@@ -9,6 +9,9 @@ import (
 	"github.com/fatih/color"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -33,25 +36,29 @@ func (Db) Connection(conn string) *gorm.DB {
 }
 
 func getConnection(conn string) *gorm.DB {
+	// 每个连接只初始化一次
 	onceAny, _ := dbLocks.LoadOrStore(conn, &sync.Once{})
 	once := onceAny.(*sync.Once)
 
 	once.Do(func() {
-		var err error
+		var (
+			db  *gorm.DB
+			err error
+		)
 
 		switch conn {
 
 		case "mysql":
-			dbInstances[conn], err = openMysql()
+			db, err = openMysql()
 
 		case "pgsql":
-			dbInstances[conn], err = openPgsql()
+			db, err = openPgsql()
 
 		case "sqlite":
-			dbInstances[conn], err = openSqlite()
+			db, err = openSqlite()
 
 		case "sqlsrv":
-			dbInstances[conn], err = openSqlsrv()
+			db, err = openSqlsrv()
 
 		default:
 			color.Red(pkg.Error+"  不支持的数据库类型: %s", Conf.Databases.DbConnection)
@@ -63,11 +70,53 @@ func getConnection(conn string) *gorm.DB {
 			os.Exit(1)
 		}
 
+		// 配置连接池
+		sqlDB, e := db.DB()
+		if e != nil {
+			err = e
+			color.Red(pkg.Error+"  %s数据库连接池配置失败: %v", Conf.Databases.DbConnection, err)
+			os.Exit(1)
+		}
+
+		// 设置连接池参数
+		sqlDB.SetMaxIdleConns(20)                  // 空闲连接数
+		sqlDB.SetMaxOpenConns(200)                 // 最大连接数
+		sqlDB.SetConnMaxLifetime(1 * time.Hour)    // 连接最大生命周期
+		sqlDB.SetConnMaxIdleTime(30 * time.Minute) // 空闲时间超过30分钟自动关闭
+
+		// 测试Ping
+		if err = sqlDB.Ping(); e != nil {
+			color.Red(pkg.Error+"  %数据库连接ping失败: %v", Conf.Databases.DbConnection, err)
+			os.Exit(1)
+		}
+
 		// 注册gorm sql回调
-		SqlCallback(dbInstances[conn])
+		SqlCallback(db)
+
+		dbInstances[conn] = db
 	})
 
 	return dbInstances[conn]
+}
+
+// configNaming 全局表名策略
+func configNaming() schema.NamingStrategy {
+	return schema.NamingStrategy{
+		SingularTable: true, // 全局关闭表名复数化
+	}
+}
+
+// gormLogger gorm日志配置
+func gormLogger() logger.Interface {
+	return logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // 输出到控制台
+		logger.Config{
+			SlowThreshold: Conf.Mysql.SlowQueryDuration, // 慢sql阈值转Duration
+			LogLevel:      logger.Info,
+			Colorful:      true, // 彩色日志
+			// IgnoreRecordNotFoundError: true, // 如果需要忽略 record not found
+		},
+	)
 }
 
 // SqlCallback sql回调

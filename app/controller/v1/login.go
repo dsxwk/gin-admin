@@ -12,6 +12,8 @@ import (
 
 type LoginController struct {
 	base.BaseController
+	service service.LoginService
+	req     request.Login
 }
 
 // Token token信息
@@ -40,27 +42,25 @@ type LoginResponse struct {
 // @Router /api/v1/login [post]
 func (s *LoginController) Login(c *gin.Context) {
 	var (
-		svc service.LoginService
-		req request.Login
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
+	err := c.ShouldBind(&s.req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = request.Login{}.GetValidate(req, "Login")
+	err = s.req.GetValidate(s.req, "Login")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := svc.Login(req.Username, req.Password)
+	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(s.req.Username, s.req.Password)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
@@ -96,23 +96,21 @@ func (s *LoginController) Login(c *gin.Context) {
 // @Router /api/v1/refresh-token [post]
 func (s *LoginController) RefreshToken(c *gin.Context) {
 	var (
-		svc service.LoginService
-		req request.Login
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
 	token := c.Request.Header.Get("token")
-	req.RefreshToken.Token = token
+	s.req.RefreshToken.Token = token
 	// 验证
-	err := request.Login{}.GetValidate(req, "RefreshToken")
+	err := s.req.GetValidate(s.req, "RefreshToken")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := svc.RefreshToken(token)
+	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := s.service.RefreshToken(token)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return

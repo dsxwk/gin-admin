@@ -124,6 +124,9 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+## v1.7.9
+> - Optimize controllers and services, optimize database connections and connection pools.
+
 ## v1.7.8
 > - Remove old model generation commands and add custom model generation commands.
 
@@ -857,6 +860,28 @@ type User struct {
 
 #### Used In The Controller
 ```go
+package v1
+
+import (
+  "gin/app/model"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "gin/pkg/lang"
+  "github.com/gin-gonic/gin"
+  "github.com/jinzhu/copier"
+  "strconv"
+)
+
+type UserController struct {
+  base.BaseController
+  service service.UserService
+  req     request.User
+  search  request.Search
+  user    model.User
+}
+
 // List User-List
 // @Tags User
 // @Summary List
@@ -869,34 +894,38 @@ type User struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-	var (
-		svc service.UserService
-		req request.User
-        ctx = c.Request.Context()
-	)
+  var (
+    ctx = c.Request.Context()
+  )
 
-    svc.WithContext(ctx)
+  s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+  err := c.ShouldBind(&s.search)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
 
-	// Validator
-	err = request.User{}.GetValidate(req, "List")
-	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
+  err = c.ShouldBind(&s.req)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
 
-	res, err := svc.List(ctx, req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+  // Validator
+  err = s.req.GetValidate(s.req, "List")
+  if err != nil {
+    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
 
-	s.Success(c, errcode.Success().WithData(res))
+  res, err := s.service.List(s.req, s.search.Search)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    return
+  }
+
+  s.Success(c, errcode.Success().WithData(res))
 }
 ```
 
@@ -1500,7 +1529,6 @@ package v1
 
 import (
 	"gin/app/event"
-	"gin/app/middleware"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
@@ -1513,7 +1541,9 @@ import (
 )
 
 type LoginController struct {
-	base.BaseController
+    base.BaseController
+    service service.LoginService
+    req     request.Login
 }
 
 // Token token-info
@@ -1541,62 +1571,58 @@ type LoginResponse struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/login [post]
 func (s *LoginController) Login(c *gin.Context) {
-	var (
-		svc service.LoginService
-		req request.Login
-		jwt middleware.Jwt
-        ctx = c.Request.Context()
-	)
+  var (
+    ctx = c.Request.Context()
+  )
 
-    svc.WithContext(ctx)
+  s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+  err := c.ShouldBind(&s.req)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
 
-	// Validator
-	err = request.Login{}.GetValidate(req, "Login")
-	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
+  // 验证
+  err = s.req.GetValidate(s.req, "Login")
+  if err != nil {
+    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
 
-	userModel, err := svc.Login(req.Username, req.Password)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
-		return
-	}
+  userModel, err := s.service.Login(s.req.Username, s.req.Password)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    return
+  }
 
-    containers := container.Get(ctx)
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := jwt.WithRefresh(userModel.ID, containers.Config.Jwt.Exp, containers.Config.Jwt.RefreshExp)
-	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
+  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(s.req.Username, s.req.Password)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    return
+  }
 
-	// Publish event
-	eventbus.Publish(ctx, event.UserLoginEvent{
-		UserId:   userModel.ID,
-		Username: userModel.Username,
-	})
+  // 发布事件
+  eventbus.Publish(ctx, event.UserLoginEvent{
+    UserId:   userModel.ID,
+    Username: userModel.Username,
+  })
 
-	s.Success(
-		c, errcode.Success().WithMsg(
-			lang.T(ctx, "login.success", map[string]interface{}{
-				"name": userModel.Username,
-			}),
-		).WithData(LoginResponse{
-			Token{
-				AccessToken:        accessToken,
-				RefreshToken:       refreshToken,
-				TokenExpire:        tokenExpire,
-				RefreshTokenExpire: refreshTokenExpire,
-			},
-			userModel,
-		}),
-	)
+  s.Success(
+    c, errcode.Success().WithMsg(
+      lang.T(ctx, "login.success", map[string]interface{}{
+        "name": userModel.Username,
+      }),
+    ).WithData(LoginResponse{
+      Token{
+        AccessToken:        accessToken,
+        RefreshToken:       refreshToken,
+        TokenExpire:        tokenExpire,
+        RefreshTokenExpire: refreshTokenExpire,
+      },
+      userModel,
+    }),
+  )
 }
 ```
 ## Event Test

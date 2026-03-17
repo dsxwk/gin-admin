@@ -6,5 +6,8 @@ import (
 )
 
 func openSqlite() (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open(Conf.Sqlite.Path), &gorm.Config{})
+	return gorm.Open(sqlite.Open(Conf.Sqlite.Path), &gorm.Config{
+		NamingStrategy: configNaming(),
+		Logger:         gormLogger(),
+	})
 }

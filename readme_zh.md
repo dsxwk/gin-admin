@@ -124,6 +124,9 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
+## v1.7.9
+> - 优化控制器和服务，优化数据库连接和连接池。
+
 ## v1.7.8
 > - 移除旧模型生成命令,新增自定义模型生成命令。
 
@@ -858,6 +861,28 @@ type User struct {
 
 #### 在控制器中使用
 ```go
+package v1
+
+import (
+  "gin/app/model"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "gin/pkg/lang"
+  "github.com/gin-gonic/gin"
+  "github.com/jinzhu/copier"
+  "strconv"
+)
+
+type UserController struct {
+  base.BaseController
+  service service.UserService
+  req     request.User
+  search  request.Search
+  user    model.User
+}
+
 // List 列表
 // @Tags 用户管理
 // @Summary 列表
@@ -870,34 +895,38 @@ type User struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-	var (
-		svc service.UserService
-		req request.User
-        ctx = c.Request.Context()
-	)
+  var (
+    ctx = c.Request.Context()
+  )
 
-    svc.WithContext(ctx)
-	
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+  s.service.WithContext(ctx)
 
-	// 验证
-	err = request.User{}.GetValidate(req, "List")
-	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
+  err := c.ShouldBind(&s.search)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
 
-	res, err := svc.List(ctx, req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+  err = c.ShouldBind(&s.req)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
 
-	s.Success(c, errcode.Success().WithData(res))
+  // 验证
+  err = s.req.GetValidate(s.req, "List")
+  if err != nil {
+    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  res, err := s.service.List(s.req, s.search.Search)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    return
+  }
+
+  s.Success(c, errcode.Success().WithData(res))
 }
 ```
 
@@ -1500,21 +1529,22 @@ func NewRabbitmqDemoPublisher() *RabbitmqDemoPublisher {
 package v1
 
 import (
-	"gin/app/event"
-	"gin/app/middleware"
-	"gin/app/model"
-	"gin/app/request"
-	"gin/app/service"
-	"gin/common/base"
-	"gin/common/errcode"
-    "gin/pkg/container"
-	"gin/pkg/eventbus"
-	"gin/pkg/lang"
-	"github.com/gin-gonic/gin"
+  "gin/app/event"
+  "gin/app/model"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "gin/pkg/container"
+  "gin/pkg/eventbus"
+  "gin/pkg/lang"
+  "github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
 	base.BaseController
+    service service.LoginService
+    req     request.Login
 }
 
 // Token token信息
@@ -1542,62 +1572,46 @@ type LoginResponse struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/login [post]
 func (s *LoginController) Login(c *gin.Context) {
-	var (
-		svc service.LoginService
-		req request.Login
-		jwt middleware.Jwt
-        ctx = c.Request.Context()
-	)
+  var (
+    ctx = c.Request.Context()
+  )
 
-    svc.WithContext(ctx)
-	
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+  s.service.WithContext(ctx)
 
-	// 验证
-	err = request.Login{}.GetValidate(req, "Login")
-	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
+  err := c.ShouldBind(&s.req)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
 
-	userModel, err := svc.Login(req.Username, req.Password)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
-		return
-	}
+  // 验证
+  err = s.req.GetValidate(s.req, "Login")
+  if err != nil {
+    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
 
-    containers := container.Get(ctx)
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := jwt.WithRefresh(userModel.ID, containers.Config.Jwt.Exp, containers.Config.Jwt.RefreshExp)
-	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
+  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(s.req.Username, s.req.Password)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    return
+  }
 
-	// 发布事件
-	eventbus.Publish(ctx, event.UserLoginEvent{
-		UserId:   userModel.ID,
-		Username: userModel.Username,
-	})
-
-	s.Success(
-		c, errcode.Success().WithMsg(
-			lang.T(ctx, "login.success", map[string]interface{}{
-				"name": userModel.Username,
-			}),
-		).WithData(LoginResponse{
-			Token{
-				AccessToken:        accessToken,
-				RefreshToken:       refreshToken,
-				TokenExpire:        tokenExpire,
-				RefreshTokenExpire: refreshTokenExpire,
-			},
-			userModel,
-		}),
-	)
+  s.Success(
+    c, errcode.Success().WithMsg(
+      lang.T(ctx, "login.success", map[string]interface{}{
+        "name": userModel.Username,
+      }),
+    ).WithData(LoginResponse{
+      Token{
+        AccessToken:        accessToken,
+        RefreshToken:       refreshToken,
+        TokenExpire:        tokenExpire,
+        RefreshTokenExpire: refreshTokenExpire,
+      },
+      userModel,
+    }),
+  )
 }
 ```
 ## 测试事件

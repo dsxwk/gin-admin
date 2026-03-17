@@ -4,25 +4,12 @@ import (
 	"gin/pkg"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
-	"log"
-	"os"
 )
 
 func openSqlsrv() (*gorm.DB, error) {
 	return gorm.Open(sqlserver.Open(getSqlsrvDsn()), &gorm.Config{
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true, // 表名不复数
-		},
-		Logger: logger.New(
-			log.New(os.Stdout, "\r\n", log.LstdFlags),
-			logger.Config{
-				SlowThreshold: Conf.Sqlsrv.SlowQueryDuration,
-				LogLevel:      logger.Info,
-				Colorful:      true,
-			},
-		),
+		NamingStrategy: configNaming(),
+		Logger:         gormLogger(),
 	})
 }
 

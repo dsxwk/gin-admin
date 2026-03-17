@@ -14,6 +14,10 @@ import (
 
 type UserController struct {
 	base.BaseController
+	service service.UserService
+	req     request.User
+	search  request.Search
+	user    model.User
 }
 
 // List 列表
@@ -29,34 +33,31 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
 	var (
-		svc service.UserService
-		req request.User
-		_s  request.Search
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&_s)
+	err := c.ShouldBind(&s.search)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	err = c.ShouldBind(&req)
+	err = c.ShouldBind(&s.req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = request.User{}.GetValidate(req, "List")
+	err = s.req.GetValidate(s.req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	res, err := svc.List(req, _s.Search)
+	res, err := s.service.List(s.req, s.search.Search)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
@@ -77,40 +78,37 @@ func (s *UserController) List(c *gin.Context) {
 // @Router /api/v1/user [post]
 func (s *UserController) Create(c *gin.Context) {
 	var (
-		svc service.UserService
-		req request.User
-		m   model.User
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
+	err := c.ShouldBind(&s.req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = request.User{}.GetValidate(req, "Create")
+	err = s.req.GetValidate(s.req, "Create")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err = copier.Copy(&m, &req)
+	err = copier.Copy(&s.user, &s.req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	m, err = svc.Create(m)
+	s.user, err = s.service.Create(s.user)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(m))
+	s.Success(c, errcode.Success().WithData(s.user))
 }
 
 // Update 更新
@@ -126,16 +124,13 @@ func (s *UserController) Create(c *gin.Context) {
 // @Router /api/v1/user/{id} [put]
 func (s *UserController) Update(c *gin.Context) {
 	var (
-		svc service.UserService
-		req request.User
-		m   model.User
 		id  int64
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
+	err := c.ShouldBind(&s.req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -146,28 +141,28 @@ func (s *UserController) Update(c *gin.Context) {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	req.ID = id
+	s.req.ID = id
 
 	// 验证
-	err = request.User{}.GetValidate(req, "Update")
+	err = s.req.GetValidate(s.req, "Update")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err = copier.Copy(&m, &req)
+	err = copier.Copy(&s.user, &s.req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	err = svc.Update(m.ID, m)
+	err = s.service.Update(s.user.ID, s.user)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(m))
+	s.Success(c, errcode.Success().WithData(s.user))
 }
 
 // Detail 详情
@@ -182,29 +177,27 @@ func (s *UserController) Update(c *gin.Context) {
 // @Router /api/v1/user/{id} [get]
 func (s *UserController) Detail(c *gin.Context) {
 	var (
-		svc service.UserService
-		req request.User
 		id  int64
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	req.ID = id
+	s.req.ID = id
 
 	// 验证
-	err = request.User{}.GetValidate(req, "Detail")
+	err = s.req.GetValidate(s.req, "Detail")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	m, err := svc.Detail(req.ID)
+	m, err := s.service.Detail(s.req.ID)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -225,29 +218,27 @@ func (s *UserController) Detail(c *gin.Context) {
 // @Router /api/v1/user/{id} [delete]
 func (s *UserController) Delete(c *gin.Context) {
 	var (
-		svc service.UserService
-		req request.User
 		id  int64
 		ctx = c.Request.Context()
 	)
 
-	svc.WithContext(ctx)
+	s.service.WithContext(ctx)
 
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	req.ID = id
+	s.req.ID = id
 
 	// 验证
-	err = request.User{}.GetValidate(req, "Delete")
+	err = s.req.GetValidate(s.req, "Delete")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	m, err := svc.Delete(req.ID)
+	m, err := s.service.Delete(s.req.ID)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return

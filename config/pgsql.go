@@ -7,7 +7,10 @@ import (
 )
 
 func openPgsql() (*gorm.DB, error) {
-	return gorm.Open(postgres.Open(getPgsqlDsn()), &gorm.Config{})
+	return gorm.Open(postgres.Open(getPgsqlDsn()), &gorm.Config{
+		NamingStrategy: configNaming(),
+		Logger:         gormLogger(),
+	})
 }
 
 func getPgsqlDsn() string {
