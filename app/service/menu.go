@@ -17,7 +17,7 @@ func (s *MenuService) List(req request.Menu, _search map[string]interface{}) (pa
 	var (
 		m          []model.Menu
 		menu       model.Menu
-		containers = container.Get(s.GetContext())
+		containers = container.Get(s.Ctx)
 	)
 
 	offset, limit := request.Pagination(req.Page, req.PageSize)

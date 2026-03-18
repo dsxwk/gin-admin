@@ -1164,14 +1164,14 @@ $ ./cli demo-test --args=arg1
 ```go
 import (
 	"fmt"
-    "gin/bootstrap"
+    "gin/pkg/container"
 )
 
 func Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	cache := bootstrap.GetContainer().Cache
+	cache := container.GetContainer().Cache
     err := cache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1209,14 +1209,14 @@ func Test() {
 ```go
 import (
 	"fmt"
-    "gin/bootstrap"
+    "gin/pkg/container"
 )
 
 func Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	redisCache := bootstrap.GetContainer().RedisCache
+	redisCache := container.GetContainer().RedisCache
     err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1256,14 +1256,14 @@ func Test() {
 ```go
 import (
 	"fmt"
-    "gin/bootstrap"
+    "gin/pkg/container"
 )
 
 func Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-    memoryCache := bootstrap.GetContainer().MemoryCache
+    memoryCache := container.GetContainer().MemoryCache
     err := memoryCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1303,14 +1303,14 @@ func Test() {
 ```go
 import (
     "fmt"
-    "gin/bootstrap"
+    "gin/pkg/container"
 )
 
 func Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-    diskCache := bootstrap.GetContainer().DiskCache
+    diskCache := container.GetContainer().DiskCache
     err := diskCache.Set(key, value, time.Second*10)
     if err != nil {
         // 处理错误	

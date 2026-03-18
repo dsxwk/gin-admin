@@ -27,6 +27,7 @@ func (s Logger) Handle() gin.HandlerFunc {
 		start := time.Now()
 		traceId := uuid.New().String()
 		lang := s.GetLang(c)
+		ctn := container.GetContainer()
 
 		ctx := c.Request.Context()
 		ctx = context.WithValue(ctx, ctxkey.TraceIdKey, traceId)
@@ -36,7 +37,9 @@ func (s Logger) Handle() gin.HandlerFunc {
 		ctx = context.WithValue(ctx, ctxkey.ParamsKey, s.getParams(c))
 		ctx = context.WithValue(ctx, ctxkey.LangKey, lang)
 		ctx = context.WithValue(ctx, ctxkey.StartTimeKey, start)
-		ctx = container.Set(ctx, container.GetContainer().WithContext(ctx))
+
+		ctnCtx := ctn.WithContext(ctx)
+		ctx = container.Set(ctx, ctnCtx)
 
 		c.Request = c.Request.WithContext(ctx)
 		c.Header("Trace-Id", traceId)

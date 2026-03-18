@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 	_ = config.GetConfig()
 
 	// 初始化container
-	c := container.GetContainer()
+	c := container.NewContainer()
 
 	// 初始化app
 	_ = bootstrap.NewApp(c)

@@ -18,7 +18,7 @@ type LoginService struct {
 
 // Login 登录
 func (s *LoginService) Login(username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
-	containers := container.Get(s.GetContext())
+	containers := container.Get(s.Ctx)
 	if err = containers.DB.
 		Where("username = ?", username).
 		First(&m).Error; err != nil {
@@ -43,7 +43,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 	}
 
 	// 发布事件
-	eventbus.Publish(s.GetContext(), event.UserLoginEvent{
+	eventbus.Publish(s.Ctx, event.UserLoginEvent{
 		UserId:   m.ID,
 		Username: m.Username,
 	})
@@ -53,7 +53,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 
 // RefreshToken 刷新token
 func (s *LoginService) RefreshToken(token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
-	containers := container.Get(s.GetContext())
+	containers := container.Get(s.Ctx)
 	j := middleware.Jwt{}
 	claims, err := j.Decode(token)
 	if err != nil || claims["typ"] != "refresh" {

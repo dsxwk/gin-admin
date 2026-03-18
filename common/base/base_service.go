@@ -11,7 +11,3 @@ func (s *BaseService) WithContext(ctx context.Context) *BaseService {
 
 	return s
 }
-
-func (s *Context) GetContext() context.Context {
-	return s.ctx
-}
