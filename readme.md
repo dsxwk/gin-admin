@@ -107,8 +107,8 @@
 # Project Introduction
 > A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `jwt`, `log`、 `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
 ## Project Address
-- Github: https://github.com/dsxwk/gin.git
-- Gitee: https://gitee.com/dsxwk/gin.git
+- Github: https://github.com/dsxwk/gin-admin.git
+- Gitee: https://gitee.com/dsxwk/gin-admin.git
 
 ## Introduction to the Gin Framework
 > Gin is a web framework written in Go language. It has the characteristics of simplicity, speed, and efficiency, and is widely used in Go language web development.
