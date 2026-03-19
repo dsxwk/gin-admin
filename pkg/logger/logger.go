@@ -71,10 +71,18 @@ func NewLogger() *Logger {
 		switch strings.ToLower(conf.Log.Level) {
 		case "debug":
 			level.SetLevel(zap.DebugLevel)
+		case "info":
+			level.SetLevel(zap.InfoLevel)
 		case "warn":
 			level.SetLevel(zap.WarnLevel)
 		case "error":
 			level.SetLevel(zap.ErrorLevel)
+		case "dPanic":
+			level.SetLevel(zap.DPanicLevel)
+		case "panic":
+			level.SetLevel(zap.PanicLevel)
+		case "fatal":
+			level.SetLevel(zap.FatalLevel)
 		default:
 			level.SetLevel(zap.InfoLevel)
 		}

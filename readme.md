@@ -124,6 +124,9 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+## v1.8.1
+> - Adjustment of log error level.
+
 ## v1.8.0
 > - Optimize the specification configuration file to reduce the occurrence of circular dependencies in the later stage.
 
@@ -1838,7 +1841,7 @@ func (s *TestController) Test(c *gin.Context) {
 }
 ```
 ## Write Log
-> Encapsulated in a container containing context. The log level supports debug, info, warn, error, panic, and fatal, with the default being `debug`.
+> Encapsulated in a container containing context. The log level supports debug, info, warn, error, dPanic, panic, and fatal, with the default being `debug`.
 ```go
 package v1
 

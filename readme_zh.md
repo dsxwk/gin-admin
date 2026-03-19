@@ -124,6 +124,9 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
+## v1.8.1
+> - 日志错误级别调整。
+
 ## v1.8.0
 > - 优化规范配置文件，减少导致后期出现循环依赖问题。
 
@@ -1828,7 +1831,7 @@ func (s *TestController) Test(c *gin.Context) {
 }
 ```
 ## 记录日志
-> 已封装在包含上下文的容器中, 日志级别支持debug、info、warn、error、panic、fatal, 默认为`debug`。
+> 已封装在包含上下文的容器中, 日志级别支持debug、info、warn、error、dPanic、panic、fatal, 默认为`debug`。
 ```go
 package v1
 
