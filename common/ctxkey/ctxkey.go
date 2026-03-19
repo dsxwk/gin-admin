@@ -10,4 +10,5 @@ const (
 	MsKey        = "ms"
 	LangKey      = "lang"
 	StartTimeKey = "startTime"
+	DebuggerKey  = "debugger"
 )

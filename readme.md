@@ -124,6 +124,9 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+## v1.8.2
+> - Add a time assistant package and corresponding test cases.
+
 ## v1.8.1
 > - Adjustment of log error level.
 
@@ -320,6 +323,7 @@ Excute Command: demo-command, Argument: 11
 │   ├──├── logger                       # Logger
 │   ├──├── message                      # Message Event
 │   ├──├── queue                        # Queue
+│   ├──├── time                         # Time Processing
 ├── public                              # Static Resources
 ├── router                              # Router
 ├── storage                             # Storage
