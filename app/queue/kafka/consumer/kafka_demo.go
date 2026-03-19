@@ -13,7 +13,7 @@ type KafkaDemoConsumer struct {
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	c := &KafkaDemoConsumer{
 		&base.KafkaConsumer{
-			Reader:       base.NewReader(config.Conf.Kafka.Brokers, "kafka_demo", "kafka_demo_group"),
+			Reader:       base.NewReader(config.NewConfig().Kafka.Brokers, "kafka_demo", "kafka_demo_group"),
 			Topic:        "kafka_demo",
 			Group:        "kafka_demo_group",
 			Retry:        3,
@@ -38,7 +38,7 @@ func (c *KafkaDemoConsumer) Start() {
 }
 
 func init() {
-	if config.GetConfig().Kafka.Enabled {
+	if config.NewConfig().Kafka.Enabled {
 		NewKafkaDemoConsumer()
 	}
 }

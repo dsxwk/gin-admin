@@ -12,7 +12,7 @@ type KafkaDelayDemoProducer struct {
 func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 	return &KafkaDelayDemoProducer{
 		&base.KafkaProducer{
-			Writer:       base.NewWriter(config.Conf.Kafka.Brokers, "kafka_delay_demo"),
+			Writer:       base.NewWriter(config.NewConfig().Kafka.Brokers, "kafka_delay_demo"),
 			Topic:        "kafka_delay_demo",
 			Key:          "kafka_delay_demo_key",
 			IsDelayQueue: true,

@@ -18,7 +18,7 @@ func New{{.Name}}() *{{.Name}} {
 	c := &{{.Name}}{
 		{{- if eq .Type "kafka"}}
 		&base.KafkaConsumer{
-			Reader:       base.NewReader(config.Conf.Kafka.Brokers, "{{.Topic}}", "{{.Group}}"),
+			Reader:       base.NewReader(config.NewConfig().Kafka.Brokers, "{{.Topic}}", "{{.Group}}"),
 			Topic:        "{{.Topic}}",
 			Group:        "{{.Group}}",
 			Retry:        {{.Retry}},
@@ -26,7 +26,7 @@ func New{{.Name}}() *{{.Name}} {
 		},
 		{{- else}}
 		&base.RabbitmqConsumer{
-			Mq:           base.InitRabbitmq(),
+			Mq:           base.NewRabbitMq(),
 			Queue:        "{{.Queue}}",
 			Exchange:     "{{.Exchange}}",
 			Routing:      "{{.Routing}}",
@@ -56,11 +56,11 @@ func (c *{{.Name}}) Handle(msg string) error {
 
 func init() {
 	{{- if eq .Type "kafka"}}
-	if config.GetConfig().Kafka.Enabled {
+	if config.NewConfig().Kafka.Enabled {
 		New{{.Name}}()
 	}
 	{{- else}}
-	if config.GetConfig().Rabbitmq.Enabled {
+	if config.NewConfig().Rabbitmq.Enabled {
 		New{{.Name}}()
 	}
 	{{end}}

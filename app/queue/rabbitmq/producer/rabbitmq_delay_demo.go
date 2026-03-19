@@ -4,14 +4,14 @@ import (
 	"gin/common/base"
 )
 
-type RabbitmqDelayDemoPublisher struct {
+type RabbitmqDelayDemoProducer struct {
 	*base.RabbitmqProducer
 }
 
-func NewRabbitmqDelayDemoPublisher() *RabbitmqDelayDemoPublisher {
-	return &RabbitmqDelayDemoPublisher{
+func NewRabbitMqDelayDemoProducer() *RabbitmqDelayDemoProducer {
+	return &RabbitmqDelayDemoProducer{
 		&base.RabbitmqProducer{
-			Mq:           base.InitRabbitmq(),
+			Mq:           base.NewRabbitMq(),
 			Queue:        "rabbitmq_delay_demo",
 			Exchange:     "rabbitmq_delay_demo_exchange",
 			Routing:      "rabbitmq_delay_demo",

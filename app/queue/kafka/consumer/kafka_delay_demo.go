@@ -13,7 +13,7 @@ type KafkaDelayDemoConsumer struct {
 func NewKafkaDelayDemoConsumer() *KafkaDelayDemoConsumer {
 	c := &KafkaDelayDemoConsumer{
 		&base.KafkaConsumer{
-			Reader:       base.NewReader(config.Conf.Kafka.Brokers, "kafka_delay_demo", "kafka_delay_demo_group"),
+			Reader:       base.NewReader(config.NewConfig().Kafka.Brokers, "kafka_delay_demo", "kafka_delay_demo_group"),
 			Topic:        "kafka_delay_demo",
 			Group:        "kafka_delay_demo_group",
 			Retry:        3,
@@ -38,7 +38,7 @@ func (c *KafkaDelayDemoConsumer) Start() {
 }
 
 func init() {
-	if config.GetConfig().Kafka.Enabled {
+	if config.NewConfig().Kafka.Enabled {
 		NewKafkaDelayDemoConsumer()
 	}
 }

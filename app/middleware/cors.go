@@ -11,15 +11,17 @@ type Cors struct {
 	base.BaseMiddleware
 }
 
+var conf = config.NewConfig()
+
 // Handle 跨域中间件
 func (s Cors) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if config.Conf.Cors.Enabled {
-			c.Header("Access-Control-Allow-Origin", config.Conf.Cors.AllowOrigin)
-			c.Header("Access-Control-Allow-Headers", config.Conf.Cors.AllowHeaders)
-			c.Header("Access-Control-Expose-Headers", config.Conf.Cors.ExposeHeaders)
-			c.Header("Access-Control-Allow-Methods", config.Conf.Cors.AllowMethods)
-			c.Header("Access-Control-Allow-Credentials", config.Conf.Cors.AllowCredentials)
+		if conf.Cors.Enabled {
+			c.Header("Access-Control-Allow-Origin", conf.Cors.AllowOrigin)
+			c.Header("Access-Control-Allow-Headers", conf.Cors.AllowHeaders)
+			c.Header("Access-Control-Expose-Headers", conf.Cors.ExposeHeaders)
+			c.Header("Access-Control-Allow-Methods", conf.Cors.AllowMethods)
+			c.Header("Access-Control-Allow-Credentials", conf.Cors.AllowCredentials)
 
 			// 放行所有OPTIONS方法
 			if c.Request.Method == "OPTIONS" {

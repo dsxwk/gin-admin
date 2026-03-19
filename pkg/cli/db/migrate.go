@@ -2,10 +2,10 @@ package db
 
 import (
 	"gin/common/base"
-	"gin/config"
 	"gin/database"
 	"gin/database/migrations"
 	"gin/pkg/cli"
+	"gin/pkg/db/connection"
 	"github.com/fatih/color"
 )
 
@@ -39,7 +39,7 @@ func (s *Migrate) Execute(args []string) {
 	color.Green("执行命令: %s %s", s.Name(), s.FormatArgs(values))
 	color.Cyan("开始执行数据迁移...")
 
-	db := config.Db{}.GetDB()
+	db := connection.Db{}.GetDB()
 	db.Exec(`
 CREATE TABLE IF NOT EXISTS migrations (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -3,13 +3,15 @@ package container
 import (
 	"gin/config"
 	"gin/pkg/cache"
+	"gin/pkg/db/connection"
+	"gin/pkg/logger"
 	"gorm.io/gorm"
 	"sync"
 )
 
 type Container struct {
 	Config      *config.Config
-	Log         *config.Logger
+	Log         *logger.Logger
 	DB          *gorm.DB
 	Cache       *cache.CacheProxy
 	RedisCache  *cache.CacheProxy
@@ -25,13 +27,13 @@ var (
 func NewContainer() *Container {
 	once.Do(func() {
 		instance = &Container{
-			Config:      config.GetConfig(),
-			Log:         config.GetLogger(),
-			DB:          config.Db{}.GetDB(),
-			Cache:       config.GetCache(),
-			RedisCache:  config.GetRedisCache(),
-			MemoryCache: config.GetMemoryCache(),
-			DiskCache:   config.GetDiskCache(),
+			Config:      config.NewConfig(),
+			Log:         logger.NewLogger(),
+			DB:          connection.Db{}.GetDB(),
+			Cache:       cache.NewCache(),
+			RedisCache:  cache.NewRedisCache(),
+			MemoryCache: cache.NewMemoryCache(),
+			DiskCache:   cache.NewDiskCache(),
 		}
 	})
 	return instance

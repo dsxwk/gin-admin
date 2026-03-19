@@ -4,14 +4,14 @@ import (
 	"gin/common/base"
 )
 
-type RabbitmqDemoPublisher struct {
+type RabbitmqDemoProducer struct {
 	*base.RabbitmqProducer
 }
 
-func NewRabbitmqDemoPublisher() *RabbitmqDemoPublisher {
-	return &RabbitmqDemoPublisher{
+func NewRabbitMqDemoProducer() *RabbitmqDemoProducer {
+	return &RabbitmqDemoProducer{
 		&base.RabbitmqProducer{
-			Mq:           base.InitRabbitmq(),
+			Mq:           base.NewRabbitMq(),
 			Queue:        "rabbitmq_demo",
 			Exchange:     "rabbitmq_demo_exchange",
 			Routing:      "rabbitmq_demo",

@@ -12,7 +12,7 @@ type KafkaDemoProducer struct {
 func NewKafkaDemoProducer() *KafkaDemoProducer {
 	return &KafkaDemoProducer{
 		&base.KafkaProducer{
-			Writer:       base.NewWriter(config.Conf.Kafka.Brokers, "kafka_demo"),
+			Writer:       base.NewWriter(config.NewConfig().Kafka.Brokers, "kafka_demo"),
 			Topic:        "kafka_demo",
 			Key:          "kafka_demo_key",
 			IsDelayQueue: false,

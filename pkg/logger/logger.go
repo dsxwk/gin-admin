@@ -1,10 +1,11 @@
-package config
+package logger
 
 import (
 	"context"
 	"gin/common/ctxkey"
+	"gin/common/flag"
 	"gin/common/trace"
-	"gin/pkg"
+	"gin/config"
 	"github.com/fatih/color"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -18,6 +19,7 @@ import (
 )
 
 var (
+	conf           = config.NewConfig()
 	loggerInstance *Logger
 	loggerOnce     sync.Once
 )
@@ -27,12 +29,12 @@ type Logger struct {
 	*zap.Logger
 }
 
-func GetLogger() *Logger {
+func NewLogger() *Logger {
 	loggerOnce.Do(func() {
 		// 确保日志目录存在
 		logDir := "storage/logs"
 		if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-			color.Red(pkg.Error+"  创建日志目录失败:", err)
+			color.Red(flag.Error+"  创建日志目录失败:", err)
 			os.Exit(1)
 		}
 
@@ -42,9 +44,9 @@ func GetLogger() *Logger {
 		// 滚动日志配置
 		lumberJackLogger := &lumberjack.Logger{
 			Filename:   logPath,
-			MaxSize:    Conf.Log.MaxSize,
-			MaxBackups: Conf.Log.MaxBackups,
-			MaxAge:     Conf.Log.MaxDay,
+			MaxSize:    conf.Log.MaxSize,
+			MaxBackups: conf.Log.MaxBackups,
+			MaxAge:     conf.Log.MaxDay,
 			Compress:   true,
 		}
 
@@ -66,7 +68,7 @@ func GetLogger() *Logger {
 
 		// 动态设置日志级别
 		level := zap.NewAtomicLevel()
-		switch strings.ToLower(Conf.Log.Level) {
+		switch strings.ToLower(conf.Log.Level) {
 		case "debug":
 			level.SetLevel(zap.DebugLevel)
 		case "warn":

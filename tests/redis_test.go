@@ -2,7 +2,7 @@ package tests
 
 import (
 	"context"
-	"gin/config"
+	"gin/pkg/cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -15,7 +15,7 @@ func TestRedisPubSub(t *testing.T) {
 
 	done := make(chan struct{})
 
-	err := config.GetRedisCache().Redis().WithContext(ctx).Subscribe("testRedisChan", func(channel, payload string) {
+	err := cache.NewRedisCache().Redis().WithContext(ctx).Subscribe("testRedisChan", func(channel, payload string) {
 		assert.Equal(t, "testRedisChan", channel)
 		assert.Contains(t, payload, "test")
 		close(done)
@@ -24,7 +24,7 @@ func TestRedisPubSub(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	err = config.GetRedisCache().Redis().Publish("testRedisChan", map[string]interface{}{
+	err = cache.NewRedisCache().Redis().Publish("testRedisChan", map[string]interface{}{
 		"test": "ok",
 	})
 	require.NoError(t, err)

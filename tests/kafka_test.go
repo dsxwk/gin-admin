@@ -14,7 +14,7 @@ func TestKafkaPublish(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(context.Background(), ctxkey.TraceIdKey, "test-trace-id")
 
-	if config.GetConfig().Kafka.Enabled {
+	if config.NewConfig().Kafka.Enabled {
 		consumer.NewKafkaDemoConsumer()
 		pdc := producer.NewKafkaDemoProducer()
 		defer func() {

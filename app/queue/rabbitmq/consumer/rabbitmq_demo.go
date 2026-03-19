@@ -10,10 +10,10 @@ type RabbitmqDemoConsumer struct {
 	*base.RabbitmqConsumer
 }
 
-func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
+func NewRabbitMqDemoConsumer() *RabbitmqDemoConsumer {
 	c := &RabbitmqDemoConsumer{
 		&base.RabbitmqConsumer{
-			Mq:           base.InitRabbitmq(),
+			Mq:           base.NewRabbitMq(),
 			Queue:        "rabbitmq_demo",
 			Exchange:     "rabbitmq_demo_exchange",
 			Routing:      "rabbitmq_demo",
@@ -38,7 +38,7 @@ func (c *RabbitmqDemoConsumer) Handle(msg string) error {
 }
 
 func init() {
-	if config.GetConfig().Rabbitmq.Enabled {
-		NewRabbitmqDemoConsumer()
+	if config.NewConfig().Rabbitmq.Enabled {
+		NewRabbitMqDemoConsumer()
 	}
 }

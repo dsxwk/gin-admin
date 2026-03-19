@@ -1,4 +1,4 @@
-package config
+package connection
 
 import (
 	"gin/pkg"
@@ -16,10 +16,10 @@ func openPgsql() (*gorm.DB, error) {
 func getPgsqlDsn() string {
 	return pkg.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		Conf.Pgsql.Host,
-		Conf.Pgsql.Username,
-		Conf.Pgsql.Password,
-		Conf.Pgsql.Database,
-		Conf.Pgsql.Port,
+		conf.Pgsql.Host,
+		conf.Pgsql.Username,
+		conf.Pgsql.Password,
+		conf.Pgsql.Database,
+		conf.Pgsql.Port,
 	)
 }

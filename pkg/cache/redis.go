@@ -7,6 +7,7 @@ import (
 	"gin/pkg/message"
 	"github.com/go-redis/redis/v8"
 	"github.com/goccy/go-json"
+	"sync"
 	"time"
 )
 
@@ -73,28 +74,35 @@ type RedisCache struct {
 	ctx     context.Context
 }
 
-// NewRedis redis实例
-func NewRedis(address, password string, db int) *CacheProxy {
-	var (
-		bus = message.GetEventBus()
-	)
+var (
+	redisCache *CacheProxy
+	redisOnce  sync.Once
+)
 
-	client := redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: password,
-		DB:       db,
+func NewRedisCache() *CacheProxy {
+	redisOnce.Do(func() {
+		var (
+			bus = message.GetEventBus()
+		)
+
+		client := redis.NewClient(&redis.Options{
+			Addr:     conf.Redis.Address,
+			Password: conf.Redis.Password,
+			DB:       conf.Redis.DB,
+		})
+
+		// 添加Hook
+		client.AddHook(&RedisHook{bus: bus})
+
+		r := &RedisCache{
+			client:  client,
+			ctx:     context.Background(),
+			pubsubs: make(map[string]*redis.PubSub),
+		}
+
+		redisCache = NewCacheProxy("redis", r, bus)
 	})
-
-	// 添加Hook
-	client.AddHook(&RedisHook{bus: bus})
-
-	r := &RedisCache{
-		client:  client,
-		ctx:     context.Background(),
-		pubsubs: make(map[string]*redis.PubSub),
-	}
-
-	return NewCacheProxy("redis", r, bus)
+	return redisCache
 }
 
 func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {

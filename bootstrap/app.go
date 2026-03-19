@@ -7,6 +7,7 @@ import (
 	_ "gin/app/listener"
 	_ "gin/app/queue/kafka/consumer"
 	_ "gin/app/queue/rabbitmq/consumer"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/container"
@@ -33,13 +34,14 @@ type App struct {
 
 func NewApp(c *container.Container) *App {
 	var (
-		r = gin.New()
+		r    = gin.New()
+		conf = config.NewConfig()
 	)
 
 	// 运行环境模式 debug模式, test测试模式, release生产模式, 默认是debug,根据当前配置文件读取
-	gin.SetMode(config.Conf.App.Mode)
+	gin.SetMode(conf.App.Mode)
 
-	if config.Conf.App.Env != "production" {
+	if conf.App.Env != "production" {
 		// 非生产环境允许所有代理
 		_ = r.SetTrustedProxies(nil)
 	}
@@ -57,6 +59,7 @@ func NewApp(c *container.Container) *App {
 }
 
 func (a *App) Run() {
+	var conf = config.NewConfig()
 	// 设置50：更积极回收
 	debug.SetGCPercent(50)
 	// 加载翻译
@@ -67,22 +70,22 @@ func (a *App) Run() {
 	defer dbg.Stop()
 
 	data := map[string]interface{}{
-		"应用":  config.Conf.App.Name,
+		"应用":  conf.App.Name,
 		"环境":  config.GetString("app.env"),
-		"端口":  config.Conf.App.Port,
-		"数据库": config.Conf.Mysql.Database,
+		"端口":  conf.App.Port,
+		"数据库": conf.Mysql.Database,
 	}
 
 	// 启动提示
 	PrintAligned(data, []string{"应用", "环境", "端口", "数据库"})
 
-	var port = pkg.IntToString(config.Conf.App.Port)
+	var port = pkg.IntToString(conf.App.Port)
 	run := map[string]interface{}{
-		pkg.Network + " Address:":  "http://0.0.0.0:" + port,
-		pkg.Pointer + " Swagger:":  "http://127.0.0.1:" + port + "/swagger/index.html",
-		pkg.Pointer + " Test API:": "http://127.0.0.1:" + port + "/ping",
+		flag.Network + " Address:":  "http://0.0.0.0:" + port,
+		flag.Pointer + " Swagger:":  "http://127.0.0.1:" + port + "/swagger/index.html",
+		flag.Pointer + " Test API:": "http://127.0.0.1:" + port + "/ping",
 	}
-	PrintAligned(run, []string{pkg.Network + " Address:", pkg.Pointer + " Swagger:", pkg.Pointer + " Test API:"})
+	PrintAligned(run, []string{flag.Network + " Address:", flag.Pointer + " Swagger:", flag.Pointer + " Test API:"})
 	fmt.Println("Gin server started successfully!")
 
 	srv := &http.Server{
@@ -109,7 +112,7 @@ func (a *App) Run() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		color.Red(pkg.Error+" 服务关闭异常: %v", err)
+		color.Red(flag.Error+" 服务关闭异常: %v", err)
 	}
 
 	// select {}

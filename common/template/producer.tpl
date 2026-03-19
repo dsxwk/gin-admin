@@ -17,7 +17,7 @@ func New{{.Name}}() *{{.Name}} {
 	return &{{.Name}}{
 		{{- if eq .Type "kafka"}}
 		&base.KafkaProducer{
-			Writer:       base.NewWriter(config.Conf.Kafka.Brokers, "{{.Topic}}"),
+			Writer:       base.NewWriter(config.NewConfig().Kafka.Brokers, "{{.Topic}}"),
 			Topic:        "{{.Topic}}",
 			Key:          "{{.Key}}",
 			IsDelayQueue: {{.IsDelay}},
@@ -25,7 +25,7 @@ func New{{.Name}}() *{{.Name}} {
 		},
 		{{- else}}
 		&base.RabbitmqProducer{
-			Mq:           base.InitRabbitmq(),
+			Mq:           base.NewRabbitMq(),
 			Queue:        "{{.Queue}}",
 			Exchange:     "{{.Exchange}}",
 			Routing:      "{{.Routing}}",

@@ -2,12 +2,11 @@ package base
 
 import (
 	"context"
-	"gin/config"
+	"gin/pkg/logger"
 	"gin/pkg/queue"
 	"github.com/goccy/go-json"
-	"time"
-
 	"github.com/segmentio/kafka-go"
+	"time"
 )
 
 type KafkaConsumer struct {
@@ -36,7 +35,7 @@ func (c *KafkaConsumer) Start(h queue.Handler) {
 		for {
 			msg, err := c.Reader.ReadMessage(context.Background())
 			if err != nil {
-				config.GetLogger().Error("kafka read error:" + err.Error())
+				logger.NewLogger().Error("kafka read error:" + err.Error())
 				time.Sleep(time.Second)
 				continue
 			}
@@ -46,7 +45,7 @@ func (c *KafkaConsumer) Start(h queue.Handler) {
 				// 解析延迟消息
 				var msgMap map[string]any
 				if err = json.Unmarshal(msg.Value, &msgMap); err != nil {
-					config.GetLogger().Error("kafka delay msg unmarshal error:" + err.Error())
+					logger.NewLogger().Error("kafka delay msg unmarshal error:" + err.Error())
 					continue
 				}
 
@@ -72,13 +71,13 @@ func (c *KafkaConsumer) Start(h queue.Handler) {
 					// 提交确认
 					err = c.Reader.CommitMessages(context.Background(), msg)
 					if err != nil {
-						config.GetLogger().Error("kafka commit error:" + err.Error())
+						logger.NewLogger().Error("kafka commit error:" + err.Error())
 					}
 					break
 				}
 				attempt++
 				if attempt >= c.Retry {
-					config.GetLogger().Error("kafka retry failed:" + actualMsg)
+					logger.NewLogger().Error("kafka retry failed:" + actualMsg)
 					break
 				}
 				time.Sleep(time.Second)

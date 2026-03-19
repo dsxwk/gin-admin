@@ -1,7 +1,7 @@
 package base
 
 import (
-	"gin/config"
+	"gin/pkg/logger"
 	"gin/pkg/queue"
 	"github.com/rabbitmq/amqp091-go"
 	"time"
@@ -40,7 +40,7 @@ func (c *RabbitmqConsumer) Start(h queue.Handler) {
 				false,
 				args,
 			); err != nil {
-				config.GetLogger().Error("[RabbitMq] ExchangeDeclare error: " + err.Error())
+				logger.NewLogger().Error("[RabbitMq] ExchangeDeclare error: " + err.Error())
 				time.Sleep(time.Second)
 				continue
 			}
@@ -53,7 +53,7 @@ func (c *RabbitmqConsumer) Start(h queue.Handler) {
 				false,
 				nil,
 			); err != nil {
-				config.GetLogger().Error("[RabbitMq] QueueDeclare error: " + err.Error())
+				logger.NewLogger().Error("[RabbitMq] QueueDeclare error: " + err.Error())
 				time.Sleep(time.Second)
 				continue
 			}
@@ -65,7 +65,7 @@ func (c *RabbitmqConsumer) Start(h queue.Handler) {
 				false,
 				nil,
 			); err != nil {
-				config.GetLogger().Error("[RabbitMq] QueueBind error: " + err.Error())
+				logger.NewLogger().Error("[RabbitMq] QueueBind error: " + err.Error())
 				time.Sleep(time.Second)
 				continue
 			}
@@ -80,7 +80,7 @@ func (c *RabbitmqConsumer) Start(h queue.Handler) {
 				nil,
 			)
 			if err != nil {
-				config.GetLogger().Error("[RabbitMq] Consume error: " + err.Error())
+				logger.NewLogger().Error("[RabbitMq] Consume error: " + err.Error())
 				time.Sleep(time.Second)
 				continue
 			}
@@ -92,16 +92,16 @@ func (c *RabbitmqConsumer) Start(h queue.Handler) {
 						err = h.Handle(string(msg.Body))
 						if err == nil {
 							if ackErr := msg.Ack(false); ackErr != nil {
-								config.GetLogger().Error("[RabbitMq] Ack error: " + ackErr.Error())
+								logger.NewLogger().Error("[RabbitMq] Ack error: " + ackErr.Error())
 							}
 							break
 						}
 
 						retry++
 						if retry >= c.Retry {
-							config.GetLogger().Error("[RabbitMq] Retry failed: " + string(msg.Body))
+							logger.NewLogger().Error("[RabbitMq] Retry failed: " + string(msg.Body))
 							if ackErr := msg.Ack(false); ackErr != nil {
-								config.GetLogger().Error("[RabbitMq] Ack error: " + ackErr.Error())
+								logger.NewLogger().Error("[RabbitMq] Ack error: " + ackErr.Error())
 							}
 							break
 						}

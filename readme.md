@@ -124,6 +124,9 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+## v1.8.0
+> - Optimize the specification configuration file to reduce the occurrence of circular dependencies in the later stage.
+
 ## v1.7.9
 > - Optimize controllers and services, optimize database connections and connection pools.
 
@@ -292,9 +295,12 @@ Excute Command: demo-command, Argument: 11
 │   ├── cli.go                          # Entry File
 ├── common                              # Common Module
 │   ├── base                            # Base
+│   ├── ctxkey                          # Context Key
 │   ├── errcode                         # Errcode
+│   ├── flag                            # Flag
 │   ├── response                        # Response
 │   ├── template                        # Template
+│   ├── trace                           # Trace
 ├── config                              # Config File
 ├── database                            # Database Test File 
 ├── docs                                # Swagger Doc
@@ -302,9 +308,13 @@ Excute Command: demo-command, Argument: 11
 │   ├──├── cache                        # Cache
 │   ├──├── cli                          # Command
 │   ├──├── container                    # Container
+│   ├──├── db                           # DB
+│   ├──├──├── connection                # Db Connection
+│   ├──├──├── gorm                      # Gorm Tool
+│   ├──├── debugger                     # Debugger
 │   ├──├── eventbus                     # Event Bus
-│   ├──├── gorm                         # Gorm Tool
 │   ├──├── lang                         # Language
+│   ├──├── logger                       # Logger
 │   ├──├── message                      # Message Event
 │   ├──├── queue                        # Queue
 ├── public                              # Static Resources
@@ -1462,10 +1472,10 @@ type RabbitmqDemoConsumer struct {
   *base.RabbitmqConsumer
 }
 
-func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
+func NewRabbitMqDemoConsumer() *RabbitmqDemoConsumer {
   c := &RabbitmqDemoConsumer{
     &base.RabbitmqConsumer{
-      Mq:           base.InitRabbitmq(),
+      Mq:           base.NewRabbitMq(),
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
@@ -1490,8 +1500,8 @@ func (c *RabbitmqDemoConsumer) Handle(msg string) error {
 }
 
 func init() {
-  if config.Conf.Rabbitmq.Enabled {
-    NewRabbitmqDemoConsumer()
+  if config.NewConfig().Rabbitmq.Enabled {
+    NewRabbitMqDemoConsumer()
   }
 }
 
@@ -1503,14 +1513,14 @@ import (
   "gin/common/base"
 )
 
-type RabbitmqDemoPublisher struct {
+type RabbitmqDemoProducer struct {
   *base.RabbitmqProducer
 }
 
-func NewRabbitmqDemoPublisher() *RabbitmqDemoPublisher {
-  return &RabbitmqDemoPublisher{
+func InitRabbitMqDemoProducer() *RabbitmqDemoProducer {
+  return &RabbitmqDemoProducer{
     &base.RabbitmqProducer{
-      Mq:           base.InitRabbitmq(),
+      Mq:           base.NewRabbitMq(),
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
@@ -2038,8 +2048,8 @@ sqlsrv:
 ## Database Connection
 ```go
 import (
-    "gin/config"
     "gin/pkg/container"
+    "gin/pkg/db/connection"
     "github.com/gin-gonic/gin"
 )
 
@@ -2049,11 +2059,11 @@ func Test(c *gin.Context)  {
     // Use container
 	db := containers.DB;
 	// Use configuration
-	db1 := config.Db{}.GetDB()
+	db1 := connection.Db{}.GetDB()
 	// Connection pgsql
-	db2 := config.Db{}.Connection("pgsql")
+	db2 := connection.Db{}.Connection("pgsql")
 	// Connection sqlsrv
-	db3 := config.Db{}.Connection("sqlsrv")
+	db3 := connection.Db{}.Connection("sqlsrv")
     // todo ...
 }
 ```
@@ -2062,8 +2072,8 @@ func Test(c *gin.Context)  {
 > Container connection is enabled by default, and once enabled, it will be recorded in the log. If using configuration connection, context needs to be passed. The use of configuration connection context is not mandatory. If the context is not bound, SQL records will not be recorded in the log.
 ```go
 import (
-    "gin/config"
     "gin/pkg/container"
+    "gin/pkg/db/connection"
     "github.com/gin-gonic/gin"
 )
 
@@ -2073,11 +2083,11 @@ func Test(c *gin.Context)  {
     // Use container default records in the log
 	db := containers.DB;
 	// Use configuration
-	db1 := config.Db{}.GetDB().WithContext(ctx)
+	db1 := connection.Db{}.GetDB().WithContext(ctx)
 	// Connection pgsql
-	db2 := config.Db{}.Connection("pgsql").WithContext(ctx)
+	db2 := connection.Db{}.Connection("pgsql").WithContext(ctx)
 	// Connection sqlsrv
-	db3 := config.Db{}.Connection("sqlsrv").WithContext(ctx)
+	db3 := connection.Db{}.Connection("sqlsrv").WithContext(ctx)
     // todo ...
 }
 ```

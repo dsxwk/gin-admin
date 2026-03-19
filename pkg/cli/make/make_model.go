@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"gin/common/base"
-	"gin/config"
-	"gin/pkg"
+	"gin/common/flag"
 	"gin/pkg/cli"
+	"gin/pkg/db/connection"
 	"github.com/fatih/color"
 	"gorm.io/gorm"
 	"os"
@@ -127,9 +127,9 @@ func (m *MakeModel) Execute(args []string) {
 	}
 
 	camel := m.StringToBool(values["camel"])
-	connection := values["connection"]
+	conn := values["connection"]
 	_make := strings.TrimPrefix(m.Name(), "make:")
-	db := config.Db{}.Connection(connection)
+	db := connection.Db{}.Connection(conn)
 	for _, table := range tables {
 		color.Cyan("开始生成模型: %s", table)
 
@@ -139,7 +139,7 @@ func (m *MakeModel) Execute(args []string) {
 			continue
 		}
 
-		color.Green(pkg.Success + " 模型生成成功: " + filepath.Join(path, table+".go"))
+		color.Green(flag.Success + " 模型生成成功: " + filepath.Join(path, table+".go"))
 	}
 }
 

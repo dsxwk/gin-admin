@@ -1,4 +1,4 @@
-package config
+package connection
 
 import (
 	"gin/pkg"
@@ -24,10 +24,10 @@ func getSqlsrvDsn() string {
 
 	return pkg.Sprintf(
 		"sqlserver://%s:%s@%s:%s?database=%s",
-		Conf.Sqlsrv.Username,
-		Conf.Sqlsrv.Password,
-		Conf.Sqlsrv.Host,
-		Conf.Sqlsrv.Port,
-		Conf.Sqlsrv.Database,
+		conf.Sqlsrv.Username,
+		conf.Sqlsrv.Password,
+		conf.Sqlsrv.Host,
+		conf.Sqlsrv.Port,
+		conf.Sqlsrv.Database,
 	)
 }

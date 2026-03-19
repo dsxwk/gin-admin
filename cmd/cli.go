@@ -14,6 +14,6 @@ import (
 )
 
 func main() {
-	config.GetConfig()
+	config.NewConfig()
 	cli.Execute()
 }

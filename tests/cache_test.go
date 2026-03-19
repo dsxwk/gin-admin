@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"gin/config"
 	"gin/pkg/cache"
 	"github.com/stretchr/testify/require"
 	"strconv"
@@ -19,9 +18,9 @@ func TestCacheSetGet(t *testing.T) {
 		cache *cache.CacheProxy
 		key   string
 	}{
-		{"redis", config.GetRedisCache().WithContext(ctx), "redis_test"},
-		{"disk", config.GetDiskCache().WithContext(ctx), "disk_test"},
-		{"memory", config.GetMemoryCache().WithContext(ctx), "memory_test"},
+		{"redis", cache.NewRedisCache().WithContext(ctx), "redis_test"},
+		{"disk", cache.NewDiskCache().WithContext(ctx), "disk_test"},
+		{"memory", cache.NewMemoryCache().WithContext(ctx), "memory_test"},
 	}
 
 	for _, tt := range tests {

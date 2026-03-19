@@ -1,4 +1,4 @@
-package config
+package connection
 
 import (
 	"gin/pkg"
@@ -21,6 +21,6 @@ func openMysql() (db *gorm.DB, err error) {
 func getMysqlDsn() string {
 	return pkg.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
-		Conf.Mysql.Username, Conf.Mysql.Password, Conf.Mysql.Host, Conf.Mysql.Port, Conf.Mysql.Database,
+		conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Host, conf.Mysql.Port, conf.Mysql.Database,
 	)
 }

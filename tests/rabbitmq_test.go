@@ -2,7 +2,7 @@ package tests
 
 import (
 	"context"
-	rc "gin/app/queue/rabbitmq/consumer"
+	c "gin/app/queue/rabbitmq/consumer"
 	p "gin/app/queue/rabbitmq/producer"
 	"gin/common/ctxkey"
 	"gin/config"
@@ -14,9 +14,9 @@ func TestRabbitMQPublish(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(context.Background(), ctxkey.TraceIdKey, "test-trace-id")
 
-	if config.GetConfig().Rabbitmq.Enabled {
-		rc.NewRabbitmqDemoConsumer()
-		pub := p.NewRabbitmqDemoPublisher()
+	if config.NewConfig().Rabbitmq.Enabled {
+		c.NewRabbitMqDemoConsumer()
+		pub := p.NewRabbitMqDemoProducer()
 		defer func() {
 			require.NoError(t, pub.Close())
 		}()

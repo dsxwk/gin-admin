@@ -1,4 +1,4 @@
-package pkg
+package flag
 
 const Error = "❌"
 const Success = "✅"

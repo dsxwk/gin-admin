@@ -124,6 +124,9 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
+## v1.8.0
+> - 优化规范配置文件，减少导致后期出现循环依赖问题。
+
 ## v1.7.9
 > - 优化控制器和服务，优化数据库连接和连接池。
 
@@ -287,14 +290,17 @@ $ ./cli demo-command --args=11
 │   ├──├──├── producer                  # 生产者
 │   ├── request                         # 验证器
 │   ├── service                         # 服务
-├── bootstrap                           # 启动文件 
+├── bootstrap                           # 初始化文件 
 ├── cmd                                 # 命令行工具
 │   ├── cli.go                          # 命令行工具入口文件
 ├── common                              # 公共模块
 │   ├── base                            # 基类
+│   ├── ctxkey                          # 上下文键名
 │   ├── errcode                         # 错误码
+│   ├── flag                            # 特殊符合
 │   ├── response                        # 响应
 │   ├── template                        # 模版
+│   ├── trace                           # 调试
 ├── config                              # 配置文件
 ├── database                            # 数据库测试文件
 ├── docs                                # 文档
@@ -302,9 +308,13 @@ $ ./cli demo-command --args=11
 │   ├──├── cache                        # 缓存
 │   ├──├── cli                          # 命令行
 │   ├──├── container                    # 容器
+│   ├──├── db                           # 数据库
+│   ├──├──├── connection                # 连接
+│   ├──├──├── gorm                      # gorm工具
+│   ├──├── debugger                     # 调试
 │   ├──├── eventbus                     # 事件
-│   ├──├── gorm                         # gorm工具
 │   ├──├── lang                         # 多语言
+│   ├──├── logger                       # 日志
 │   ├──├── message                      # 消息事件
 │   ├──├── queue                        # 队列
 ├── public                              # 静态资源
@@ -316,6 +326,7 @@ $ ./cli demo-command --args=11
 │   ├──├── en                           # 英文翻译
 │   ├──├── zh                           # 中文翻译
 ├── tests                               # 测试用例
+├── tmp                                 # 临时文件
 ├── vendor                              # 依赖包
 ├── .air.linux.toml                     # air配置文件
 ├── .air.toml                           # air配置文件
@@ -1463,10 +1474,10 @@ type RabbitmqDemoConsumer struct {
   *base.RabbitmqConsumer
 }
 
-func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
+func NewRabbitMqDemoConsumer() *RabbitmqDemoConsumer {
   c := &RabbitmqDemoConsumer{
     &base.RabbitmqConsumer{
-      Mq:           base.InitRabbitmq(),
+      Mq:           base.NewRabbitMq(),
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
@@ -1491,8 +1502,8 @@ func (c *RabbitmqDemoConsumer) Handle(msg string) error {
 }
 
 func init() {
-  if config.Conf.Rabbitmq.Enabled {
-    NewRabbitmqDemoConsumer()
+  if config.NewConfig().Rabbitmq.Enabled {
+    NewRabbitMqDemoConsumer()
   }
 }
 
@@ -1504,14 +1515,14 @@ import (
   "gin/common/base"
 )
 
-type RabbitmqDemoPublisher struct {
+type RabbitmqDemoProducer struct {
   *base.RabbitmqProducer
 }
 
-func NewRabbitmqDemoPublisher() *RabbitmqDemoPublisher {
-  return &RabbitmqDemoPublisher{
+func NewRabbitMqDemoProducer() *RabbitmqDemoProducer {
+  return &RabbitmqDemoProducer{
     &base.RabbitmqProducer{
-      Mq:           base.InitRabbitmq(),
+      Mq:           base.NewRabbitMq(),
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
@@ -1881,9 +1892,9 @@ func (s *TestController) Test(c *gin.Context) {
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": null,
-    "Http": null,
-    "Mq": null,
+    "Cache": [],
+    "Http": [],
+    "Mq": [],
     "ListenerEvent": null
   },
   "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
@@ -2027,8 +2038,8 @@ sqlsrv:
 ## 数据库连接
 ```go
 import (
-    "gin/config"
     "gin/pkg/container"
+    "gin/pkg/db/connection"
     "github.com/gin-gonic/gin"
 )
 
@@ -2038,11 +2049,11 @@ func Test(c *gin.Context)  {
     // 使用容器
 	db := containers.DB;
 	// 使用配置
-	db1 := config.Db{}.GetDB()
+	db1 := connection.Db{}.GetDB()
 	// 连接pgsql
-	db2 := config.Db{}.Connection("pgsql")
+	db2 := connection.Db{}.Connection("pgsql")
 	// 连接sqlsrv
-	db3 := config.Db{}.Connection("sqlsrv")
+	db3 := connection.Db{}.Connection("sqlsrv")
     // todo ...
 }
 ```
@@ -2051,8 +2062,8 @@ func Test(c *gin.Context)  {
 > 使用容器连接默认开启，开启后，会记录到日志中，如果使用配置连接需要传递上下文。使用配置连接上下文非必须，如果不绑定上下文则日志不会记录sql记录。
 ```go
 import (
-    "gin/config"
     "gin/pkg/container"
+    "gin/pkg/db/connection"
     "github.com/gin-gonic/gin"
 )
 
@@ -2062,11 +2073,11 @@ func Test(c *gin.Context)  {
     // 使用容器默认记录
 	db := containers.DB;
 	// 使用配置
-	db1 := config.Db{}.GetDB().WithContext(ctx)
+	db1 := connection.Db{}.GetDB().WithContext(ctx)
 	// 连接pgsql
-	db2 := config.Db{}.Connection("pgsql").WithContext(ctx)
+	db2 := connection.Db{}.Connection("pgsql").WithContext(ctx)
 	// 连接sqlsrv
-	db3 := config.Db{}.Connection("sqlsrv").WithContext(ctx)
+	db3 := connection.Db{}.Connection("sqlsrv").WithContext(ctx)
     // todo ...
 }
 ```

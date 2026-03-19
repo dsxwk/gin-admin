@@ -7,7 +7,7 @@ import (
 	"gin/common/base"
 	"gin/pkg"
 	"gin/pkg/container"
-	"gin/pkg/gorm/search"
+	"gin/pkg/db/gorm/search"
 	"time"
 )
 

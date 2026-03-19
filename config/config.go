@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"gin/pkg"
+	"gin/common/flag"
 	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -12,130 +12,6 @@ import (
 	"sync"
 	"time"
 )
-
-// App 应用
-type App struct {
-	Name     string `mapstructure:"name" yaml:"name"`
-	Mode     string `mapstructure:"mode" yaml:"mode"`
-	Port     int64  `mapstructure:"port" yaml:"port"`
-	Timezone string `mapstructure:"timezone" yaml:"timezone"`
-	Proxies  string `mapstructure:"proxies" yaml:"proxies"`
-	Env      string `mapstructure:"env" yaml:"env"`
-}
-
-// Databases 数据库
-type Databases struct {
-	DbConnection      string        `mapstructure:"db-connection" yaml:"db-connection"`             // 默认数据库
-	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间(ms) 超过这个时间会记录到日志中
-}
-
-// Mysql 数据库
-type Mysql struct {
-	Driver            string        `mapstructure:"driver" yaml:"driver"`
-	Host              string        `mapstructure:"host" yaml:"host"`
-	Port              string        `mapstructure:"port" yaml:"port"`
-	Database          string        `mapstructure:"database" yaml:"database"`
-	Username          string        `mapstructure:"username" yaml:"username"`
-	Password          string        `mapstructure:"password" yaml:"password"`
-	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间(ms) 超过这个时间会记录到日志中
-}
-
-// Sqlite 数据库
-type Sqlite struct {
-	Driver            string        `mapstructure:"driver" yaml:"driver"`
-	Path              string        `mapstructure:"path" yaml:"path"`
-	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间(ms) 超过这个时间会记录到日志中
-}
-
-// Pgsql 数据库
-type Pgsql struct {
-	Driver            string        `mapstructure:"driver" yaml:"driver"`
-	Host              string        `mapstructure:"host" yaml:"host"`
-	Port              string        `mapstructure:"port" yaml:"port"`
-	Database          string        `mapstructure:"database" yaml:"database"`
-	Username          string        `mapstructure:"username" yaml:"username"`
-	Password          string        `mapstructure:"password" yaml:"password"`
-	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间(ms) 超过这个时间会记录到日志中
-}
-
-// Sqlsrv 数据库
-type Sqlsrv struct {
-	Driver            string        `mapstructure:"driver" yaml:"driver"`
-	Host              string        `mapstructure:"host" yaml:"host"`
-	Port              string        `mapstructure:"port" yaml:"port"`
-	Database          string        `mapstructure:"database" yaml:"database"`
-	Username          string        `mapstructure:"username" yaml:"username"`
-	Password          string        `mapstructure:"password" yaml:"password"`
-	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间(ms) 超过这个时间会记录到日志中
-}
-
-// Cache 缓存
-type Cache struct {
-	Driver string `mapstructure:"driver" yaml:"driver"`
-	Redis  Redis  `mapstructure:"redis" yaml:"redis"`
-	Memory Memory `mapstructure:"memory" yaml:"memory"`
-	Disk   Disk   `mapstructure:"disk" yaml:"disk"`
-}
-
-// Redis 数据库
-type Redis struct {
-	Address  string `mapstructure:"address" yaml:"address"`
-	Password string `mapstructure:"password" yaml:"password"`
-	DB       int    `mapstructure:"db" yaml:"db"`
-}
-
-// Memory 内存缓存
-type Memory struct {
-	DefaultExpire   time.Duration `mapstructure:"default-expire" yaml:"default-expire"`
-	CleanupInterval time.Duration `mapstructure:"cleanup-interval" yaml:"cleanup-interval"`
-}
-
-// Disk 磁盘缓存
-type Disk struct {
-	Path string `mapstructure:"path" yaml:"path"`
-}
-
-// Cors 跨域
-type Cors struct {
-	Enabled          bool   `mapstructure:"enabled" yaml:"enabled"`
-	AllowOrigin      string `mapstructure:"allow-origin" yaml:"allow-origin"`
-	AllowHeaders     string `mapstructure:"allow-headers" yaml:"allow-headers"`
-	ExposeHeaders    string `mapstructure:"expose-headers" yaml:"expose-headers"`
-	AllowMethods     string `mapstructure:"allow-methods" yaml:"allow-methods"`
-	AllowCredentials string `mapstructure:"allow-credentials" yaml:"allow-credentials"`
-}
-
-// Jwt token
-type Jwt struct {
-	Key        string `mapstructure:"key" yaml:"key"`
-	Exp        int64  `mapstructure:"exp" yaml:"exp"`
-	RefreshExp int64  `mapstructure:"refresh-exp" yaml:"refresh-exp"`
-}
-
-// Log 日志
-type Log struct {
-	Access     bool   `mapstructure:"access" yaml:"access"`           // 是否记录访问日志
-	MaxSize    int    `mapstructure:"max-size" yaml:"max-size"`       // 单个日志文件大小（MB）
-	MaxBackups int    `mapstructure:"max-backups" yaml:"max-backups"` // 最多保留的旧日志文件数
-	MaxDay     int    `mapstructure:"max-day" yaml:"max-day"`         // 保留的最大天数
-	Level      string `mapstructure:"level" yaml:"level"`             // 日志级别
-}
-
-// I18n 翻译
-type I18n struct {
-	Dir  string `mapstructure:"dir" yaml:"dir"`   // 翻译文件目录
-	Lang string `mapstructure:"lang" yaml:"lang"` // 默认语言,多个语言用逗号分隔
-}
-
-type Kafka struct {
-	Enabled bool     `mapstructure:"enabled" yaml:"enabled"` // 是否启用
-	Brokers []string `mapstructure:"brokers" yaml:"brokers"`
-}
-
-type Rabbitmq struct {
-	Enabled bool   `mapstructure:"enabled" yaml:"enabled"` // 是否启用
-	Url     string `mapstructure:"url" yaml:"url"`
-}
 
 // Config 配置
 type Config struct {
@@ -161,12 +37,12 @@ var (
 	confOnce sync.Once
 )
 
-func GetConfig() *Config {
+func NewConfig() *Config {
 	confOnce.Do(func() {
 		v := viper.New()
 
 		// 默认配置文件目录为根目录
-		configDir := pkg.GetRootPath()
+		configDir := GetRootPath()
 		v.AddConfigPath(configDir)
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
@@ -177,7 +53,7 @@ func GetConfig() *Config {
 
 		// 读取主配置文件 config.yaml
 		if err := v.ReadInConfig(); err != nil {
-			color.Red(pkg.Error+"  读取配置文件失败: %v", err)
+			color.Red(flag.Error+"  读取配置文件失败: %v", err)
 		}
 
 		// 获取环境类型
@@ -191,18 +67,18 @@ func GetConfig() *Config {
 		if _, err := os.Stat(configFile); err == nil {
 			v.SetConfigFile(configFile)
 			if err = v.MergeInConfig(); err != nil {
-				color.Red(pkg.Error+"  合并环境配置失败: %v", err)
+				color.Red(flag.Error+"  合并环境配置失败: %v", err)
 				os.Exit(1)
 			}
-			color.Green(pkg.Success+"  已加载环境配置文件: %s\n", configFile)
+			color.Green(flag.Success+"  已加载环境配置文件: %s\n", configFile)
 		} else {
-			color.Yellow(pkg.Warning+"  未找到环境配置文件: %s，使用默认配置\n", configFile)
+			color.Yellow(flag.Warning+"  未找到环境配置文件: %s，使用默认配置\n", configFile)
 		}
 
 		// 自动映射到结构体
 		cfg := &Config{}
 		if err := v.Unmarshal(cfg); err != nil {
-			color.Red(pkg.Error+"  解析配置文件失败: %v", err)
+			color.Red(flag.Error+"  解析配置文件失败: %v", err)
 			os.Exit(1)
 		}
 
@@ -222,9 +98,9 @@ func GetConfig() *Config {
 			}
 			lastEventTime = now
 
-			color.Green(pkg.Loading+"  配置文件修改: %s\n", e.Name)
+			color.Green(flag.Loading+"  配置文件修改: %s\n", e.Name)
 			if err := v.Unmarshal(cfg); err != nil {
-				color.Red(pkg.Warning+"  配置热更新失败: %v", err)
+				color.Red(flag.Warning+"  配置热更新失败: %v", err)
 				os.Exit(1)
 			}
 		})
@@ -234,6 +110,23 @@ func GetConfig() *Config {
 	})
 
 	return Conf
+}
+
+// GetRootPath 获取项目根路径
+func GetRootPath() string {
+	dir, _ := os.Getwd()
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return ""
 }
 
 // Get 获取配置项

@@ -10,7 +10,7 @@ import (
 
 func TestMain(m *testing.M) {
 	// 初始化配置
-	_ = config.GetConfig()
+	_ = config.NewConfig()
 
 	// 初始化container
 	c := container.NewContainer()

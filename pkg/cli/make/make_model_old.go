@@ -3,9 +3,9 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
-	"gin/config"
 	"gin/pkg"
 	"gin/pkg/cli"
+	"gin/pkg/db/connection"
 	"github.com/fatih/color"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -94,7 +94,7 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 		ModelPkgPath:      path,
 	})
 
-	g.UseDB(config.Db{}.GetDB())
+	g.UseDB(connection.Db{}.GetDB())
 
 	dataMap := map[string]func(detailType gorm.ColumnType) (dataType string){
 		"tinyint":   func(detailType gorm.ColumnType) (dataType string) { return "int64" },

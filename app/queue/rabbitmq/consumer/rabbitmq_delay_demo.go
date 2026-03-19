@@ -10,10 +10,10 @@ type RabbitmqDelayDemoConsumer struct {
 	*base.RabbitmqConsumer
 }
 
-func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
+func NewRabbitMqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
 	c := &RabbitmqDelayDemoConsumer{
 		&base.RabbitmqConsumer{
-			Mq:           base.InitRabbitmq(),
+			Mq:           base.NewRabbitMq(),
 			Queue:        "rabbitmq_delay_demo",
 			Exchange:     "rabbitmq_delay_demo_exchange",
 			Routing:      "rabbitmq_delay_demo",
@@ -38,7 +38,7 @@ func (c *RabbitmqDelayDemoConsumer) Handle(msg string) error {
 }
 
 func init() {
-	if config.GetConfig().Rabbitmq.Enabled {
-		NewRabbitmqDelayDemoConsumer()
+	if config.NewConfig().Rabbitmq.Enabled {
+		NewRabbitMqDelayDemoConsumer()
 	}
 }

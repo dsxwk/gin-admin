@@ -3,8 +3,11 @@ package cache
 import (
 	"context"
 	"gin/common/ctxkey"
+	"gin/config"
 	"gin/pkg/debugger"
+	"gin/pkg/logger"
 	"gin/pkg/message"
+	"sync"
 	"time"
 )
 
@@ -29,6 +32,33 @@ func NewCacheProxy(driver string, c Cache, bus *message.EventBus) *CacheProxy {
 		c:      c,
 		bus:    bus,
 	}
+}
+
+var (
+	conf      = config.NewConfig()
+	instance  *CacheProxy
+	cacheOnce sync.Once
+)
+
+func NewCache() *CacheProxy {
+	cacheOnce.Do(func() {
+		switch conf.Cache.Driver {
+
+		case "redis":
+			instance = NewRedisCache()
+
+		case "", "memory":
+			instance = NewMemoryCache()
+
+		case "disk":
+			instance = NewDiskCache()
+
+		default:
+			logger.NewLogger().Fatal("不支持的缓存驱动: " + conf.Cache.Driver)
+		}
+	})
+
+	return instance
 }
 
 func (p *CacheProxy) WithContext(ctx context.Context) *CacheProxy {

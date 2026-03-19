@@ -5,6 +5,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/config"
 	"gin/pkg/debugger"
+	"gin/pkg/logger"
 	"gin/pkg/message"
 	"github.com/rabbitmq/amqp091-go"
 	"time"
@@ -15,7 +16,7 @@ type RabbitMq struct {
 	Channel *amqp091.Channel
 }
 
-func NewRabbitMq(url string) (*RabbitMq, error) {
+func NewAmqp(url string) (*RabbitMq, error) {
 	conn, err := amqp091.Dial(url)
 	if err != nil {
 		return nil, err
@@ -51,15 +52,15 @@ type RabbitmqProducer struct {
 	Headers      amqp091.Table
 }
 
-func InitRabbitmq() *RabbitMq {
-	rmq, err := NewRabbitMq(config.Conf.Rabbitmq.Url)
+func NewRabbitMq() *RabbitMq {
+	rmq, err := NewAmqp(config.NewConfig().Rabbitmq.Url)
 	if err != nil {
-		config.GetLogger().Error("RabbitMq连接失败: " + err.Error())
+		logger.NewLogger().Error("RabbitMq连接失败: " + err.Error())
 	}
 	return rmq
 }
 
-func (p *RabbitmqProducer) initQueue() error {
+func (p *RabbitmqProducer) newQueue() error {
 	args := amqp091.Table{}
 	exchangeType := "direct"
 	if p.IsDelayQueue {
@@ -88,7 +89,7 @@ func (p *RabbitmqProducer) initQueue() error {
 
 func (p *RabbitmqProducer) Publish(ctx context.Context, msg []byte) error {
 	start := time.Now()
-	if err := p.initQueue(); err != nil {
+	if err := p.newQueue(); err != nil {
 		return err
 	}
 

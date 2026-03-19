@@ -8,6 +8,7 @@ import (
 	"gin/common/trace"
 	"gin/config"
 	"gin/pkg/container"
+	"gin/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
@@ -54,8 +55,8 @@ func (s Logger) Handle() gin.HandlerFunc {
 
 		c.Next()
 
-		if config.GetConfig().Log.Access {
-			config.GetLogger().WithDebugger(ctx).Info("Access Log")
+		if config.NewConfig().Log.Access {
+			logger.NewLogger().WithDebugger(ctx).Info("Access Log")
 		}
 	}
 }
@@ -93,7 +94,7 @@ func (s Logger) getParams(c *gin.Context) any {
 // GetLang 获取语言
 func (s *Logger) GetLang(c *gin.Context) string {
 	// 配置支持的语言如["zh", "en"]
-	supported := strings.Split(config.Conf.I18n.Lang, ",")
+	supported := strings.Split(config.NewConfig().I18n.Lang, ",")
 
 	if q := strings.ToLower(strings.TrimSpace(c.Query("lang"))); q != "" {
 		if lang := s.matchLang(q, supported); lang != "" {
