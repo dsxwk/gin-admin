@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
 	"github.com/fatih/color"
@@ -85,7 +86,7 @@ func (m *%s) Rollback(db *gorm.DB) error {
 		return
 	}
 
-	color.Green(pkg.Success+"  迁移文件生成成功: %s", filePath)
+	color.Green(flag.Success+"  迁移文件生成成功: %s", filePath)
 }
 
 func init() {

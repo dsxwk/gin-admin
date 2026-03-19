@@ -2,6 +2,7 @@ package make
 
 import (
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
 	"github.com/fatih/color"
@@ -123,5 +124,5 @@ func (m *MakeController) generateFile(_make, file, function, method, router, des
 		os.Exit(1)
 	}
 
-	color.Green(pkg.Success + " 控制器文件: " + file + " 生成成功!")
+	color.Green(flag.Success + " 控制器文件: " + file + " 生成成功!")
 }

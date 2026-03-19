@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	"gin/common/base"
-	"gin/pkg"
+	"gin/common/flag"
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"os"
@@ -18,7 +18,7 @@ var (
 func Register(cmd base.Command) {
 	name := cmd.Name()
 	if _, exists := commands[name]; exists {
-		color.Yellow(pkg.Warning+"  Command \"%s\" already registered, skipped.", name)
+		color.Yellow(flag.Warning+"  Command \"%s\" already registered, skipped.", name)
 		os.Exit(1)
 	}
 	commands[name] = cmd
@@ -71,7 +71,7 @@ func Execute() {
 
 	cmd, exists := Get(name)
 	if !exists {
-		color.Red(pkg.Error+"  Command \"%s\" is not defined.", name)
+		color.Red(flag.Error+"  Command \"%s\" is not defined.", name)
 		printUsage("txt")
 		os.Exit(1)
 	}

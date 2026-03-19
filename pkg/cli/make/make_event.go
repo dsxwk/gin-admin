@@ -2,6 +2,7 @@ package make
 
 import (
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
 	"github.com/fatih/color"
@@ -98,5 +99,5 @@ func (m *MakeEvent) generateFile(_make, file, name, desc string) {
 		os.Exit(1)
 	}
 
-	color.Green(pkg.Success+"  事件文件: %s 生成成功!", file)
+	color.Green(flag.Success+"  事件文件: %s 生成成功!", file)
 }

@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
 	"github.com/fatih/color"
@@ -91,7 +92,7 @@ func (s *%s) Run(db *gorm.DB) error {
 		return
 	}
 
-	color.Green(pkg.Success+"  seed文件生成成功: %s", filePath)
+	color.Green(flag.Success+"  seed文件生成成功: %s", filePath)
 }
 
 func init() {

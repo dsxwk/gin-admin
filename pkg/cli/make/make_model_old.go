@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
 	"gin/pkg/db/connection"
@@ -65,7 +66,7 @@ func (m *MakeModelOld) Execute(args []string) {
 	tables := strings.Split(values["table"], ",")
 	for i := range tables {
 		tables[i] = strings.TrimSpace(tables[i])
-		color.Green(pkg.Success+"  创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
+		color.Green(flag.Success+"  创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
 	}
 
 	m.generateFiles(p, tables, m.StringToBool(values["camel"]))
@@ -173,12 +174,12 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 		})
 
 		if err = os.WriteFile(filePath, []byte(text), 0644); err != nil {
-			color.Red(fmt.Sprintf(pkg.Error+"  为文件 %s 添加 swaggerignore 失败", file.Name()))
+			color.Red(fmt.Sprintf(flag.Error+"  为文件 %s 添加 swaggerignore 失败", file.Name()))
 			os.Exit(1)
 		}
 	}
 
-	color.Green(fmt.Sprintf(pkg.Success+"  模型生成成功! 输出目录: %s", path))
+	color.Green(fmt.Sprintf(flag.Success+"  模型生成成功! 输出目录: %s", path))
 
 	_ = os.RemoveAll(outPath)
 }

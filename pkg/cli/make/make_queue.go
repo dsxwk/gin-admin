@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
 	"github.com/fatih/color"
@@ -167,8 +168,8 @@ func (m *MakeQueue) generateFile(isDelay bool, values map[string]string) {
 
 	generateTemplateData(isDelay, values, tmpls, f1, f2, tmpl)
 
-	color.Green(pkg.Success + "  验证请求文件: " + file1 + " 生成成功!")
-	color.Green(pkg.Success + "  验证请求文件: " + file2 + " 生成成功!")
+	color.Green(flag.Success + "  验证请求文件: " + file1 + " 生成成功!")
+	color.Green(flag.Success + "  验证请求文件: " + file2 + " 生成成功!")
 }
 
 func generateTemplateData(isDelay bool, values, tmpls map[string]string, f1, f2 io.Writer, tmpl *template.Template) (any, any) {
