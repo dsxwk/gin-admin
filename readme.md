@@ -124,6 +124,9 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+## v1.8.3
+> - Public error codes can be added with error code prefixes and error code test cases.
+
 ## v1.8.2
 > - Add a time assistant package and corresponding test cases.
 

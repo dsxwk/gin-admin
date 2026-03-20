@@ -1,8 +1,17 @@
 package errcode
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
-// ErrorCode 公共错误码结构体
+// 业务码
+const (
+	LoginErrorPrefix = 1000 // 登录错误码前缀
+	UserErrorPrefix  = 1001 // 用户错误码前缀
+	MenuErrorPrefix  = 1001 // 菜单错误码前缀
+)
+
 type ErrorCode struct {
 	Code int64       `json:"code"` // 错误码
 	Msg  string      `json:"msg"`  // 错误描述
@@ -11,7 +20,14 @@ type ErrorCode struct {
 
 // Error 实现error接口
 func (e ErrorCode) Error() string {
-	return fmt.Sprintf("%s", e.Msg)
+	return fmt.Sprintf("%d=>%s", e.Code, e.Msg)
+}
+
+// WithPrefix 设置错误码前缀
+func (e ErrorCode) WithPrefix(prefix int64) ErrorCode {
+	code := fmt.Sprintf("%d%d", prefix, e.Code)
+	e.Code, _ = strconv.ParseInt(code, 10, 64)
+	return e
 }
 
 func NewError(code int64, msg string) ErrorCode {
