@@ -124,6 +124,9 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
+## v1.8.4
+> - 验证请求优化。
+
 ## v1.8.3
 > - 公共错误码新增可添加错误码前缀，新增错误码测试用例。
 
@@ -670,8 +673,8 @@ type User struct {
     PageListValidate
 }
 
-// GetValidate 请求验证
-func (s User) GetValidate(data User, scene string) error {
+// Validate 请求验证
+func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())
@@ -855,8 +858,8 @@ func (s User) ValidateIsEven(val any) bool {
 
 #### 临时规则
 ```go
-// GetValidate 请求验证
-func (s User) GetValidate(data User, scene string) error {
+// Validate 请求验证
+func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
 	v.AddValidator("is_even", func(val any, rule string) bool {
         num, ok := val.(int)
@@ -935,7 +938,7 @@ func (s *UserController) List(c *gin.Context) {
   }
 
   // 验证
-  err = s.req.GetValidate(s.req, "List")
+  err = s.req.Validate(s.req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1606,7 +1609,7 @@ func (s *LoginController) Login(c *gin.Context) {
   }
 
   // 验证
-  err = s.req.GetValidate(s.req, "Login")
+  err = s.req.Validate(s.req, "Login")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return

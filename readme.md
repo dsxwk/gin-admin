@@ -124,6 +124,9 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+## v1.8.4
+> - Validate request optimization.
+
 ## v1.8.3
 > - Public error codes can be added with error code prefixes and error code test cases.
 
@@ -668,8 +671,8 @@ type User struct {
     PageListValidate
 }
 
-// GetValidate Request-Validation
-func (s User) GetValidate(data User, scene string) error {
+// Validate Request-Validation
+func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())
@@ -853,8 +856,8 @@ return num%2 == 0
 
 #### Temporary Rules
 ```go
-// GetValidate Request-Validation
-func (s User) GetValidate(data User, scene string) error {
+// Validate Request-Validation
+func (s User) Validate(data User, scene string) error {
     v := validate.Struct(data, scene)
     v.AddValidator("is_even", func(val any, rule string) bool {
         num, ok := val.(int)
@@ -933,7 +936,7 @@ func (s *UserController) List(c *gin.Context) {
   }
 
   // Validator
-  err = s.req.GetValidate(s.req, "List")
+  err = s.req.Validate(s.req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1604,7 +1607,7 @@ func (s *LoginController) Login(c *gin.Context) {
   }
 
   // 验证
-  err = s.req.GetValidate(s.req, "Login")
+  err = s.req.Validate(s.req, "Login")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return

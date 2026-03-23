@@ -139,7 +139,7 @@ func FilterModelFields(db *gorm.DB, model any, raw map[string]interface{}) map[s
 
 	for k, v := range raw {
 		if _, ok := stmt.Schema.FieldsByDBName[CamelToSnake(k)]; ok {
-			filtered[k] = v
+			filtered[CamelToSnake(k)] = v
 		}
 	}
 

@@ -57,10 +57,11 @@ func (s *UserService) Create(m model.User) (model.User, error) {
 	var (
 		count      int64
 		containers = container.Get(s.Ctx)
+		db         = containers.DB
 	)
 
 	// 校验用户名是否重复
-	err := containers.DB.Model(&model.User{}).Where("username = ?", m.Username).Count(&count).Error
+	err := db.Model(&model.User{}).Where("username = ?", m.Username).Count(&count).Error
 	if err != nil {
 		return m, err
 	}
@@ -70,7 +71,7 @@ func (s *UserService) Create(m model.User) (model.User, error) {
 
 	// 处理密码
 	m.Password = pkg.BcryptHash(m.Password)
-	err = containers.DB.Create(&m).Error
+	err = db.Create(&m).Error
 	if err != nil {
 		return m, err
 	}
@@ -79,24 +80,28 @@ func (s *UserService) Create(m model.User) (model.User, error) {
 }
 
 // Update 更新
-func (s *UserService) Update(id int64, m model.User) error {
+func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	var (
 		count      int64
 		containers = container.Get(s.Ctx)
+		db         = containers.DB
 	)
 
 	// 校验用户名是否重复
-	err := containers.DB.Model(&model.User{}).Where("username = ? AND id <> ?", m.Username, m.ID).Count(&count).Error
+	err := db.Model(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
 	if count > 0 {
 		return errors.New("用户名已存在")
 	}
-	data := request.FilterMapByKeys(m, request.UserUpdateKeys)
-	data["updated_at"] = time.DateTime
+	if pkg.HasKey(data, "password") && data["password"] != "" {
+		data["password"] = pkg.BcryptHash(data["password"].(string))
+	}
+	rows := pkg.FilterModelFields(db, model.User{}, data)
+	rows["updated_at"] = time.DateTime
 
-	err = containers.DB.Model(&model.User{}).Where("id = ?", id).Updates(data).Error
+	err = db.Model(&model.User{}).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
 		return err
 	}

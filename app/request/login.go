@@ -28,8 +28,8 @@ type Login struct {
 	Context
 }
 
-// GetValidate 请求验证
-func (s Login) GetValidate(data Login, scene string) error {
+// Validate 请求验证
+func (s Login) Validate(data Login, scene string) error {
 	v := validate.Struct(data, scene)
 
 	// v.AddMessages(s.Messages())

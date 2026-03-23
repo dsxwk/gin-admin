@@ -8,6 +8,7 @@ import (
 	"gin/common/errcode"
 	"gin/pkg/lang"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/copier"
 	"strconv"
 )
@@ -51,7 +52,7 @@ func (s *UserController) List(c *gin.Context) {
 	}
 
 	// 验证
-	err = s.req.GetValidate(s.req, "List")
+	err = s.req.Validate(s.req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -90,7 +91,7 @@ func (s *UserController) Create(c *gin.Context) {
 	}
 
 	// 验证
-	err = s.req.GetValidate(s.req, "Create")
+	err = s.req.Validate(s.req, "Create")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -124,13 +125,20 @@ func (s *UserController) Create(c *gin.Context) {
 // @Router /api/v1/user/{id} [put]
 func (s *UserController) Update(c *gin.Context) {
 	var (
-		id  int64
-		ctx = c.Request.Context()
+		id   int64
+		ctx  = c.Request.Context()
+		data map[string]interface{}
 	)
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&s.req)
+	err := c.ShouldBindBodyWith(&s.req, binding.JSON)
+	if err != nil {
+		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	err = c.ShouldBindBodyWith(&data, binding.JSON)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -144,7 +152,7 @@ func (s *UserController) Update(c *gin.Context) {
 	s.req.ID = id
 
 	// 验证
-	err = s.req.GetValidate(s.req, "Update")
+	err = s.req.Validate(s.req, "Update")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -156,13 +164,13 @@ func (s *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	err = s.service.Update(s.user.ID, s.user)
+	err = s.service.Update(s.user.ID, data)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(s.user))
+	s.Success(c, errcode.Success().WithData(data))
 }
 
 // Detail 详情
@@ -191,7 +199,7 @@ func (s *UserController) Detail(c *gin.Context) {
 	s.req.ID = id
 
 	// 验证
-	err = s.req.GetValidate(s.req, "Detail")
+	err = s.req.Validate(s.req, "Detail")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -232,7 +240,7 @@ func (s *UserController) Delete(c *gin.Context) {
 	s.req.ID = id
 
 	// 验证
-	err = s.req.GetValidate(s.req, "Delete")
+	err = s.req.Validate(s.req, "Delete")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

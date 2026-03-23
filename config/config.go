@@ -62,7 +62,7 @@ func NewConfig() *Config {
 			env = "dev"
 		}
 
-		// 加载对应环境的配置文件，如 config.dev.yaml
+		// 加载对应环境的配置文件，如 dev.config.yaml
 		configFile := filepath.Join(configDir, fmt.Sprintf("%s.config.yaml", env))
 		if _, err := os.Stat(configFile); err == nil {
 			v.SetConfigFile(configFile)
@@ -134,12 +134,17 @@ func Get(key string) interface{} {
 	return vp.Get(key)
 }
 
-// GetString 快捷方法
+// GetString 获取字符串
 func GetString(key string) string {
 	return vp.GetString(key)
 }
 
-// GetInt 快捷方法
+// GetInt 获取整数
 func GetInt(key string) int {
 	return vp.GetInt(key)
+}
+
+// GetBool 获取布尔值
+func GetBool(key string) bool {
+	return vp.GetBool(key)
 }

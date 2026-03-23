@@ -47,7 +47,7 @@ func (s *MenuController) List(c *gin.Context) {
 	}
 
 	// 验证
-	err = request.Menu{}.GetValidate(s.req, "List")
+	err = request.Menu{}.Validate(s.req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

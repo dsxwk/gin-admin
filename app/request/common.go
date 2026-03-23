@@ -3,7 +3,6 @@ package request
 import (
 	"gin/common/base"
 	"gin/pkg"
-	"github.com/goccy/go-json"
 )
 
 type Context struct {
@@ -48,25 +47,15 @@ func Pagination(page, pageSize int) (int, int) {
 	return offset, pageSize
 }
 
-// FilterMapByKeys 过滤请求map/struct只保留白名单keys
-func FilterMapByKeys(req any, fillAble []string) map[string]interface{} {
+// FilterMapByKeys 过滤请求map只保留白名单keys
+func FilterMapByKeys(req map[string]interface{}, fillAble []string) map[string]interface{} {
 	if req == nil || len(fillAble) == 0 {
-		return nil
-	}
-
-	// req->map[string]interface{}
-	var src map[string]interface{}
-	data, err := json.Marshal(req)
-	if err != nil {
-		return nil
-	}
-	if err = json.Unmarshal(data, &src); err != nil {
 		return nil
 	}
 
 	result := make(map[string]interface{}, len(fillAble))
 	for _, k := range fillAble {
-		if v, ok := src[k]; ok {
+		if v, ok := req[k]; ok {
 			result[pkg.CamelToSnake(k)] = v
 		}
 	}

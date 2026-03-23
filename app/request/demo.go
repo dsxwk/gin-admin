@@ -33,8 +33,8 @@ type MenuSearch struct {
 	RoleIds string `form:"roleIds"`
 }
 
-// GetValidate 请求验证
-func (s MenuRequest) GetValidate(data MenuRequest, scene string) error {
+// Validate 请求验证
+func (s MenuRequest) Validate(data MenuRequest, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())

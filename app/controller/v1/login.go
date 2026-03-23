@@ -54,7 +54,7 @@ func (s *LoginController) Login(c *gin.Context) {
 	}
 
 	// 验证
-	err = s.req.GetValidate(s.req, "Login")
+	err = s.req.Validate(s.req, "Login")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -104,7 +104,7 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 	token := c.Request.Header.Get("token")
 	s.req.RefreshToken.Token = token
 	// 验证
-	err := s.req.GetValidate(s.req, "RefreshToken")
+	err := s.req.Validate(s.req, "RefreshToken")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

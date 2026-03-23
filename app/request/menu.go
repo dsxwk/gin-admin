@@ -11,8 +11,8 @@ type Menu struct {
 	Context
 }
 
-// GetValidate 请求验证
-func (s Menu) GetValidate(data Menu, scene string) error {
+// Validate 请求验证
+func (s Menu) Validate(data Menu, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())

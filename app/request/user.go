@@ -55,17 +55,21 @@ type User struct {
 	Context
 }
 
-// UserUpdateKeys 允许更新的键
-var UserUpdateKeys = []string{
+// UserFillAble 允许更新的键
+var UserFillAble = []string{
+	"avatar",
 	"username",
 	"fullName",
+	"email",
+	"password",
 	"nickname",
 	"gender",
 	"age",
+	"status",
 }
 
-// GetValidate 请求验证
-func (s User) GetValidate(data User, scene string) error {
+// Validate 请求验证
+func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())

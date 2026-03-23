@@ -17,8 +17,8 @@ type {{.Name}} struct {
     {{- end }}
 }
 
-// GetValidate 请求验证
-func (s {{.Name}}) GetValidate(data {{.Name}}, scene string) error {
+// Validate 请求验证
+func (s {{.Name}}) Validate(data {{.Name}}, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())
