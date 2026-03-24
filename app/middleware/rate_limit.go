@@ -99,9 +99,8 @@ func (s RateLimit) IpRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 			return
 		}
 
-		ip := c.ClientIP()
 		// ip+路径
-		key := ip + ":" + c.FullPath()
+		key := c.ClientIP() + ":" + c.FullPath()
 
 		// 快速失败
 		if !ipStore.AllowKey(key, r, burst) {

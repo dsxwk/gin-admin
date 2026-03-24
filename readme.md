@@ -362,26 +362,55 @@ var rateLimitMiddleware middleware.RateLimit
 // LoadRouters Load Routers
 func LoadRouters(router *gin.Engine) {
     // Global Rate Limit
-    router.Group("", rateLimitMiddleware.Handle()).GET("/test1", func(c *gin.Context) {
-        err := errcode.NewError(0, "pong")
-        response.Success(c, &err)
-    })
+    group := router.Group("", rateLimitMiddleware.Handle())
+    r := group.Group("")
+    {
+        r.GET("/global-test1", func(c *gin.Context) {
+            err := errcode.NewError(0, "global test1")
+            response.Success(c, &err)
+        })
 
+        r.GET("/global-test2", func(c *gin.Context) {
+            err := errcode.NewError(0, "global test2")
+            response.Success(c, &err)
+        })
+    }
+
+	// Specify interface current limit
     // User Rate Limit
     // r How many tokens are generated per second
     // burst Bucket capacity
-    router.Group("", rateLimitMiddleware.UserRateLimit(1, 1)).GET("/test2", func(c *gin.Context) {
-        err := errcode.NewError(0, "pong")
-        response.Success(c, &err)
-    })
+    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
+	r1 := userGroup.Group("")
+	{
+		r1.GET("/test1", func(c *gin.Context) {
+			err := errcode.NewError(0, "user test1")
+			response.Success(c, &err)
+		})
 
+		r1.GET("/test2", func(c *gin.Context) {
+			err := errcode.NewError(0, "user test2")
+			response.Success(c, &err)
+		})
+    }
+
+    // Specify interface current limit
     // Ip Rate Limit
     // r How many tokens are generated per second
     // burst Bucket capacity
-    router.Group("", rateLimitMiddleware.IpRateLimit(1, 1)).GET("/test3", func(c *gin.Context) {
-        err := errcode.NewError(0, "pong")
-        response.Success(c, &err)
-    })
+    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
+	r2 := ipGroup.Group("")
+	{
+		r2.GET("/test1", func(c *gin.Context) {
+			err := errcode.NewError(0, "ip test1")
+			response.Success(c, &err)
+		})
+
+		r2.GET("/test2", func(c *gin.Context) {
+			err := errcode.NewError(0, "ip test2")
+			response.Success(c, &err)
+		})
+    }
 }
 ```
 

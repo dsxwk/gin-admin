@@ -363,26 +363,55 @@ var rateLimitMiddleware middleware.RateLimit
 // LoadRouters 加载路由
 func LoadRouters(router *gin.Engine) {
     // 全局限流
-    router.Group("", rateLimitMiddleware.Handle()).GET("/test1", func(c *gin.Context) {
-        err := errcode.NewError(0, "pong")
-        response.Success(c, &err)
-    })
+    group := router.Group("", rateLimitMiddleware.Handle())
+	r := group.Group("") 
+	{
+        r.GET("/global-test1", func(c *gin.Context) {
+            err := errcode.NewError(0, "global test1")
+            response.Success(c, &err)
+        })
 
+        r.GET("/global-test2", func(c *gin.Context) {
+            err := errcode.NewError(0, "global test2")
+            response.Success(c, &err)
+        })
+    }
+
+	// 指定接口限流
     // 用户限流
     // r 每秒产生多少token
     // burst 桶容量
-    router.Group("", rateLimitMiddleware.UserRateLimit(1, 1)).GET("/test2", func(c *gin.Context) {
-        err := errcode.NewError(0, "pong")
-        response.Success(c, &err)
-    })
+    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
+	r1 := userGroup.Group("")
+	{
+		r1.GET("/user-test1", func(c *gin.Context) {
+            err := errcode.NewError(0, "user test1")
+            response.Success(c, &err)
+        })
 
+        r1.GET("/user-test2", func(c *gin.Context) {
+            err := errcode.NewError(0, "user test2")
+            response.Success(c, &err)
+        })
+    }
+
+    // 指定接口限流
     // ip限流
     // r 每秒产生多少token
     // burst 桶容量
-    router.Group("", rateLimitMiddleware.IpRateLimit(1, 1)).GET("/test3", func(c *gin.Context) {
-        err := errcode.NewError(0, "pong")
-        response.Success(c, &err)
-    })
+    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
+	r2 := ipGroup.Group("")
+	{
+		r2.GET("/ip-test1", func(c *gin.Context) {
+            err := errcode.NewError(0, "ip test1")
+            response.Success(c, &err)
+        })
+
+        r2.GET("/ip-test2", func(c *gin.Context) {
+            err := errcode.NewError(0, "ip test2")
+            response.Success(c, &err)
+		})
+    }
 }
 ```
 
