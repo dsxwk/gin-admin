@@ -128,7 +128,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v1.8.6
+> - Latest Version: v1.8.7
 > - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
@@ -214,14 +214,12 @@ Excute Command: demo-command, Argument: 11
 │   ├──├── cache                        # Cache
 │   ├──├── cli                          # Command
 │   ├──├── container                    # Container
-│   ├──├── db                           # DB
-│   ├──├──├── connection                # Db Connection
-│   ├──├──├── gorm                      # Gorm Tool
 │   ├──├── debugger                     # Debugger
 │   ├──├── eventbus                     # Event Bus
 │   ├──├── lang                         # Language
 │   ├──├── logger                       # Logger
 │   ├──├── message                      # Message Event
+│   ├──├── gorm                         # Orm Tool
 │   ├──├── queue                        # Queue
 │   ├──├── time                         # Time Processing
 ├── public                              # Static Resources
@@ -243,7 +241,9 @@ Excute Command: demo-command, Argument: 11
 ├── LICENSE                             # LICENSE
 ├── main.go                             # Entry File
 ├── readme.md                           # English Document
-└── readme_zh.md                        # Chinese Document
+├── readme_zh.md                        # Chinese Document
+├── VersionHistoryEn.md                 # Version History English Document
+└── VersionHistoryZn.md                 # Version History Chinese Document
 ```
 
 # Instructions For Use
@@ -2040,7 +2040,7 @@ sqlsrv:
 ```go
 import (
     "gin/pkg/container"
-    "gin/pkg/db/connection"
+    "gin/pkg/orm"
     "github.com/gin-gonic/gin"
 )
 
@@ -2050,11 +2050,11 @@ func Test(c *gin.Context)  {
     // Use container
 	db := containers.DB;
 	// Use configuration
-	db1 := connection.Db{}.GetDB()
+	db1 := orm.Connection()
 	// Connection pgsql
-	db2 := connection.Db{}.Connection("pgsql")
+	db2 := orm.Connection("pgsql")
 	// Connection sqlsrv
-	db3 := connection.Db{}.Connection("sqlsrv")
+	db3 := orm.Connection("sqlsrv")
     // todo ...
 }
 ```
@@ -2064,7 +2064,7 @@ func Test(c *gin.Context)  {
 ```go
 import (
     "gin/pkg/container"
-    "gin/pkg/db/connection"
+    "gin/pkg/orm"
     "github.com/gin-gonic/gin"
 )
 
@@ -2074,11 +2074,11 @@ func Test(c *gin.Context)  {
     // Use container default records in the log
 	db := containers.DB;
 	// Use configuration
-	db1 := connection.Db{}.GetDB().WithContext(ctx)
+	db1 := orm.Connection.WithContext(ctx)
 	// Connection pgsql
-	db2 := connection.Db{}.Connection("pgsql").WithContext(ctx)
+	db2 := orm.Connection("pgsql").WithContext(ctx)
 	// Connection sqlsrv
-	db3 := connection.Db{}.Connection("sqlsrv").WithContext(ctx)
+	db3 := orm.Connection("sqlsrv").WithContext(ctx)
     // todo ...
 }
 ```

@@ -1,4 +1,4 @@
-package connection
+package orm
 
 import (
 	"gin/pkg"

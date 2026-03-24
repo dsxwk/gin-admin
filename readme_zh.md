@@ -128,7 +128,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v1.8.6
+> - 最新版本: v1.8.7
 > - [版本更新详细记录](VersionHistoryZh.md)
 
 # 安装说明
@@ -214,14 +214,12 @@ $ ./cli demo-command --args=11
 │   ├──├── cache                        # 缓存
 │   ├──├── cli                          # 命令行
 │   ├──├── container                    # 容器
-│   ├──├── db                           # 数据库
-│   ├──├──├── connection                # 连接
-│   ├──├──├── gorm                      # gorm工具
 │   ├──├── debugger                     # 调试
 │   ├──├── eventbus                     # 事件
 │   ├──├── lang                         # 多语言
 │   ├──├── logger                       # 日志
 │   ├──├── message                      # 消息事件
+│   ├──├── gorm                         # orm工具
 │   ├──├── queue                        # 队列
 │   ├──├── time                         # 时间处理
 ├── public                              # 静态资源
@@ -244,7 +242,9 @@ $ ./cli demo-command --args=11
 ├── LICENSE                             # 开源协议
 ├── main.go                             # 入口文件
 ├── readme.md                           # 英文文档
-└── readme_zh.md                        # 中文文档
+├── readme_zh.md                        # 中文文档
+├── VersionHistoryEn.md                 # 版本记录英文文档
+└── VersionHistoryZn.md                 # 版本记录中文文档
 ```
 
 # 使用方法
@@ -2030,7 +2030,7 @@ sqlsrv:
 ```go
 import (
     "gin/pkg/container"
-    "gin/pkg/db/connection"
+    "gin/pkg/orm"
     "github.com/gin-gonic/gin"
 )
 
@@ -2040,11 +2040,11 @@ func Test(c *gin.Context)  {
     // 使用容器
 	db := containers.DB;
 	// 使用配置
-	db1 := connection.Db{}.GetDB()
+	db1 := orm.Connection()
 	// 连接pgsql
-	db2 := connection.Db{}.Connection("pgsql")
+	db2 := orm.Connection("pgsql")
 	// 连接sqlsrv
-	db3 := connection.Db{}.Connection("sqlsrv")
+	db3 := orm.Connection("sqlsrv")
     // todo ...
 }
 ```
@@ -2054,7 +2054,7 @@ func Test(c *gin.Context)  {
 ```go
 import (
     "gin/pkg/container"
-    "gin/pkg/db/connection"
+    "gin/pkg/orm"
     "github.com/gin-gonic/gin"
 )
 
@@ -2064,11 +2064,11 @@ func Test(c *gin.Context)  {
     // 使用容器默认记录
 	db := containers.DB;
 	// 使用配置
-	db1 := connection.Db{}.GetDB().WithContext(ctx)
+	db1 := orm.Connection.WithContext(ctx)
 	// 连接pgsql
-	db2 := connection.Db{}.Connection("pgsql").WithContext(ctx)
+	db2 := orm.Connection("pgsql").WithContext(ctx)
 	// 连接sqlsrv
-	db3 := connection.Db{}.Connection("sqlsrv").WithContext(ctx)
+	db3 := orm.Connection("sqlsrv").WithContext(ctx)
     // todo ...
 }
 ```

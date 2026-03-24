@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"gin/common/base"
+	"gin/common/ctxkey"
 	"gin/common/errcode"
 	"gin/common/response"
 	"gin/pkg/ratelimit"
@@ -68,7 +69,7 @@ func (s RateLimit) Handle() gin.HandlerFunc {
 // burst 桶容量
 func (s RateLimit) UserRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID := c.GetString("user.id")
+		userID := c.GetString(ctxkey.UserIdKey)
 		if userID == "" {
 			c.Next()
 			return

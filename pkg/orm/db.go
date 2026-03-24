@@ -1,4 +1,4 @@
-package connection
+package orm
 
 import (
 	"fmt"
@@ -26,16 +26,12 @@ var (
 	dbLocks     sync.Map
 )
 
-type Db struct{}
-
-// GetDB 初始化数据库(统一入口)
-func (Db) GetDB() *gorm.DB {
-	return getConnection(conf.Databases.DbConnection)
-}
-
 // Connection 连接数据库
-func (Db) Connection(conn string) *gorm.DB {
-	return getConnection(conn)
+func Connection(conn ...string) *gorm.DB {
+	if len(conn) == 0 || conn[0] == "" {
+		return getConnection(conf.Databases.DbConnection)
+	}
+	return getConnection(conn[0])
 }
 
 func getConnection(conn string) *gorm.DB {

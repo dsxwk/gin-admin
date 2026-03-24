@@ -5,7 +5,7 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg/container"
-	"gin/pkg/db/gorm/search"
+	"gin/pkg/orm"
 )
 
 type MenuService struct {
@@ -25,7 +25,7 @@ func (s *MenuService) List(req request.Menu, _search map[string]interface{}) (pa
 	db := containers.DB.Model(&menu)
 
 	if _search != nil {
-		whereSql, args, _err := search.BuildCondition(_search, db, menu)
+		whereSql, args, _err := orm.BuildCondition(_search, db, menu)
 		if _err != nil {
 			return pageData, err
 		}

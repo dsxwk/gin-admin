@@ -3,8 +3,8 @@ package container
 import (
 	"gin/config"
 	"gin/pkg/cache"
-	"gin/pkg/db/connection"
 	"gin/pkg/logger"
+	"gin/pkg/orm"
 	"gorm.io/gorm"
 	"sync"
 )
@@ -29,7 +29,7 @@ func NewContainer() *Container {
 		instance = &Container{
 			Config:      config.NewConfig(),
 			Log:         logger.NewLogger(),
-			DB:          connection.Db{}.GetDB(),
+			DB:          orm.Connection(),
 			Cache:       cache.NewCache(),
 			RedisCache:  cache.NewRedisCache(),
 			MemoryCache: cache.NewMemoryCache(),

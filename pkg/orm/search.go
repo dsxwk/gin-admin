@@ -1,4 +1,4 @@
-package search
+package orm
 
 import (
 	"fmt"
@@ -63,7 +63,7 @@ SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created
 `
 db := DB.Model(&model.Menu{})
 if _search != nil {
-	whereSql, args, _ := search.BuildCondition(_search, db, model.Menu{})
+	whereSql, args, _ := orm.BuildCondition(_search, db, model.Menu{})
 
 	if whereSql != "" {
 		db = db.Where(whereSql, args...)

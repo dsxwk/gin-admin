@@ -1,3 +1,6 @@
+## v1.8.7
+> - Context optimization, database connection optimization.
+
 ## v1.8.6
 > - Add request timeout middleware and improve test cases for request timeout and flow limiting middleware.
 

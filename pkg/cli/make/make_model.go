@@ -6,7 +6,7 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"gin/pkg/db/connection"
+	"gin/pkg/orm"
 	"github.com/fatih/color"
 	"gorm.io/gorm"
 	"os"
@@ -129,7 +129,7 @@ func (m *MakeModel) Execute(args []string) {
 	camel := m.StringToBool(values["camel"])
 	conn := values["connection"]
 	_make := strings.TrimPrefix(m.Name(), "make:")
-	db := connection.Db{}.Connection(conn)
+	db := orm.Connection(conn)
 	for _, table := range tables {
 		color.Cyan("开始生成模型: %s", table)
 
