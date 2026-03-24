@@ -1,3 +1,6 @@
+## v1.8.6
+> - Add request timeout middleware and improve test cases for request timeout and flow limiting middleware.
+
 ## v1.8.5
 > - Optimize flow limiting middleware, optimize log support for dynamic setter and getter of log levels, optimize login information for user IDs to be stored and retrieved using context keys, and improve middleware usage documentation.
 

@@ -97,3 +97,10 @@ func SystemError() ErrorCode {
 		Msg:  "Internal server error",
 	}
 }
+
+func TimeoutError() ErrorCode {
+	return ErrorCode{
+		Code: 504,
+		Msg:  "Request Timeout",
+	}
+}

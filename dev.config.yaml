@@ -1,11 +1,12 @@
 # 应用
 app:
+  env: dev # dev|testing|production dev=本地环境 testing=测试环境 production=生产环境
   name: gin
   mode: debug # debug|test|release debug=本地环境 test=测试环境 release=生产环境
   port: 8080
   timezone: Asia/Shanghai
   proxies: 127.0.0.1/8080 # 代理地址多个地址用逗号分隔
-  env: dev # dev|testing|production dev=本地环境 testing=测试环境 production=生产环境
+  timeout: 10s # 请求超时时间(time.Duration单位:秒)
 
 # 数据库
 databases:

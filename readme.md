@@ -128,7 +128,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v1.8.5
+> - Latest Version: v1.8.6
 > - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
