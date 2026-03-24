@@ -1,6 +1,7 @@
 package ctxkey
 
 const (
+	UserIdKey    = "userId"
 	ContainerKey = "container"
 	TraceIdKey   = "traceId"
 	IpKey        = "ip"

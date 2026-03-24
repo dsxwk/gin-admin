@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"gin/common/base"
+	"gin/common/ctxkey"
 	"gin/common/errcode"
 	"gin/common/response"
 	"gin/config"
@@ -33,7 +34,7 @@ func (s Jwt) Handle() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user.id", data["id"])
+		c.Set(ctxkey.UserIdKey, data["id"])
 		c.Next()
 	}
 }

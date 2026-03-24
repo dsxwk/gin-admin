@@ -20,6 +20,10 @@
   - [Configuration File](#Configuration-File)
     -[Project Configuration](#Project-Configuration)
     -[Hot Update Configuration](#Hot-Update-Configuration)
+  - [Middleware](#Middleware)
+    - [Middleware Creation Help](#Middleware-Creation-Help)
+    - [Middleware Creation](#Middleware-Creation)
+    - [Rate Limit Middleware](#Rate-Limit-Middleware)
   - [Route](#Route)
     - [Route Creation Help](#Route-Creation-Help)
     - [Route Creation](#Route-Creation)
@@ -124,118 +128,8 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-## v1.8.4
-> - Validate request optimization.
-
-## v1.8.3
-> - Public error codes can be added with error code prefixes and error code test cases.
-
-## v1.8.2
-> - Add a time assistant package and corresponding test cases.
-
-## v1.8.1
-> - Adjustment of log error level.
-
-## v1.8.0
-> - Optimize the specification configuration file to reduce the occurrence of circular dependencies in the later stage.
-
-## v1.7.9
-> - Optimize controllers and services, optimize database connections and connection pools.
-
-## v1.7.8
-> - Remove old model generation commands and add custom model generation commands.
-
-## v1.7.7
-> - Add new test cases.
-
-## v1.7.6
-> - Adjust the command tool path to the cmd directory.
-
-## v1.7.5
-> - Add database documents and database connections, which can be switched to MySQL, pgSQL, SQLite, and SQLSRV databases.
-
-## v1.7.4
-> - Cancel global variables, initialize new containers through bootstrap, bind context through middleware, and obtain container instances wherever there is context. Databases, caches, logs, and configurations can all be obtained through container instances.
-
-## v1.7.3
-> - Adjust RabbitMQ to remove unmaintained packages and use new packages
-
-## v1.7.2
-> - Optimize flow limiting middleware, add user flow limiting and IP flow limiting maps for automatic cleaning
-
-## v1.7.1
-> - Add global exception capture middleware.
-
-## v1.7.0
-> - Update the package name of `utils` to pkg, add the bootstrap directory as the boot directory, optimize the code, and improve the documentation.
-
-## v1.6.0
-> - Optimize context link logging (SQL, HTTP, listener, Redis, Kafka, RabbitMQ...)
-
-## v1.5.4
-> - Optimize logging stack SQL information, HTTP requests redis、kafka、rabbitmq、 Waiting is optional.
-
-## v1.5.3
-> - New flow limiting middleware, default flow limiting, user flow limiting, IP flow limiting
-
-## v1.5.2
-> - New database configuration supports MySQL, SQLite, pgSQL, and SQLSRV
-
-## v1.5.1
-> - Add command line shortcut to create data migration and data filling
-
-## v1.5.0
-> - Gorm dynamic query optimization and readme document improvement
-> - Release Package v1.5.0
-
-## v1.4.1
-> - Command line data migration, adjustment, and optimization
-
-## v1.4.0
-> - Model validator command line creation optimization
-> - Add Gorm dynamic query
-> - Release Package v1.4.0
-
-## v1.3.0
-> Improve Kafka and RabbitMQ message queue command line shortcut to create consumers and producers
-> Improve the command line to create a message queue document
-> Release Package v1.3.0
-
-## v1.2.4
-> - Add Kafka and RabbitMQ message queues and configurations
-> - New Assistant Function - Tree Structure Generation
-
-## v1.2.3
-> - Optimize context processing and log processing, adjust readme document update records
-
-## v1.2.2
-> - Optimized the time consumption of logging SQL, Redis, and HTTP
-
-## v1.2.1
-> - Optimize context processing
-> - Optimize log processing and log processing for Redis, HTTP, MySQL
-> - Improved readme document after optimization
-
-## v1.2.0
-> - Optimize context processing
-> - Optimize log processing
-> - Add Messages Release Subscription
-> - Improved readme document after optimization
-
-## v1.1.0
-> Improve log debugging and user documentation, and complete version v1.0.0.
-
-## v1.0.3
-> Improve public response usage documentation.
-
-## v1.0.2
-> Error code optimization.
-
-## v1.0.1
-> Add the public package function 'FilterFields', adjust the public package function `StructToMap`, and modify the JSON serialization to use the package `go-json`.
-
-## v1.0.0
-> Except for incomplete response, error handling, and log documentation, all other updates have been completed.
+> - Latest Version: v1.8.5
+> - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
 > The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
@@ -435,6 +329,61 @@ Gin server started successfully!
 
 ### Hot Update Configuration
 > `.air.toml` is the default configuration file in Windows environment, and `.air.Linux.toml` is the default configuration file in Linux environment. You can modify it according to the overall needs of the project.
+
+## Middleware
+> `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
+### Middleware Creation Help
+```bash
+$ go run ./cmd/cli.go make:middleware -h # --help
+make:middleware - Middleware Creation
+
+Options:
+  -f, --file  File Path, Expample: auth                        required:true
+  -d, --desc  Description, Expample: Authorization-Middleware  required:false
+```
+
+### Middleware Creation
+```bash
+$ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middleware
+```
+
+### Rate Limit Middleware
+> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow limiting, IP interface flow limiting, and global flow limiting.
+```go
+package router
+
+import (
+    "gin/app/middleware"
+    "github.com/gin-gonic/gin"
+)
+
+var rateLimitMiddleware middleware.RateLimit
+
+// LoadRouters Load Routers
+func LoadRouters(router *gin.Engine) {
+    // Global Rate Limit
+    router.Group("", rateLimitMiddleware.Handle()).GET("/test1", func(c *gin.Context) {
+        err := errcode.NewError(0, "pong")
+        response.Success(c, &err)
+    })
+
+    // User Rate Limit
+    // r How many tokens are generated per second
+    // burst Bucket capacity
+    router.Group("", rateLimitMiddleware.UserRateLimit(1, 1)).GET("/test2", func(c *gin.Context) {
+        err := errcode.NewError(0, "pong")
+        response.Success(c, &err)
+    })
+
+    // Ip Rate Limit
+    // r How many tokens are generated per second
+    // burst Bucket capacity
+    router.Group("", rateLimitMiddleware.IpRateLimit(1, 1)).GET("/test3", func(c *gin.Context) {
+        err := errcode.NewError(0, "pong")
+        response.Success(c, &err)
+    })
+}
+```
 
 ## Route
 > The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need to be defaulted.

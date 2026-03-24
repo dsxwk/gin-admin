@@ -31,7 +31,7 @@ func (m *MakeMiddleware) Help() []base.CommandOption {
 				Short: "f",
 				Long:  "file",
 			},
-			"文件路径, 如: v1/user",
+			"文件路径, 如: auth",
 			true,
 		},
 		{
@@ -40,7 +40,7 @@ func (m *MakeMiddleware) Help() []base.CommandOption {
 				Long:    "desc",
 				Default: "middleware-desc",
 			},
-			"描述, 如: 列表",
+			"描述, 如: 权限中间件",
 			false,
 		},
 	}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	_ "gin/app/listener"
+	"gin/app/middleware"
 	_ "gin/app/queue/kafka/consumer"
 	_ "gin/app/queue/rabbitmq/consumer"
 	"gin/common/flag"
@@ -68,6 +69,7 @@ func (a *App) Run() {
 	dbg := debugger.NewDebugger(message.GetEventBus())
 	dbg.Start()
 	defer dbg.Stop()
+	middleware.InitRateLimit()
 
 	data := map[string]interface{}{
 		"应用":  conf.App.Name,
@@ -108,6 +110,7 @@ func (a *App) Run() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
 	color.Yellow("服务正在关闭...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -115,7 +118,18 @@ func (a *App) Run() {
 		color.Red(flag.Error+" 服务关闭异常: %v", err)
 	}
 
+	a.shutdown()
 	// select {}
+}
+
+// 关闭资源
+func (a *App) shutdown() {
+	middleware.ShutdownRateLimit()
+
+	// ...
+	// kafka.Close()
+	// rabbitmq.Close()
+	// db.Close()
 }
 
 // PrintAligned 打印冒号对齐,支持中文

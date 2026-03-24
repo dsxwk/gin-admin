@@ -20,6 +20,10 @@
   - [配置文件](#配置文件)
     -[项目配置](#项目配置)
     -[热更新配置](#热更新配置)
+  - [中间件](#中间件)
+    - [中间件创建帮助](#中间件创建帮助)
+    - [中间件创建](#中间件创建)
+    - [限流中间件](#限流中间件)
   - [路由](#路由)
     - [路由创建帮助](#路由创建帮助)
     - [路由创建](#路由创建)
@@ -124,118 +128,8 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-## v1.8.4
-> - 验证请求优化。
-
-## v1.8.3
-> - 公共错误码新增可添加错误码前缀，新增错误码测试用例。
-
-## v1.8.2 
-> - 新增时间工具包以及对应的测试用例。
-
-## v1.8.1
-> - 日志错误级别调整。
-
-## v1.8.0
-> - 优化规范配置文件，减少导致后期出现循环依赖问题。
-
-## v1.7.9
-> - 优化控制器和服务，优化数据库连接和连接池。
-
-## v1.7.8
-> - 移除旧模型生成命令,新增自定义模型生成命令。
-
-## v1.7.7
-> - 新增测试用例。
-
-## v1.7.6
-> - 调整命令行工具路径到cmd目录。
-
-## v1.7.5
-> - 新增数据库文档以及数据库连接，可通过切换连接到mysql、pgsql、sqlite、sqlsrv数据库。
-
-## v1.7.4
-> - 取消全局变量,新增容器通过bootstrap初始化,通过中间件绑定context上下文,只要有上下文的地方都可以获取容器实例,数据库、缓存、日志、配置都可通过容器实例获取。
-
-## v1.7.3
-> - 调整rabbitmq移除不维护的包使用新的包
-
-## v1.7.2
-> - 优化限流中间件新增用户限流和ip限流map自动清理
-
-## v1.7.1
-> - 新增全局异常捕获中间件。
-
-## v1.7.0
-> - 更新utils包名为pkg,新增bootstrap目录为启动目录,代码优化以及文档完善。
-
-## v1.6.0
-> - 优化上下文链路日志记录(sql、http、listener、redis、kafka、rabbitmq等)
-
-## v1.5.4
-> - 优化日志记录堆栈sql信息、http请求、redis、kafka、rabbitmq、等为可选。
-
-## v1.5.3
-> - 新增限流中间件、默认限流、用户限流、ip限流
-
-## v1.5.2
-> - 新增数据库配置支持mysql、sqlite、pgsql、sqlsrv
-
-## v1.5.1
-> - 新增命令行快捷创建数据迁移和数据填充
-
-## v1.5.0
-> - gorm动态查询优化以及readme文档完善
-> - 发布包v1.5.0
-
-## v1.4.1
-> - 命令行数据迁移调整优化
-
-## v1.4.0
-> - 模型验证器命令行创建优化
-> - 新增gorm动态查询
-> - 发布包v1.4.0
-
-## v1.3.0 
-> 完善kafka和rabbitmq消息队列命令行快捷创建消费者和生产者
-> 完善命令行创建消息队列文档
-> 发布包v1.3.0
-
-## v1.2.4
-> - 新增kafka和rabbitmq消息队列以及配置
-> - 新增助手函数-树形结构生成
-
-## v1.2.3
-> - 优化上下文处理以及日志处理，调整readme文档更新记录
-
-## v1.2.2
-> - 优化了日志记录sql、redis、http耗时
-
-## v1.2.1
-> - 优化上下文处理
-> - 优化日志处理以及redis、http、mysql等日志处理
-> - 优化后readme文档完善
-
-## v1.2.0
-> - 优化上下文处理
-> - 优化日志处理
-> - 新增消息发布订阅
-> - 优化后readme文档完善
-
-## v1.1.0
-> 完善日志调试以及使用文档, 完成版本v1.0.0。
-
-## v1.0.3
-> 完善公共响应使用文档。
-
-## v1.0.2
-> 错误码优化。
-
-## v1.0.1
-> 新增以公共包函数`FilterFields`, 调整公共包函数`StructToMap`, 调整json序列化使用包`go-json`。
-
-## v1.0.0
-> 除响应、错误处理、日志文档未完善其他已完成更新。
+> - 最新版本: v1.8.5
+> - [版本更新详细记录](VersionHistoryZh.md)
 
 # 安装说明
 > 项目基于Golang 1.25.2版本开发, 低版本可能存在版本差异, 建议版本 >= 1.25.2。
@@ -436,6 +330,61 @@ Gin server started successfully!
 
 ### 热更新配置
 > `.air.toml`为Windows环境下默认配置文件, `.air.linux.toml`为Linux环境下默认配置文件。可自行根据项目整体需要自行修改。
+
+## 中间件
+> `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
+### 中间件创建帮助
+```bash
+$ go run ./cmd/cli.go make:middleware -h # --help
+make:middleware - 中间件创建
+
+Options:
+  -f, --file  文件路径, 如: auth   required:true
+  -d, --desc  描述, 如: 权限中间件  required:false
+```
+
+### 中间件创建
+```bash
+$ go run ./cmd/cli.go make:middleware --file=auth --desc=授权中间件
+```
+
+### 限流中间件
+> `middleware/rate_limit.go`文件中定义了全局限流中间件, 支持全局用户接口限流、ip接口限流以及全局限流。
+```go
+package router
+
+import (
+    "gin/app/middleware"
+    "github.com/gin-gonic/gin"
+)
+
+var rateLimitMiddleware middleware.RateLimit
+
+// LoadRouters 加载路由
+func LoadRouters(router *gin.Engine) {
+    // 全局限流
+    router.Group("", rateLimitMiddleware.Handle()).GET("/test1", func(c *gin.Context) {
+        err := errcode.NewError(0, "pong")
+        response.Success(c, &err)
+    })
+
+    // 用户限流
+    // r 每秒产生多少token
+    // burst 桶容量
+    router.Group("", rateLimitMiddleware.UserRateLimit(1, 1)).GET("/test2", func(c *gin.Context) {
+        err := errcode.NewError(0, "pong")
+        response.Success(c, &err)
+    })
+
+    // ip限流
+    // r 每秒产生多少token
+    // burst 桶容量
+    router.Group("", rateLimitMiddleware.IpRateLimit(1, 1)).GET("/test3", func(c *gin.Context) {
+        err := errcode.NewError(0, "pong")
+        response.Success(c, &err)
+    })
+}
+```
 
 ## 路由
 > `router/root.go` 文件中定义了全局路由规则可自行修改,  一般情况只需要默认即可。

@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	loggerMiddleware  = middleware.Logger{}.Handle()
-	corsMiddleware    = middleware.Cors{}.Handle()
-	jwtMiddleware     = middleware.Jwt{}.Handle()
-	recoverMiddleware = middleware.Recover{}.Handle()
+	loggerMiddleware    = middleware.Logger{}.Handle()
+	corsMiddleware      = middleware.Cors{}.Handle()
+	jwtMiddleware       = middleware.Jwt{}.Handle()
+	recoverMiddleware   = middleware.Recover{}.Handle()
+	rateLimitMiddleware = middleware.RateLimit{}
 )
 
 // LoadRouters 加载路由
@@ -31,8 +32,9 @@ func LoadRouters(router *gin.Engine) {
 	public := router.Group("", loggerMiddleware, corsMiddleware, recoverMiddleware) // 无需权限
 	auth := public.Group("", jwtMiddleware)                                         // 需要权限
 
-	// 健康检查 # middleware.NewRateLimit(1, 1).Handle() middleware.IpRateLimit(1, 1) middleware.UserRateLimit(1, 1)
-	public.GET("/ping", middleware.IpRateLimit(1, 1), func(c *gin.Context) {
+	// 健康检查
+	// 全局限流:rateLimitMiddleware.Handle() 用户限流:rateLimitMiddleware.UserRateLimit(1, 1) ip限流:rateLimitMiddleware.IpRateLimit(1, 1)
+	public.GET("/ping", rateLimitMiddleware.IpRateLimit(1, 1), func(c *gin.Context) {
 		err := errcode.NewError(0, "pong")
 		response.Success(c, &err)
 	})
