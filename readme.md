@@ -1128,7 +1128,7 @@ Usage:
   cli [command] [options]
 
 Command:
-make:command  Command Creation
+  make:command  Command Creation
 
 Options:
   -f, --file  File Path, Example: cronjob/demo     required:true
@@ -1229,7 +1229,7 @@ Usage:
   cli [command] [options]
 
 Command:
-demo-test  command-desc
+  demo-test  command-desc
 
 Options:
   -a, --args  Example Argument, Example: arg1  required:true

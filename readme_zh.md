@@ -1128,7 +1128,7 @@ Usage:
   cli [command] [options]
 
 Command:
-make:command  命令创建
+  make:command  命令创建
 
 Options:
   -f, --file  文件路径, 如: cronjob/demo  required:true
@@ -1229,7 +1229,7 @@ Usage:
   cli [command] [options]
 
 Command:
-demo-test  command-desc
+  demo-test  command-desc
 
 Options:
   -a, --args  示例参数, 如: arg1  required:true
