@@ -2,6 +2,7 @@ package db
 
 import (
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/database"
 	"gin/database/migrations"
 	"gin/pkg/cli"
@@ -36,8 +37,7 @@ func (s *Migrate) Help() []base.CommandOption {
 
 func (s *Migrate) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
-	color.Green("执行命令: %s %s", s.Name(), s.FormatArgs(values))
-	color.Cyan("开始执行数据迁移...")
+	flag.Infof("开始执行数据迁移...")
 
 	db := orm.Connection()
 	db.Exec(`
@@ -62,12 +62,12 @@ CREATE TABLE IF NOT EXISTS migrations (
 		}
 
 		if err := m.Migrate(db); err != nil {
-			color.Red("Migration %s 执行失败: %v", m.ID(), err)
+			flag.Errorf("Migration %s 执行失败: %v", m.ID(), err)
 			return
 		}
 
 		db.Create(&database.Migrations{Migration: m.ID()})
-		color.Green("Migration %s 执行成功", m.ID())
+		flag.Successf("Migration %s 执行成功", m.ID())
 	}
 }
 

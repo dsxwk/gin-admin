@@ -1,4 +1,4 @@
-package pkg
+package http
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 
 const timeout = 5 * time.Second
 
-type HttpOption struct {
+type Option struct {
 	Headers map[string]string // 请求头
 	Query   map[string]string // get参数
 	Form    map[string]string // 表单参数
@@ -38,8 +38,8 @@ func buildUrl(baseURL string, query map[string]string) string {
 	return baseURL + "?" + q.Encode()
 }
 
-// HttpRequest 发送http请求
-func HttpRequest(ctx context.Context, method, uri string, opt *HttpOption) (string, error) {
+// Request 发送http请求
+func Request(ctx context.Context, method, uri string, opt *Option) (string, error) {
 	start := time.Now()
 	req := fasthttp.AcquireRequest()
 	resp := fasthttp.AcquireResponse()
@@ -49,10 +49,11 @@ func HttpRequest(ctx context.Context, method, uri string, opt *HttpOption) (stri
 	}()
 
 	if opt == nil {
-		opt = &HttpOption{}
+		opt = &Option{}
 	}
-	if opt.Timeout == 0 {
-		opt.Timeout = timeout
+	requestTimeout := opt.Timeout
+	if requestTimeout == 0 {
+		requestTimeout = timeout
 	}
 
 	method = strings.ToUpper(method)
@@ -82,9 +83,9 @@ func HttpRequest(ctx context.Context, method, uri string, opt *HttpOption) (stri
 
 	// 创建客户端并设置超时
 	client := &fasthttp.Client{
-		MaxConnsPerHost: 100,     // 最大连接数
-		ReadTimeout:     timeout, // 读取超时
-		WriteTimeout:    timeout, // 写入超时
+		MaxConnsPerHost: 100,            // 最大连接数
+		ReadTimeout:     requestTimeout, // 读取超时
+		WriteTimeout:    requestTimeout, // 写入超时
 	}
 
 	var (
@@ -96,8 +97,17 @@ func HttpRequest(ctx context.Context, method, uri string, opt *HttpOption) (stri
 		cost := time.Since(start)
 		costMs := float64(cost.Nanoseconds()) / 1e6
 
+		traceId := "unknown"
+		if ctx != nil {
+			if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+				if s, ok := id.(string); ok && s != "" {
+					traceId = s
+				}
+			}
+		}
+
 		message.GetEventBus().Publish(debugger.TopicHttp, debugger.HttpEvent{
-			TraceId:  ctx.Value(ctxkey.TraceIdKey).(string),
+			TraceId:  traceId,
 			Url:      uri,
 			Method:   method,
 			Header:   opt.Headers,
@@ -127,9 +137,9 @@ func HttpRequest(ctx context.Context, method, uri string, opt *HttpOption) (stri
 	return respBody, nil
 }
 
-// HttpRequestJson 发送请求并解析json响应
-func HttpRequestJson[T any](ctx context.Context, method, url string, opt *HttpOption) (*T, error) {
-	resp, err := HttpRequest(ctx, method, url, opt)
+// RequestJson 发送请求并解析json响应
+func RequestJson[T any](ctx context.Context, method, url string, opt *Option) (*T, error) {
+	resp, err := Request(ctx, method, url, opt)
 	if err != nil {
 		return nil, err
 	}

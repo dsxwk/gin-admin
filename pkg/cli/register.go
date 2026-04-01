@@ -2,10 +2,13 @@ package cli
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
+	"gin/pkg"
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
+	"github.com/mattn/go-runewidth"
 	"os"
 	"sort"
 	"strings"
@@ -18,7 +21,7 @@ var (
 func Register(cmd base.Command) {
 	name := cmd.Name()
 	if _, exists := commands[name]; exists {
-		color.Yellow(flag.Warning+"  Command \"%s\" already registered, skipped.", name)
+		flag.Errorf("Command \"%s\" already registered, skipped.", name)
 		os.Exit(1)
 	}
 	commands[name] = cmd
@@ -42,7 +45,7 @@ func Execute() {
 		printUsage("txt")
 		return
 	case "-v", "--version":
-		color.Green("Gin CLI v1.0.0")
+		fmt.Println("Gin Cli", getVersion())
 		return
 	}
 
@@ -71,7 +74,7 @@ func Execute() {
 
 	cmd, exists := Get(name)
 	if !exists {
-		color.Red(flag.Error+"  Command \"%s\" is not defined.", name)
+		flag.Errorf("Command \"%s\" is not defined.", name)
 		printUsage("txt")
 		os.Exit(1)
 	}
@@ -100,31 +103,99 @@ func printUsage(format string) {
 
 // 打印文本格式
 func printText() {
-	color.Cyan("Usage: cli [command] [options]")
+	fmt.Println("Gin Cli", getVersion())
+	fmt.Println()
+
+	color.Yellow("Usage:")
+	fmt.Println("  cli [command] [options]")
 	fmt.Println()
 	color.Yellow("Available commands:")
 
-	names := make([]string, 0, len(commands))
+	// 按前缀分组
+	groups := make(map[string][]string)
+	maxCmdLen := 0
+
+	// 收集命令并分组
 	for name := range commands {
-		names = append(names, name)
-	}
-	sort.Strings(names)
+		parts := strings.SplitN(name, ":", 2)
+		group := parts[0]
+		if len(parts) == 1 {
+			group = "other"
+		}
 
-	for _, name := range names {
-		cmd := commands[name]
-		fmt.Printf("  %s%s\n", color.GreenString(fmt.Sprintf("%-25s", name)), cmd.Description())
+		groups[group] = append(groups[group], name)
+
+		if len(name) > maxCmdLen {
+			maxCmdLen = len(name)
+		}
 	}
 
-	fmt.Println()
-	color.Yellow("Options:")
-	fmt.Println(color.GreenString("  -f, --format        ") + "The output format (txt, json) [default: txt]")
-	fmt.Println(color.GreenString("  -h, --help          ") + "Display help for the given command")
-	fmt.Println(color.GreenString("  -v, --version       ") + "Display CLI version")
+	// 获取所有组名并排序
+	groupNames := make([]string, 0, len(groups))
+	for group := range groups {
+		if group != "other" {
+			groupNames = append(groupNames, group)
+		}
+	}
+	sort.Strings(groupNames)
+
+	// 将other组放在最后
+	if _, ok := groups["other"]; ok {
+		groupNames = append(groupNames, "other")
+	}
+
+	// 计算最大宽度
+	maxWidth := 0
+	for name := range commands {
+		w := runewidth.StringWidth(name)
+		if w > maxWidth {
+			maxWidth = w
+		}
+	}
+
+	// 打印Options
+	options := [][]string{
+		{"-f, --format", "The output format (txt, json) [default: txt]"},
+		{"-h, --help", "Display help for the given command"},
+		{"-v, --version", "Display cli version"},
+	}
+
+	// 计算最大宽度
+	optMax := 0
+	for _, opt := range options {
+		w := runewidth.StringWidth(opt[0])
+		if w > optMax {
+			optMax = w
+		}
+	}
+
+	// 打印命令
+	for _, group := range groupNames {
+		names := groups[group]
+		sort.Strings(names)
+
+		color.Yellow("%s:", group)
+
+		var items [][]string
+		for _, name := range names {
+			cmd := commands[name]
+			items = append(items, []string{name, cmd.Description()})
+		}
+
+		printAlign(items, 2, pkg.Ter(true, maxWidth, optMax))
+	}
+
+	color.Yellow("\nOptions:")
+	printAlign(options, 2, pkg.Ter(true, maxWidth, optMax))
 }
 
 // 打印单个命令帮助
 func printCommandHelp(cmd base.Command) {
-	fmt.Printf("\n%s - %s\n\n", color.GreenString(cmd.Name()), cmd.Description())
+	fmt.Println("Gin Cli", getVersion())
+	color.Yellow("\nUsage:")
+	fmt.Println("  cli [command] [options]")
+	color.Yellow("\nCommand:")
+	fmt.Printf("  %s  %s\n\n", color.GreenString(cmd.Name()), cmd.Description())
 
 	options := cmd.Help()
 	if len(options) == 0 {
@@ -154,10 +225,32 @@ func printJSON() {
 	}
 
 	data := map[string]interface{}{
-		"version":  "Gin CLI v2.0.0",
+		"version":  "Gin Cli " + facade.Config.Get().App.CliVersion,
 		"commands": list,
 	}
 
 	jsonData, _ := json.MarshalIndent(data, "", "  ")
 	color.Green(string(jsonData))
+}
+
+func getVersion() string {
+	return color.GreenString(facade.Config.Get().App.CliVersion)
+}
+
+// 打印对齐
+func printAlign(items [][]string, indent int, maxWidth int) {
+	for _, item := range items {
+		key := item[0]
+		val := item[1]
+
+		w := runewidth.StringWidth(key)
+		padding := maxWidth - w
+
+		fmt.Printf("%s%s%s  %s\n",
+			strings.Repeat(" ", indent),
+			color.GreenString(key),
+			strings.Repeat(" ", padding),
+			val,
+		)
+	}
 }

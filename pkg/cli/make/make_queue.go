@@ -1,17 +1,13 @@
 package make
 
 import (
-	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"html/template"
-	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 )
 
@@ -24,97 +20,67 @@ func (m *MakeQueue) Name() string {
 }
 
 func (m *MakeQueue) Description() string {
-	return "消息队列创建"
+	return "创建消息队列(Kafka/RabbitMQ)"
 }
 
 func (m *MakeQueue) Help() []base.CommandOption {
 	return []base.CommandOption{
 		{
-			base.Flag{
-				Short: "t",
-				Long:  "type",
-			},
-			"队列类型, 如: kafka或rabbitmq",
+			base.Flag{Short: "t", Long: "type"},
+			"队列类型: kafka 或 rabbitmq",
 			true,
 		},
 		{
-			base.Flag{
-				Short: "n",
-				Long:  "name",
-			},
-			"队列名称, 如: order_create",
+			base.Flag{Short: "n", Long: "name"},
+			"队列名称, 如: order",
 			true,
 		},
 		{
-			base.Flag{
-				Short: "d",
-				Long:  "isDelay",
-			},
-			"是否延迟队列, 如: true或false",
+			base.Flag{Short: "d", Long: "delay"},
+			"是否延迟队列: true/false",
+			false,
+		},
+		// Kafka参数
+		{
+			base.Flag{Short: "T", Long: "topic"},
+			"Kafka主题",
 			false,
 		},
 		{
-			base.Flag{
-				Short: "T",
-				Long:  "topic",
-			},
-			"队列主题, 如: kafka_demo",
+			base.Flag{Short: "k", Long: "key"},
+			"Kafka消息Key",
 			false,
 		},
 		{
-			base.Flag{
-				Short: "k",
-				Long:  "key",
-			},
-			"消息键, 如: kafka_demo",
+			base.Flag{Short: "g", Long: "group"},
+			"Kafka消费组",
+			false,
+		},
+		// RabbitMQ参数
+		{
+			base.Flag{Short: "q", Long: "queue"},
+			"RabbitMQ队列名",
 			false,
 		},
 		{
-			base.Flag{
-				Short: "g",
-				Long:  "group",
-			},
-			"消费组, 如: kafka_demo",
+			base.Flag{Short: "e", Long: "exchange"},
+			"RabbitMQ交换机",
 			false,
 		},
 		{
-			base.Flag{
-				Short: "q",
-				Long:  "queue",
-			},
-			"队列名, 如: rabbitmq_demo",
+			base.Flag{Short: "r", Long: "routing"},
+			"RabbitMQ路由键",
+			false,
+		},
+		// 通用参数
+		{
+			base.Flag{Short: "R", Long: "retry"},
+			"重试次数, 默认3",
 			false,
 		},
 		{
-			base.Flag{
-				Short: "e",
-				Long:  "exchange",
-			},
-			"交换机, 如: rabbitmq_demo",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "r",
-				Long:  "routing",
-			},
-			"路由键, 如: rabbitmq_demo",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "R",
-				Long:  "retry",
-			},
-			"错误重试次数, 如: 3",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "m",
-				Long:  "delayMs",
-			},
-			"延迟毫秒, 如: 10000",
+			base.Flag{Short: "m", Long: "delayMs"},
+			"延迟毫秒数, 默认0",
 			false,
 		},
 	}
@@ -122,131 +88,126 @@ func (m *MakeQueue) Help() []base.CommandOption {
 
 func (m *MakeQueue) Execute(args []string) {
 	values := m.ParseFlags(m.Name(), args, m.Help())
-	color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
-	_make := strings.TrimPrefix(m.Name(), "make:")
-	if _make != "queue" {
-		m.ExitError("命令错误,未找到")
+
+	queueType := values["type"]
+	name := values["name"]
+	isDelay := values["delay"] == "true" || values["delay"] == "1" || values["delay"] == "yes"
+
+	// 设置默认值
+	if values["retry"] == "" {
+		values["retry"] = "3"
 	}
-	b := false
-	fmt.Printf("values: %v\n", values)
-	if values["isDelay"] == "" || values["isDelay"] == "false" {
-		b = false
-	} else {
-		b = true
+	if values["delayMs"] == "" {
+		values["delayMs"] = "0"
 	}
 
-	m.generateFile(b, values)
+	m.generateQueue(queueType, name, isDelay, values)
 }
 
 func init() {
 	cli.Register(&MakeQueue{})
 }
 
-func (m *MakeQueue) generateFile(isDelay bool, values map[string]string) {
-	tmpls := m.GetQueueTemplates()
-	tmpl, err := template.ParseFiles(tmpls["consumer"], tmpls["producer"])
+func (m *MakeQueue) generateQueue(queueType, name string, isDelay bool, values map[string]string) {
+	// 设置默认参数
+	queueName := strings.ToLower(name)
+	camelName := pkg.ToUpperCamel(name)
+	lowerName := pkg.SnakeToLowerCamel(name)
+
+	retry, _ := pkg.StringToInt[int](values["retry"])
+	delayMs, _ := pkg.StringToInt[int64](values["delayMs"])
+
+	// 构建数据
+	data := map[string]interface{}{
+		"Package":   "consumer",
+		"Name":      camelName,
+		"LowerName": lowerName,
+		"Type":      queueType,
+		"TypeTitle": map[string]string{"kafka": "Kafka", "rabbitmq": "RabbitMQ"}[queueType],
+		"IsDelay":   isDelay,
+		"Retry":     retry,
+		"DelayMs":   delayMs,
+	}
+
+	// Kafka 参数
+	if queueType == "kafka" {
+		topic := values["topic"]
+		if topic == "" {
+			topic = queueName
+		}
+		group := values["group"]
+		if group == "" {
+			group = queueName + "_group"
+		}
+		key := values["key"]
+		if key == "" {
+			key = queueName + "_key"
+		}
+		data["Topic"] = topic
+		data["Group"] = group
+		data["Key"] = key
+	} else {
+		queue := values["queue"]
+		if queue == "" {
+			queue = queueName
+		}
+		exchange := values["exchange"]
+		if exchange == "" {
+			exchange = queueName + "_exchange"
+		}
+		routing := values["routing"]
+		if routing == "" {
+			routing = queueName
+		}
+		data["Queue"] = queue
+		data["Exchange"] = exchange
+		data["Routing"] = routing
+	}
+
+	// 获取模板
+	tmplConsumer, err := template.ParseFiles("common/template/consumer.tpl")
 	if err != nil {
-		color.Red("Error parsing template:", err.Error())
+		flag.Errorf("解析消费者模板失败: %v", err)
 		os.Exit(1)
 	}
-	fmt.Println("Defined templates:", tmpl.DefinedTemplates())
 
-	files := m.GetMakeQueueFile(values["name"], values["type"], isDelay)
-	file1 := files["consumer"]
-	file2 := files["producer"]
+	tmplProducer, err := template.ParseFiles("common/template/producer.tpl")
+	if err != nil {
+		flag.Errorf("解析生产者模板失败: %v", err)
+		os.Exit(1)
+	}
 
-	// 创建文件
-	f1 := m.CheckDirAndFile(file1)
+	// 生成消费者文件
+	consumerFile := filepath.Join("app/queue", queueType, "consumer", queueName+".go")
+	err = os.MkdirAll(filepath.Dir(consumerFile), 0755)
+	if err != nil {
+		return
+	}
+
+	f1 := m.CheckDirAndFile(consumerFile)
 	if f1 == nil {
+		return
+	}
+
+	data["Package"] = "consumer"
+	if err = tmplConsumer.Execute(f1, data); err != nil {
+		flag.Errorf("执行消费者模板失败: %v", err)
 		os.Exit(1)
 	}
 
-	f2 := m.CheckDirAndFile(file2)
+	// 生成生产者文件
+	producerFile := filepath.Join("app/queue", queueType, "producer", queueName+".go")
+	f2 := m.CheckDirAndFile(producerFile)
 	if f2 == nil {
+		return
+	}
+
+	data["Package"] = "producer"
+	if err = tmplProducer.Execute(f2, data); err != nil {
+		flag.Errorf("执行生产者模板失败: %v", err)
 		os.Exit(1)
 	}
 
-	generateTemplateData(isDelay, values, tmpls, f1, f2, tmpl)
-
-	color.Green(flag.Success + "  验证请求文件: " + file1 + " 生成成功!")
-	color.Green(flag.Success + "  验证请求文件: " + file2 + " 生成成功!")
-}
-
-func generateTemplateData(isDelay bool, values, tmpls map[string]string, f1, f2 io.Writer, tmpl *template.Template) (any, any) {
-	// 包名
-	packageName1 := "consumer"
-	packageName2 := "producer"
-
-	retry, err := strconv.Atoi(values["retry"])
-	if err != nil {
-		retry = 3
-	}
-
-	delayMs, err := strconv.ParseInt(values["delayMs"], 10, 64)
-	if err != nil {
-		delayMs = 0
-	}
-
-	data1 := struct {
-		Package  string // 提取的包名
-		Name     string // 模块名称(首字母大写)
-		Type     string // 队列类型
-		Topic    string // 队列主题
-		Group    string // 消费组
-		Queue    string // 队列名称
-		Exchange string // 交换机
-		Routing  string // 路由键
-		Retry    int    // 重试次数
-		IsDelay  bool   // 是否延迟队列
-
-	}{
-		Package:  packageName1,
-		Name:     pkg.ToUpperCamel(values["name"]),
-		Type:     values["type"],
-		Topic:    values["topic"],
-		Group:    values["group"],
-		Queue:    values["queue"],
-		Exchange: values["exchange"],
-		Routing:  values["routing"],
-		Retry:    retry,
-		IsDelay:  isDelay,
-	}
-
-	err = tmpl.ExecuteTemplate(f1, filepath.Base(tmpls["consumer"]), data1)
-	if err != nil {
-		color.Red("Error executing consumer template:", err.Error())
-		os.Exit(1)
-	}
-
-	data2 := struct {
-		Package  string // 提取的包名
-		Name     string // 模块名称(首字母大写)
-		Type     string // 队列类型
-		Topic    string // 队列主题
-		Key      string // 消息键
-		Queue    string // 队列名称
-		Exchange string // 交换机
-		Routing  string // 路由键
-		IsDelay  bool   // 是否延迟队列
-		DelayMs  int64  // 延迟毫秒
-	}{
-		Package:  packageName2,
-		Name:     pkg.ToUpperCamel(values["name"]),
-		Type:     values["type"],
-		Topic:    values["topic"],
-		Key:      values["group"],
-		Queue:    values["queue"],
-		Exchange: values["exchange"],
-		Routing:  values["routing"],
-		IsDelay:  isDelay,
-		DelayMs:  delayMs,
-	}
-
-	err = tmpl.ExecuteTemplate(f2, filepath.Base(tmpls["producer"]), data2)
-	if err != nil {
-		color.Red("Error executing producer template:", err.Error())
-		os.Exit(1)
-	}
-
-	return data1, data2
+	flag.Successf("消费者文件: %s 生成成功!", consumerFile)
+	flag.Successf("生产者文件: %s 生成成功!", producerFile)
 }

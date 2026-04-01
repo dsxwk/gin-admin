@@ -3,12 +3,11 @@ package service
 import (
 	"errors"
 	"gin/app/event"
+	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/app/model"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/container"
-	"gin/pkg/eventbus"
 	"gorm.io/gorm"
 )
 
@@ -18,8 +17,12 @@ type LoginService struct {
 
 // Login 登录
 func (s *LoginService) Login(username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
-	containers := container.Get(s.Ctx)
-	if err = containers.DB.
+	var (
+		db   = facade.DB.Connection().WithContext(s.Ctx)
+		conf = facade.Config.Get()
+	)
+
+	if err = db.
 		Where("username = ?", username).
 		First(&m).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -37,13 +40,13 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 	}
 
 	jwt := middleware.Jwt{}
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = jwt.WithRefresh(m.ID, containers.Config.Jwt.Exp, containers.Config.Jwt.RefreshExp)
+	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = jwt.WithRefresh(m.ID, conf.Jwt.Exp, conf.Jwt.RefreshExp)
 	if err != nil {
 		return errors.New(err.Error()), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
 	// 发布事件
-	eventbus.Publish(s.Ctx, event.UserLoginEvent{
+	facade.Event.Publish(s.Ctx, event.UserLoginEvent{
 		UserId:   m.ID,
 		Username: m.Username,
 	})
@@ -53,7 +56,10 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 
 // RefreshToken 刷新token
 func (s *LoginService) RefreshToken(token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
-	containers := container.Get(s.Ctx)
+	var (
+		conf = facade.Config.Get()
+	)
+
 	j := middleware.Jwt{}
 	claims, err := j.Decode(token)
 	if err != nil || claims["typ"] != "refresh" {
@@ -62,5 +68,5 @@ func (s *LoginService) RefreshToken(token string) (accessToken, refreshToken str
 
 	uid := int64(claims["id"].(float64))
 
-	return j.WithRefresh(uid, containers.Config.Jwt.Exp, containers.Config.Jwt.RefreshExp)
+	return j.WithRefresh(uid, conf.Jwt.Exp, conf.Jwt.RefreshExp)
 }

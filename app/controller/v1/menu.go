@@ -12,8 +12,6 @@ import (
 type MenuController struct {
 	base.BaseController
 	service service.MenuService
-	req     request.Menu
-	search  request.Search
 }
 
 // List 列表
@@ -29,31 +27,33 @@ type MenuController struct {
 // @Router /api/v1/menu [get]
 func (s *MenuController) List(c *gin.Context) {
 	var (
-		ctx = c.Request.Context()
+		ctx    = c.Request.Context()
+		req    request.Menu
+		search request.Search
 	)
 
 	s.service.WithContext(c.Request.Context())
 
-	err := c.ShouldBind(&s.search)
+	err := c.ShouldBind(&search)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	err = c.ShouldBind(&s.req)
+	err = c.ShouldBind(&req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = request.Menu{}.Validate(s.req, "List")
+	err = request.Menu{}.Validate(req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	res, err := s.service.List(s.req, s.search.Search)
+	res, err := s.service.List(req, search.Search)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return

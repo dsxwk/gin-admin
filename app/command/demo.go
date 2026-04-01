@@ -3,7 +3,6 @@ package command
 import (
 	"gin/common/base"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 )
 
 type DemoCommand struct {
@@ -11,7 +10,7 @@ type DemoCommand struct {
 }
 
 func (m *DemoCommand) Name() string {
-	return "demo-command"
+	return "demo:command"
 }
 
 func (m *DemoCommand) Description() string {
@@ -32,8 +31,7 @@ func (m *DemoCommand) Help() []base.CommandOption {
 }
 
 func (m *DemoCommand) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
-	color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
+	_ = m.ParseFlags(m.Name(), args, m.Help())
 }
 
 func init() {

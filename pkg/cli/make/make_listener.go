@@ -5,7 +5,6 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -47,7 +46,6 @@ func (m *MakeListener) Help() []base.CommandOption {
 
 func (m *MakeListener) Execute(args []string) {
 	values := m.ParseFlags(m.Name(), args, m.Help())
-	color.Green("执行命令: %s %v", m.Name(), values)
 	_make := "listener"
 	file := m.GetMakeFile(values["file"], _make)
 	eventName := values["event"]
@@ -62,7 +60,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		color.Red("Error parsing template:", err.Error())
+		flag.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -85,9 +83,9 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		color.Red("Error executing template:", err.Error())
+		flag.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	color.Green(flag.Success+" 监听文件: %s 生成成功!", file)
+	flag.Successf("监听文件: %s 生成成功!", file)
 }

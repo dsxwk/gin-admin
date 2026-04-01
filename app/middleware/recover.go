@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"gin/common/base"
 	"gin/common/ctxkey"
@@ -28,29 +29,39 @@ type ErrData struct {
 // Handle recover中间件
 func (s Recover) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		errCode := errcode.SystemError()
 		defer func() {
-			if e := recover(); e != nil {
+			if err := recover(); err != nil {
 				ctx := c.Request.Context()
 
-				errCode = errCode.WithData(&ErrData{
-					TraceId: ctx.Value(ctxkey.TraceIdKey).(string),
-					Error:   e,
-					IP:      ctx.Value(ctxkey.IpKey).(string),
-					Lang:    ctx.Value(ctxkey.LangKey).(string),
-					Path:    ctx.Value(ctxkey.PathKey).(string),
-					Method:  ctx.Value(ctxkey.MethodKey).(string),
-					Params:  ctx.Value(ctxkey.ParamsKey),
-					Stack:   getStackTrace(3),
-				})
-
+				// 返回错误响应
+				errCode := errcode.SystemError().
+					WithMsg(fmt.Sprintf("%v", err)).
+					WithData(&ErrData{
+						TraceId: getString(ctx, ctxkey.TraceIdKey),
+						Error:   err,
+						IP:      getString(ctx, ctxkey.IpKey),
+						Lang:    getString(ctx, ctxkey.LangKey),
+						Path:    getString(ctx, ctxkey.PathKey),
+						Method:  getString(ctx, ctxkey.MethodKey),
+						Params:  ctx.Value(ctxkey.ParamsKey),
+						Stack:   getStackTrace(3),
+					})
 				response.Error(c, &errCode)
-				return
 			}
 		}()
-
 		c.Next()
 	}
+}
+
+// 防止panic
+func getString(c context.Context, key string) string {
+	if c == nil {
+		return "unknown"
+	}
+	if v, ok := c.Value(key).(string); ok {
+		return v
+	}
+	return "unknown"
 }
 
 // getStackTrace 获取堆栈
@@ -60,7 +71,7 @@ func getStackTrace(skip int) []string {
 	n := runtime.Callers(skip, pc)
 	pc = pc[:n]
 
-	trace := []string{}
+	var trace []string
 	for _, p := range pc {
 		fn := runtime.FuncForPC(p)
 		if fn == nil {

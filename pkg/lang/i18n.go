@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/config"
+	"gin/pkg"
 	"gin/pkg/logger"
 	"github.com/goccy/go-json"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -13,46 +14,52 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var (
-	conf       = config.NewConfig()
-	log        = logger.NewLogger()
 	Bundle     *i18n.Bundle
 	Localizers = map[string]*i18n.Localizer{}
+	once       sync.Once
+	log        *logger.Logger
 )
 
 // LoadLang 初始化翻译
-func LoadLang() {
-	Bundle = i18n.NewBundle(language.Chinese)
-	Bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
+func LoadLang(conf *config.Config, logger *logger.Logger) {
+	once.Do(func() {
+		log = logger
+		Bundle = i18n.NewBundle(language.Chinese)
+		Bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+		Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
-	baseDir := conf.I18n.Dir
-	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
-		log.Info(fmt.Sprintf("i18n baseDir not found: %s", baseDir))
-		return
-	}
+		baseDir := conf.I18n.Dir
+		if _, err := os.Stat(baseDir); os.IsNotExist(err) {
+			log.Info(pkg.Sprintf("i18n baseDir not found: %s", baseDir))
+			return
+		}
 
-	langs := strings.Split(conf.I18n.Lang, ",")
+		langs := strings.Split(conf.I18n.Lang, ",")
 
-	// 遍历语言目录
-	for _, lang := range langs {
-		langDir := filepath.Join(baseDir, lang)
-		loadLangDir(lang, langDir)
-	}
+		// 遍历语言目录
+		for _, langCode := range langs {
+			langDir := filepath.Join(baseDir, langCode)
+			loadLangDir(langCode, langDir)
+		}
 
-	// 初始化Localizer
-	for _, lang := range langs {
-		Localizers[lang] = i18n.NewLocalizer(Bundle, lang)
-	}
+		// 初始化Localizer
+		for _, langCode := range langs {
+			Localizers[langCode] = i18n.NewLocalizer(Bundle, langCode)
+		}
+
+		log.Info(pkg.Sprintf("翻译服务加载成功,支持语言: %s", conf.I18n.Lang))
+	})
 }
 
 // loadLangDir 递归加载指定语言目录下的所有翻译文件
-func loadLangDir(lang, dir string) {
+func loadLangDir(langCode, dir string) {
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Info(err.Error())
+			log.Info(pkg.Sprintf("遍历翻译目录失败: %v", err))
 			return nil
 		}
 
@@ -62,39 +69,32 @@ func loadLangDir(lang, dir string) {
 
 		ext := strings.ToLower(filepath.Ext(path))
 		if ext != ".json" && ext != ".yaml" && ext != ".yml" {
-			log.Info("Unsupported lang file type: " + ext)
 			return nil
 		}
 
 		data, err := os.ReadFile(path)
 		if err != nil {
-			log.Info(err.Error())
+			log.Info(pkg.Sprintf("读取翻译文件失败: %v", err))
+			return nil
 		}
 
 		// 模拟路径格式如zh.json/en.yaml,让go-i18n能识别语言
-		virtualFileName := fmt.Sprintf("%s%s", lang, ext)
+		virtualFileName := fmt.Sprintf("%s%s", langCode, ext)
 		_, err = Bundle.ParseMessageFileBytes(data, virtualFileName)
 		if err != nil {
-			log.Info(err.Error())
+			log.Info(pkg.Sprintf("解析翻译文件失败: %v", err))
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.Info(err.Error())
+		log.Info(pkg.Sprintf("加载翻译目录失败: %v", err))
 	}
 }
 
 // T 翻译
 func T(ctx context.Context, messageID string, data map[string]interface{}) string {
-	langCode := "zh" // 默认语言
-	if ctx != nil {
-		if v := ctx.Value(ctxkey.LangKey); v != nil {
-			if s, ok := v.(string); ok && s != "" {
-				langCode = s
-			}
-		}
-	}
+	langCode := getLangFromContext(ctx)
 
 	localizer, ok := Localizers[langCode]
 	if !ok {
@@ -106,8 +106,39 @@ func T(ctx context.Context, messageID string, data map[string]interface{}) strin
 		TemplateData: data,
 	})
 	if err != nil {
-		log.Info(fmt.Sprintf("缺少翻译: %s (%s)\n", messageID, langCode))
+		log.Debug(pkg.Sprintf("缺少翻译: %s (%s)", messageID, langCode))
 		return messageID
 	}
 	return msg
+}
+
+// getLangFromContext 从上下文获取语言
+func getLangFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return "zh"
+	}
+	if v := ctx.Value(ctxkey.LangKey); v != nil {
+		if s, ok := v.(string); ok && s != "" {
+			return s
+		}
+	}
+	return "zh"
+}
+
+// GetLocalizer 获取指定语言
+func GetLocalizer(langCode string) *i18n.Localizer {
+	if localizer, ok := Localizers[langCode]; ok {
+		return localizer
+	}
+	return Localizers["zh"]
+}
+
+// GetBundle 获取翻译包
+func GetBundle() *i18n.Bundle {
+	return Bundle
+}
+
+// IsLoaded 检查翻译是否已加载
+func IsLoaded() bool {
+	return Bundle != nil && len(Localizers) > 0
 }

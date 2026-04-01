@@ -2,11 +2,11 @@ package service
 
 import (
 	"errors"
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/container"
 	"gin/pkg/orm"
 	"time"
 )
@@ -18,13 +18,13 @@ type UserService struct {
 // List 列表
 func (s *UserService) List(req request.User, _search map[string]interface{}) (pageData request.PageData, err error) {
 	var (
-		m          []model.User
-		containers = container.Get(s.Ctx)
+		m  []model.User
+		db = facade.DB.Connection().WithContext(s.Ctx)
 	)
 
 	offset, limit := request.Pagination(req.Page, req.PageSize)
 
-	db := containers.DB.Model(&model.User{}).
+	db = db.Model(&model.User{}).
 		Preload("UserRoles")
 
 	if _search != nil {
@@ -55,9 +55,8 @@ func (s *UserService) List(req request.User, _search map[string]interface{}) (pa
 // Create 创建
 func (s *UserService) Create(m model.User) (model.User, error) {
 	var (
-		count      int64
-		containers = container.Get(s.Ctx)
-		db         = containers.DB
+		count int64
+		db    = facade.DB.Connection().WithContext(s.Ctx)
 	)
 
 	// 校验用户名是否重复
@@ -82,9 +81,8 @@ func (s *UserService) Create(m model.User) (model.User, error) {
 // Update 更新
 func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	var (
-		count      int64
-		containers = container.Get(s.Ctx)
-		db         = containers.DB
+		count int64
+		db    = facade.DB.Connection().WithContext(s.Ctx)
 	)
 
 	// 校验用户名是否重复
@@ -111,8 +109,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 
 // Detail 详情
 func (s *UserService) Detail(id int64) (m model.User, err error) {
-	containers := container.Get(s.Ctx)
-	err = containers.DB.First(&m, id).Error
+	err = facade.DB.Connection().WithContext(s.Ctx).First(&m, id).Error
 	if err != nil {
 		return m, err
 	}
@@ -122,8 +119,7 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 
 // Delete 删除
 func (s *UserService) Delete(id int64) (m model.User, err error) {
-	containers := container.Get(s.Ctx)
-	err = containers.DB.Delete(&m, id).Error
+	err = facade.DB.Connection().WithContext(s.Ctx).Delete(&m, id).Error
 	if err != nil {
 		return m, err
 	}

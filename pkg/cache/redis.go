@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"gin/config"
 	"gin/pkg/debugger"
 	"gin/pkg/message"
 	"github.com/go-redis/redis/v8"
@@ -32,7 +33,7 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 		h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
 			Driver: "redis",
 			Name:   cmd.Name(),
-			Cmd:    cmd.String(),
+			Cmd:    cmd.FullName(),
 			Args:   cmd.Args(),
 			Ms:     costMs,
 		})
@@ -57,7 +58,7 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 			h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
 				Driver: "redis",
 				Name:   cmd.Name(),
-				Cmd:    cmd.String(),
+				Cmd:    cmd.FullName(),
 				Args:   cmd.Args(),
 				Ms:     costMs,
 			})
@@ -72,6 +73,7 @@ type RedisCache struct {
 	client  *redis.Client
 	pubsubs map[string]*redis.PubSub
 	ctx     context.Context
+	bus     *message.EventBus
 }
 
 var (
@@ -79,7 +81,7 @@ var (
 	redisOnce  sync.Once
 )
 
-func NewRedisCache() *CacheProxy {
+func NewRedisCache(conf *config.Config) *CacheProxy {
 	redisOnce.Do(func() {
 		var (
 			bus = message.GetEventBus()
@@ -98,6 +100,7 @@ func NewRedisCache() *CacheProxy {
 			client:  client,
 			ctx:     context.Background(),
 			pubsubs: make(map[string]*redis.PubSub),
+			bus:     bus,
 		}
 
 		redisCache = NewCacheProxy("redis", r, bus)
@@ -114,7 +117,30 @@ func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {
 }
 
 func (r *RedisCache) Set(key string, value interface{}, expire time.Duration) error {
-	err := r.client.Set(r.ctx, key, value, expire).Err()
+	var valStr string
+
+	// 根据类型处理值
+	switch v := value.(type) {
+	case string:
+		valStr = v
+	case []byte:
+		valStr = string(v)
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		valStr = fmt.Sprintf("%v", v)
+	case float32, float64:
+		valStr = fmt.Sprintf("%v", v)
+	case bool:
+		valStr = fmt.Sprintf("%v", v)
+	default:
+		// map,slice,struct等复杂类型需要JSON序列化
+		b, err := json.Marshal(v)
+		if err != nil {
+			return fmt.Errorf("failed to marshal value: %v", err)
+		}
+		valStr = string(b)
+	}
+
+	err := r.client.Set(r.ctx, key, valStr, expire).Err()
 	if err != nil {
 		return fmt.Errorf("error setting Redis cache: %v", err)
 	}
@@ -128,6 +154,14 @@ func (r *RedisCache) Get(key string) (interface{}, bool) {
 		return nil, false
 	}
 
+	// 尝试解析JSON
+	var result interface{}
+	if err = json.Unmarshal([]byte(val), &result); err == nil {
+		// 如果是JSON对象或数组,返回解析后的结果
+		return result, true
+	}
+
+	// 否则返回原始字符串
 	return val, true
 }
 

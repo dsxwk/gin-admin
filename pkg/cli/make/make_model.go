@@ -3,10 +3,10 @@ package make
 import (
 	"bytes"
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"gin/pkg/orm"
 	"github.com/fatih/color"
 	"gorm.io/gorm"
 	"os"
@@ -117,7 +117,6 @@ func (m *MakeModel) Help() []base.CommandOption {
 // Execute cli命令执行入口
 func (m *MakeModel) Execute(args []string) {
 	values := m.ParseFlags(m.Name(), args, m.Help())
-	color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
 	// 输出目录
 	path := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
 	// 表名支持多个
@@ -129,17 +128,17 @@ func (m *MakeModel) Execute(args []string) {
 	camel := m.StringToBool(values["camel"])
 	conn := values["connection"]
 	_make := strings.TrimPrefix(m.Name(), "make:")
-	db := orm.Connection(conn)
+	db := facade.DB.Connection(conn)
 	for _, table := range tables {
 		color.Cyan("开始生成模型: %s", table)
 
 		err := m.generateModel(_make, db, table, path, camel)
 		if err != nil {
-			color.Red("生成失败: %s", err.Error())
+			flag.Errorf("生成失败: %s", err.Error())
 			continue
 		}
 
-		color.Green(flag.Success + " 模型生成成功: " + filepath.Join(path, table+".go"))
+		flag.Successf("模型生成成功: " + filepath.Join(path, table+".go"))
 	}
 }
 
@@ -229,7 +228,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	templateFile := m.GetTemplate(_make)
 	tpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		color.Red("Error parsing template:", err.Error())
+		flag.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 	data := struct {

@@ -2,10 +2,10 @@ package db
 
 import (
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/database/migrations"
 	"gin/pkg/cli"
 	"gin/pkg/orm"
-	"github.com/fatih/color"
 )
 
 type Seed struct {
@@ -32,8 +32,7 @@ func (s *Seed) Help() []base.CommandOption {
 
 func (s *Seed) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
-	color.Green("执行命令: %s %s", s.Name(), s.FormatArgs(values))
-	color.Cyan("开始执行数据填充...")
+	flag.Infof("开始执行数据填充...")
 
 	db := orm.Connection()
 	id := values["id"]
@@ -43,10 +42,10 @@ func (s *Seed) Execute(args []string) {
 		}
 
 		if err := seed.Run(db); err != nil {
-			color.Red("Seed %s 执行失败: %v", seed.ID(), err)
+			flag.Errorf("Seed %s 执行失败: %v", seed.ID(), err)
 			return
 		}
-		color.Green("Seed %s 执行成功", seed.ID())
+		flag.Successf("Seed %s 执行成功", seed.ID())
 	}
 }
 

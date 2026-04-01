@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"os"
 	"path/filepath"
 	"time"
@@ -82,11 +81,11 @@ func (m *%s) Rollback(db *gorm.DB) error {
 	}
 
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-		color.Red("写入文件失败: %v", err)
+		flag.Errorf("写入文件失败: %v", err)
 		return
 	}
 
-	color.Green(flag.Success+"  迁移文件生成成功: %s", filePath)
+	flag.Successf("迁移文件生成成功: %s", filePath)
 }
 
 func init() {

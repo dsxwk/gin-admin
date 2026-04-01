@@ -1,6 +1,7 @@
 # 应用
 app:
   env: dev # dev|testing|production dev=本地环境 testing=测试环境 production=生产环境
+  cli-version: v2.0.0
   name: gin
   mode: debug # debug|test|release debug=本地环境 test=测试环境 release=生产环境
   port: 8080
@@ -100,10 +101,10 @@ i18n:
   lang: "zh,en" # 默认语言,多个语言用逗号分隔
 
 kafka:
-  enabled: false # 是否启用kafka
+  enabled: true # 是否启用kafka
   brokers:
-    - "172.17.139.67:9092"
+    - "172.30.117.79:9092"
 
 rabbitmq:
-  enabled: false # 是否启用rabbitmq
+  enabled: true # 是否启用rabbitmq
   url: "amqp://admin:admin@172.30.117.79:5672/"

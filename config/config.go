@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"gin/common/flag"
-	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"os"
@@ -53,7 +52,7 @@ func NewConfig() *Config {
 
 		// 读取主配置文件 config.yaml
 		if err := v.ReadInConfig(); err != nil {
-			color.Red(flag.Error+"  读取配置文件失败: %v", err)
+			flag.Errorf("读取配置文件失败: %v", err)
 		}
 
 		// 获取环境类型
@@ -67,18 +66,18 @@ func NewConfig() *Config {
 		if _, err := os.Stat(configFile); err == nil {
 			v.SetConfigFile(configFile)
 			if err = v.MergeInConfig(); err != nil {
-				color.Red(flag.Error+"  合并环境配置失败: %v", err)
+				flag.Errorf("合并环境配置失败: %v", err)
 				os.Exit(1)
 			}
-			color.Green(flag.Success+"  已加载环境配置文件: %s\n", configFile)
+			flag.Successf("已加载环境配置文件: %s", configFile)
 		} else {
-			color.Yellow(flag.Warning+"  未找到环境配置文件: %s，使用默认配置\n", configFile)
+			flag.Warningf("未找到环境配置文件: %s，使用默认配置\n", configFile)
 		}
 
 		// 自动映射到结构体
 		cfg := &Config{}
 		if err := v.Unmarshal(cfg); err != nil {
-			color.Red(flag.Error+"  解析配置文件失败: %v", err)
+			flag.Errorf("解析配置文件失败: %v", err)
 			os.Exit(1)
 		}
 
@@ -98,9 +97,9 @@ func NewConfig() *Config {
 			}
 			lastEventTime = now
 
-			color.Green(flag.Loading+"  配置文件修改: %s\n", e.Name)
+			flag.Infof("配置文件修改: %s\n", e.Name)
 			if err := v.Unmarshal(cfg); err != nil {
-				color.Red(flag.Warning+"  配置热更新失败: %v", err)
+				flag.Errorf("配置热更新失败: %v", err)
 				os.Exit(1)
 			}
 		})

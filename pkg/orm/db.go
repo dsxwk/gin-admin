@@ -8,7 +8,6 @@ import (
 	"gin/pkg/debugger"
 	l "gin/pkg/logger"
 	"gin/pkg/message"
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,6 +30,7 @@ func Connection(conn ...string) *gorm.DB {
 	if len(conn) == 0 || conn[0] == "" {
 		return getConnection(conf.Databases.DbConnection)
 	}
+
 	return getConnection(conn[0])
 }
 
@@ -45,47 +45,42 @@ func getConnection(conn string) *gorm.DB {
 			err error
 		)
 
+		// 根据连接类型打开数据库
 		switch conn {
-
 		case "mysql":
 			db, err = openMysql()
-
 		case "pgsql":
 			db, err = openPgsql()
-
 		case "sqlite":
 			db, err = openSqlite()
-
 		case "sqlsrv":
 			db, err = openSqlsrv()
-
 		default:
-			color.Red(flag.Error+"  不支持的数据库类型: %s", conf.Databases.DbConnection)
+			flag.Errorf("不支持的数据库类型: %s", conn)
 			os.Exit(1)
 		}
 
 		if err != nil {
-			color.Red(flag.Error+"  %s数据库连接失败: %v", conf.Databases.DbConnection, err)
+			flag.Errorf("%s数据库连接失败: %v", conn, err)
 			os.Exit(1)
 		}
 
 		// 配置连接池
 		sqlDB, e := db.DB()
 		if e != nil {
-			err = e
-			color.Red(flag.Error+"  %s数据库连接池配置失败: %v", conf.Databases.DbConnection, err)
+			flag.Errorf("%s数据库连接池配置失败: %v", conn, e)
 			os.Exit(1)
 		}
 
 		// 设置连接池参数
-		sqlDB.SetMaxIdleConns(20)                  // 空闲连接数
-		sqlDB.SetMaxOpenConns(200)                 // 最大连接数
-		sqlDB.SetConnMaxLifetime(1 * time.Hour)    // 连接最大生命周期
-		sqlDB.SetConnMaxIdleTime(30 * time.Minute) // 空闲时间超过30分钟自动关闭
+		sqlDB.SetMaxIdleConns(20)
+		sqlDB.SetMaxOpenConns(200)
+		sqlDB.SetConnMaxLifetime(1 * time.Hour)
+		sqlDB.SetConnMaxIdleTime(30 * time.Minute)
 
 		// 测试Ping
-		if err = sqlDB.Ping(); e != nil {
-			color.Red(flag.Error+"  %数据库连接ping失败: %v", conf.Databases.DbConnection, err)
+		if err = sqlDB.Ping(); err != nil {
+			flag.Errorf("%s数据库连接ping失败: %v", conn, err)
 			os.Exit(1)
 		}
 
@@ -93,6 +88,7 @@ func getConnection(conn string) *gorm.DB {
 		SqlCallback(db)
 
 		dbInstances[conn] = db
+		flag.Successf("%s数据库连接成功", conn)
 	})
 
 	return dbInstances[conn]

@@ -2,13 +2,10 @@ package middleware
 
 import (
 	"bytes"
-	"context"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
-	"gin/common/trace"
-	"gin/config"
-	"gin/pkg/container"
-	"gin/pkg/logger"
+	"gin/pkg/debugger"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
@@ -27,37 +24,46 @@ func (s Logger) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		traceId := uuid.New().String()
-		lang := s.GetLang(c)
-		ctn := container.GetContainer()
+		lang := s.getLang(c)
 
+		// 构建完整的context
 		ctx := c.Request.Context()
-		ctx = context.WithValue(ctx, ctxkey.TraceIdKey, traceId)
-		ctx = context.WithValue(ctx, ctxkey.IpKey, c.ClientIP())
-		ctx = context.WithValue(ctx, ctxkey.PathKey, c.Request.URL.Path)
-		ctx = context.WithValue(ctx, ctxkey.MethodKey, c.Request.Method)
-		ctx = context.WithValue(ctx, ctxkey.ParamsKey, s.getParams(c))
-		ctx = context.WithValue(ctx, ctxkey.LangKey, lang)
-		ctx = context.WithValue(ctx, ctxkey.StartTimeKey, start)
 
-		ctnCtx := ctn.WithContext(ctx)
-		ctx = container.Set(ctx, ctnCtx)
+		// 注入追踪信息
+		ctx = ctxkey.WithValue(ctx, ctxkey.TraceIdKey, traceId)
+		ctx = ctxkey.WithValue(ctx, ctxkey.IpKey, c.ClientIP())
+		ctx = ctxkey.WithValue(ctx, ctxkey.PathKey, c.Request.URL.Path)
+		ctx = ctxkey.WithValue(ctx, ctxkey.MethodKey, c.Request.Method)
+		ctx = ctxkey.WithValue(ctx, ctxkey.ParamsKey, s.getParams(c))
+		ctx = ctxkey.WithValue(ctx, ctxkey.LangKey, lang)
+		ctx = ctxkey.WithValue(ctx, ctxkey.StartTimeKey, start)
 
-		c.Request = c.Request.WithContext(ctx)
 		c.Header("Trace-Id", traceId)
 
+		// 注入日志
+		log := facade.Log.Logger()
+		ctx = ctxkey.WithValue(ctx, ctxkey.DebuggerKey, log.WithDebugger(ctx))
+
+		// 更新请求的context
+		c.Request = c.Request.WithContext(ctx)
+
 		defer func() {
-			// 清理trace
-			trace.Store.Delete(traceId)
+			// 从当前请求获取最新的ctx
+			currentCtx := c.Request.Context()
 			cost := float64(time.Since(start).Milliseconds())
-			ctx = context.WithValue(ctx, ctxkey.MsKey, cost)
-			c.Request = c.Request.WithContext(ctx)
+
+			// 更新耗时
+			currentCtx = ctxkey.WithValue(currentCtx, ctxkey.MsKey, cost)
+			c.Request = c.Request.WithContext(currentCtx)
+
+			if conf.Log.Access {
+				log.WithDebugger(currentCtx).Info("Access Log")
+			}
+			debugger.Store.Delete(traceId)
 		}()
 
+		// 执行后续处理
 		c.Next()
-
-		if config.NewConfig().Log.Access {
-			logger.NewLogger().WithDebugger(ctx).Info("Access Log")
-		}
 	}
 }
 
@@ -91,10 +97,10 @@ func (s Logger) getParams(c *gin.Context) any {
 	return string(body)
 }
 
-// GetLang 获取语言
-func (s *Logger) GetLang(c *gin.Context) string {
+// getLang 获取语言
+func (s *Logger) getLang(c *gin.Context) string {
 	// 配置支持的语言如["zh", "en"]
-	supported := strings.Split(config.NewConfig().I18n.Lang, ",")
+	supported := strings.Split(conf.I18n.Lang, ",")
 
 	if q := strings.ToLower(strings.TrimSpace(c.Query("lang"))); q != "" {
 		if lang := s.matchLang(q, supported); lang != "" {

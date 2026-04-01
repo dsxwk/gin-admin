@@ -5,7 +5,6 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -48,7 +47,6 @@ func (m *MakeMiddleware) Help() []base.CommandOption {
 
 func (m *MakeMiddleware) Execute(args []string) {
 	values := m.ParseFlags(m.Name(), args, m.Help())
-	color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, f, values["desc"])
@@ -62,7 +60,7 @@ func (m *MakeMiddleware) generateFile(_make, file, desc string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		color.Red("Error parsing template:", err.Error())
+		flag.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -87,9 +85,9 @@ func (m *MakeMiddleware) generateFile(_make, file, desc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		color.Red("Error executing template:", err.Error())
+		flag.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	color.Green(flag.Success + "  中间件文件: " + file + " 生成成功!")
+	flag.Successf("中间件文件: " + file + " 生成成功!")
 }

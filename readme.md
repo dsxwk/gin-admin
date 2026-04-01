@@ -34,7 +34,7 @@
   - [Model](#Model)
     - [Model Creation Help](#Model-Creation-Help)
     - [Model Creation](#Model-Creation)
-    - [GORM Dynamic Filtering](#GORM-Dynamic-Filtering)
+    - [ORM Dynamic Filtering](#ORM-Dynamic-Filtering)
     - [OR Condition Query](#OR-Condition-Query)
     - [AND Condition Query](#AND-Condition-Query)
     - [JSON Field Query](#JSON-Field-Query)
@@ -80,6 +80,7 @@
   - [Queue](#Queue)
     - [Queue Creation Help](#Queue-Creation-Help)
     - [Queue Creation](#Queue-Creation)
+    - [Queue Usage](#Queue-Usage)
   - [Publish Event](#Publish-Event)
     - [Event Test](#Event-Test)
   - [Event List](#Event-List)
@@ -100,12 +101,15 @@
     - [Ordinary Translation](#Ordinary-Translation) 
     - [Template Translation](#Template-Translation) 
     - [Add Language Support](#Add-Language-Support) 
-  - [Container](#Container)
-    - [Container Usage](#Container-Usage)
+  - [Provider Service](#Provider-Service)
+    - [Provider Service Creation](#Provider-Service-Creation)
+  - [Facade](#Facade)
+    - [Facade Creation](#Facade-Creation)
+    - [Facade Usage](#Facade-Usage)
   - [Database](#Database)
     - [Database Configuration](#Database-Configuration)
     - [Database Connection](#Database-Connection)
-    - [Sql Log Record](#Sql-Log-Record)
+    - [Database Search](#Database-Search)
   - [Swagger Documents](#Swagger-Documents)
 
 # Project Introduction
@@ -128,7 +132,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v1.8.7
+> - Latest Version: v2.0.0
 > - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
@@ -173,9 +177,9 @@ $ ./main
 ### Compile Command
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo-command --args=11
+$ ./cli demo:command --args=11
 
-Excute Command: demo-command, Argument: 11
+Excute Command: demo:command, Argument: 11
 ```
 
 # Directory Structure
@@ -184,9 +188,11 @@ Excute Command: demo-command, Argument: 11
 │   ├── command                         # Command
 │   ├── controller                      # Controller
 │   ├── event                           # Event
+│   ├── facade                          # Facade
 │   ├── listener                        # Listener
 │   ├── middleware                      # Middleware
 │   ├── model                           # Model
+│   ├── provider                        # Provider
 │   ├── queue                           # Queue
 │   ├──├── kafka                        # Kafka
 │   ├──├──├── consumer                  # Consumer
@@ -206,20 +212,20 @@ Excute Command: demo-command, Argument: 11
 │   ├── flag                            # Flag
 │   ├── response                        # Response
 │   ├── template                        # Template
-│   ├── trace                           # Trace
 ├── config                              # Config File
 ├── database                            # Database Test File 
 ├── docs                                # Swagger Doc
 ├── pkg                                 # Pakage
 │   ├──├── cache                        # Cache
 │   ├──├── cli                          # Command
-│   ├──├── container                    # Container
 │   ├──├── debugger                     # Debugger
 │   ├──├── eventbus                     # Event Bus
+│   ├──├── foundation                   # Providers
+│   ├──├── http                         # Http Request
 │   ├──├── lang                         # Language
 │   ├──├── logger                       # Logger
 │   ├──├── message                      # Message Event
-│   ├──├── gorm                         # Orm Tool
+│   ├──├── orm                          # Orm Tool
 │   ├──├── queue                        # Queue
 │   ├──├── time                         # Time Processing
 ├── public                              # Static Resources
@@ -264,51 +270,9 @@ watching .
 watching app
 watching app\command
 watching app\controller
-watching app\controller\v1
-watching app\middleware
-watching app\model
-watching app\request
-watching app\service
-watching common
-watching common\base
-watching common\errcode
-watching common\response
-watching common\template
-watching config
-watching database
-watching docs
-watching public
-watching router
-!exclude storage
-watching tests
-!exclude tmp
-watching pkg
-watching pkg\cli
-watching pkg\cli\db
-watching pkg\cli\make
-watching pkg\cli\route
-watching pkg\ctx
-!exclude vendor
-building...
-running...
-✅ 已加载环境配置文件: config\dev.config.yaml
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:   export GIN_MODE=release
- - using code:  gin.SetMode(gin.ReleaseMode)
-
-✅ 已加载环境配置文件: config\dev.config.yaml
-[GIN-debug] GET    /ping                     --> gin/router.LoadRouters.func1 (3 handlers)
-[GIN-debug] GET    /public/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] HEAD   /public/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (3 handlers)
-[GIN-debug] POST   /api/v1/login             --> gin/app/controller/v1.(*LoginController).Login-fm (4 handlers)
-[GIN-debug] GET    /api/v1/user              --> gin/app/controller/v1.(*UserController).List-fm (5 handlers)
-[GIN-debug] POST   /api/v1/user              --> gin/app/controller/v1.(*UserController).Create-fm (5 handlers)
-[GIN-debug] PUT    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Update-fm (5 handlers)
-[GIN-debug] DELETE /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Delete-fm (5 handlers)
-[GIN-debug] GET    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Detail-fm (5 handlers)
+...
+...
+[GIN-debug] GET    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Detail-fm (6 handlers)
 应用:    gin
 环境:    dev
 端口:    8080
@@ -316,7 +280,7 @@ running...
 🌐 Address:    http://0.0.0.0:8080
 👉 Swagger:    http://127.0.0.1:8080/swagger/index.html
 👉 Test API:   http://127.0.0.1:8080/ping
-Gin server started successfully!
+ SUCCESS  Gin server started successfully!
 ```
 
 ## Configuration File
@@ -335,7 +299,13 @@ Gin server started successfully!
 ### Middleware Creation Help
 ```bash
 $ go run ./cmd/cli.go make:middleware -h # --help
-make:middleware - Middleware Creation
+Gin Cli v2.0.0
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:middleware  Middleware Creation
 
 Options:
   -f, --file  File Path, Expample: auth                        required:true
@@ -419,8 +389,13 @@ func LoadRouters(router *gin.Engine) {
 ### Route Creation Help
 ```bash
 $ go run ./cmd/cli.go make:router -h # --help
+Gin Cli v2.0.0
 
-make:router - Route Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:router  Route Creation
 
 Options:
   -f, --file  File Path, Expample: user                   required:true
@@ -499,8 +474,13 @@ A total of 10 routes
 ### Controller Creation Help
 ```bash
 $ go run ./cmd/cli.go make:controller -h # --help
+Gin Cli v2.0.0
 
-make:controller - Controller Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:controller  Controller Creation
 
 Options:
   -f, --file      File Path, Example: v1/user       required:true
@@ -538,13 +518,19 @@ func (s *TestController) List(c *gin.Context) {
 ### Model Creation Help
 ```bash
 $ go run ./cmd/cli.go make:model -h # --help
+Gin Cli v2.0.0
 
-make:model - Model Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:model  Model Creation
 
 Options:
-  -t, --table  Table Name, Example: user or user,menu     required:true
-  -p, --path   Output Directory, Example: api/user        required:false
-  -c, --camel  Is it a camel hump field, Example: true    required:false
+  -t, --table       Table Name, Example: user or user,menu     required:true
+  -p, --path        Output Directory, Example: api/user        required:false
+  -c, --camel       Is it a camel hump field, Example: true    required:false
+  -C, --connection  Database Connection                        required:false
 ```
 
 ### Model Creation
@@ -586,7 +572,7 @@ func (*User) TableName() string {
 }
 ```
 
-## GORM Dynamic Filtering
+## ORM Dynamic Filtering
 > By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria based on the list fields. The `__search` type is `map[string]interface{}`, for example:__ search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}.  support or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes: `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where' condition, SQL statements will be automatically constructed based on the condition
 ### OR Condition Query
 ```http
@@ -624,8 +610,13 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 ### Validator Creation Help
 ```bash
 $ go run ./cmd/cli.go make:request -h # --help
+Gin Cli v2.0.0
 
-make:request - Validator Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:request  Validator Creation
 
 Options:
   -f, --file  File Path, Example: user                         required:true
@@ -695,6 +686,8 @@ func (s User) Translates() map[string]string {
 ### Validator Rules
 > For more rules, please refer to [gookit/validate](https://github.com/gookit/validate)
 ```go
+package request
+
 // UserCreate User-Create-Validation
 type UserCreate struct {
 	Username string `json:"username" validate:"required" label:"username"`
@@ -733,6 +726,8 @@ type User struct {
 
 ### Validator Scenes
 ```go
+package request
+
 // ConfigValidation Configuration-Validation
 // - Define validation scenes
 // - You can also add verification settings
@@ -773,6 +768,8 @@ func (s User) ConfigValidation(v *validate.Validation) {
 
 ### Prompt Message
 ```go
+package request
+
 // Messages Validator-Error-Message
 func (s User) Messages() map[string]string {
     return validate.MS{
@@ -786,6 +783,8 @@ func (s User) Messages() map[string]string {
 
 ### Field Translation
 ```go
+package request
+
 // Translates Field-Translation
 func (s User) Translates() map[string]string {
 	return validate.MS{
@@ -825,15 +824,19 @@ func init() {
 
 #### Local Rules
 ```go
-// Define local rule methods (naming convention: Validate<rule name>)
+package request
+
+// ValidateIsEven Define local rule methods (naming convention: Validate<rule name>)
 func (s User) ValidateIsEven(val any) bool {
-num := val.(int)
-return num%2 == 0
+    num := val.(int)
+    return num%2 == 0
 }
 ```
 
 #### Temporary Rules
 ```go
+package request
+
 // Validate Request-Validation
 func (s User) Validate(data User, scene string) error {
     v := validate.Struct(data, scene)
@@ -854,6 +857,8 @@ func (s User) Validate(data User, scene string) error {
 
 #### Validator Usage
 ```go
+package request
+
 type User struct {
     Age int `json:"gender" validate:"required|is_even" label:"age"`
 }
@@ -864,12 +869,12 @@ type User struct {
 package v1
 
 import (
+  "gin/app/facade"
   "gin/app/model"
   "gin/app/request"
   "gin/app/service"
   "gin/common/base"
   "gin/common/errcode"
-  "gin/pkg/lang"
   "github.com/gin-gonic/gin"
   "github.com/jinzhu/copier"
   "strconv"
@@ -878,9 +883,6 @@ import (
 type UserController struct {
   base.BaseController
   service service.UserService
-  req     request.User
-  search  request.Search
-  user    model.User
 }
 
 // List User-List
@@ -896,33 +898,35 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
   var (
-    ctx = c.Request.Context()
+    ctx    = c.Request.Context()
+    req    request.User
+    search request.Search
   )
 
   s.service.WithContext(ctx)
 
-  err := c.ShouldBind(&s.search)
+  err := c.ShouldBind(&search)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
-  err = c.ShouldBind(&s.req)
+  err = c.ShouldBind(&req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
   // Validator
-  err = s.req.Validate(s.req, "List")
+  err = req.Validate(req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }
 
-  res, err := s.service.List(s.req, s.search.Search)
+  res, err := s.service.List(req, search.Search)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
   }
 
@@ -934,8 +938,13 @@ func (s *UserController) List(c *gin.Context) {
 ### Service Creation Help
 ```bash
 $ go run ./cmd/cli.go make:service -h # --help
+Gin Cli v2.0.0
 
-make:service - Service Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:service  Service Creation
 
 Options:
   -f, --file      File Path, Example: v1/user      required:true
@@ -953,53 +962,92 @@ $ go run ./cmd/cli.go make:service -f=user --function=list --desc="list"
 ### Get Version
 ```bash
 $ go run ./cmd/cli.go --version # -v
-Gin CLI v1.0.0
+Gin Cli v2.0.0
 ```
 
 ### Command Help
 ```bash
 $ go run ./cmd/cli.go -h # --help
+Gin Cli v2.0.0
 
-Usage: go run ./cmd/cli.go [command] [options]
+Usage:
+  cli [command] [options]
+
 Available commands:
-  db:migrate               Database Migration(Automatic Table Creation/Schema Updates)
-  db:seed                  Data Initialization
-  demo-command             test-demo
-  make:command             Service Creation
-  make:controller          Controller Creation
-  make:middleware          Middleware Creation
-  make:model               Model Creation
-  make:request             Validator Creation
-  make:router              Route Creation
-  make:service             Service Creation
-  route:list               Route List
+consumer:
+  consumer:list    消费者列表
+db:
+  db:migrate       数据迁移
+  db:rollback      数据回滚
+  db:seed          数据填充
+demo:
+  demo:command     test-demo
+event:
+  event:list       事件列表
+listener:
+  listener:list    事件监听列表
+make:
+  make:command     Command Creation
+  make:controller  Controller Creation
+  make:event       Event Creation
+  make:facade      Facade Creation
+  make:listener    Listener Creation
+  make:middleware  Middleware Creation
+  make:migration   Generate database migration template
+  make:model       Model Creation
+  make:model-old   Model Creation old
+  make:provider    Producer Creation
+  make:queue       Queue Creation(Kafka/RabbitMQ)
+  make:request     Request Creation
+  make:router      Router Creation
+  make:seed        Generate database seeder template
+  make:service     Service Creation
+producer:
+  producer:list    Producer List
+route:
+  route:list       Route List
 
 Options:
-  -f, --format   The output format (txt, json) [default: txt]
-  -h, --help     Display help for the given command. When no command is given display help for the list command
-  -v, --version  Display this application version
+  -f, --format     The output format (txt, json) [default: txt]
+  -h, --help       Display help for the given command
+  -v, --version    Display CLI version
 ```
 
 ### Command List
 ```bash
 $ go run ./cmd/cli.go --format=json # -f=json
-
 {
   "commands": [
     {
-      "description": "Database Migration(Automatic Table Creation/Schema Updates)",
+      "description": "Consumer List",
+      "name": "consumer:list"
+    },
+    {
+      "description": "Database migrate",
       "name": "db:migrate"
     },
     {
-      "description": "Data Initialization",
+      "description": "Database rollback",
+      "name": "db:rollback"
+    },
+    {
+      "description": "Database seed",
       "name": "db:seed"
     },
     {
-      "description": "test-demo",
-      "name": "demo-command"
+      "description": "Demo test",
+      "name": "demo:command"
     },
     {
-      "description": "Service Creation",
+      "description": "Event List",
+      "name": "event:list"
+    },
+    {
+      "description": "Listener List",
+      "name": "listener:list"
+    },
+    {
+      "description": "Command Creation",
       "name": "make:command"
     },
     {
@@ -1007,15 +1055,43 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:controller"
     },
     {
+      "description": "Event Creation",
+      "name": "make:event"
+    },
+    {
+      "description": "Facade Creation",
+      "name": "make:facade"
+    },
+    {
+      "description": "Listener Creation",
+      "name": "make:listener"
+    },
+    {
       "description": "Middleware Creation",
       "name": "make:middleware"
+    },
+    {
+      "description": "Generate database migration template",
+      "name": "make:migration"
     },
     {
       "description": "Model Creation",
       "name": "make:model"
     },
     {
-      "description": "Validator Creation",
+      "description": "Model Creation old",
+      "name": "make:model-old"
+    },
+    {
+      "description": "Provider Creation",
+      "name": "make:provider"
+    },
+    {
+      "description": "Queue Creation(Kafka/RabbitMQ)",
+      "name": "make:queue"
+    },
+    {
+      "description": "Request Creation",
       "name": "make:request"
     },
     {
@@ -1023,23 +1099,36 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:router"
     },
     {
+      "description": "Generate database seeder template",
+      "name": "make:seed"
+    },
+    {
       "description": "Service Creation",
       "name": "make:service"
+    },
+    {
+      "description": "Producer List",
+      "name": "producer:list"
     },
     {
       "description": "Route List",
       "name": "route:list"
     }
   ],
-  "version": "Gin CLI v1.0.0"
+  "version": "Gin Cli v2.0.0"
 }
 ```
 
 ## Command Creation Help
 ```bash
 $ go run ./cmd/cli.go make:command -h # --help
+Gin Cli v2.0.0
 
-make:command - Command Creation
+Usage:
+  cli [command] [options]
+
+Command:
+make:command  Command Creation
 
 Options:
   -f, --file  File Path, Example: cronjob/demo     required:true
@@ -1100,23 +1189,20 @@ func init() {
 ```
 
 ## Command Registration
-> `cli. go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the command you registered is not `command` package, you can add the path to import the package in `cli. go`.
+> `cli. go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the command you registered is not `command` package, you can add the path to import the package in `./cmd/imports/import.go`.
 ```go
 package main
 
 import (
-	_ "gin/app/command"
-	_ "gin/app/command/cronjob"
-	"gin/pkg/cli"
-	_ "gin/pkg/cli/db"
-	_ "gin/pkg/cli/make"
-	_ "gin/pkg/cli/route"
+    _ "gin/cmd/imports"
+    "gin/config"
+    "gin/pkg/cli"
 )
 
 func main() {
-	cli.Execute()
+    _ = config.NewConfig()
+    cli.Execute()
 }
-
 ```
 
 ## Help Options
@@ -1137,8 +1223,13 @@ func (m *DemoCommand) Help() []base.CommandOption {
 ```
 ```bash
 $ go run ./cmd/cli.go demo-test -h # --help
+Gin Cli v2.0.0
 
-demo-test - command-desc
+Usage:
+  cli [command] [options]
+
+Command:
+demo-test  command-desc
 
 Options:
   -a, --args  Example Argument, Example: arg1  required:true
@@ -1146,32 +1237,39 @@ Options:
 
 ## Execute Command
 ```bash
-$ go run ./cmd/cli.go demo-test --args=arg1
-
-Execute Command: demo-test --args=arg1
+$ go run ./cmd/cli.go demo:command --args=arg1
+ SUCCESS  Excute Command: demo:command --args=arg1
 ```
 
 ## Compile And Execute Commands
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo-test --args=arg1
+$ ./cli demo:command --args=arg1
 ```
 
 # Cache
-> Global cache is used, with `memory` as the default cache driver and support for custom extensions. By default, it supports three modes: `Memory cache`, `Redis cache`, and `Disk cache`. It can use global cache or any cache separately. The global cache only integrates the common methods of `Set`, `Get`, `Delete`, and `Expire` by default. If you need to use more, you can use them separately, or you can integrate them yourself.
+> With `memory` as the default cache driver and support for custom extensions. By default, it supports three modes: `Memory cache`, `Redis cache`, and `Disk cache`. It can use global cache or any cache separately. The global cache only integrates the common methods of `Set`, `Get`, `Delete`, and `Expire` by default. If you need to use more, you can use them separately, or you can integrate them yourself.
 ## Global Cache
-> The configuration of global cache can be switched through the `cache.driver` configuration in the `yaml` configuration file.
+> The configuration of global cache can be switched through the `cache.driver` configuration in the `yaml` configuration file, or dynamically switched.
 ```go
+package controller
+
 import (
 	"fmt"
-    "gin/bootstrap"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test()  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test()  {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    cache := bootstrap.GetContainer().Cache
+    cache := facade.Cache.Store()
+    cache = facade.Cache.Store("redis")
     err := cache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // Handle error	
@@ -1207,16 +1305,23 @@ func Test()  {
 
 ## Redis Cache
 ```go
+package controller
+
 import (
 	"fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test()  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test()  {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    redisCache := container.GetContainer().RedisCache
+    redisCache := facade.Cache.Store("redis")
     err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // Handle error	
@@ -1254,16 +1359,23 @@ func Test()  {
 
 ## Memory Cache
 ```go
+package controller
+
 import (
 	"fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test()  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test()  {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    memoryCache := container.GetContainer().MemoryCache
+    memoryCache := facade.Cache.Store("memory")
     err := memoryCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // Handle error	
@@ -1301,16 +1413,23 @@ func Test()  {
 
 ## Disk Cache
 ```go
+package controller
+
 import (
     "fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test() {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    diskCache := container.GetContainer().DiskCache
+    diskCache := facade.Cache.Store("disk")
     err := diskCache.Set(key, value, time.Second*10)
     if err != nil {
         // Handle error	
@@ -1350,8 +1469,13 @@ func Test() {
 ## Event Creation Help
 ```bash
 $ go run ./cmd/cli.go make:event -h # --help
+Gin Cli v2.0.0
 
-make:event - Event Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:event  Event Creation
 
 Options:
   -f, --file  File Path, Example: login/test             required:true
@@ -1388,8 +1512,13 @@ func (u UserLoginEvent) Description() string {
 ## Listener Creation Help
 ```bash
 $ go run ./cmd/cli.go make:listener -h # --help
+Gin Cli v2.0.0
 
-make:listener - Listener Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:listener  Listener Creation
 
 Options:
   -f, --file   File Path, Example: login/test   required:true
@@ -1404,18 +1533,24 @@ $ go run ./cmd/cli.go make:listener -f=user_login -e=UserLoginEvent
 package listener
 
 import (
-	"github.com/goccy/go-json"
-	"fmt"
-	"gin/app/event"
-	"gin/pkg/eventbus"
-	"time"
+    "fmt"
+    "gin/app/event"
+    "gin/common/base"
+    "gin/pkg/eventbus"
+    "github.com/goccy/go-json"
+    "time"
 )
 
 type UserLoginListener struct{}
 
-func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
+func (l *UserLoginListener) Handle(e base.Event) {
+    ev, ok := e.(event.UserLoginEvent)
+    if !ok {
+        return
+    }
+  
 	data, _ := json.Marshal(e)
-	fmt.Printf("Recieved Event: %s Event Description: %s Event Data: %s, Time: %s\n", e.Name(), e.Description(), data, time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("Recieved Event: %s Event Description: %s Event Data: %s, Time: %s\n", ev.Name(), ev.Description(), data, time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func init() {
@@ -1429,8 +1564,13 @@ func init() {
 ## Queue Creation Help
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
+Gin Cli v2.0.0
 
-make:queue - Queue Creation
+Usage:
+  cli [command] [options]
+
+Command:
+  make:queue  Queue Creation
 
 Options:
   -t, --type      Queue Type, Example: kafka or rabbitmq     required:true
@@ -1454,74 +1594,144 @@ $ go run ./cmd/cli.go make:queue --type=rabbitmq --name=rabbitmq_demo --queue=ra
 package consumer
 
 import (
-  "fmt"
+  "gin/app/facade"
   "gin/common/base"
   "gin/config"
+  "gin/pkg"
+  "gin/pkg/logger"
+  "gin/pkg/queue"
 )
 
+// RabbitmqDemoConsumer RabbitMQ Consumer
 type RabbitmqDemoConsumer struct {
   *base.RabbitmqConsumer
 }
 
-func NewRabbitMqDemoConsumer() *RabbitmqDemoConsumer {
-  c := &RabbitmqDemoConsumer{
-    &base.RabbitmqConsumer{
-      Mq:           base.NewRabbitMq(),
+// NewRabbitmqDemoConsumer Consumer Creation
+func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
+  cfg := facade.Config.Get()
+  log := facade.Log.Logger()
+  bus := facade.Message.GetBus()
+
+  // RabbitMQ Connection Creation
+  mq, err := base.NewRabbitMQ(cfg, log, bus)
+  if err != nil {
+    log.Error(pkg.Sprintf("RabbitMQ Connection Failed: %v", err))
+    return nil
+  }
+
+  return &RabbitmqDemoConsumer{
+    RabbitmqConsumer: &base.RabbitmqConsumer{
+      Mq:           mq,
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
-      Retry:        3,
       IsDelayQueue: false,
+      Retry:        3,
     },
   }
-
-  c.Start()
-
-  return c
 }
 
-// Start Run the consumer
-func (c *RabbitmqDemoConsumer) Start() {
+func (c *RabbitmqDemoConsumer) Name() string {
+  return "rabbitmq_demo"
+}
+
+func (c *RabbitmqDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
   c.RabbitmqConsumer.Start(c)
+  log.Info(pkg.Sprintf("RabbitMQ Consumer Start Successed: %s", c.Name()))
+  return nil
 }
 
+func (c *RabbitmqDemoConsumer) Stop() error {
+  return c.RabbitmqConsumer.Stop()
+}
+
+func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
+  return cfg.Rabbitmq.Enabled
+}
+
+func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
+  return c.RabbitmqConsumer.Status()
+}
+
+// Handle Process business logic
 func (c *RabbitmqDemoConsumer) Handle(msg string) error {
-  fmt.Println("RabbitMq Received Msg:", msg)
+  facade.Log.Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
+  // todo Process business logic
   return nil
 }
 
 func init() {
-  if config.NewConfig().Rabbitmq.Enabled {
-    NewRabbitMqDemoConsumer()
-  }
+  queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
 }
-
 ```
 ```go
 package producer
 
 import (
+  "gin/app/facade"
   "gin/common/base"
+  "gin/pkg"
+  "gin/pkg/queue"
 )
 
+// RabbitmqDemoProducer RabbitMQ Producer
 type RabbitmqDemoProducer struct {
   *base.RabbitmqProducer
 }
 
-func InitRabbitMqDemoProducer() *RabbitmqDemoProducer {
+// NewRabbitmqDemoProducer Producer Creation
+func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
+  cfg := facade.Config.Get()
+  log := facade.Log.Logger()
+  bus := facade.Message.GetBus()
+
+  mq, err := base.NewRabbitMQ(cfg, log, bus)
+  if err != nil {
+    log.Error(pkg.Sprintf("RabbitMQ Connection Failed: %v", err))
+    return nil
+  }
+
   return &RabbitmqDemoProducer{
-    &base.RabbitmqProducer{
-      Mq:           base.NewRabbitMq(),
+    RabbitmqProducer: &base.RabbitmqProducer{
+      Mq:           mq,
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
       IsDelayQueue: false,
-      DelayMs:      0,
-      Headers:      nil,
     },
   }
 }
 
+func (p *RabbitmqDemoProducer) Name() string {
+  return "rabbitmq_demo"
+}
+
+func init() {
+  queue.GetProducerRegistry().Register(NewRabbitmqDemoProducer())
+}
+```
+
+## Queue Usage
+> When consumers start a project, it is automatically registered in the container for unlimited additional launches, and producers can use it directly by initializing the storefront.
+```go
+package controller
+
+import (
+    "fmt"
+    "gin/app/facade"
+    "gin/common/base"
+)
+
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
+    // Get Producer
+    producer := facade.Queue.Producer("rabbitmq_demo")
+	_ = producer.Publish(ctx, []byte(`{"orderId":111, "message":"message 111"}`))
+}
 ```
 
 # Publish Event
@@ -1529,22 +1739,18 @@ func InitRabbitMqDemoProducer() *RabbitmqDemoProducer {
 package v1
 
 import (
-	"gin/app/event"
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/container"
-	"gin/pkg/eventbus"
-	"gin/pkg/lang"
 	"github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
     base.BaseController
     service service.LoginService
-    req     request.Login
 }
 
 // Token token-info
@@ -1574,44 +1780,45 @@ type LoginResponse struct {
 func (s *LoginController) Login(c *gin.Context) {
   var (
     ctx = c.Request.Context()
+    req request.Login
   )
 
   s.service.WithContext(ctx)
 
-  err := c.ShouldBind(&s.req)
+  err := c.ShouldBind(&req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
-  // 验证
-  err = s.req.Validate(s.req, "Login")
+  // Validate
+  err = req.Validate(req, "Login")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }
 
-  userModel, err := s.service.Login(s.req.Username, s.req.Password)
+  userModel, err := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
   }
 
-  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(s.req.Username, s.req.Password)
+  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
   }
 
-  // 发布事件
-  eventbus.Publish(ctx, event.UserLoginEvent{
+  // Publish Event
+  facade.Event.Publish(ctx, event.UserLoginEvent{
     UserId:   userModel.ID,
     Username: userModel.Username,
   })
 
   s.Success(
     c, errcode.Success().WithMsg(
-      lang.T(ctx, "login.success", map[string]interface{}{
+      facade.Lang.T(ctx, "login.success", map[string]interface{}{
         "name": userModel.Username,
       }),
     ).WithData(LoginResponse{
@@ -1626,6 +1833,7 @@ func (s *LoginController) Login(c *gin.Context) {
   )
 }
 ```
+
 ## Event Test
 ```bash
 $ POST /api/v1/login HTTP/1.1
@@ -1651,7 +1859,7 @@ user.login 用户登录事件
 
 ## Event Listener List
 ```bash
-$ go run ./cmd/cli.go event-listener:list
+$ go run ./cmd/cli.go listener:list
 
 ==== Currently registered events ====
 Event: user.login
@@ -1821,21 +2029,21 @@ func (s *TestController) Test(c *gin.Context) {
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": null,
-    "Http": null,
-    "Mq": null,
-    "ListenerEvent": null
+    "Cache": [],
+    "Http": [],
+    "Mq": [],
+    "ListenerEvent": []
   }
 }
 ```
+
 ## Write Log
-> Encapsulated in a container containing context. The log level supports debug, info, warn, error, dPanic, panic, and fatal, with the default being `debug`.
+> Encapsulated in the facade, the log level supports debug, info, warn, error, dpanic, panic, and fatal, with the default being `debug`.
 ```go
 package v1
 
 import (
-    "gin/common/base"
-    "gin/pkg/container"
+    "gin/app/facade"
     "github.com/gin-gonic/gin"
 )
 
@@ -1844,8 +2052,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-  containers := container.Get(c.Request.Context())
-  containers.Log.Error("System Error")
+    facade.Log.Error("System Error")
 }
 ```
 
@@ -1855,8 +2062,8 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+    "gin/app/facade"
     "gin/common/base"
-    "gin/pkg/container"
     "github.com/gin-gonic/gin"
 )
 
@@ -1865,9 +2072,8 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-  ctx := c.Request.Context()
-  containers := container.Get(ctx)
-  containers.Log.WithDebugger(ctx).Error("System Error")
+    ctx := c.Request.Context()
+    facade.Log.WithDebugger(ctx).Error("System Error")
 }
 ```
 ```json
@@ -1893,17 +2099,17 @@ func (s *TestController) Test(c *gin.Context) {
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": null,
-    "Http": null,
-    "Mq": null,
-    "ListenerEvent": null
+    "Cache": [],
+    "Http": [],
+    "Mq": [],
+    "ListenerEvent": []
   },
   "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
 }
 ```
 
 # Language Support
-> Implement multilingual support using the `i18n` package, supporting both `zh` and `en` languages, and supporting custom extensions. Language transmission defaults to transmitting the `Accept-Language` parameter in the `header`, such as `zh` or `en`, which is not case sensitive and does not pass the default language as `zh`.
+> Multilingualism has been integrated into the facade and provider, supporting both `zh` and `en` languages, and supporting custom extensions. Language transmission defaults to transmitting the `Accept-Language` parameter in the `header`, such as `zh` or `en`, which is not case sensitive and does not pass the default language as `zh`.
 ## Directory Configuration
 > The storage path for translation files is `storage/scales`, the default language is `zh`, and multiple languages are separated by commas. Languages are stored in the corresponding language directory without distinguishing between subdirectories. For example, Chinese is stored in `storage/scales/zh` and can support `json` and `yaml` format files in any directory.
 ```yaml
@@ -1915,14 +2121,22 @@ i18n:
 
 ## Ordinary Translation
 ```go
+package controller
+
 import (
-    "gin/pkg/lang"
+	"fmt"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := lang.T(ctx, "login.username", nil)
+    trans := facade.Lang.T(ctx, "login.username", nil)
 	fmt.Println(trans) // Output: 用户名, English Output: Username
 }
 ```
@@ -1938,14 +2152,22 @@ func Test(c *gin.Context)  {
 ]
 ```
 ```go
+package controller
+
 import (
-    "gin/pkg/lang"
+    "fmt"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := lang.T(ctx, "login.success", map[string]interface{}{
+    trans := facade.Lang.T(ctx, "login.success", map[string]interface{}{
         "name": "admin",
     }),
 	fmt.Println(trans) // Output: admin,登录成功 English Output: admin,Login Success
@@ -1961,26 +2183,39 @@ i18n:
   lang: "zh,en" # Default language, multiple languages separated by commas
 ```
 
-# Container
-## Container Usage
-> Containers are initialized through bootstrap and bound to context through middleware. Container instances can be obtained wherever there is context.
+# Provider Service
+> The provider service will automatically load the registration upon startup and release it upon shutdown.
+## Provider Service Creation
+> 同模型、控制器等使用命令行创建,具体参考之前文档。
+
+# Facade
+## Facade Creation
+> Create models, controllers, etc. using the command line, refer to the previous documentation for details.
+
+## Facade Usage
+> The project integrates features such as logs, databases, caches, and throttling by Facade. Currently, cache is used as an example. The binding of context to databases, caches, HTTP requests, and queues will be recorded in the debugging log.
 ```go
+package controller
+
 import (
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+	base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    containers := container.Get(ctx)
-    db := containers.DB;
-    cache := containers.Cache;
-	redisCache := containers.RedisCache;
-	memoryCache := containers.MemoryCache;
-	diskCache := containers.DiskCache;
-	conf := containers.Config;
-	log := containers.Log;
-	// todo ...
+    cache := facade.Cache.Store()
+    redisCache := facade.Cache.Store('redis')   // OR facade.Cache.Redis()
+    // Bind context to cache
+    redisCache = redisCache.WithContext(ctx)
+    memoryCache := facade.Cache.Store('memory') // OR facade.Cache.Memory()
+    diskCache := facade.Cache.Store('disk')     // OR facade.Cache.Disk()
+    // Other facade usage ...
 }
 ```
 
@@ -2037,50 +2272,87 @@ sqlsrv:
 ```
 
 ## Database Connection
+> The use of context is not mandatory. If the context is not bound, SQL records will not be recorded in the log.
 ```go
+package controller
+
 import (
-    "gin/pkg/container"
-    "gin/pkg/orm"
-    "github.com/gin-gonic/gin"
+  "gin/app/facade"
+  "gin/common/base"
+  "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
-    ctx := c.Request.Context()
-    containers := container.Get(ctx)
-    // Use container
-	db := containers.DB;
-	// Use configuration
-	db1 := orm.Connection()
-	// Connection pgsql
-	db2 := orm.Connection("pgsql")
-	// Connection sqlsrv
-	db3 := orm.Connection("sqlsrv")
-    // todo ...
+type TestController struct {
+  base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
+  ctx := c.Request.Context()
+  // Default Connection
+  db := facade.DB.Connection()
+  // Using context
+  db1 := facade.DB.Connection().WithContext(ctx)
+  // Connection pgsql
+  db2 := facade.DB.Connection("pgsql").WithContext(ctx)
+  // Connection sqlsrv
+  db3 := facade.DB.Connection("sqlsrv").WithContext(ctx)
+  // todo ...
 }
 ```
 
-## Sql Log Record
-> Container connection is enabled by default, and once enabled, it will be recorded in the log. If using configuration connection, context needs to be passed. The use of configuration connection context is not mandatory. If the context is not bound, SQL records will not be recorded in the log.
+## Database Search
+> Use in conjunction with the ORM dynamic filtering example in the document.
 ```go
+package controller
+
 import (
-    "gin/pkg/container"
-    "gin/pkg/orm"
+    "gin/app/facade"
+    "gin/app/model"
+    "gin/app/request"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
-    ctx := c.Request.Context()
-    containers := container.Get(ctx)
-    // Use container default records in the log
-	db := containers.DB;
-	// Use configuration
-	db1 := orm.Connection.WithContext(ctx)
-	// Connection pgsql
-	db2 := orm.Connection("pgsql").WithContext(ctx)
-	// Connection sqlsrv
-	db3 := orm.Connection("sqlsrv").WithContext(ctx)
-    // todo ...
+type TestController struct {
+    base.BaseController
 }
+
+func (s *TestController) Test(c *gin.Context) {
+    var (
+        ctx    = c.Request.Context()
+		search request.Search
+        m      []model.User
+		db     = facade.DB.Connection().WithContext(ctx)
+	)
+
+    err := c.ShouldBind(&search)
+    if err != nil {
+        s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    db = db.Model(&model.User{})
+	
+    if search != nil {
+        whereSql, args, err := orm.BuildCondition(search, db, model.User{})
+        if err != nil {
+            s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+            return
+        }
+    
+        if whereSql != "" {
+            db = db.Where(whereSql, args...)
+        }
+    }
+
+    err = db.Offset(10).Limit(10).Order("id DESC").Find(&m).Error
+	if err != nil {
+		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+    }
+	
+	s.Success(c, m)
+}
+
 ```
 
 # Swagger Documents

@@ -1,15 +1,15 @@
 package event
 
 import (
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/eventbus"
 )
 
 type EventListenerList struct{}
 
 func (s *EventListenerList) Name() string {
-	return "event-listener:list"
+	return "listener:list"
 }
 
 func (s *EventListenerList) Description() string {
@@ -21,7 +21,7 @@ func (s *EventListenerList) Help() []base.CommandOption {
 }
 
 func (s *EventListenerList) Execute(args []string) {
-	eventbus.DebugPrint()
+	facade.Event.Debug()
 }
 
 func init() {
