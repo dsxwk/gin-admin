@@ -33,7 +33,8 @@ func (p *QueueProvider) Register(app foundation.App) {
 	// 注册队列门面
 	facade.Register("queue", facade.Queue)
 	p.consumers = queue.GetConsumerRegistry().GetAll()
-	facade.Log.Info(pkg.Sprintf("已注册 %d 个消费者", len(p.consumers)))
+	p.producers = queue.GetProducerRegistry().GetAll()
+	facade.Log.Info(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
 }
 
 // Boot 启动服务(只启动消费者,生产者按需使用)
