@@ -1,10 +1,10 @@
 package service
 
 import (
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg/container"
 	"gin/pkg/orm"
 )
 
@@ -15,14 +15,14 @@ type MenuService struct {
 // List 列表
 func (s *MenuService) List(req request.Menu, _search map[string]interface{}) (pageData request.PageData, err error) {
 	var (
-		m          []model.Menu
-		menu       model.Menu
-		containers = container.Get(s.Ctx)
+		m    []model.Menu
+		menu model.Menu
+		db   = facade.DB.Connection().WithContext(s.Ctx)
 	)
 
 	offset, limit := request.Pagination(req.Page, req.PageSize)
 
-	db := containers.DB.Model(&menu)
+	db = db.Model(&menu)
 
 	if _search != nil {
 		whereSql, args, _err := orm.BuildCondition(_search, db, menu)

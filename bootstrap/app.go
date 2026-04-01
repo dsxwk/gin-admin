@@ -4,17 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gin/app/facade"
 	_ "gin/app/listener"
-	"gin/app/middleware"
-	_ "gin/app/queue/kafka/consumer"
-	_ "gin/app/queue/rabbitmq/consumer"
+	_ "gin/app/provider"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/container"
-	"gin/pkg/debugger"
-	"gin/pkg/lang"
-	"gin/pkg/message"
+	"gin/pkg/foundation"
 	"gin/router"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -28,108 +24,158 @@ import (
 	"time"
 )
 
+// App 应用结构
 type App struct {
-	Engine    *gin.Engine
-	Container *container.Container
+	Engine *gin.Engine
 }
 
-func NewApp(c *container.Container) *App {
-	var (
-		r    = gin.New()
-		conf = config.NewConfig()
-	)
+// Init 初始化应用
+func Init() error {
+	// 初始化门面系统
+	facade.Init()
+	// 创建应用实例
+	app := foundation.GetApp()
+	// 注册应用到门面
+	facade.Register("app", app)
 
-	// 运行环境模式 debug模式, test测试模式, release生产模式, 默认是debug,根据当前配置文件读取
+	// 启动应用(加载所有providers)
+	return app.Boot()
+}
+
+// NewApp 创建应用实例
+func NewApp() *App {
+	if err := Init(); err != nil {
+		flag.Errorf("初始化应用失败: %v", err)
+		os.Exit(1)
+	}
+
+	return &App{
+		Engine: setupEngine(),
+	}
+}
+
+// setupEngine 配置Gin引擎
+func setupEngine() *gin.Engine {
+	r := gin.New()
+
+	conf := facade.Config.Get()
+
+	// 设置运行模式
 	gin.SetMode(conf.App.Mode)
 
+	// 非生产环境允许所有代理
 	if conf.App.Env != "production" {
-		// 非生产环境允许所有代理
 		_ = r.SetTrustedProxies(nil)
 	}
 
-	// 设置http请求处理文件上传时可以使用的最大内存为90MB
+	// 设置文件上传最大内存
 	r.MaxMultipartMemory = 90 << 20
 
 	// 加载路由
 	router.LoadRouters(r)
 
-	return &App{
-		Engine:    r,
-		Container: c,
-	}
+	return r
 }
 
 func (a *App) Run() {
-	var conf = config.NewConfig()
-	// 设置50：更积极回收
+	// 系统优化设置50：更积极回收
 	debug.SetGCPercent(50)
-	// 加载翻译
-	lang.LoadLang()
-	// debugger订阅
-	dbg := debugger.NewDebugger(message.GetEventBus())
-	dbg.Start()
-	defer dbg.Stop()
-	middleware.InitRateLimit()
 
-	data := map[string]interface{}{
-		"应用":  conf.App.Name,
-		"环境":  config.GetString("app.env"),
-		"端口":  conf.App.Port,
-		"数据库": conf.Mysql.Database,
+	conf := facade.Config.Get()
+	if conf == nil {
+		flag.Errorf("配置未加载,无法启动服务")
+		os.Exit(1)
 	}
 
 	// 启动提示
-	PrintAligned(data, []string{"应用", "环境", "端口", "数据库"})
+	a.printStartupInfo(conf)
 
-	var port = pkg.IntToString(conf.App.Port)
-	run := map[string]interface{}{
-		flag.Network + " Address:":  "http://0.0.0.0:" + port,
-		flag.Pointer + " Swagger:":  "http://127.0.0.1:" + port + "/swagger/index.html",
-		flag.Pointer + " Test API:": "http://127.0.0.1:" + port + "/ping",
+	// 启动http服务
+	srv := a.startHttpServer(conf)
+
+	// 优雅关闭
+	a.gracefulShutdown(srv)
+
+	// select {}
+}
+
+// printStartupInfo 打印启动信息
+func (a *App) printStartupInfo(conf *config.Config) {
+	// 应用信息
+	appInfo := map[string]interface{}{
+		"应用":  conf.App.Name,
+		"环境":  conf.App.Env,
+		"端口":  conf.App.Port,
+		"数据库": conf.Mysql.Database,
 	}
-	PrintAligned(run, []string{flag.Network + " Address:", flag.Pointer + " Swagger:", flag.Pointer + " Test API:"})
-	fmt.Println("Gin server started successfully!")
+	PrintAligned(appInfo, []string{"应用", "环境", "端口", "数据库"})
 
+	// 服务地址
+	port := pkg.IntToString(conf.App.Port)
+	network := pkg.Sprintf("%s Address:", flag.NetworkIco)
+	swagger := pkg.Sprintf("%s Swagger:", flag.PointerIco)
+	testApi := pkg.Sprintf("%s Test API:", flag.PointerIco)
+	serverInfo := map[string]interface{}{
+		network: pkg.Sprintf("http://0.0.0.0:%s", port),
+		swagger: pkg.Sprintf("http://127.0.0.1:%s/swagger/index.html", port),
+		testApi: pkg.Sprintf("http://127.0.0.1:%s/ping", port),
+	}
+	PrintAligned(serverInfo, []string{
+		network,
+		swagger,
+		testApi,
+	})
+
+	flag.Successf("Gin server started successfully!")
+}
+
+// startHTTPServer 启动http服务
+func (a *App) startHttpServer(conf *config.Config) *http.Server {
+	port := pkg.IntToString(conf.App.Port)
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           a.Engine,
-		ReadTimeout:       10 * time.Second, // 设置读取超时
-		WriteTimeout:      10 * time.Second, // 设置写入超时
-		IdleTimeout:       30 * time.Second, // 设置空闲超时
-		ReadHeaderTimeout: 5 * time.Second,  // 设置读取头超时
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			color.Red("服务启动失败: %s", err.Error())
+			flag.Errorf("服务启动失败: %s", err.Error())
 			os.Exit(1)
 		}
 	}()
 
-	// 等待中断信号以优雅地关闭服务器(设置5秒的超时时间)
+	return srv
+}
+
+// gracefulShutdown 优雅关闭
+func (a *App) gracefulShutdown(srv *http.Server) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	color.Yellow("服务正在关闭...")
+
+	defer func() {
+		app := foundation.GetApp()
+		err := app.Stop()
+		if err != nil {
+			flag.Errorf("关闭应用失败: %s", err.Error())
+			return
+		}
+	}()
+
+	// 设置关闭超时
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	// 关闭http服务
 	if err := srv.Shutdown(ctx); err != nil {
-		color.Red(flag.Error+" 服务关闭异常: %v", err)
+		flag.Errorf("服务关闭异常: %v", err)
 	}
-
-	a.shutdown()
-	// select {}
-}
-
-// 关闭资源
-func (a *App) shutdown() {
-	middleware.ShutdownRateLimit()
-
-	// ...
-	// kafka.Close()
-	// rabbitmq.Close()
-	// db.Close()
 }
 
 // PrintAligned 打印冒号对齐,支持中文

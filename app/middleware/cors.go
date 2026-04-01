@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"gin/app/facade"
 	"gin/common/base"
-	"gin/config"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,7 +11,7 @@ type Cors struct {
 	base.BaseMiddleware
 }
 
-var conf = config.NewConfig()
+var conf = facade.Config.Get()
 
 // Handle 跨域中间件
 func (s Cors) Handle() gin.HandlerFunc {

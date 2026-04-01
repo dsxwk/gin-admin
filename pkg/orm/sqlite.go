@@ -1,13 +1,19 @@
 package orm
 
 import (
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
+	// 纯Go的SQLite驱动,不需要CGO
+	"github.com/glebarez/sqlite"
 )
 
 func openSqlite() (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open(conf.Sqlite.Path), &gorm.Config{
-		NamingStrategy: configNaming(),
-		Logger:         gormLogger(),
+	db, err := gorm.Open(sqlite.Open(conf.Sqlite.Path), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+		Logger: logger.Default.LogMode(logger.Info),
 	})
+	return db, err
 }

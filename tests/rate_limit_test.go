@@ -15,11 +15,6 @@ import (
 
 func TestRateLimitMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	// 初始化限流
-	middleware.InitRateLimit()
-
-	// 关闭限流
-	defer middleware.ShutdownRateLimit()
 
 	r := gin.New()
 

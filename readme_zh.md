@@ -34,7 +34,7 @@
   - [模型](#模型)
     - [模型创建帮助](#模型创建帮助)
     - [模型创建](#模型创建)
-    - [GORM动态筛选](#GORM动态筛选)
+    - [ORM动态筛选](#ORM动态筛选)
     - [OR条件查询](#OR条件查询)
     - [AND条件查询](#AND条件查询)
     - [json字段查询](#json字段查询)
@@ -80,6 +80,7 @@
   - [队列](#队列)
     - [队列创建帮助](#队列创建帮助)
     - [队列创建](#队列创建)
+    - [队列使用](#队列使用)
   - [发布事件](#发布事件)
     - [测试事件](#测试事件)
   - [事件列表](#事件列表)
@@ -100,16 +101,19 @@
     - [常规翻译](#常规翻译)
     - [模版翻译](#模版翻译)
     - [添加语言](#添加语言)
-  - [容器](#容器)
-    - [容器使用](#容器使用) 
+  - [容器服务](#容器服务)
+    - [容器服务创建](#容器服务创建)
+  - [门面](#门面)
+    - [门面创建](#门面创建)
+    - [门面使用](#门面使用)
   - [数据库](#数据库)
     - [数据库配置](#数据库配置)
     - [数据库连接](#数据库连接)
-    - [sql日志记录](#sql日志记录)
+    - [数据库搜索](#数据库搜索)
   - [swagger文档](#swagger文档)
 
 # 项目简介
-> 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
+> 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`门面`、`容器服务`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
 ## 项目地址
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
@@ -128,7 +132,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v1.8.7
+> - 最新版本: v2.0.0
 > - [版本更新详细记录](VersionHistoryZh.md)
 
 # 安装说明
@@ -173,9 +177,9 @@ $ ./main
 ### 编译命令行
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo-command --args=11
+$ ./cli demo:command --args=11
 
-执行命令: demo-command, 参数: 11
+执行命令: demo:command, 参数: 11
 ```
 
 # 目录结构
@@ -184,9 +188,11 @@ $ ./cli demo-command --args=11
 │   ├── command                         # 命令
 │   ├── controller                      # 控制器
 │   ├── event                           # 事件
+│   ├── facade                          # 门面
 │   ├── listener                        # 监听
 │   ├── middleware                      # 中间件
 │   ├── model                           # 模型
+│   ├── provider                        # 容器服务
 │   ├── queue                           # 消息队列
 │   ├──├── kafka                        # Kafka
 │   ├──├──├── consumer                  # 消费者
@@ -206,20 +212,20 @@ $ ./cli demo-command --args=11
 │   ├── flag                            # 特殊符合
 │   ├── response                        # 响应
 │   ├── template                        # 模版
-│   ├── trace                           # 调试
 ├── config                              # 配置文件
 ├── database                            # 数据库测试文件
 ├── docs                                # 文档
 ├── pkg                                 # 工具包
 │   ├──├── cache                        # 缓存
 │   ├──├── cli                          # 命令行
-│   ├──├── container                    # 容器
 │   ├──├── debugger                     # 调试
 │   ├──├── eventbus                     # 事件
+│   ├──├── foundation                   # 服务提供者
+│   ├──├── http                         # http请求
 │   ├──├── lang                         # 多语言
 │   ├──├── logger                       # 日志
 │   ├──├── message                      # 消息事件
-│   ├──├── gorm                         # orm工具
+│   ├──├── orm                          # orm工具
 │   ├──├── queue                        # 队列
 │   ├──├── time                         # 时间处理
 ├── public                              # 静态资源
@@ -265,51 +271,9 @@ watching .
 watching app
 watching app\command
 watching app\controller
-watching app\controller\v1
-watching app\middleware
-watching app\model
-watching app\request
-watching app\service
-watching common
-watching common\base
-watching common\errcode
-watching common\response
-watching common\template
-watching config
-watching database
-watching docs
-watching public
-watching router
-!exclude storage
-watching tests
-!exclude tmp
-watching pkg
-watching pkg\cli
-watching pkg\cli\db
-watching pkg\cli\make
-watching pkg\cli\route
-watching pkg\ctx
-!exclude vendor
-building...
-running...
-✅ 已加载环境配置文件: config\dev.config.yaml
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:   export GIN_MODE=release
- - using code:  gin.SetMode(gin.ReleaseMode)
-
-✅ 已加载环境配置文件: config\dev.config.yaml
-[GIN-debug] GET    /ping                     --> gin/router.LoadRouters.func1 (3 handlers)
-[GIN-debug] GET    /public/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] HEAD   /public/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (3 handlers)
-[GIN-debug] POST   /api/v1/login             --> gin/app/controller/v1.(*LoginController).Login-fm (4 handlers)
-[GIN-debug] GET    /api/v1/user              --> gin/app/controller/v1.(*UserController).List-fm (5 handlers)
-[GIN-debug] POST   /api/v1/user              --> gin/app/controller/v1.(*UserController).Create-fm (5 handlers)
-[GIN-debug] PUT    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Update-fm (5 handlers)
-[GIN-debug] DELETE /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Delete-fm (5 handlers)
-[GIN-debug] GET    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Detail-fm (5 handlers)
+...
+...
+[GIN-debug] GET    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Detail-fm (6 handlers)
 应用:    gin
 环境:    dev
 端口:    8080
@@ -317,7 +281,7 @@ running...
 🌐 Address:    http://0.0.0.0:8080
 👉 Swagger:    http://127.0.0.1:8080/swagger/index.html
 👉 Test API:   http://127.0.0.1:8080/ping
-Gin server started successfully!
+ SUCCESS  Gin server started successfully!
 ```
 
 ## 配置文件
@@ -336,10 +300,16 @@ Gin server started successfully!
 ### 中间件创建帮助
 ```bash
 $ go run ./cmd/cli.go make:middleware -h # --help
-make:middleware - 中间件创建
+Gin Cli v2.0.0
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:middleware  中间件创建
 
 Options:
-  -f, --file  文件路径, 如: auth   required:true
+  -f, --file  文件路径, 如: auth    required:true
   -d, --desc  描述, 如: 权限中间件  required:false
 ```
 
@@ -420,8 +390,13 @@ func LoadRouters(router *gin.Engine) {
 ### 路由创建帮助
 ```bash
 $ go run ./cmd/cli.go make:router -h # --help
+Gin Cli v2.0.0
 
-make:router - 路由创建
+Usage:
+  cli [command] [options]
+
+Command:
+  make:router  路由创建
 
 Options:
   -f, --file  文件路径, 如: user      required:true
@@ -500,15 +475,18 @@ GET      /swagger/*any                       github.com/swaggo/gin-swagger.Custo
 ### 控制器创建帮助
 ```bash
 $ go run ./cmd/cli.go make:controller -h # --help
+Gin Cli v2.0.0
 
-make:controller - 控制器创建
+Usage:
+  cli [command] [options]
+
+Command:
+  make:controller  控制器创建
 
 Options:
   -f, --file      文件路径, 如: v1/user  required:true
   -F, --function  方法名称, 如: list     required:false
   -m, --method    请求方式, 如: get      required:false
-  -r, --router    路由地址, 如: /user    required:false
-  -d, --desc      描述, 如: 列表         required:false
 ```
 
 ### 控制器创建
@@ -540,13 +518,19 @@ func (s *TestController) List(c *gin.Context) {
 ### 模型创建帮助
 ```bash
 $ go run ./cmd/cli.go make:model -h # --help
+Gin Cli v2.0.0
 
-make:model - 模型创建
+Usage:
+  cli [command] [options]
+
+Command:
+  make:model  模型创建
 
 Options:
-  -t, --table  表名, 如: user 或 user,menu  required:true
-  -p, --path   输出目录, 如: api/user       required:false
-  -c, --camel  是否驼峰字段, 如: true       required:false
+  -t, --table       表名, 如: user 或 user,menu  required:true
+  -p, --path        输出目录, 如: api/user       required:false
+  -c, --camel       json字段是否使用驼峰          required:false
+  -C, --connection  数据库连接                   required:false
 ```
 
 ### 模型创建
@@ -588,7 +572,7 @@ func (*User) TableName() string {
 }
 ```
 
-## GORM动态筛选
+## ORM动态筛选
 > 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]interface{}` 如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username":"admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
 ### OR条件查询
 ```http
@@ -626,8 +610,13 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 ### 验证创建帮助
 ```bash
 $ go run ./cmd/cli.go make:request -h # --help
+Gin Cli v2.0.0
 
-make:request - 验证请求创建
+Usage:
+  cli [command] [options]
+
+Command:
+  make:request  验证请求创建
 
 Options:
   -f, --file  文件路径, 如: user     required:true
@@ -697,6 +686,8 @@ func (s User) Translates() map[string]string {
 ### 验证规则
 > 更多规则请查看 [gookit/validate](https://github.com/gookit/validate)
 ```go
+package request
+
 // UserCreate 用户创建验证
 type UserCreate struct {
 	Username string `json:"username" validate:"required" label:"用户名"`
@@ -735,6 +726,8 @@ type User struct {
 
 ### 验证场景
 ```go
+package request
+
 // ConfigValidation 配置验证
 // - 定义验证场景
 // - 也可以添加验证设置
@@ -775,6 +768,8 @@ func (s User) ConfigValidation(v *validate.Validation) {
 
 ### 提示信息
 ```go
+package request
+
 // Messages 验证器错误消息
 func (s User) Messages() map[string]string {
 	return validate.MS{
@@ -788,6 +783,8 @@ func (s User) Messages() map[string]string {
 
 ### 字段翻译
 ```go
+package request
+
 // Translates 字段翻译
 func (s User) Translates() map[string]string {
 	return validate.MS{
@@ -827,7 +824,9 @@ func init() {
 
 #### 局部规则
 ```go
-// 定义局部规则方法(命名规则：Validate<规则名>)
+package request
+
+// ValidateIsEven 定义局部规则方法(命名规则：Validate<规则名>)
 func (s User) ValidateIsEven(val any) bool {
 	num := val.(int)
 	return num%2 == 0
@@ -836,6 +835,8 @@ func (s User) ValidateIsEven(val any) bool {
 
 #### 临时规则
 ```go
+package request
+
 // Validate 请求验证
 func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
@@ -856,6 +857,8 @@ func (s User) Validate(data User, scene string) error {
 
 #### 验证使用
 ```go
+package request
+
 type User struct {
     Age int `json:"gender" validate:"required|is_even" label:"年龄"`
 }
@@ -866,12 +869,12 @@ type User struct {
 package v1
 
 import (
+  "gin/app/facade"
   "gin/app/model"
   "gin/app/request"
   "gin/app/service"
   "gin/common/base"
   "gin/common/errcode"
-  "gin/pkg/lang"
   "github.com/gin-gonic/gin"
   "github.com/jinzhu/copier"
   "strconv"
@@ -880,9 +883,6 @@ import (
 type UserController struct {
   base.BaseController
   service service.UserService
-  req     request.User
-  search  request.Search
-  user    model.User
 }
 
 // List 列表
@@ -898,33 +898,35 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
   var (
-    ctx = c.Request.Context()
+    ctx    = c.Request.Context()
+    req    request.User
+    search request.Search
   )
 
   s.service.WithContext(ctx)
 
-  err := c.ShouldBind(&s.search)
+  err := c.ShouldBind(&search)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
-  err = c.ShouldBind(&s.req)
+  err = c.ShouldBind(&req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
   // 验证
-  err = s.req.Validate(s.req, "List")
+  err = req.Validate(req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }
 
-  res, err := s.service.List(s.req, s.search.Search)
+  res, err := s.service.List(req, search.Search)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
   }
 
@@ -936,8 +938,13 @@ func (s *UserController) List(c *gin.Context) {
 ### 服务创建帮助
 ```bash
 $ go run ./cmd/cli.go make:service -h # --help
+Gin Cli v2.0.0
 
-make:service - 服务创建
+Usage:
+  cli [command] [options]
+
+Command:
+  make:service  服务创建
 
 Options:
   -f, --file      文件路径, 如: v1/user  required:true
@@ -955,53 +962,92 @@ $ go run ./cmd/cli.go make:service -f=user --function=list --desc="列表"
 ### 获取版本
 ```bash
 $ go run ./cmd/cli.go --version # -v
-Gin CLI v1.0.0
+Gin Cli v2.0.0
 ```
 
 ### 命令帮助
 ```bash
 $ go run ./cmd/cli.go -h # --help
+Gin Cli v2.0.0
 
-Usage: go run ./cmd/cli.go [command] [options]
+Usage:
+  cli [command] [options]
+
 Available commands:
-  db:migrate               数据库迁移(自动建表/更新结构)
-  db:seed                  数据初始化
-  demo-command             test-demo
-  make:command             服务创建
-  make:controller          控制器创建
-  make:middleware          中间件创建
-  make:model               模型创建
-  make:request             验证请求创建
-  make:router              路由创建
-  make:service             服务创建
-  route:list               路由列表
+consumer:
+  consumer:list    消费者列表
+db:
+  db:migrate       数据迁移
+  db:rollback      数据回滚
+  db:seed          数据填充
+demo:
+  demo:command     test-demo
+event:
+  event:list       事件列表
+listener:
+  listener:list    事件监听列表
+make:
+  make:command     命令创建
+  make:controller  控制器创建
+  make:event       创建事件
+  make:facade      创建门面
+  make:listener    创建监听
+  make:middleware  中间件创建
+  make:migration   生成数据库迁移模板
+  make:model       模型创建
+  make:model-old   模型创建old
+  make:provider    创建服务提供者
+  make:queue       创建消息队列(Kafka/RabbitMQ)
+  make:request     验证请求创建
+  make:router      路由创建
+  make:seed        生成数据库seeder模板
+  make:service     服务创建
+producer:
+  producer:list    生产者列表
+route:
+  route:list       路由列表
 
 Options:
-  -f, --format   The output format (txt, json) [default: txt]
-  -h, --help     Display help for the given command. When no command is given display help for the list command
-  -v, --version  Display this application version
+  -f, --format     The output format (txt, json) [default: txt]
+  -h, --help       Display help for the given command
+  -v, --version    Display CLI version
 ```
 
 ### 命令列表
 ```bash
 $ go run ./cmd/cli.go --format=json # -f=json
-
 {
   "commands": [
     {
-      "description": "数据库迁移(自动建表/更新结构)",
+      "description": "消费者列表",
+      "name": "consumer:list"
+    },
+    {
+      "description": "数据迁移",
       "name": "db:migrate"
     },
     {
-      "description": "数据初始化",
+      "description": "数据回滚",
+      "name": "db:rollback"
+    },
+    {
+      "description": "数据填充",
       "name": "db:seed"
     },
     {
       "description": "test-demo",
-      "name": "demo-command"
+      "name": "demo:command"
     },
     {
-      "description": "服务创建",
+      "description": "事件列表",
+      "name": "event:list"
+    },
+    {
+      "description": "事件监听列表",
+      "name": "listener:list"
+    },
+    {
+      "description": "命令创建",
       "name": "make:command"
     },
     {
@@ -1009,12 +1055,40 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:controller"
     },
     {
+      "description": "创建事件",
+      "name": "make:event"
+    },
+    {
+      "description": "创建门面",
+      "name": "make:facade"
+    },
+    {
+      "description": "创建监听",
+      "name": "make:listener"
+    },
+    {
       "description": "中间件创建",
       "name": "make:middleware"
     },
     {
+      "description": "生成数据库迁移模板",
+      "name": "make:migration"
+    },
+    {
       "description": "模型创建",
       "name": "make:model"
+    },
+    {
+      "description": "模型创建old",
+      "name": "make:model-old"
+    },
+    {
+      "description": "创建服务提供者",
+      "name": "make:provider"
+    },
+    {
+      "description": "创建消息队列(Kafka/RabbitMQ)",
+      "name": "make:queue"
     },
     {
       "description": "验证请求创建",
@@ -1025,23 +1099,36 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:router"
     },
     {
+      "description": "生成数据库seeder模板",
+      "name": "make:seed"
+    },
+    {
       "description": "服务创建",
       "name": "make:service"
+    },
+    {
+      "description": "生产者列表",
+      "name": "producer:list"
     },
     {
       "description": "路由列表",
       "name": "route:list"
     }
   ],
-  "version": "Gin CLI v1.0.0"
+  "version": "Gin Cli v2.0.0"
 }
 ```
 
 ## 命令创建帮助
 ```bash
 $ go run ./cmd/cli.go make:command -h # --help
+Gin Cli v2.0.0
 
-make:command - 命令创建
+Usage:
+  cli [command] [options]
+
+Command:
+make:command  命令创建
 
 Options:
   -f, --file  文件路径, 如: cronjob/demo  required:true
@@ -1102,23 +1189,20 @@ func init() {
 ```
 
 ## 命令注册
-> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在 `./cmd/cli.go` 中添加导入包的路径。
+> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在 `./cmd/imports/import.go` 中添加导入包的路径。
 ```go
 package main
 
 import (
-	_ "gin/app/command"
-	_ "gin/app/command/cronjob"
-	"gin/pkg/cli"
-	_ "gin/pkg/cli/db"
-	_ "gin/pkg/cli/make"
-	_ "gin/pkg/cli/route"
+    _ "gin/cmd/imports"
+    "gin/config"
+    "gin/pkg/cli"
 )
 
 func main() {
+    _ = config.NewConfig()
 	cli.Execute()
 }
-
 ```
 
 ## 帮助选项
@@ -1139,8 +1223,13 @@ func (m *DemoCommand) Help() []base.CommandOption {
 ```
 ```bash
 $ go run ./cmd/cli.go demo-test -h # --help
+Gin Cli v2.0.0
 
-demo-test - command-desc
+Usage:
+  cli [command] [options]
+
+Command:
+demo-test  command-desc
 
 Options:
   -a, --args  示例参数, 如: arg1  required:true
@@ -1148,32 +1237,39 @@ Options:
 
 ## 执行命令
 ```bash
-$ go run ./cmd/cli.go demo-test --args=arg1
-
-执行命令: demo-test --args=arg1
+$ go run ./cmd/cli.go demo:command --args=arg1
+ SUCCESS  执行命令: demo:command --args=arg1
 ```
 
 ## 编译执行
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo-test --args=arg1
+$ ./cli demo:command --args=arg1
 ```
 
 # 缓存
-> 使用了全局缓存, 默认使用 `memory` 作为缓存驱动, 支持自定义扩展。默认支持`内存缓存`、`Redis缓存`、`磁盘缓存`三种模式, 可使用全局缓存也可单独使用任意缓存。全局缓存默认只集成了`Set`、`Get`、`Delete`、`Expire`公共方法如需使用更多可以单独使用,你也可以自己集成。
+> 默认使用 `memory` 作为缓存驱动, 支持自定义扩展。默认支持`内存缓存`、`Redis缓存`、`磁盘缓存`三种模式, 可使用全局缓存也可单独使用任意缓存。全局缓存默认只集成了`Set`、`Get`、`Delete`、`Expire`公共方法如需使用更多可以单独使用,你也可以自己集成。
 ## 全局缓存
-> 配置全局缓存可通过`yaml`配置文件中的`cache.driver`配置进行切换。
+> 配置全局缓存可通过`yaml`配置文件中的`cache.driver`配置进行切换，也可以动态切换。
 ```go
+package controller
+
 import (
 	"fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test() {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	cache := container.GetContainer().Cache
+	cache := facade.Cache.Store()
+	cache = facade.Cache.Store("redis")
     err := cache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1209,16 +1305,23 @@ func Test() {
 
 ## Redis缓存
 ```go
+package controller
+
 import (
 	"fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test() {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	redisCache := container.GetContainer().RedisCache
+	redisCache := facade.Cache.Store("redis")
     err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1256,16 +1359,23 @@ func Test() {
 
 ## 内存缓存
 ```go
+package controller
+
 import (
 	"fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test() {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-    memoryCache := container.GetContainer().MemoryCache
+    memoryCache := facade.Cache.Store("memory")
     err := memoryCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1303,16 +1413,23 @@ func Test() {
 
 ## 磁盘缓存
 ```go
+package controller
+
 import (
     "fmt"
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
 )
 
-func Test() {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-    diskCache := container.GetContainer().DiskCache
+    diskCache := facade.Cache.Store("disk")
     err := diskCache.Set(key, value, time.Second*10)
     if err != nil {
         // 处理错误	
@@ -1352,8 +1469,13 @@ func Test() {
 ## 事件创建帮助
 ```bash
 $ go run ./cmd/cli.go make:event -h # --help
+Gin Cli v2.0.0
 
-make:event - 创建事件
+Usage:
+  cli [command] [options]
+
+Command:
+  make:event  创建事件
 
 Options:
   -f, --file  文件路径, 如: login/test  required:true
@@ -1390,8 +1512,13 @@ func (u UserLoginEvent) Description() string {
 ## 监听创建帮助
 ```bash
 $ go run ./cmd/cli.go make:listener -h # --help
+Gin Cli v2.0.0
 
-make:listener - 创建监听
+Usage:
+  cli [command] [options]
+
+Command:
+  make:listener  创建监听
 
 Options:
   -f, --file   文件路径, 如: login/test  required:true
@@ -1406,18 +1533,24 @@ $ go run ./cmd/cli.go make:listener -f=user_login -e=UserLoginEvent
 package listener
 
 import (
-	"github.com/goccy/go-json"
-	"fmt"
-	"gin/app/event"
-	"gin/pkg/eventbus"
-	"time"
+    "fmt"
+    "gin/app/event"
+    "gin/common/base"
+    "gin/pkg/eventbus"
+    "github.com/goccy/go-json"
+    "time"
 )
 
 type UserLoginListener struct{}
 
-func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
+func (l *UserLoginListener) Handle(e base.Event) {
+    ev, ok := e.(event.UserLoginEvent)
+    if !ok {
+        return
+    }
+  
 	data, _ := json.Marshal(e)
-	fmt.Printf("收到事件: %s 事件描述: %s 事件数据: %s, 时间: %s\n", e.Name(), e.Description(), data, time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("收到事件: %s 事件描述: %s 事件数据: %s, 时间: %s\n", ev.Name(), ev.Description(), data, time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func init() {
@@ -1431,8 +1564,13 @@ func init() {
 ## 队列创建帮助
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
+Gin Cli v2.0.0
 
-make:queue - 消息队列创建
+Usage:
+  cli [command] [options]
+
+Command:
+  make:queue  消息队列创建
 
 Options:
   -t, --type      队列类型, 如: kafka或rabbitmq  required:true
@@ -1456,74 +1594,150 @@ $ go run ./cmd/cli.go make:queue --type=rabbitmq --name=rabbitmq_demo --queue=ra
 package consumer
 
 import (
-  "fmt"
+  "gin/app/facade"
   "gin/common/base"
   "gin/config"
+  "gin/pkg"
+  "gin/pkg/logger"
+  "gin/pkg/queue"
 )
 
+// RabbitmqDemoConsumer RabbitMQ普通消费者
 type RabbitmqDemoConsumer struct {
   *base.RabbitmqConsumer
 }
 
-func NewRabbitMqDemoConsumer() *RabbitmqDemoConsumer {
-  c := &RabbitmqDemoConsumer{
-    &base.RabbitmqConsumer{
-      Mq:           base.NewRabbitMq(),
+// NewRabbitmqDemoConsumer 创建消费者实例
+func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
+  cfg := facade.Config.Get()
+  log := facade.Log.Logger()
+  bus := facade.Message.GetBus()
+
+  // 创建RabbitMQ连接
+  mq, err := base.NewRabbitMQ(cfg, log, bus)
+  if err != nil {
+    log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+    return nil
+  }
+
+  return &RabbitmqDemoConsumer{
+    RabbitmqConsumer: &base.RabbitmqConsumer{
+      Mq:           mq,
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
-      Retry:        3,
       IsDelayQueue: false,
+      Retry:        3,
     },
   }
+}
 
-  c.Start()
-
-  return c
+// Name 消费者名称
+func (c *RabbitmqDemoConsumer) Name() string {
+  return "rabbitmq_demo"
 }
 
 // Start 启动消费者
-func (c *RabbitmqDemoConsumer) Start() {
+func (c *RabbitmqDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
   c.RabbitmqConsumer.Start(c)
-}
-
-func (c *RabbitmqDemoConsumer) Handle(msg string) error {
-  fmt.Println("RabbitMq Received Msg:", msg)
+  log.Info(pkg.Sprintf("RabbitMQ消费者启动成功: %s", c.Name()))
   return nil
 }
 
-func init() {
-  if config.NewConfig().Rabbitmq.Enabled {
-    NewRabbitMqDemoConsumer()
-  }
+// Stop 停止消费者
+func (c *RabbitmqDemoConsumer) Stop() error {
+  return c.RabbitmqConsumer.Stop()
 }
 
+// Enabled 是否启用
+func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
+  return cfg.Rabbitmq.Enabled
+}
+
+// Status 消费者状态
+func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
+  return c.RabbitmqConsumer.Status()
+}
+
+// Handle 处理消息的业务逻辑
+func (c *RabbitmqDemoConsumer) Handle(msg string) error {
+  facade.Log.Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
+  // todo 处理业务逻辑
+  return nil
+}
+
+// init 注册消费者到注册表
+func init() {
+  queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
+}
 ```
 ```go
 package producer
 
 import (
+  "gin/app/facade"
   "gin/common/base"
+  "gin/pkg"
+  "gin/pkg/queue"
 )
 
+// RabbitmqDemoProducer RabbitMQ普通生产者
 type RabbitmqDemoProducer struct {
   *base.RabbitmqProducer
 }
 
-func NewRabbitMqDemoProducer() *RabbitmqDemoProducer {
+// NewRabbitmqDemoProducer 创建生产者实例
+func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
+  cfg := facade.Config.Get()
+  log := facade.Log.Logger()
+  bus := facade.Message.GetBus()
+
+  mq, err := base.NewRabbitMQ(cfg, log, bus)
+  if err != nil {
+    log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+    return nil
+  }
+
   return &RabbitmqDemoProducer{
-    &base.RabbitmqProducer{
-      Mq:           base.NewRabbitMq(),
+    RabbitmqProducer: &base.RabbitmqProducer{
+      Mq:           mq,
       Queue:        "rabbitmq_demo",
       Exchange:     "rabbitmq_demo_exchange",
       Routing:      "rabbitmq_demo",
       IsDelayQueue: false,
-      DelayMs:      0,
-      Headers:      nil,
     },
   }
 }
 
+func (p *RabbitmqDemoProducer) Name() string {
+  return "rabbitmq_demo"
+}
+
+func init() {
+  queue.GetProducerRegistry().Register(NewRabbitmqDemoProducer())
+}
+```
+
+## 队列使用
+> 消费者启动项目时自动注册在容器中无限额外启动,生产者直接使用门面初始化即可使用。
+```go
+package controller
+
+import (
+    "fmt"
+    "gin/app/facade"
+    "gin/common/base"
+)
+
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test() {
+    // 获取生产者
+    producer := facade.Queue.Producer("rabbitmq_demo")
+	_ = producer.Publish(ctx, []byte(`{"orderId":111, "message":"message 111"}`))
+}
 ```
 
 # 发布事件
@@ -1532,21 +1746,18 @@ package v1
 
 import (
   "gin/app/event"
+  "gin/app/facade"
   "gin/app/model"
   "gin/app/request"
   "gin/app/service"
   "gin/common/base"
   "gin/common/errcode"
-  "gin/pkg/container"
-  "gin/pkg/eventbus"
-  "gin/pkg/lang"
   "github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
 	base.BaseController
     service service.LoginService
-    req     request.Login
 }
 
 // Token token信息
@@ -1576,32 +1787,45 @@ type LoginResponse struct {
 func (s *LoginController) Login(c *gin.Context) {
   var (
     ctx = c.Request.Context()
+    req request.Login
   )
 
   s.service.WithContext(ctx)
 
-  err := c.ShouldBind(&s.req)
+  err := c.ShouldBind(&req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
   // 验证
-  err = s.req.Validate(s.req, "Login")
+  err = req.Validate(req, "Login")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }
 
-  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(s.req.Username, s.req.Password)
+  userModel, err := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
   }
 
+  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
+  if err != nil {
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
+    return
+  }
+
+  // 发布事件
+  facade.Event.Publish(ctx, event.UserLoginEvent{
+    UserId:   userModel.ID,
+    Username: userModel.Username,
+  })
+
   s.Success(
     c, errcode.Success().WithMsg(
-      lang.T(ctx, "login.success", map[string]interface{}{
+      facade.Lang.T(ctx, "login.success", map[string]interface{}{
         "name": userModel.Username,
       }),
     ).WithData(LoginResponse{
@@ -1616,6 +1840,7 @@ func (s *LoginController) Login(c *gin.Context) {
   )
 }
 ```
+
 ## 测试事件
 ```bash
 $ POST /api/v1/login HTTP/1.1
@@ -1641,7 +1866,7 @@ user.login 用户登录事件
 
 ## 事件监听列表
 ```bash
-$ go run ./cmd/cli.go event-listener:list
+$ go run ./cmd/cli.go listener:list
 
 ==== 当前已注册事件 ====
 事件: user.login
@@ -1811,21 +2036,22 @@ func (s *TestController) Test(c *gin.Context) {
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": null,
-    "Http": null,
-    "Mq": null,
-    "ListenerEvent": null
+    "Cache": [],
+    "Http": [],
+    "Mq": [],
+    "ListenerEvent": []
   }
 }
 ```
+
 ## 记录日志
-> 已封装在包含上下文的容器中, 日志级别支持debug、info、warn、error、dPanic、panic、fatal, 默认为`debug`。
+> 已封装在门面中, 日志级别支持debug、info、warn、error、dPanic、panic、fatal, 默认为`debug`。
 ```go
 package v1
 
 import (
+    "gin/app/facade"
     "gin/common/base"
-    "gin/pkg/container"
     "github.com/gin-gonic/gin"
 )
 
@@ -1834,8 +2060,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    containers := container.Get(c.Request.Context())
-    containers.Log.Error("System Error")
+    facade.Log.Error("System Error")
 }
 ```
 
@@ -1845,8 +2070,8 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/facade"
     "gin/common/base"
-    "gin/pkg/container"
     "github.com/gin-gonic/gin"
 )
 
@@ -1856,8 +2081,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
   ctx := c.Request.Context()
-  containers := container.Get(ctx)
-  containers.Log.WithDebugger(ctx).Error("System Error")
+  facade.Log.WithDebugger(ctx).Error("System Error")
 }
 ```
 ```json
@@ -1886,14 +2110,14 @@ func (s *TestController) Test(c *gin.Context) {
     "Cache": [],
     "Http": [],
     "Mq": [],
-    "ListenerEvent": null
+    "ListenerEvent": []
   },
   "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
 }
 ```
 
 # 多语言
-> 使用 `i18n` 包实现多语言支持，支持 `zh` 和 `en` 两种语言, 可支持自定义扩展。语言传输默认在`header`中传输 `Accept-Language` 参数, 如 `zh` 或 `en`, 不区分大小写, 不传递默认语言为 `zh`。
+> 多语言已集成在门面和容器中,语言支持 `zh` 和 `en` 两种语言, 可支持自定义扩展。语言传输默认在`header`中传输 `Accept-Language` 参数, 如 `zh` 或 `en`, 不区分大小写, 不传递默认语言为 `zh`。
 ## 目录配置
 > 翻译文件存放路径为 `storage/locales`, 默认语言为 `zh`, 多个语言用逗号分隔。语言存放在对应的语言目录下不区分子目录, 如中文就放在`storage/locales/zh`下,可以支持任意目录下的`json`和`yaml`格式文件。
 ```yaml
@@ -1905,14 +2129,22 @@ i18n:
 
 ## 常规翻译
 ```go
+package controller
+
 import (
-    "gin/pkg/lang"
+    "fmt"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
 	ctx := c.Request.Context()
-    trans := lang.T(ctx, "login.username", nil)
+    trans := facade.Lang.T(ctx, "login.username", nil)
 	fmt.Println(trans) // 输出: 用户名, 英文输出: Username
 }
 ```
@@ -1928,14 +2160,22 @@ func Test(c *gin.Context)  {
 ]
 ```
 ```go
+package controller
+
 import (
-    "gin/pkg/lang"
+	"fmt"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := lang.T(ctx, "login.success", map[string]interface{}{
+    trans := facade.Lang.T(ctx, "login.success", map[string]interface{}{
         "name": "admin",
     }),
 	fmt.Println(trans) // 输出: admin,登录成功 英文输出: admin,Login Success
@@ -1951,31 +2191,44 @@ i18n:
   lang: "zh,en" # 默认语言,多个语言用逗号分隔
 ```
 
-# 容器
-## 容器使用
-> 容器通过bootstrap初始化,通过中间件绑定context上下文,只要有上下文的地方都可以获取容器实例。
+# 容器服务
+> 容器会在启动时自动加载注册，关闭时自动释放。
+## 容器服务创建
+> 同模型、控制器等使用命令行创建,具体参考之前文档。
+
+# 门面
+## 门面创建
+> 同模型、控制器等使用命令行创建,具体参考之前文档。
+
+## 门面使用
+> 项目以默认集成了日志、数据库、缓存、限流等门面，当前以缓存为示例。数据库、缓存、http请求、队列绑定了上下文会记录到调试日志中。
 ```go
+package controller
+
 import (
-    "gin/pkg/container"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    containers := container.Get(ctx)
-    db := containers.DB;
-    cache := containers.Cache;
-	redisCache := containers.RedisCache;
-	memoryCache := containers.MemoryCache;
-	diskCache := containers.DiskCache;
-	conf := containers.Config;
-	log := containers.Log;
-    // todo ...
+    cache := facade.Cache.Store()
+	redisCache := facade.Cache.Store('redis')   // 或 facade.Cache.Redis()
+	// 绑定上下文
+    redisCache = redisCache.WithContext(ctx)
+	memoryCache := facade.Cache.Store('memory') // 或 facade.Cache.Memory()
+	diskCache := facade.Cache.Store('disk')     // 或 facade.Cache.Disk()
+    // 其他门面使用 ...
 }
 ```
 
 # 数据库
-> 数据库通过容器初始化,通过中间件绑定context上下文,只要有上下文的地方都可以获取数据库实例。也可以单独获取数据库实例。默认集成了mysql、pgsql、sqlite、sqlsrv,可配置默认数据库以及通过Connection方法指定数据库连接。
+> 数据库通过容器服务初始化,默认集成了mysql、pgsql、sqlite、sqlsrv,可配置默认数据库以及通过Connection方法指定数据库连接。
 ## 数据库配置
 ```yaml
 # 数据库
@@ -2027,50 +2280,88 @@ sqlsrv:
 ```
 
 ## 数据库连接
+> 使用上下文非必须，如果不绑定上下文则日志不会记录sql记录。
 ```go
+package controller
+
 import (
-    "gin/pkg/container"
-    "gin/pkg/orm"
+    "gin/app/facade"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    containers := container.Get(ctx)
-    // 使用容器
-	db := containers.DB;
-	// 使用配置
-	db1 := orm.Connection()
-	// 连接pgsql
-	db2 := orm.Connection("pgsql")
-	// 连接sqlsrv
-	db3 := orm.Connection("sqlsrv")
+    // 默认连接
+    db := facade.DB.Connection()
+    // 使用上下文
+    db1 := facade.DB.Connection().WithContext(ctx)
+    // 连接pgsql
+    db2 := facade.DB.Connection("pgsql").WithContext(ctx)
+    // 连接sqlsrv
+    db3 := facade.DB.Connection("sqlsrv").WithContext(ctx)
     // todo ...
 }
 ```
 
-## sql日志记录
-> 使用容器连接默认开启，开启后，会记录到日志中，如果使用配置连接需要传递上下文。使用配置连接上下文非必须，如果不绑定上下文则日志不会记录sql记录。
+## 数据库搜索
+> 配合文档中的ORM动态筛选示例使用。
 ```go
+package controller
+
 import (
-    "gin/pkg/container"
-    "gin/pkg/orm"
+    "gin/app/facade"
+    "gin/app/model"
+    "gin/app/request"
+    "gin/common/base"
     "github.com/gin-gonic/gin"
 )
 
-func Test(c *gin.Context)  {
-    ctx := c.Request.Context()
-    containers := container.Get(ctx)
-    // 使用容器默认记录
-	db := containers.DB;
-	// 使用配置
-	db1 := orm.Connection.WithContext(ctx)
-	// 连接pgsql
-	db2 := orm.Connection("pgsql").WithContext(ctx)
-	// 连接sqlsrv
-	db3 := orm.Connection("sqlsrv").WithContext(ctx)
-    // todo ...
+type TestController struct {
+    base.BaseController
 }
+
+func (s *TestController) Test(c *gin.Context) {
+    var (
+        ctx    = c.Request.Context()
+		search request.Search
+        m      []model.User
+		db     = facade.DB.Connection().WithContext(ctx)
+	)
+
+    err := c.ShouldBind(&search)
+    if err != nil {
+        s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    db = db.Model(&model.User{})
+	
+    if search != nil {
+        whereSql, args, err := orm.BuildCondition(search, db, model.User{})
+        if err != nil {
+            s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+            return
+        }
+    
+        if whereSql != "" {
+            db = db.Where(whereSql, args...)
+        }
+    }
+
+    err = db.Offset(10).Limit(10).Order("id DESC").Find(&m).Error
+	if err != nil {
+		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+    }
+	
+	s.Success(c, m)
+}
+
 ```
 
 # swagger文档

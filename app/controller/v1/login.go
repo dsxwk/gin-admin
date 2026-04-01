@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
@@ -13,7 +14,6 @@ import (
 type LoginController struct {
 	base.BaseController
 	service service.LoginService
-	req     request.Login
 }
 
 // Token token信息
@@ -43,24 +43,25 @@ type LoginResponse struct {
 func (s *LoginController) Login(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
+		req request.Login
 	)
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&s.req)
+	err := c.ShouldBind(&req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = s.req.Validate(s.req, "Login")
+	err = req.Validate(req, "Login")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(s.req.Username, s.req.Password)
+	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
@@ -68,7 +69,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
 	s.Success(
 		c, errcode.Success().WithMsg(
-			lang.T(ctx, "login.success", map[string]interface{}{
+			facade.Lang.T(ctx, "login.success", map[string]interface{}{
 				"name": userModel.Username,
 			}),
 		).WithData(LoginResponse{
@@ -97,14 +98,15 @@ func (s *LoginController) Login(c *gin.Context) {
 func (s *LoginController) RefreshToken(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
+		req request.Login
 	)
 
 	s.service.WithContext(ctx)
 
 	token := c.Request.Header.Get("token")
-	s.req.RefreshToken.Token = token
+	req.RefreshToken.Token = token
 	// 验证
-	err := s.req.Validate(s.req, "RefreshToken")
+	err := req.Validate(req, "RefreshToken")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -122,4 +124,8 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 		TokenExpire:        tokenExpire,
 		RefreshTokenExpire: refreshTokenExpire,
 	}))
+}
+
+func (s *LoginController) Test(c *gin.Context) {
+	s.Success(c, errcode.Success())
 }

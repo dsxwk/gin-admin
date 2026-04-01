@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"os"
 	"path/filepath"
 	"time"
@@ -21,7 +20,7 @@ func (s *MakeSeed) Name() string {
 }
 
 func (s *MakeSeed) Description() string {
-	return "生成数据库 Seeder 模板"
+	return "生成数据库seeder模板"
 }
 
 func (s *MakeSeed) Help() []base.CommandOption {
@@ -88,11 +87,11 @@ func (s *%s) Run(db *gorm.DB) error {
 	}
 
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-		color.Red("写入文件失败: %v", err)
+		flag.Errorf("写入文件失败: %v", err)
 		return
 	}
 
-	color.Green(flag.Success+"  seed文件生成成功: %s", filePath)
+	flag.Successf("seed文件生成成功: %s", filePath)
 }
 
 func init() {

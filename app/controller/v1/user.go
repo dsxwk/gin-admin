@@ -16,9 +16,6 @@ import (
 type UserController struct {
 	base.BaseController
 	service service.UserService
-	req     request.User
-	search  request.Search
-	user    model.User
 }
 
 // List 列表
@@ -34,31 +31,33 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
 	var (
-		ctx = c.Request.Context()
+		ctx    = c.Request.Context()
+		req    request.User
+		search request.Search
 	)
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&s.search)
+	err := c.ShouldBind(&search)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	err = c.ShouldBind(&s.req)
+	err = c.ShouldBind(&req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = s.req.Validate(s.req, "List")
+	err = req.Validate(req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	res, err := s.service.List(s.req, s.search.Search)
+	res, err := s.service.List(req, search.Search)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
@@ -79,37 +78,39 @@ func (s *UserController) List(c *gin.Context) {
 // @Router /api/v1/user [post]
 func (s *UserController) Create(c *gin.Context) {
 	var (
-		ctx = c.Request.Context()
+		ctx  = c.Request.Context()
+		req  request.User
+		user model.User
 	)
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&s.req)
+	err := c.ShouldBind(&req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	// 验证
-	err = s.req.Validate(s.req, "Create")
+	err = req.Validate(req, "Create")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err = copier.Copy(&s.user, &s.req)
+	err = copier.Copy(&user, &req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.user, err = s.service.Create(s.user)
+	user, err = s.service.Create(user)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(s.user))
+	s.Success(c, errcode.Success().WithData(user))
 }
 
 // Update 更新
@@ -128,11 +129,13 @@ func (s *UserController) Update(c *gin.Context) {
 		id   int64
 		ctx  = c.Request.Context()
 		data map[string]interface{}
+		req  request.User
+		user model.User
 	)
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBindBodyWith(&s.req, binding.JSON)
+	err := c.ShouldBindBodyWith(&req, binding.JSON)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -149,22 +152,22 @@ func (s *UserController) Update(c *gin.Context) {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	s.req.ID = id
+	req.ID = id
 
 	// 验证
-	err = s.req.Validate(s.req, "Update")
+	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err = copier.Copy(&s.user, &s.req)
+	err = copier.Copy(&user, &req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	err = s.service.Update(s.user.ID, data)
+	err = s.service.Update(user.ID, data)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -187,6 +190,7 @@ func (s *UserController) Detail(c *gin.Context) {
 	var (
 		id  int64
 		ctx = c.Request.Context()
+		req request.User
 	)
 
 	s.service.WithContext(ctx)
@@ -196,16 +200,16 @@ func (s *UserController) Detail(c *gin.Context) {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	s.req.ID = id
+	req.ID = id
 
 	// 验证
-	err = s.req.Validate(s.req, "Detail")
+	err = req.Validate(req, "Detail")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	m, err := s.service.Detail(s.req.ID)
+	m, err := s.service.Detail(req.ID)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -228,6 +232,7 @@ func (s *UserController) Delete(c *gin.Context) {
 	var (
 		id  int64
 		ctx = c.Request.Context()
+		req request.User
 	)
 
 	s.service.WithContext(ctx)
@@ -237,16 +242,16 @@ func (s *UserController) Delete(c *gin.Context) {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	s.req.ID = id
+	req.ID = id
 
 	// 验证
-	err = s.req.Validate(s.req, "Delete")
+	err = req.Validate(req, "Delete")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	m, err := s.service.Delete(s.req.ID)
+	m, err := s.service.Delete(req.ID)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return

@@ -2,17 +2,17 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"gin/common/ctxkey"
 	"gin/common/flag"
-	"gin/common/trace"
 	"gin/config"
-	"github.com/fatih/color"
+	"gin/pkg/debugger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"path/filepath"
-	"runtime/debug"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -40,7 +40,7 @@ func NewLogger() *Logger {
 		// 确保日志目录存在
 		logDir := "storage/logs"
 		if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-			color.Red(flag.Error+"  创建日志目录失败:", err)
+			flag.Errorf("创建日志目录失败: %v", err)
 			os.Exit(1)
 		}
 
@@ -146,22 +146,25 @@ func (l *Logger) WithDebugger(c context.Context) *zap.Logger {
 		zap.String(ctxkey.MethodKey, getString(c, ctxkey.MethodKey)),
 		zap.Any(ctxkey.ParamsKey, c.Value(ctxkey.ParamsKey)),
 		zap.Float64(ctxkey.MsKey, ms),
-		zap.Any(ctxkey.DebuggerKey, trace.Store.Get(traceId)),
+		zap.Any(ctxkey.DebuggerKey, debugger.Store.Get(traceId)),
 	)
 }
 
 // 防止panic
 func getString(c context.Context, key string) string {
+	if c == nil {
+		return "unknown"
+	}
 	if v, ok := c.Value(key).(string); ok {
 		return v
 	}
-	return ""
+	return "unknown"
 }
 
 type StackTrace struct{}
 
 func (s StackTrace) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	stack := strings.Split(string(debug.Stack()), "\n")
+	stack := getStackTrace(3)
 	return enc.AddArray("stack", zapcore.ArrayMarshalerFunc(func(arr zapcore.ArrayEncoder) error {
 		for _, line := range stack {
 			line = strings.TrimSpace(line)
@@ -171,4 +174,25 @@ func (s StackTrace) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 		}
 		return nil
 	}))
+}
+
+// getStackTrace 获取堆栈
+func getStackTrace(skip int) []string {
+	const maxDepth = 32
+	pc := make([]uintptr, maxDepth)
+	n := runtime.Callers(skip, pc)
+	pc = pc[:n]
+
+	var trace []string
+	for _, p := range pc {
+		fn := runtime.FuncForPC(p)
+		if fn == nil {
+			trace = append(trace, "unknown")
+			continue
+		}
+		file, line := fn.FileLine(p)
+		trace = append(trace, fmt.Sprintf("%s:%d %s", file, line, fn.Name()))
+	}
+
+	return trace
 }

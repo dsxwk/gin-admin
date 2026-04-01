@@ -59,15 +59,15 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 	// 解析命令参数
 	err := fs.Parse(args)
 	if err != nil {
-		color.Red(flag.Error+"  argument error, %s is not defined.", err.Error())
-		color.Cyan("Usage: cli %s [args]", name)
-		fmt.Println()
-		color.Yellow("Available args:")
+		flag.Errorf("argument error, %s is not defined.", err.Error())
+		color.Yellow("Usage: ")
+		fmt.Printf("  cli %s [args]\n", name)
+		color.Yellow("\nAvailable args:")
 		PrintArgs(opts)
 		os.Exit(1)
 	}
 
-	// 构建结果 map
+	// 构建结果map
 	values := make(map[string]string)
 	for key, ref := range flagRefs {
 		values[key] = *ref
@@ -80,6 +80,8 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 			b.ExitError(fmt.Sprintf("参数 -%s 或 --%s 不能为空", opt.Flag.Short, opt.Flag.Long))
 		}
 	}
+
+	flag.Successf("执行命令: %s %s", name, b.FormatArgs(values))
 
 	return values
 }
@@ -153,7 +155,7 @@ func (b *BaseCommand) StringToBool(s string) bool {
 }
 
 func (b *BaseCommand) ExitError(msg string) {
-	color.Red(flag.Error+"  %s", msg)
+	flag.Errorf("%s", msg)
 	os.Exit(1)
 }
 
@@ -194,7 +196,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 
 	switch _make {
 	case "model-old":
-	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener":
+	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider":
 		templateFile = filepath.Join(pkg.GetRootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")
@@ -216,13 +218,13 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 	// 如果目录不存在则创建
 	dir := filepath.Dir(file)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		color.Red(flag.Error+" Failed to create directory:", err)
+		flag.Errorf("Failed to create directory: %s", err)
 		return nil
 	}
 
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
 		fmt.Printf("%s 文件 %s 已存在,是否覆盖?(%s/%s): ",
-			color.YellowString(flag.Warning),
+			color.YellowString(flag.Warning()),
 			color.CyanString(file),
 			color.GreenString("Y"),
 			color.RedString("N"),
@@ -238,10 +240,10 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 		}
 	}
 
-	color.Green(flag.File+" 创建文件: %s\n", color.CyanString(file))
+	flag.Successf(flag.FileIco+" 创建文件: %s\n", color.CyanString(file))
 	f, err := os.Create(file)
 	if err != nil {
-		color.Red(flag.Error+" Failed to create file:", err.Error())
+		flag.Errorf("Failed to create file: %s", err.Error())
 		return nil
 	}
 	return f

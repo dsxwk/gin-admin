@@ -2,9 +2,9 @@ package event
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/eventbus"
 	"github.com/fatih/color"
 )
 
@@ -23,7 +23,7 @@ func (s *EventList) Help() []base.CommandOption {
 }
 
 func (s *EventList) Execute(args []string) {
-	list := eventbus.EventList()
+	list := facade.Event.List()
 	for _, v := range list {
 		color.Green(fmt.Sprintf("%-8s %-35s", v.Name, v.Description))
 	}

@@ -1,3 +1,9 @@
+## v2.0.0
+> - Add facade and provider 
+> - Optimize Command Line,log,context,middleware
+> - Command line create file template adjustment
+> - Complete documentation
+
 ## v1.8.7
 > - Context optimization, database connection optimization.
 

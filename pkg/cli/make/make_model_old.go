@@ -1,12 +1,11 @@
 package make
 
 import (
-	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"gin/pkg/orm"
 	"github.com/fatih/color"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -60,13 +59,12 @@ func (m *MakeModelOld) Help() []base.CommandOption {
 
 func (m *MakeModelOld) Execute(args []string) {
 	values := m.ParseFlags(m.Name(), args, m.Help())
-	color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
 	// 去除前斜杠
 	p := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
 	tables := strings.Split(values["table"], ",")
 	for i := range tables {
 		tables[i] = strings.TrimSpace(tables[i])
-		color.Green(flag.Success+"  创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
+		flag.Successf("创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
 	}
 
 	m.generateFiles(p, tables, m.StringToBool(values["camel"]))
@@ -95,7 +93,7 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 		ModelPkgPath:      path,
 	})
 
-	g.UseDB(orm.Connection())
+	g.UseDB(facade.DB.Connection())
 
 	dataMap := map[string]func(detailType gorm.ColumnType) (dataType string){
 		"tinyint":   func(detailType gorm.ColumnType) (dataType string) { return "int64" },
@@ -174,12 +172,12 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 		})
 
 		if err = os.WriteFile(filePath, []byte(text), 0644); err != nil {
-			color.Red(fmt.Sprintf(flag.Error+"  为文件 %s 添加 swaggerignore 失败", file.Name()))
+			flag.Errorf("为文件 %s 添加 swaggerignore 失败", file.Name())
 			os.Exit(1)
 		}
 	}
 
-	color.Green(fmt.Sprintf(flag.Success+"  模型生成成功! 输出目录: %s", path))
+	flag.Successf("模型生成成功! 输出目录: %s", path)
 
 	_ = os.RemoveAll(outPath)
 }

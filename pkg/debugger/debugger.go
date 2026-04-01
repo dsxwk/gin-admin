@@ -1,7 +1,6 @@
 package debugger
 
 import (
-	"gin/common/trace"
 	"gin/pkg/message"
 )
 
@@ -18,9 +17,12 @@ func NewDebugger(bus *message.EventBus) *Debugger {
 }
 
 func (d *Debugger) Start() {
+	if d.Bus == nil {
+		return
+	}
 	d.subIds[TopicSql] = d.Bus.Subscribe(TopicSql, func(ev any) {
 		if e, ok := ev.(SqlEvent); ok {
-			trace.AddSql(e.TraceId, map[string]any{
+			AddSql(e.TraceId, map[string]any{
 				"sql":  e.Sql,
 				"rows": e.Rows,
 				"ms":   e.Ms,
@@ -29,7 +31,7 @@ func (d *Debugger) Start() {
 	})
 	d.subIds[TopicCache] = d.Bus.Subscribe(TopicCache, func(ev any) {
 		if e, ok := ev.(CacheEvent); ok {
-			trace.AddCache(e.TraceId, map[string]any{
+			AddCache(e.TraceId, map[string]any{
 				"driver": e.Driver,
 				"name":   e.Name,
 				"cmd":    e.Cmd,
@@ -40,7 +42,7 @@ func (d *Debugger) Start() {
 	})
 	d.subIds[TopicHttp] = d.Bus.Subscribe(TopicHttp, func(ev any) {
 		if e, ok := ev.(HttpEvent); ok {
-			trace.AddHttp(e.TraceId, map[string]any{
+			AddHttp(e.TraceId, map[string]any{
 				"url":      e.Url,
 				"method":   e.Method,
 				"header":   e.Header,
@@ -53,7 +55,7 @@ func (d *Debugger) Start() {
 	})
 	d.subIds[TopicMq] = d.Bus.Subscribe(TopicMq, func(ev any) {
 		if e, ok := ev.(MqEvent); ok {
-			trace.AddMq(e.TraceId, map[string]any{
+			AddMq(e.TraceId, map[string]any{
 				"driver":  e.Driver,
 				"topic":   e.Topic,
 				"message": e.Message,
@@ -66,7 +68,7 @@ func (d *Debugger) Start() {
 	})
 	d.subIds[TopicListener] = d.Bus.Subscribe(TopicListener, func(ev any) {
 		if e, ok := ev.(ListenerEvent); ok {
-			trace.AddListener(e.TraceId, map[string]any{
+			AddListener(e.TraceId, map[string]any{
 				"name":  e.Name,
 				"topic": e.Description,
 				"data":  e.Data,
@@ -79,4 +81,18 @@ func (d *Debugger) Stop() {
 	for topic, id := range d.subIds {
 		d.Bus.Unsubscribe(topic, id)
 	}
+	// 清空订阅ID
+	for k := range d.subIds {
+		delete(d.subIds, k)
+	}
+}
+
+// SubIds 获取所有订阅ID(用于调试和检查)
+func (d *Debugger) SubIds() map[string]uint64 {
+	return d.subIds
+}
+
+// IsRunning 检查调试器是否运行中
+func (d *Debugger) IsRunning() bool {
+	return len(d.subIds) > 0
 }

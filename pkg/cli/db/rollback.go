@@ -2,6 +2,7 @@ package db
 
 import (
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/database"
 	"gin/database/migrations"
 	"gin/pkg/cli"
@@ -36,8 +37,7 @@ func (s *Rollback) Help() []base.CommandOption {
 
 func (s *Rollback) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
-	color.Green("执行命令: %s %s", s.Name(), s.FormatArgs(values))
-	color.Cyan("开始执行数据回滚...")
+	flag.Infof("开始执行数据回滚...")
 
 	db := orm.Connection()
 	id := values["id"]
@@ -54,12 +54,12 @@ func (s *Rollback) Execute(args []string) {
 		}
 
 		if err := m.Rollback(db); err != nil {
-			color.Red("Migration %s 回滚失败: %v", m.ID(), err)
+			flag.Errorf("Migration %s 回滚失败: %v", m.ID(), err)
 			return
 		}
 
 		db.Where("migration = ?", m.ID()).Delete(&database.Migrations{})
-		color.Green("Migration %s 回滚成功", m.ID())
+		flag.Successf("Migration %s 回滚成功", m.ID())
 	}
 }
 

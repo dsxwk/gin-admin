@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"errors"
+	"gin/config"
 	"gin/pkg/message"
 	"github.com/patrickmn/go-cache"
 	"sync"
@@ -20,7 +21,7 @@ var (
 	memoryOnce  sync.Once
 )
 
-func NewMemoryCache() *CacheProxy {
+func NewMemoryCache(conf *config.Config) *CacheProxy {
 	memoryOnce.Do(func() {
 		m := &MemoryCache{
 			cache: cache.New(conf.Cache.Memory.DefaultExpire, conf.Cache.Memory.CleanupInterval),

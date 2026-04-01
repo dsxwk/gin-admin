@@ -62,6 +62,9 @@ func (s *Context) GetStartTime() string {
 
 // 防止panic
 func getString(c context.Context, key string) string {
+	if c == nil {
+		return "unknown"
+	}
 	if v, ok := c.Value(key).(string); ok {
 		return v
 	}

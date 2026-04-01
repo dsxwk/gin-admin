@@ -35,23 +35,22 @@ func NewCacheProxy(driver string, c Cache, bus *message.EventBus) *CacheProxy {
 }
 
 var (
-	conf      = config.NewConfig()
 	instance  *CacheProxy
 	cacheOnce sync.Once
 )
 
-func NewCache() *CacheProxy {
+func NewCache(conf *config.Config) *CacheProxy {
 	cacheOnce.Do(func() {
 		switch conf.Cache.Driver {
 
 		case "redis":
-			instance = NewRedisCache()
+			instance = NewRedisCache(conf)
 
 		case "", "memory":
-			instance = NewMemoryCache()
+			instance = NewMemoryCache(conf)
 
 		case "disk":
-			instance = NewDiskCache()
+			instance = NewDiskCache(conf)
 
 		default:
 			logger.NewLogger().Fatal("不支持的缓存驱动: " + conf.Cache.Driver)
@@ -99,7 +98,7 @@ func (p *CacheProxy) Expire(key string) (interface{}, time.Time, bool, error) {
 }
 
 func (p *CacheProxy) publish(method, key string, val interface{}, cost time.Duration) {
-	if p.bus != nil {
+	if p.bus != nil && p.ctx != nil {
 		traceId, ok := p.ctx.Value(ctxkey.TraceIdKey).(string)
 		if !ok || traceId == "" {
 			traceId = "unknown"

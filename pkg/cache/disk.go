@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gin/config"
 	"gin/pkg/logger"
 	"gin/pkg/message"
 	"github.com/dgraph-io/badger/v4"
@@ -22,7 +23,7 @@ var (
 	diskOnce  sync.Once
 )
 
-func NewDiskCache() *CacheProxy {
+func NewDiskCache(conf *config.Config) *CacheProxy {
 	diskOnce.Do(func() {
 		opts := badger.DefaultOptions(conf.Cache.Disk.Path)
 		db, err := badger.Open(opts)
