@@ -1,3 +1,6 @@
+## v2.0.2
+> - Command line style beautification.
+
 ## v2.0.1
 > - Optimize queue auto loading and optimize command-line output.
 

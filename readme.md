@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.0.1
+> - Latest Version: v2.0.2
 > - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
