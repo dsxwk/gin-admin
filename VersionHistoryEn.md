@@ -1,3 +1,6 @@
+## v2.0.1
+> - Optimize queue auto loading and optimize command-line output.
+
 ## v2.0.0
 > - Add facade and provider 
 > - Optimize Command Line,log,context,middleware

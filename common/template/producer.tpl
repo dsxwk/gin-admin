@@ -91,5 +91,8 @@ func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Close() error {
 }
 
 func init() {
-	queue.GetProducerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer())
+    cfg := facade.Config.Get()
+	if cfg != nil && cfg.{{if eq .Type "kafka"}}Kafka{{else}}Rabbitmq{{end}}.Enabled {
+	    queue.GetProducerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer())
+	}
 }

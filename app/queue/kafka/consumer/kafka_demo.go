@@ -73,5 +73,8 @@ func (c *KafkaDemoConsumer) Handle(msg string) error {
 }
 
 func init() {
-	queue.GetConsumerRegistry().Register(NewKafkaDemoConsumer())
+	cfg := facade.Config.Get()
+	if cfg != nil && cfg.Kafka.Enabled {
+		queue.GetConsumerRegistry().Register(NewKafkaDemoConsumer())
+	}
 }

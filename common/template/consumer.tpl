@@ -119,5 +119,8 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(msg string) error 
 }
 
 func init() {
-	queue.GetConsumerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
+    cfg := facade.Config.Get()
+	if cfg != nil && cfg.{{if eq .Type "kafka"}}Kafka{{else}}Rabbitmq{{end}}.Enabled {
+	    queue.GetConsumerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
+	}
 }

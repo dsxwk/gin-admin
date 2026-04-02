@@ -40,5 +40,8 @@ func (p *RabbitmqDemoProducer) Name() string {
 }
 
 func init() {
-	queue.GetProducerRegistry().Register(NewRabbitmqDemoProducer())
+	cfg := facade.Config.Get()
+	if cfg != nil && cfg.Rabbitmq.Enabled {
+		queue.GetProducerRegistry().Register(NewRabbitmqDemoProducer())
+	}
 }

@@ -240,7 +240,7 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 		}
 	}
 
-	flag.Successf(flag.FileIco+" 创建文件: %s\n", color.CyanString(file))
+	flag.Successf(flag.FileIco+" 创建文件: %s", color.CyanString(file))
 	f, err := os.Create(file)
 	if err != nil {
 		flag.Errorf("Failed to create file: %s", err.Error())

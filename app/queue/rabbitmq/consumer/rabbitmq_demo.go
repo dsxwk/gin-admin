@@ -75,5 +75,8 @@ func (c *RabbitmqDemoConsumer) Handle(msg string) error {
 
 // init 注册消费者到注册表
 func init() {
-	queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
+	cfg := facade.Config.Get()
+	if cfg != nil && cfg.Rabbitmq.Enabled {
+		queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
+	}
 }

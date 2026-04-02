@@ -67,5 +67,8 @@ func (c *RabbitmqDelayDemoConsumer) Handle(msg string) error {
 }
 
 func init() {
-	queue.GetConsumerRegistry().Register(NewRabbitmqDelayDemoConsumer())
+	cfg := facade.Config.Get()
+	if cfg != nil && cfg.Rabbitmq.Enabled {
+		queue.GetConsumerRegistry().Register(NewRabbitmqDelayDemoConsumer())
+	}
 }

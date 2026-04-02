@@ -42,5 +42,8 @@ func (p *KafkaDelayDemoProducer) Name() string {
 }
 
 func init() {
-	queue.GetProducerRegistry().Register(NewKafkaDelayDemoProducer())
+	cfg := facade.Config.Get()
+	if cfg != nil && cfg.Kafka.Enabled {
+		queue.GetProducerRegistry().Register(NewKafkaDelayDemoProducer())
+	}
 }

@@ -41,7 +41,7 @@ pgsql:
 # sqlite数据库
 sqlite:
   driver: sqlite
-  path: storage/data/gin.db
+  path: E:/sqlite/gin.db
   # 慢查询的时间(ms) 超过这个时间会记录到日志中
   slow-query-duration: 3000ms # 3秒(time.Duration)
 
@@ -50,8 +50,8 @@ sqlsrv:
   driver: sqlsrv
   host: 127.0.0.1
   port: 1433
-  username: root
-  password: root
+  username: sa
+  password: Aa123456
   database: gin
   # 慢查询的时间(ms) 超过这个时间会记录到日志中
   slow-query-duration: 3000ms # 3秒(time.Duration)
@@ -101,10 +101,10 @@ i18n:
   lang: "zh,en" # 默认语言,多个语言用逗号分隔
 
 kafka:
-  enabled: true # 是否启用kafka
+  enabled: false # 是否启用kafka
   brokers:
-    - "172.30.117.79:9092"
+    - "172.30.117.791:9092"
 
 rabbitmq:
-  enabled: true # 是否启用rabbitmq
-  url: "amqp://admin:admin@172.30.117.79:5672/"
+  enabled: false # 是否启用rabbitmq
+  url: "amqp://admin:admin@172.30.117.791:5672/"
