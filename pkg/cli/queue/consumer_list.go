@@ -1,11 +1,13 @@
 package queue
 
 import (
+	"fmt"
 	"gin/common/base"
 	"gin/pkg/cli"
 	"gin/pkg/queue"
 	"github.com/fatih/color"
 	"sort"
+	"strings"
 )
 
 type ConsumerList struct{}
@@ -29,23 +31,41 @@ func (s *ConsumerList) Execute(args []string) {
 		return
 	}
 
-	// 提取名称并排序
-	names := make([]string, 0, len(consumers))
+	// 按名称排序
+	sort.Slice(consumers, func(i, j int) bool {
+		return consumers[i].Name() < consumers[j].Name()
+	})
+
+	// 计算最大名称宽度
+	maxNameLen := 0
 	for _, c := range consumers {
-		names = append(names, c.Name())
+		if len(c.Name()) > maxNameLen {
+			maxNameLen = len(c.Name())
+		}
 	}
-	sort.Strings(names)
-
-	// 打印表头
-	color.Green("----------------------------------------")
-	color.Green("消费者列表 (%d)\n", len(names))
-	color.Green("----------------------------------------")
-
-	for _, name := range names {
-		color.Green("  %s", name)
+	if maxNameLen < 20 {
+		maxNameLen = 20
 	}
 
-	color.Green("----------------------------------------")
+	totalWidth := maxNameLen + 4
+
+	// 打印标题
+	color.Cyan("\n" + strings.Repeat("=", totalWidth))
+	color.Cyan(fmt.Sprintf("%-*s", maxNameLen+2, "消费者名称"))
+	color.Cyan(strings.Repeat("=", totalWidth))
+
+	// 打印消费者列表
+	for i, c := range consumers {
+		prefix := "├─ "
+		if i == len(consumers)-1 {
+			prefix = "└─ "
+		}
+		// 只用一个格式符
+		fmt.Printf("%s\n", color.GreenString(fmt.Sprintf("%-*s", maxNameLen+2, prefix+c.Name())))
+	}
+
+	color.Cyan(strings.Repeat("=", totalWidth))
+	color.Cyan("总计 %d 个消费者\n", len(consumers))
 }
 
 func init() {

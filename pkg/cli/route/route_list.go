@@ -1,7 +1,9 @@
 package route
 
 import (
+	"fmt"
 	"gin/common/base"
+	"gin/pkg"
 	"gin/pkg/cli"
 	"gin/router"
 	"github.com/fatih/color"
@@ -34,6 +36,10 @@ func (s *RouteList) Execute(args []string) {
 
 	// 获取所有路由
 	routes := engine.Routes()
+	if len(routes) == 0 {
+		color.Yellow("暂无注册的路由")
+		return
+	}
 
 	// 按Path排序
 	sort.Slice(routes, func(i, j int) bool {
@@ -41,20 +47,37 @@ func (s *RouteList) Execute(args []string) {
 	})
 
 	// 打印路由列表
-	color.Green("---------------------------------------------------------")
-	color.Green("%-8s %-35s %-40s\n", "Method", "Path", "Handler")
-	color.Green("---------------------------------------------------------")
-
+	fmt.Println(pkg.Sprintf("%-8s %-35s %-40s", "Method", "Path", "Handler"))
 	for _, route := range routes {
-		color.Green(
-			"%-8s %-35s %-40s\n",
-			route.Method,
-			route.Path,
-			s.formatHandlerName(route.Handler),
+		// Method颜色: GET=绿色 POST=黄色 PUT=蓝色 DELETE=红色
+		var methodColor *color.Color
+		switch route.Method {
+		case "GET":
+			methodColor = color.New(color.FgGreen)
+		case "POST":
+			methodColor = color.New(color.FgYellow)
+		case "PUT":
+			methodColor = color.New(color.FgBlue)
+		case "DELETE":
+			methodColor = color.New(color.FgRed)
+		default:
+			methodColor = color.New(color.FgWhite)
+		}
+
+		// Path颜色: 青色
+		pathColor := color.New(color.FgCyan)
+
+		// Handler颜色: 白色(默认)
+		handlerColor := color.New(color.FgWhite)
+
+		str := pkg.Sprintf("%s %s %s",
+			methodColor.Sprintf("%-8s", route.Method),
+			pathColor.Sprintf("%-35s", route.Path),
+			handlerColor.Sprintf("%-40s", s.formatHandlerName(route.Handler)),
 		)
+		fmt.Println(str)
 	}
 
-	color.Green("---------------------------------------------------------")
 	color.Cyan("总计 %d 条路由\n", len(routes))
 }
 

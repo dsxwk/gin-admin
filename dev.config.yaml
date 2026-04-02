@@ -103,8 +103,8 @@ i18n:
 kafka:
   enabled: false # 是否启用kafka
   brokers:
-    - "172.30.117.791:9092"
+    - "172.30.117.79:9092"
 
 rabbitmq:
   enabled: false # 是否启用rabbitmq
-  url: "amqp://admin:admin@172.30.117.791:5672/"
+  url: "amqp://admin:admin@172.30.117.79:5672/"

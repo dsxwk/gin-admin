@@ -81,6 +81,8 @@
     - [Queue Creation Help](#Queue-Creation-Help)
     - [Queue Creation](#Queue-Creation)
     - [Queue Usage](#Queue-Usage)
+    - [Consumer List](#Consumer-List)
+    - [Producer List](#Producer-List)
   - [Publish Event](#Publish-Event)
     - [Event Test](#Event-Test)
   - [Event List](#Event-List)
@@ -1734,6 +1736,36 @@ func (s *TestController) Test() {
 }
 ```
 
+## Consumer List
+```bash
+$ go run ./cmd/cli.go consumer:list
+
+========================
+Consumer Name
+========================
+├─ kafka_delay_demo
+├─ kafka_demo
+├─ rabbitmq_delay_demo
+└─ rabbitmq_demo
+========================
+Total 4 consumers
+```
+
+## Producer List
+```bash
+$ go run ./cmd/cli.go producer:list
+
+========================
+Producer Name
+========================
+├─ kafka_delay_demo
+├─ kafka_demo
+├─ rabbitmq_delay_demo
+└─ rabbitmq_demo
+========================
+Total 4 producers
+```
+
 # Publish Event
 ```go
 package v1
@@ -1861,13 +1893,14 @@ user.login 用户登录事件
 ```bash
 $ go run ./cmd/cli.go listener:list
 
-==== Currently registered events ====
-Event: user.login
-Description: User Login Event
-Listener:
-  - *listener.TestListener
-  - *listener.UserLoginListener
-----------------------
+=====================================================
+Event Name         Description
+=====================================================
+user.login        User Login Event 
+                   ├─ *listener.TestListener
+                   └─ *listener.UserLoginListener
+=====================================================
+Total 1 event
 ```
 
 # Response

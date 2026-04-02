@@ -81,6 +81,8 @@
     - [队列创建帮助](#队列创建帮助)
     - [队列创建](#队列创建)
     - [队列使用](#队列使用)
+    - [消费者列表](#消费者列表)
+    - [生产者列表](#生产者列表)
   - [发布事件](#发布事件)
     - [测试事件](#测试事件)
   - [事件列表](#事件列表)
@@ -1740,6 +1742,36 @@ func (s *TestController) Test() {
 }
 ```
 
+## 消费者列表
+```bash
+$ go run ./cmd/cli.go consumer:list
+
+========================
+消费者名称
+========================
+├─ kafka_delay_demo
+├─ kafka_demo
+├─ rabbitmq_delay_demo
+└─ rabbitmq_demo
+========================
+总计 4 个消费者
+```
+
+## 生产者列表
+```bash
+$ go run ./cmd/cli.go producer:list
+
+========================
+生产者名称
+========================
+├─ kafka_delay_demo
+├─ kafka_demo
+├─ rabbitmq_delay_demo
+└─ rabbitmq_demo
+========================
+总计 4 个生产者
+```
+
 # 发布事件
 ```go
 package v1
@@ -1868,13 +1900,14 @@ user.login 用户登录事件
 ```bash
 $ go run ./cmd/cli.go listener:list
 
-==== 当前已注册事件 ====
-事件: user.login
-描述: 用户登录事件
-监听:
-  - *listener.TestListener
-  - *listener.UserLoginListener
-----------------------
+=====================================================
+事件名称              描述
+=====================================================
+user.login        用户登录事件
+                   ├─ *listener.TestListener
+                   └─ *listener.UserLoginListener
+=====================================================
+总计 1 个事件
 ```
 
 # 响应
