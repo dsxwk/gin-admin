@@ -2,13 +2,14 @@ package request
 
 import (
 	"errors"
+	"gin/common/base"
 	"github.com/gookit/validate"
 )
 
 // Menu Validator
 type Menu struct {
+	base.BaseRequest
 	PageListValidate
-	Context
 }
 
 // Validate 请求验证

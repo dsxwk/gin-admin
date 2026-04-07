@@ -6,6 +6,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
+	"gin/pkg"
 	"gin/pkg/cli"
 	"github.com/fatih/color"
 	"gorm.io/gorm"
@@ -142,7 +143,6 @@ func (m *MakeModel) Execute(args []string) {
 	}
 }
 
-// init 注册cli命令
 func init() {
 	cli.Register(&MakeModel{})
 }
@@ -175,7 +175,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		})
 	}
 
-	structName := snakeToCamel(table)
+	structName := pkg.SnakeToCamel(table)
 	tableConst := "TableName" + structName
 
 	// 计算字段对齐长度
@@ -183,7 +183,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	maxTypeLen := 0
 
 	for _, c := range columns {
-		name := snakeToCamel(c.Name)
+		name := pkg.SnakeToCamel(c.Name)
 		typ := goType(c, im, pkgName)
 
 		if len(name) > maxNameLen {
@@ -198,12 +198,12 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	var fieldLines []string
 
 	for _, c := range columns {
-		fieldName := snakeToCamel(c.Name)
+		fieldName := pkg.SnakeToCamel(c.Name)
 		fieldType := goType(c, im, pkgName)
 
 		var jsonName string
 		if camel {
-			jsonName = snakeToLowerCamel(c.Name)
+			jsonName = pkg.ToLowerCamel(c.Name)
 		} else {
 			jsonName = c.Name
 		}
@@ -338,22 +338,4 @@ func buildGormTag(c Column) string {
 	}
 
 	return "gorm:\"" + strings.Join(tags, ";") + "\""
-}
-
-// snakeToCamel 下划线转大驼峰
-func snakeToCamel(s string) string {
-	parts := strings.Split(s, "_")
-
-	for i := range parts {
-		parts[i] = strings.Title(parts[i])
-	}
-
-	return strings.Join(parts, "")
-}
-
-// snakeToLowerCamel 下划线转小驼峰
-func snakeToLowerCamel(s string) string {
-	camel := snakeToCamel(s)
-
-	return strings.ToLower(camel[:1]) + camel[1:]
 }

@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.0.2
+> - Latest Version: v2.0.3
 > - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
@@ -623,65 +623,76 @@ Command:
 Options:
   -f, --file  File Path, Example: user                         required:true
   -d, --desc  Description, Example: user-request-validation    required:false
+  -t, --table       Table, Example: roles                      required:false
+  -c, --camel       Column is use camel                        required:false
+  -C, --connection  Database connection                        required:false
 ```
 
 ### Validator Creation
 ```bash
-$ go run ./cmd/cli.go make:request --file=user --desc=user-request-validation
+$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-request-validation
 ```
 ```go
 package request
 
 import (
-    "errors"
-    "github.com/gookit/validate"
+  "errors"
+  "gin/common/base"
+  "github.com/gookit/validate"
 )
 
-// User User-Request-Validation
-type User struct {
-    PageListValidate
+// Roles role-request-validation
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
+  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+  PageListValidate
 }
 
-// Validate Request-Validation
-func (s User) Validate(data User, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
-	}
-
-	return nil
+func (s Roles) Validate(data Roles, scene string) error {
+  v := validate.Struct(data, scene)
+  if !v.Validate(scene) {
+    return errors.New(v.Errors.One())
+  }
+  return nil
 }
 
 // ConfigValidation Configuration-Validation
 // - Define validation scenes
 // - You can also add verification settings
-func (s User) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		"list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"create": []string{},
-		"update": []string{"ID"},
-		"detail": []string{"ID"},
-		"delete": []string{"ID"},
-	})
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "create": []string{"Name", "Desc", "Status"},
+    "update": []string{"ID", "Name", "Desc", "Status"},
+    "detail": []string{"ID"},
+    "delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
 }
 
-// Messages Validator-Error-Message
-func (s User) Messages() map[string]string {
-	return validate.MS{
-		"required":    "Field {field} Required",
-		"int":         "Field {field} Must be an integer",
-		"Page.gt":     "Field {field} Must be greater than 0",
-		"PageSize.gt": "Field {field} Must be greater than 0",
-	}
+// Messages
+func (s Roles) Messages() map[string]string {
+  return validate.MS{
+    "required":    "Field {field} Required",
+    "int":         "Field {field} Must be an integer",
+    "Page.gt":     "Field {field} Must be greater than 0",
+    "PageSize.gt": "Field {field} Must be greater than 0",
+  }
 }
 
-// Translates Field-Translation
-func (s User) Translates() map[string]string {
-	return validate.MS{
-		"Page":     "Page",
-		"PageSize": "Page Size",
-		"ID":       "ID",
-	}
+// Translates
+func (s Roles) Translates() map[string]string {
+  return validate.MS{
+    "ID":       "ID",
+    "Name":     "Role Name",
+    "Desc":     "Role Description",
+    "Status":   "Status 1=Enable 2=Disable",
+    "Page":     "Page",
+    "PageSize": "Page Size",
+  }
 }
 ```
 
@@ -690,39 +701,14 @@ func (s User) Translates() map[string]string {
 ```go
 package request
 
-// UserCreate User-Create-Validation
-type UserCreate struct {
-	Username string `json:"username" validate:"required" label:"username"`
-	FullName string `json:"fullName" validate:"required" label:"fullname"`
-	Nickname string `json:"nickname" validate:"required" label:"nickname"`
-	Gender   int    `json:"gender" validate:"required|int" label:"gender"`
-	Password string `json:"password" validate:"required" label:"password"`
-}
-
-// UserUpdate User-Update-Validation
-type UserUpdate struct {
-    ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
-    Username string `json:"username" validate:"required" label:"username"`
-    FullName string `json:"fullName" validate:"required" label:"fullname"`
-    Nickname string `json:"nickname" validate:"required" label:"nickname"`
-    Gender   int    `json:"gender" validate:"required|int" label:"gender"`
-    Password string `json:"password" validate:"required" label:"password"`
-}
-
-// UserDetail User-Detail-Validation
-type UserDetail struct {
-    ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
-}
-
-// User User-Request-Validation
-type User struct {
-    ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
-    Username string `json:"username" validate:"required" label:"username"`
-    FullName string `json:"fullName" validate:"required" label:"fullname"`
-    Nickname string `json:"nickname" validate:"required" label:"nickname"`
-    Gender   int    `json:"gender" validate:"required|int" label:"gender"`
-    Password string `json:"password" validate:"required" label:"password"`
-	PageListValidate
+// Roles role-request-validation
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
+  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+  PageListValidate
 }
 ```
 
@@ -733,38 +719,15 @@ package request
 // ConfigValidation Configuration-Validation
 // - Define validation scenes
 // - You can also add verification settings
-func (s User) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		// List
-		"List": []string{
-			"PageListValidate.Page",
-			"PageListValidate.PageSize",
-		},
-		// Create
-		"Create": []string{
-			"Username",
-			"FullName",
-			"Nickname",
-			"Gender",
-			"Password",
-		},
-		// Update
-		"Update": []string{
-			"ID",
-			"Username",
-			"FullName",
-			"Nickname",
-			"Gender",
-		},
-		// Detail
-		"Detail": []string{
-			"ID",
-		},
-		// Delete
-		"Delete": []string{
-			"ID",
-		},
-	})
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "create": []string{"Name", "Desc", "Status"},
+    "update": []string{"ID", "Name", "Desc", "Status"},
+    "detail": []string{"ID"},
+    "delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
 }
 ```
 
@@ -773,7 +736,7 @@ func (s User) ConfigValidation(v *validate.Validation) {
 package request
 
 // Messages Validator-Error-Message
-func (s User) Messages() map[string]string {
+func (s Roles) Messages() map[string]string {
     return validate.MS{
         "required":                     "Field {field} Required",
         "int":                          "Field {field} Must be an integer",
@@ -788,16 +751,14 @@ func (s User) Messages() map[string]string {
 package request
 
 // Translates Field-Translation
-func (s User) Translates() map[string]string {
+func (s Roles) Translates() map[string]string {
 	return validate.MS{
-		"Page":     "Page",
-		"PageSize": "Page Size",
-		"ID":       "ID",
-		"Username": "Username",
-		"FullName": "Fullname",
-		"Nickname": "Nickname",
-		"Gender":   "Gender",
-		"Password": "Password",
+      "ID":       "ID",
+      "Name":     "Role Name",
+      "Desc":     "Role Description",
+      "Status":   "Status 1=Enable 2=Disable",
+      "Page":     "Page",
+      "PageSize": "Page Size",
 	}
 }
 ```

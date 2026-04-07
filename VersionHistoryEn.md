@@ -1,3 +1,6 @@
+## v2.0.3
+> - Optimize the code generator to create support table names and database connection names, and automatically generate request structures based on table names.
+
 ## v2.0.2
 > - Command line style beautification.
 

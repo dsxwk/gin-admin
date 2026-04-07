@@ -30,16 +30,6 @@ func LcFirst(s string) string {
 	return string(runes)
 }
 
-// ToUpperCamel 将下划线命名转换为大驼峰命名
-func ToUpperCamel(s string) string {
-	c := cases.Title(language.Und)
-	parts := strings.Split(s, "_")
-	for i := range parts {
-		parts[i] = c.String(parts[i])
-	}
-	return strings.Join(parts, "")
-}
-
 // SnakeToCamel 将下划线命名转换为驼峰命名
 func SnakeToCamel(s string) string {
 	s = strings.ToLower(s)
@@ -60,15 +50,6 @@ func SnakeToCamel(s string) string {
 	return b.String()
 }
 
-// SnakeToLowerCamel 将下划线命名转换为小驼峰命名
-func SnakeToLowerCamel(s string) string {
-	if s == "" {
-		return ""
-	}
-	camel := SnakeToCamel(s)
-	return strings.ToLower(camel[:1]) + camel[1:]
-}
-
 // CamelToSnake 将驼峰命名转换为下划线命名
 func CamelToSnake(s string) string {
 	var b strings.Builder
@@ -83,6 +64,25 @@ func CamelToSnake(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// ToLowerCamel 将下划线命名转换为小驼峰命名
+func ToLowerCamel(s string) string {
+	if s == "" {
+		return ""
+	}
+	camel := SnakeToCamel(s)
+	return strings.ToLower(camel[:1]) + camel[1:]
+}
+
+// ToUpperCamel 将下划线命名转换为大驼峰命名
+func ToUpperCamel(s string) string {
+	c := cases.Title(language.Und)
+	parts := strings.Split(s, "_")
+	for i := range parts {
+		parts[i] = c.String(parts[i])
+	}
+	return strings.Join(parts, "")
 }
 
 // Spaces 返回指定数量的空格

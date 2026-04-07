@@ -134,7 +134,7 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 	// 自定义JSON tag
 	if camel {
 		g.WithJSONTagNameStrategy(func(columnName string) string {
-			return pkg.SnakeToLowerCamel(columnName)
+			return pkg.ToLowerCamel(columnName)
 		})
 	}
 

@@ -2,6 +2,7 @@ package request
 
 import (
 	"errors"
+	"gin/common/base"
 	"gin/pkg/lang"
 	"github.com/gookit/validate"
 )
@@ -23,9 +24,9 @@ type Register struct {
 
 // Login Validator
 type Login struct {
+	base.BaseRequest
 	UserLogin
 	RefreshToken RefreshToken
-	Context
 }
 
 // Validate 请求验证

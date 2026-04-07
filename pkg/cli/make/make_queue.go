@@ -112,7 +112,7 @@ func (m *MakeQueue) generateQueue(queueType, name string, isDelay bool, values m
 	// 设置默认参数
 	queueName := strings.ToLower(name)
 	camelName := pkg.ToUpperCamel(name)
-	lowerName := pkg.SnakeToLowerCamel(name)
+	lowerName := pkg.ToLowerCamel(name)
 
 	retry, _ := pkg.StringToInt[int](values["retry"])
 	delayMs, _ := pkg.StringToInt[int64](values["delayMs"])

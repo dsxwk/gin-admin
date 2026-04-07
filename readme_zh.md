@@ -134,7 +134,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.0.2
+> - 最新版本: v2.0.3
 > - [版本更新详细记录](VersionHistoryZh.md)
 
 # 安装说明
@@ -621,67 +621,81 @@ Command:
   make:request  验证请求创建
 
 Options:
-  -f, --file  文件路径, 如: user     required:true
-  -d, --desc  描述, 如: 用户请求验证  required:false
+  -f, --file        文件路径, 如: user  required:true
+  -t, --table       表名, 如: roles    required:false
+  -d, --desc        描述               required:false
+  -c, --camel       字段是否使用驼峰     required:false
+  -C, --connection  数据库连接          required:false
 ```
 
 ### 验证创建
 ```bash
-$ go run ./cmd/cli.go make:request --file=user --desc=用户请求验证
+$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=用户请求验证
 ```
 ```go
 package request
 
 import (
-    "errors"
-    "github.com/gookit/validate"
+  "errors"
+  "gin/common/base"
+  "github.com/gookit/validate"
 )
 
-// User 用户请求验证
-type User struct {
-    PageListValidate
+// Roles 角色请求验证
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|max:255" label:"角色名称"`
+  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"角色描述"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+  PageListValidate
 }
 
 // Validate 请求验证
-func (s User) Validate(data User, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
-	}
-
-	return nil
+func (s Roles) Validate(data Roles, scene string) error {
+  v := validate.Struct(data, scene)
+  if !v.Validate(scene) {
+    return errors.New(v.Errors.One())
+  }
+  return nil
 }
 
 // ConfigValidation 配置验证
 // - 定义验证场景
 // - 也可以添加验证设置
-func (s User) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		"list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"create": []string{},
-		"update": []string{"ID"},
-		"detail": []string{"ID"},
-		"delete": []string{"ID"},
-	})
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "create": []string{"Name", "Desc", "Status"},
+    "update": []string{"ID", "Name", "Desc", "Status"},
+    "detail": []string{"ID"},
+    "delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
 }
 
 // Messages 验证器错误消息
-func (s User) Messages() map[string]string {
-	return validate.MS{
-		"required":    "字段 {field} 必填",
-		"int":         "字段 {field} 必须为整数",
-		"Page.gt":     "字段 {field} 需大于 0",
-		"PageSize.gt": "字段 {field} 需大于 0",
-	}
+func (s Roles) Messages() map[string]string {
+  return validate.MS{
+    "required":    "字段 {field} 必填",
+    "int":         "字段 {field} 必须为整数",
+    "gt":          "字段 {field} 必须大于 0",
+    "max":         "字段 {field} 长度不能超过 255",
+    "Page.gt":     "页码必须大于 0",
+    "PageSize.gt": "每页数量必须大于 0",
+  }
 }
 
 // Translates 字段翻译
-func (s User) Translates() map[string]string {
-	return validate.MS{
-		"Page":     "页码",
-		"PageSize": "每页数量",
-		"ID":       "ID",
-	}
+func (s Roles) Translates() map[string]string {
+  return validate.MS{
+    "ID":       "ID",
+    "Name":     "角色名称",
+    "Desc":     "角色描述",
+    "Status":   "状态 1=启用 2=停用",
+    "Page":     "页码",
+    "PageSize": "每页数量",
+  }
 }
 ```
 
@@ -690,39 +704,14 @@ func (s User) Translates() map[string]string {
 ```go
 package request
 
-// UserCreate 用户创建验证
-type UserCreate struct {
-	Username string `json:"username" validate:"required" label:"用户名"`
-	FullName string `json:"fullName" validate:"required" label:"姓名"`
-	Nickname string `json:"nickname" validate:"required" label:"昵称"`
-	Gender   int    `json:"gender" validate:"required|int" label:"性别"`
-	Password string `json:"password" validate:"required" label:"密码"`
-}
-
-// UserUpdate 用户更新验证
-type UserUpdate struct {
-    ID       int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
-    Username string `json:"username" validate:"required" label:"用户名"`
-    FullName string `json:"fullName" validate:"required" label:"姓名"`
-    Nickname string `json:"nickname" validate:"required" label:"昵称"`
-    Gender   int    `json:"gender" validate:"required|int" label:"性别"`
-    Password string `json:"password" validate:"required" label:"密码"`
-}
-
-// UserDetail 用户详情验证
-type UserDetail struct {
-    ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
-}
-
-// User 用户请求验证
-type User struct {
-    ID       int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
-    Username string `json:"username" validate:"required" label:"用户名"`
-    FullName string `json:"fullName" validate:"required" label:"姓名"`
-    Nickname string `json:"nickname" validate:"required" label:"昵称"`
-    Gender   int    `json:"gender" validate:"required|int" label:"性别"`
-    Password string `json:"password" validate:"required" label:"密码"`
-	PageListValidate
+// Roles 角色请求验证
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|max:255" label:"角色名称"`
+  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"角色描述"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+  PageListValidate
 }
 ```
 
@@ -733,38 +722,15 @@ package request
 // ConfigValidation 配置验证
 // - 定义验证场景
 // - 也可以添加验证设置
-func (s User) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		// 列表
-		"List": []string{
-			"PageListValidate.Page",
-			"PageListValidate.PageSize",
-		},
-		// 创建
-		"Create": []string{
-			"Username",
-			"FullName",
-			"Nickname",
-			"Gender",
-			"Password",
-		},
-		// 更新
-		"Update": []string{
-			"ID",
-			"Username",
-			"FullName",
-			"Nickname",
-			"Gender",
-		},
-		// 详情
-		"Detail": []string{
-			"ID",
-		},
-		// 删除
-		"Delete": []string{
-			"ID",
-		},
-	})
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "create": []string{"Name", "Desc", "Status"},
+    "update": []string{"ID", "Name", "Desc", "Status"},
+    "detail": []string{"ID"},
+    "delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
 }
 ```
 
@@ -773,7 +739,7 @@ func (s User) ConfigValidation(v *validate.Validation) {
 package request
 
 // Messages 验证器错误消息
-func (s User) Messages() map[string]string {
+func (s Roles) Messages() map[string]string {
 	return validate.MS{
         "required":                     "字段 {field} 必填",
         "int":                          "字段 {field} 必须为整数",
@@ -788,17 +754,15 @@ func (s User) Messages() map[string]string {
 package request
 
 // Translates 字段翻译
-func (s User) Translates() map[string]string {
-	return validate.MS{
-        "Page":     "页码",
-        "PageSize": "每页数量",
-        "ID":       "ID",
-        "Username": "用户名",
-        "FullName": "姓名",
-        "Nickname": "昵称",
-        "Gender":   "性别",
-        "Password": "密码",
-	}
+func (s Roles) Translates() map[string]string {
+  return validate.MS{
+    "ID":       "ID",
+    "Name":     "角色名称",
+    "Desc":     "角色描述",
+    "Status":   "状态 1=启用 2=停用",
+    "Page":     "页码",
+    "PageSize": "每页数量",
+  }
 }
 ```
 

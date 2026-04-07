@@ -2,6 +2,7 @@ package request
 
 import (
 	"errors"
+	"gin/common/base"
 	"github.com/gookit/validate"
 )
 
@@ -44,28 +45,15 @@ type UserSearch struct {
 
 // User 用户请求验证
 type User struct {
+	base.BaseRequest
 	ID       int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
-	Username string `json:"username" validate:"required" label:"用户名"`
+	Username string `json:"username" form:"username" validate:"required" label:"用户名"`
 	FullName string `json:"fullName" validate:"required" label:"姓名"`
 	Nickname string `json:"nickname" validate:"required" label:"昵称"`
 	Gender   int    `json:"gender" validate:"required|int" label:"性别"`
 	Password string `json:"password" validate:"required" label:"密码"`
 	Age      int    `json:"age" validate:"int" label:"年龄"`
 	PageListValidate
-	Context
-}
-
-// UserFillAble 允许更新的键
-var UserFillAble = []string{
-	"avatar",
-	"username",
-	"fullName",
-	"email",
-	"password",
-	"nickname",
-	"gender",
-	"age",
-	"status",
 }
 
 // Validate 请求验证

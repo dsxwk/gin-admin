@@ -2,6 +2,7 @@ package request
 
 import (
 	"errors"
+	"gin/common/base"
 	"github.com/gookit/validate"
 )
 
@@ -18,6 +19,7 @@ type Meta struct {
 
 // MenuRequest 菜单请求验证
 type MenuRequest struct {
+	base.BaseRequest
 	ID       int64  `json:"id" validate:"required" label:"ID"`
 	PID      int64  `json:"pid" validate:"required" label:"父级ID"`
 	Name     string `json:"name" validate:"required" label:"路由名称"`
@@ -26,7 +28,7 @@ type MenuRequest struct {
 	IsLink   bool   `json:"isLink" validate:"required" label:"是否外链"`
 	Sort     int64  `json:"sort" validate:"required" label:"排序"`
 	Meta     Meta   `json:"meta" validate:"required" label:"元数据"`
-	Context
+	PageListValidate
 }
 
 type MenuSearch struct {
