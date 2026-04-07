@@ -48,6 +48,10 @@ func (c *KafkaDemoConsumer) Name() string {
 	return "kafka_demo"
 }
 
+func (c *KafkaDemoConsumer) Description() string {
+	return "kakfa普通队列消费者"
+}
+
 func (c *KafkaDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
 	c.KafkaConsumer.Start(c)
 	log.Info(pkg.Sprintf("Kafka消费者启动成功: %s", c.Name()))

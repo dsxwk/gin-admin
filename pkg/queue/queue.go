@@ -14,6 +14,8 @@ import (
 type Consumer interface {
 	// Name 消费者名称
 	Name() string
+	// Description 消费者描述
+	Description() string
 	// Start 启动消费者
 	Start(cfg *config.Config, log *logger.Logger) error
 	// Stop 停止消费者
@@ -44,6 +46,8 @@ type Handler interface {
 type Producer interface {
 	// Name 生产者名称
 	Name() string
+	// Description 生产者描述
+	Description() string
 	// Publish 发送消息
 	Publish(ctx context.Context, msg []byte) error
 	// Close 关闭生产者

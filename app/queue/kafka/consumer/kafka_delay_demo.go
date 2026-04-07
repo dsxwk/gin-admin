@@ -49,6 +49,10 @@ func (c *KafkaDelayDemoConsumer) Name() string {
 	return "kafka_delay_demo"
 }
 
+func (c *KafkaDelayDemoConsumer) Description() string {
+	return "kakfa延迟队列消费者"
+}
+
 func (c *KafkaDelayDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
 	c.KafkaConsumer.Start(c)
 	log.Info(pkg.Sprintf("Kafka延迟消费者启动成功: %s", c.Name()))

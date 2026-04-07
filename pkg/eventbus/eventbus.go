@@ -8,6 +8,8 @@ import (
 	"gin/pkg/debugger"
 	"gin/pkg/message"
 	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -95,55 +97,98 @@ func DebugPrint() {
 		return
 	}
 
-	// 计算最大宽度
+	// 按名称排序
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].Name < events[j].Name
+	})
+
+	// 计算最大名称宽度和描述宽度(使用显示宽度)
 	maxNameLen := 0
 	maxDescLen := 0
 	for _, info := range events {
-		if len(info.Name) > maxNameLen {
-			maxNameLen = len(info.Name)
+		nameLen := runewidth.StringWidth(info.Name)
+		if nameLen > maxNameLen {
+			maxNameLen = nameLen
 		}
-		if len(info.Description) > maxDescLen {
-			maxDescLen = len(info.Description)
+
+		descLen := runewidth.StringWidth(info.Description)
+		if descLen > maxDescLen {
+			maxDescLen = descLen
 		}
 	}
 
 	// 设置最小宽度
-	if maxNameLen < 15 {
-		maxNameLen = 15
+	if maxNameLen < 20 {
+		maxNameLen = 20
 	}
-	if maxDescLen < 30 {
-		maxDescLen = 30
+	if maxDescLen < 35 {
+		maxDescLen = 35
 	}
 
-	totalWidth := maxNameLen + maxDescLen + 8
+	// 计算标题的显示宽度
+	titleNameLen := runewidth.StringWidth("事件名称")
+	titleDescLen := runewidth.StringWidth("描述")
+	if titleNameLen > maxNameLen {
+		maxNameLen = titleNameLen
+	}
+	if titleDescLen > maxDescLen {
+		maxDescLen = titleDescLen
+	}
 
-	// 打印标题
-	color.Cyan("\n" + strings.Repeat("=", totalWidth))
-	color.Cyan(fmt.Sprintf("%-*s %-*s", maxNameLen+2, "事件名称", maxDescLen+2, "描述"))
-	color.Cyan(strings.Repeat("=", totalWidth))
+	// 计算总宽度
+	totalWidth := maxNameLen + maxDescLen + 7
 
-	// 打印事件
+	// 打印顶部边框
+	color.Yellow("┌" + strings.Repeat("─", totalWidth-2) + "┐")
+
+	// 打印标题行
+	titleLine := fmt.Sprintf("│ %s   %s "+color.YellowString("│"),
+		color.HiWhiteString(padRight("事件名称", maxNameLen)),
+		color.HiWhiteString(padRight("描述", maxDescLen)))
+	color.Yellow(titleLine)
+
+	// 打印分隔线
+	color.Yellow("├" + strings.Repeat("─", maxNameLen+2) + "─" + strings.Repeat("─", maxDescLen+2) + "┤")
+
+	var listeners int
+	// 打印事件列表
 	for _, info := range events {
-		fmt.Printf("%s %s\n",
-			color.GreenString(fmt.Sprintf("%-*s", maxNameLen+2, info.Name)),
-			color.YellowString(fmt.Sprintf("%-*s", maxDescLen+2, info.Description)),
-		)
+		// 事件行
+		coloredName := color.GreenString(padRight(info.Name, maxNameLen))
+		coloredDesc := color.WhiteString(padRight(info.Description, maxDescLen))
+		contentLine := fmt.Sprintf("│ %s   %s "+color.YellowString("│"), coloredName, coloredDesc)
+		color.Yellow(contentLine)
 
-		// 打印监听器(缩进显示)
+		// 打印监听器
 		for i, listener := range info.Listeners {
-			prefix := "  └─ "
+			prefix := "├─ "
 			if i == len(info.Listeners)-1 {
-				prefix = "  └─ "
-			} else {
-				prefix = "  ├─ "
+				prefix = "└─ "
 			}
-			fmt.Printf("%s%s\n",
-				strings.Repeat(" ", maxNameLen+2),
-				color.CyanString("%s%s", prefix, listener),
-			)
+			listeners++
+
+			// 构建完整行使用固定格式
+			// 名称区域：maxNameLen+2个空格+前缀+监听器名称
+			nameArea := strings.Repeat(" ", maxNameLen+2) + prefix + listener
+			// 确保总长度与事件行一致
+			fullLine := fmt.Sprintf("│%-*s│", totalWidth-2, nameArea)
+			color.Yellow(fullLine)
 		}
 	}
 
-	color.Cyan(strings.Repeat("=", totalWidth))
-	color.Cyan("总计 %d 个事件\n", len(events))
+	// 打印底部边框
+	color.Yellow("└" + strings.Repeat("─", totalWidth-2) + "┘")
+
+	// 打印统计信息
+	color.Cyan(fmt.Sprintf("总计 %d 个事件 %d 个监听\n", len(events), listeners))
+}
+
+// padRight 右侧填充空格,支持中文字符
+func padRight(s string, width int) string {
+	currentWidth := runewidth.StringWidth(s)
+	if currentWidth >= width {
+		return s
+	}
+	padding := width - currentWidth
+	return s + strings.Repeat(" ", padding)
 }

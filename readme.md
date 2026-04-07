@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.0.3
+> - Latest Version: v2.0.4
 > - [Version update detailed record](VersionHistoryEn.md)
 
 # Installation Instructions
@@ -938,17 +938,17 @@ Usage:
 
 Available commands:
 consumer:
-  consumer:list    消费者列表
+  consumer:list    Consumer List
 db:
-  db:migrate       数据迁移
-  db:rollback      数据回滚
-  db:seed          数据填充
+  db:migrate       Database Migration
+  db:rollback      Database Rollback
+  db:seed          Database Seed
 demo:
   demo:command     test-demo
 event:
-  event:list       事件列表
+  event:list       Event List
 listener:
-  listener:list    事件监听列表
+  listener:list    Listener List
 make:
   make:command     Command Creation
   make:controller  Controller Creation
@@ -1701,14 +1701,14 @@ func (s *TestController) Test() {
 ```bash
 $ go run ./cmd/cli.go consumer:list
 
-========================
-Consumer Name
-========================
-├─ kafka_delay_demo
-├─ kafka_demo
-├─ rabbitmq_delay_demo
-└─ rabbitmq_demo
-========================
+┌────────────────────────────────────────────────────────────┐
+│ Consumer Name          Description                         │
+├────────────────────────────────────────────────────────────┤
+│ kafka_delay_demo       Kafka delay queue consumer          │
+│ kafka_demo             Kafka consumer for queue            │
+│ rabbitmq_delay_demo    RabbitMQ delay queue consumer       │
+│ rabbitmq_demo          RabbitMQ ordinary queue consumer    │
+└────────────────────────────────────────────────────────────┘
 Total 4 consumers
 ```
 
@@ -1716,14 +1716,14 @@ Total 4 consumers
 ```bash
 $ go run ./cmd/cli.go producer:list
 
-========================
-Producer Name
-========================
-├─ kafka_delay_demo
-├─ kafka_demo
-├─ rabbitmq_delay_demo
-└─ rabbitmq_demo
-========================
+┌────────────────────────────────────────────────────────────┐
+│ Producer Name          Description                         │
+├────────────────────────────────────────────────────────────┤
+│ kafka_delay_demo       Kafka delay queue producer          │
+│ kafka_demo             Kafka producer for queue            │
+│ rabbitmq_delay_demo    RabbitMQ delay queue producer       │
+│ rabbitmq_demo          RabbitMQ ordinary queue producer    │
+└────────────────────────────────────────────────────────────┘
 Total 4 producers
 ```
 
@@ -1847,21 +1847,26 @@ Content-Length: 56
 ```bash
 $ go run ./cmd/cli.go event:list
 
-user.login 用户登录事件
+┌────────────────────────────────────────────────────────────┐
+│ Event Name            Description                          │
+├────────────────────────────────────────────────────────────┤
+│ user.login            User Login Event                     │
+└────────────────────────────────────────────────────────────┘
+Total 1 event
 ```
 
 ## Event Listener List
 ```bash
 $ go run ./cmd/cli.go listener:list
 
-=====================================================
-Event Name         Description
-=====================================================
-user.login        User Login Event 
-                   ├─ *listener.TestListener
-                   └─ *listener.UserLoginListener
-=====================================================
-Total 1 event
+┌────────────────────────────────────────────────────────────┐
+│ Event Name             Description                           │
+├────────────────────────────────────────────────────────────┤
+│ user.login             User Login Event                    │
+│                      ├─ *listener.TestListener             │
+│                      └─ *listener.UserLoginListener        │
+└────────────────────────────────────────────────────────────┘
+Total 1 event 2 listeners
 ```
 
 # Response

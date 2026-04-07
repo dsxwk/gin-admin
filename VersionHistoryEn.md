@@ -1,3 +1,6 @@
+## v2.0.4
+> - Optimize the code generator queue, events, and listening output format.
+
 ## v2.0.3
 > - Optimize the code generator to create support table names and database connection names, and automatically generate request structures based on table names.
 

@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 23/01/2026 15:56:55
+ Date: 07/04/2026 09:41:33
 */
 
 SET NAMES utf8mb4;
@@ -243,51 +243,6 @@ INSERT INTO `menu_action` VALUES (21, 0, 10, 2, 'btn', 'primary', 'small', 2, '�
 INSERT INTO `menu_action` VALUES (22, 0, 10, 2, 'btn', 'danger', 'small', 2, '删除', 'article.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
 
 -- ----------------------------
--- Table structure for menu_roles
--- ----------------------------
-DROP TABLE IF EXISTS `menu_roles`;
-CREATE TABLE `menu_roles`  (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `menu_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '菜单id',
-  `role_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '角色id',
-  `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '角色名称',
-  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单角色表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of menu_roles
--- ----------------------------
-INSERT INTO `menu_roles` VALUES (1, 1, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-05-27 16:26:52');
-INSERT INTO `menu_roles` VALUES (2, 2, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-05-27 16:27:48');
-INSERT INTO `menu_roles` VALUES (3, 3, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-05-29 10:39:41');
-INSERT INTO `menu_roles` VALUES (4, 4, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-06-11 17:17:29');
-INSERT INTO `menu_roles` VALUES (5, 5, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-06-11 17:17:36');
-INSERT INTO `menu_roles` VALUES (6, 6, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-06-11 17:17:42');
-INSERT INTO `menu_roles` VALUES (17, 3, 1, 'admin', '2025-05-29 10:39:41', '2025-05-29 10:39:41', '2025-05-29 10:39:41');
-INSERT INTO `menu_roles` VALUES (18, 3, 1, 'admin', '2025-05-29 10:39:41', '2025-05-29 10:39:41', '2025-06-11 17:17:14');
-INSERT INTO `menu_roles` VALUES (19, 7, 2, 'test', '2025-06-06 10:21:50', '2025-06-06 10:21:50', '2025-06-06 10:21:50');
-INSERT INTO `menu_roles` VALUES (20, 7, 2, 'test', '2025-06-06 10:21:50', '2025-06-06 10:21:50', '2025-06-06 10:55:59');
-INSERT INTO `menu_roles` VALUES (21, 8, 2, 'test', '2025-06-06 10:35:00', '2025-06-06 10:35:00', '2025-06-06 10:55:33');
-INSERT INTO `menu_roles` VALUES (22, 8, 2, 'test', '2025-06-06 10:35:00', '2025-06-06 10:35:00', '2025-06-06 10:55:33');
-INSERT INTO `menu_roles` VALUES (23, 9, 2, 'test', '2025-06-06 11:01:30', '2025-06-06 11:01:30', '2025-06-06 11:01:42');
-INSERT INTO `menu_roles` VALUES (24, 9, 2, 'test', '2025-06-06 11:01:30', '2025-06-06 11:01:30', '2025-06-06 11:01:42');
-INSERT INTO `menu_roles` VALUES (25, 3, 1, 'admin', '2025-06-11 17:17:14', '2025-06-11 17:17:14', '2025-06-11 17:17:14');
-INSERT INTO `menu_roles` VALUES (26, 3, 1, 'admin', '2025-06-11 17:17:14', '2025-06-11 17:17:14', NULL);
-INSERT INTO `menu_roles` VALUES (27, 4, 1, 'admin', '2025-06-11 17:17:29', '2025-06-11 17:17:29', '2025-06-11 17:17:29');
-INSERT INTO `menu_roles` VALUES (28, 4, 1, 'admin', '2025-06-11 17:17:29', '2025-06-11 17:17:29', NULL);
-INSERT INTO `menu_roles` VALUES (29, 5, 1, 'admin', '2025-06-11 17:17:36', '2025-06-11 17:17:36', '2025-06-11 17:17:36');
-INSERT INTO `menu_roles` VALUES (30, 5, 1, 'admin', '2025-06-11 17:17:36', '2025-06-11 17:17:36', NULL);
-INSERT INTO `menu_roles` VALUES (31, 6, 1, 'admin', '2025-06-11 17:17:42', '2025-06-11 17:17:42', '2025-06-11 17:17:42');
-INSERT INTO `menu_roles` VALUES (32, 6, 1, 'admin', '2025-06-11 17:17:42', '2025-06-11 17:17:42', NULL);
-INSERT INTO `menu_roles` VALUES (33, 1, 1, 'admin', '2025-06-13 11:10:18', '2025-06-13 11:10:18', '2025-06-13 11:10:18');
-INSERT INTO `menu_roles` VALUES (34, 1, 1, 'admin', '2025-06-13 11:10:18', '2025-06-13 11:10:18', NULL);
-INSERT INTO `menu_roles` VALUES (35, 10, 1, 'admin', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
-INSERT INTO `menu_roles` VALUES (36, 10, 1, 'admin', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
-
--- ----------------------------
 -- Table structure for migrations
 -- ----------------------------
 DROP TABLE IF EXISTS `migrations`;
@@ -305,6 +260,52 @@ CREATE TABLE `migrations`  (
 INSERT INTO `migrations` VALUES (1, '20251212_create_user_table', '2025-12-12 17:04:27.313');
 
 -- ----------------------------
+-- Table structure for role_menus
+-- ----------------------------
+DROP TABLE IF EXISTS `role_menus`;
+CREATE TABLE `role_menus`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `role_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '角色id',
+  `menu_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '菜单id',
+  `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '角色名称',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_role_id`(`role_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 37 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单角色表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of role_menus
+-- ----------------------------
+INSERT INTO `role_menus` VALUES (1, 1, 1, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-05-27 16:26:52');
+INSERT INTO `role_menus` VALUES (2, 1, 2, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-05-27 16:27:48');
+INSERT INTO `role_menus` VALUES (3, 1, 3, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-05-29 10:39:41');
+INSERT INTO `role_menus` VALUES (4, 1, 4, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-06-11 17:17:29');
+INSERT INTO `role_menus` VALUES (5, 1, 5, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-06-11 17:17:36');
+INSERT INTO `role_menus` VALUES (6, 1, 6, 'admin', '2025-05-26 17:50:37', '2025-05-26 17:50:37', '2025-06-11 17:17:42');
+INSERT INTO `role_menus` VALUES (17, 1, 3, 'admin', '2025-05-29 10:39:41', '2025-05-29 10:39:41', '2025-05-29 10:39:41');
+INSERT INTO `role_menus` VALUES (18, 1, 3, 'admin', '2025-05-29 10:39:41', '2025-05-29 10:39:41', '2025-06-11 17:17:14');
+INSERT INTO `role_menus` VALUES (19, 2, 7, 'test', '2025-06-06 10:21:50', '2025-06-06 10:21:50', '2025-06-06 10:21:50');
+INSERT INTO `role_menus` VALUES (20, 2, 7, 'test', '2025-06-06 10:21:50', '2025-06-06 10:21:50', '2025-06-06 10:55:59');
+INSERT INTO `role_menus` VALUES (21, 2, 8, 'test', '2025-06-06 10:35:00', '2025-06-06 10:35:00', '2025-06-06 10:55:33');
+INSERT INTO `role_menus` VALUES (22, 2, 8, 'test', '2025-06-06 10:35:00', '2025-06-06 10:35:00', '2025-06-06 10:55:33');
+INSERT INTO `role_menus` VALUES (23, 2, 9, 'test', '2025-06-06 11:01:30', '2025-06-06 11:01:30', '2025-06-06 11:01:42');
+INSERT INTO `role_menus` VALUES (24, 2, 9, 'test', '2025-06-06 11:01:30', '2025-06-06 11:01:30', '2025-06-06 11:01:42');
+INSERT INTO `role_menus` VALUES (25, 1, 3, 'admin', '2025-06-11 17:17:14', '2025-06-11 17:17:14', '2025-06-11 17:17:14');
+INSERT INTO `role_menus` VALUES (26, 1, 3, 'admin', '2025-06-11 17:17:14', '2025-06-11 17:17:14', NULL);
+INSERT INTO `role_menus` VALUES (27, 1, 4, 'admin', '2025-06-11 17:17:29', '2025-06-11 17:17:29', '2025-06-11 17:17:29');
+INSERT INTO `role_menus` VALUES (28, 1, 4, 'admin', '2025-06-11 17:17:29', '2025-06-11 17:17:29', NULL);
+INSERT INTO `role_menus` VALUES (29, 1, 5, 'admin', '2025-06-11 17:17:36', '2025-06-11 17:17:36', '2025-06-11 17:17:36');
+INSERT INTO `role_menus` VALUES (30, 1, 5, 'admin', '2025-06-11 17:17:36', '2025-06-11 17:17:36', NULL);
+INSERT INTO `role_menus` VALUES (31, 1, 6, 'admin', '2025-06-11 17:17:42', '2025-06-11 17:17:42', '2025-06-11 17:17:42');
+INSERT INTO `role_menus` VALUES (32, 1, 6, 'admin', '2025-06-11 17:17:42', '2025-06-11 17:17:42', NULL);
+INSERT INTO `role_menus` VALUES (33, 1, 1, 'admin', '2025-06-13 11:10:18', '2025-06-13 11:10:18', '2025-06-13 11:10:18');
+INSERT INTO `role_menus` VALUES (34, 1, 1, 'admin', '2025-06-13 11:10:18', '2025-06-13 11:10:18', NULL);
+INSERT INTO `role_menus` VALUES (35, 1, 10, 'admin', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `role_menus` VALUES (36, 1, 10, 'admin', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+
+-- ----------------------------
 -- Table structure for roles
 -- ----------------------------
 DROP TABLE IF EXISTS `roles`;
@@ -317,7 +318,7 @@ CREATE TABLE `roles`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of roles
@@ -384,7 +385,7 @@ CREATE TABLE `user`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 47 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
@@ -392,7 +393,7 @@ CREATE TABLE `user`  (
 INSERT INTO `user` VALUES (1, 'https://cdn.qitx.net/local/myblog/user_header_image/20230517/577a53d123bc4c4f19db0cb2c6c980a8.jpg', 'admin', '超级管理员', 'dsx.emil@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', '大师兄', 1, 31, 1, '2023-09-05 17:29:36', '2023-09-12 14:47:48', NULL);
 INSERT INTO `user` VALUES (2, '', 'test2', '李四1', 'ls@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2025-06-16 14:32:14', NULL);
 INSERT INTO `user` VALUES (4, '', 'test1', '测试1', 'test1@qq.com', '$2a$10$Ww.IvYhlDpNt6Uq07X5W0OswksocMpae9dmaE2TaHclINQoBUF3Fq', '昵称', 1, 22, 1, '2023-09-07 17:48:39', '2023-09-12 09:52:47', '2023-09-12 09:53:12');
-INSERT INTO `user` VALUES (10, '', 'dsx', '大师兄', 'dsx@qq.com', '$2a$10$Y2FUvgUMpMlJ5h/oooH7OOdInCZgheFQaiVkKu0Wx6YcXhiylAT3a', '大师兄', 1, 0, 1, '2024-07-22 17:34:36', '2006-01-02 15:04:05', NULL);
+INSERT INTO `user` VALUES (10, '', 'dsx', '大师兄111', 'dsx@qq.com', '$2a$10$Y2FUvgUMpMlJ5h/oooH7OOdInCZgheFQaiVkKu0Wx6YcXhiylAT3a', '大师兄', 1, 0, 1, '2024-07-22 17:34:36', '2006-01-02 15:04:05', NULL);
 INSERT INTO `user` VALUES (11, '', 'admin1', '张三1', 'zs1@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', 'dsx', 1, 28, 1, '2023-09-05 17:29:36', '2023-09-12 14:47:48', NULL);
 INSERT INTO `user` VALUES (12, '', 'test3', '李四1', 'ls3@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2023-09-13 09:29:27', NULL);
 INSERT INTO `user` VALUES (13, '', 'test4', '测试2', 'test4@qq.com', '$2a$10$Ww.IvYhlDpNt6Uq07X5W0OswksocMpae9dmaE2TaHclINQoBUF3Fq', '昵称', 1, 22, 1, '2023-09-07 17:48:39', '2023-09-12 09:52:47', '2023-09-12 09:53:12');
@@ -433,8 +434,9 @@ CREATE TABLE `user_roles`  (
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_roles

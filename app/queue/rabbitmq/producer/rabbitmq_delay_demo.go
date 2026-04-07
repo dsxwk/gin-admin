@@ -40,6 +40,10 @@ func (p *RabbitmqDelayDemoProducer) Name() string {
 	return "rabbitmq_delay_demo"
 }
 
+func (p *RabbitmqDelayDemoProducer) Description() string {
+	return "rabbitmq延迟队列生产者"
+}
+
 func init() {
 	cfg := facade.Config.Get()
 	if cfg != nil && cfg.Rabbitmq.Enabled {

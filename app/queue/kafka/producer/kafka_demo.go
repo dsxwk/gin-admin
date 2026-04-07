@@ -39,6 +39,10 @@ func (p *KafkaDemoProducer) Name() string {
 	return "kafka_demo"
 }
 
+func (p *KafkaDemoProducer) Description() string {
+	return "kafka普通队列生产者"
+}
+
 func init() {
 	cfg := facade.Config.Get()
 	if cfg != nil && cfg.Kafka.Enabled {

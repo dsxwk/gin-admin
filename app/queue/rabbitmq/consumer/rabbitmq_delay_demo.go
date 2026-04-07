@@ -42,6 +42,10 @@ func (c *RabbitmqDelayDemoConsumer) Name() string {
 	return "rabbitmq_delay_demo"
 }
 
+func (c *RabbitmqDelayDemoConsumer) Description() string {
+	return "rabbitmq延迟队列消费者"
+}
+
 func (c *RabbitmqDelayDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
 	c.RabbitmqConsumer.Start(c)
 	log.Info(pkg.Sprintf("RabbitMQ延迟消费者启动成功: %s", c.Name()))

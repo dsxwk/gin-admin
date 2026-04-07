@@ -6,6 +6,7 @@ import (
 	"gin/pkg/cli"
 	"gin/pkg/queue"
 	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 	"sort"
 	"strings"
 )
@@ -36,36 +37,77 @@ func (s *ConsumerList) Execute(args []string) {
 		return consumers[i].Name() < consumers[j].Name()
 	})
 
-	// 计算最大名称宽度
+	// 计算最大名称宽度和描述宽度(使用显示宽度)
 	maxNameLen := 0
+	maxDescLen := 0
 	for _, c := range consumers {
-		if len(c.Name()) > maxNameLen {
-			maxNameLen = len(c.Name())
+		nameLen := runewidth.StringWidth(c.Name())
+		if nameLen > maxNameLen {
+			maxNameLen = nameLen
+		}
+
+		descLen := runewidth.StringWidth(c.Description())
+		if descLen > maxDescLen {
+			maxDescLen = descLen
 		}
 	}
+
+	// 设置最小宽度
 	if maxNameLen < 20 {
 		maxNameLen = 20
 	}
-
-	totalWidth := maxNameLen + 4
-
-	// 打印标题
-	color.Cyan("\n" + strings.Repeat("=", totalWidth))
-	color.Cyan(fmt.Sprintf("%-*s", maxNameLen+2, "消费者名称"))
-	color.Cyan(strings.Repeat("=", totalWidth))
-
-	// 打印消费者列表
-	for i, c := range consumers {
-		prefix := "├─ "
-		if i == len(consumers)-1 {
-			prefix = "└─ "
-		}
-		// 只用一个格式符
-		fmt.Printf("%s\n", color.GreenString(fmt.Sprintf("%-*s", maxNameLen+2, prefix+c.Name())))
+	if maxDescLen < 35 {
+		maxDescLen = 35
 	}
 
-	color.Cyan(strings.Repeat("=", totalWidth))
-	color.Cyan("总计 %d 个消费者\n", len(consumers))
+	// 计算标题的显示宽度
+	titleNameLen := runewidth.StringWidth("消费者名称")
+	titleDescLen := runewidth.StringWidth("描述")
+	if titleNameLen > maxNameLen {
+		maxNameLen = titleNameLen
+	}
+	if titleDescLen > maxDescLen {
+		maxDescLen = titleDescLen
+	}
+
+	// 计算总宽度(名称宽度+描述宽度+边框)
+	totalWidth := maxNameLen + maxDescLen + 7
+
+	// 打印顶部边框
+	color.Yellow("┌" + strings.Repeat("─", totalWidth-2) + "┐")
+
+	// 打印标题行
+	titleLine := fmt.Sprintf("│ %s   %s "+color.YellowString("│"),
+		color.HiWhiteString(padRight("消费者名称", maxNameLen)),
+		color.HiWhiteString(padRight("描述", maxDescLen)))
+	color.Yellow(titleLine)
+
+	// 打印分隔线
+	color.Yellow("├" + strings.Repeat("─", maxNameLen+2) + "─" + strings.Repeat("─", maxDescLen+2) + "┤")
+
+	// 打印消费者列表
+	for _, c := range consumers {
+		coloredName := color.GreenString(padRight(c.Name(), maxNameLen))
+		coloredDesc := color.WhiteString(padRight(c.Description(), maxDescLen))
+		contentLine := fmt.Sprintf("│ %s   %s "+color.YellowString("│"), coloredName, coloredDesc)
+		color.Yellow(contentLine)
+	}
+
+	// 打印底部边框
+	color.Yellow("└" + strings.Repeat("─", totalWidth-2) + "┘")
+
+	// 打印统计信息
+	color.Cyan(fmt.Sprintf("总计 %d 个消费者\n", len(consumers)))
+}
+
+// padRight 右侧填充空格,支持中文字符
+func padRight(s string, width int) string {
+	currentWidth := runewidth.StringWidth(s)
+	if currentWidth >= width {
+		return s
+	}
+	padding := width - currentWidth
+	return s + strings.Repeat(" ", padding)
 }
 
 func init() {

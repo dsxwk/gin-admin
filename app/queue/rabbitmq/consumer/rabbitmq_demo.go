@@ -44,6 +44,10 @@ func (c *RabbitmqDemoConsumer) Name() string {
 	return "rabbitmq_demo"
 }
 
+func (c *RabbitmqDemoConsumer) Description() string {
+	return "rabbitmq普通队列消费者"
+}
+
 // Start 启动消费者
 func (c *RabbitmqDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
 	c.RabbitmqConsumer.Start(c)

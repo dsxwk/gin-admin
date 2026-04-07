@@ -41,6 +41,10 @@ func (p *KafkaDelayDemoProducer) Name() string {
 	return "kafka_delay_demo"
 }
 
+func (p *KafkaDelayDemoProducer) Description() string {
+	return "kafka延迟队列生产者"
+}
+
 func init() {
 	cfg := facade.Config.Get()
 	if cfg != nil && cfg.Kafka.Enabled {

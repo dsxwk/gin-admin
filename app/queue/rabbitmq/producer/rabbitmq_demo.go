@@ -39,6 +39,10 @@ func (p *RabbitmqDemoProducer) Name() string {
 	return "rabbitmq_demo"
 }
 
+func (p *RabbitmqDemoProducer) Description() string {
+	return "rabbitmq普通队列生产者"
+}
+
 func init() {
 	cfg := facade.Config.Get()
 	if cfg != nil && cfg.Rabbitmq.Enabled {
