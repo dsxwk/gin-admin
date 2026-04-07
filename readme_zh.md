@@ -276,13 +276,16 @@ watching app\controller
 ...
 ...
 [GIN-debug] GET    /api/v1/user/:id          --> gin/app/controller/v1.(*UserController).Detail-fm (6 handlers)
-应用:    gin
-环境:    dev
-端口:    8080
-数据库:  gin
-🌐 Address:    http://0.0.0.0:8080
-👉 Swagger:    http://127.0.0.1:8080/swagger/index.html
-👉 Test API:   http://127.0.0.1:8080/ping
+应用:                  gin
+环境:                  dev
+端口:                  8080
+数据库:                gin
+🌐 Local Address:      http://127.0.0.1:8080
+🌐 Network Address:    http://192.168.8.54:8080
+👉 Local Swagger:      http://127.0.0.1:8080/swagger/index.html
+👉 Network Swagger:    http://192.168.8.54:8080/swagger/index.html
+👉 Local Test API:     http://127.0.0.1:8080/ping
+👉 Network Test API:   http://192.168.8.54:8080/ping
  SUCCESS  Gin server started successfully!
 ```
 

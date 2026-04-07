@@ -15,6 +15,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/mattn/go-runewidth"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -101,35 +102,131 @@ func (a *App) Run() {
 
 // printStartupInfo 打印启动信息
 func (a *App) printStartupInfo(conf *config.Config) {
-	// 应用信息
-	appInfo := map[string]interface{}{
+	// 获取IP地址
+	networkIP := getNetworkIP()
+	port := pkg.IntToString(conf.App.Port)
+
+	// 构建数据
+	data := map[string]interface{}{
 		"应用":  conf.App.Name,
 		"环境":  conf.App.Env,
-		"端口":  conf.App.Port,
+		"端口":  color.YellowString(pkg.IntToString[int64](conf.App.Port)),
 		"数据库": conf.Mysql.Database,
 	}
-	PrintAligned(appInfo, []string{"应用", "环境", "端口", "数据库"})
 
-	// 服务地址
-	port := pkg.IntToString(conf.App.Port)
-	network := pkg.Sprintf("%s Address:", flag.NetworkIco)
-	swagger := pkg.Sprintf("%s Swagger:", flag.PointerIco)
-	testApi := pkg.Sprintf("%s Test API:", flag.PointerIco)
-	serverInfo := map[string]interface{}{
-		network: pkg.Sprintf("http://0.0.0.0:%s", port),
-		swagger: pkg.Sprintf("http://127.0.0.1:%s/swagger/index.html", port),
-		testApi: pkg.Sprintf("http://127.0.0.1:%s/ping", port),
+	// 地址信息
+	data[pkg.Sprintf("%s Local Address:", flag.NetworkIco)] = pkg.Sprintf("http://127.0.0.1:%s", port)
+	data[pkg.Sprintf("%s Local Swagger:", flag.PointerIco)] = pkg.Sprintf("http://127.0.0.1:%s/swagger/index.html", port)
+	data[pkg.Sprintf("%s Local Test API:", flag.PointerIco)] = pkg.Sprintf("http://127.0.0.1:%s/ping", port)
+
+	// 网络地址信息
+	if networkIP != "" {
+		data[pkg.Sprintf("%s Network Address:", flag.NetworkIco)] = pkg.Sprintf("http://%s:%s", networkIP, port)
+		data[pkg.Sprintf("%s Network Swagger:", flag.PointerIco)] = pkg.Sprintf("http://%s:%s/swagger/index.html", networkIP, port)
+		data[pkg.Sprintf("%s Network Test API:", flag.PointerIco)] = pkg.Sprintf("http://%s:%s/ping", networkIP, port)
+	} else {
+		data[pkg.Sprintf("%s Network Address:", flag.NetworkIco)] = "未获取到网络地址"
+		data[pkg.Sprintf("%s Network Swagger:", flag.PointerIco)] = "未获取到网络地址"
+		data[pkg.Sprintf("%s Network Test API:", flag.PointerIco)] = "未获取到网络地址"
 	}
-	PrintAligned(serverInfo, []string{
-		network,
-		swagger,
-		testApi,
-	})
+
+	// 定义显示顺序
+	order := []string{
+		"应用", "环境", "端口", "数据库",
+		pkg.Sprintf("%s Local Address:", flag.NetworkIco),
+		pkg.Sprintf("%s Network Address:", flag.NetworkIco),
+		pkg.Sprintf("%s Local Swagger:", flag.PointerIco),
+		pkg.Sprintf("%s Network Swagger:", flag.PointerIco),
+		pkg.Sprintf("%s Local Test API:", flag.PointerIco),
+		pkg.Sprintf("%s Network Test API:", flag.PointerIco),
+	}
+
+	PrintAligned(data, order)
 
 	flag.Successf("Gin server started successfully!")
 }
 
-// startHTTPServer 启动http服务
+// PrintAligned 打印冒号对齐,支持中文
+func PrintAligned(data map[string]interface{}, order []string) {
+	if len(order) == 0 {
+		return
+	}
+
+	// 找出最长key的显示宽度
+	maxLen := 0
+	for _, k := range order {
+		if val, ok := data[k]; ok && val != nil {
+			w := runewidth.StringWidth(k)
+			if w > maxLen {
+				maxLen = w
+			}
+		}
+	}
+
+	// 打印每一行
+	for _, k := range order {
+		if val, ok := data[k]; ok && val != nil {
+			key := ensureEmojiSpace(strings.TrimSuffix(k, ":"))
+			padding := maxLen - runewidth.StringWidth(key) + 2
+
+			// 根据值的类型处理颜色
+			switch v := val.(type) {
+			case string:
+				if strings.HasPrefix(v, "http") {
+					// URL使用青色
+					fmt.Printf("%s:%s%s\n", key, spaces(padding), color.CyanString(v))
+				} else if strings.Contains(k, "Network") && v == "未获取到网络地址" {
+					// 未获取到网络地址使用黄色
+					fmt.Printf("%s:%s%s\n", key, spaces(padding), color.YellowString(v))
+				} else {
+					// 普通字符串
+					fmt.Printf("%s:%s%s\n", key, spaces(padding), color.YellowString(v))
+				}
+			default:
+				fmt.Printf("%s:%s%v\n", key, spaces(padding), v)
+			}
+		}
+	}
+}
+
+// getNetworkIP 获取局域网IP地址
+func getNetworkIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			// 排除Docker和虚拟网卡
+			if !isVirtualIP(ipnet.IP.String()) {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
+}
+
+// isVirtualIP 判断是否为虚拟网卡IP
+func isVirtualIP(ip string) bool {
+	// 常见的虚拟网卡IP段
+	virtualPrefixes := []string{
+		"172.17.", // Docker
+		"172.18.",
+		"172.19.",
+		"192.168.99.", // Docker Machine
+		"10.0.",       // VPN
+	}
+
+	for _, prefix := range virtualPrefixes {
+		if strings.HasPrefix(ip, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// startHttpServer 启动http服务
 func (a *App) startHttpServer(conf *config.Config) *http.Server {
 	port := pkg.IntToString(conf.App.Port)
 	srv := &http.Server{
@@ -175,24 +272,6 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 	// 关闭http服务
 	if err := srv.Shutdown(ctx); err != nil {
 		flag.Errorf("服务关闭异常: %v", err)
-	}
-}
-
-// PrintAligned 打印冒号对齐,支持中文
-func PrintAligned(data map[string]interface{}, order []string) {
-	// 找出最长key的显示宽度
-	maxLen := 0
-	for k := range data {
-		w := runewidth.StringWidth(k)
-		if w > maxLen {
-			maxLen = w
-		}
-	}
-
-	for _, k := range order {
-		key := ensureEmojiSpace(strings.TrimSuffix(k, ":"))
-		padding := maxLen - runewidth.StringWidth(key) + 2
-		fmt.Printf("%s:%s%v\n", key, spaces(padding), data[k])
 	}
 }
 
