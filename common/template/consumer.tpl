@@ -53,7 +53,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 	{{- else}}
 	mq, err := base.NewRabbitMQ(cfg, log, bus)
 	if err != nil {
-		log.Errorf("RabbitMQ连接失败: %v", err)
+		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
@@ -76,6 +76,10 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Name() string {
 	{{- else}}
 	return "{{.LowerName}}"
 	{{- end}}
+}
+
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Description() string {
+	return "{{.Description}}"
 }
 
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Start(cfg *config.Config, log *logger.Logger) error {

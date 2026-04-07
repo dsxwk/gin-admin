@@ -48,7 +48,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 	{{- else}}
 	mq, err := base.NewRabbitMQ(cfg, log, bus)
 	if err != nil {
-		log.Errorf("RabbitMQ连接失败: %v", err)
+		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
@@ -71,6 +71,10 @@ func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Name() string {
 	{{- else}}
 	return "{{.LowerName}}"
 	{{- end}}
+}
+
+func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Description() string {
+	return "{{.Description}}"
 }
 
 func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Publish(ctx context.Context, msg []byte) error {

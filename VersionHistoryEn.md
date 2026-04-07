@@ -1,3 +1,6 @@
+## v2.0.5
+> - Optimize code generator queue creation issues.
+
 ## v2.0.4
 > - Optimize the code generator queue, events, and listening output format.
 

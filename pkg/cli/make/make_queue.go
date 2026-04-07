@@ -5,10 +5,10 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"html/template"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 )
 
 type MakeQueue struct {
@@ -38,6 +38,11 @@ func (m *MakeQueue) Help() []base.CommandOption {
 		{
 			base.Flag{Short: "d", Long: "delay"},
 			"是否延迟队列: true/false",
+			false,
+		},
+		{
+			base.Flag{Short: "D", Long: "desc"},
+			"队列描述",
 			false,
 		},
 		// Kafka参数
@@ -74,12 +79,12 @@ func (m *MakeQueue) Help() []base.CommandOption {
 		},
 		// 通用参数
 		{
-			base.Flag{Short: "R", Long: "retry"},
+			base.Flag{Short: "R", Long: "retry", Default: "3"},
 			"重试次数, 默认3",
 			false,
 		},
 		{
-			base.Flag{Short: "m", Long: "delayMs"},
+			base.Flag{Short: "m", Long: "delayMs", Default: "0"},
 			"延迟毫秒数, 默认0",
 			false,
 		},
@@ -91,15 +96,7 @@ func (m *MakeQueue) Execute(args []string) {
 
 	queueType := values["type"]
 	name := values["name"]
-	isDelay := values["delay"] == "true" || values["delay"] == "1" || values["delay"] == "yes"
-
-	// 设置默认值
-	if values["retry"] == "" {
-		values["retry"] = "3"
-	}
-	if values["delayMs"] == "" {
-		values["delayMs"] = "0"
-	}
+	isDelay := m.StringToBool(values["delay"])
 
 	m.generateQueue(queueType, name, isDelay, values)
 }
@@ -119,17 +116,18 @@ func (m *MakeQueue) generateQueue(queueType, name string, isDelay bool, values m
 
 	// 构建数据
 	data := map[string]interface{}{
-		"Package":   "consumer",
-		"Name":      camelName,
-		"LowerName": lowerName,
-		"Type":      queueType,
-		"TypeTitle": map[string]string{"kafka": "Kafka", "rabbitmq": "RabbitMQ"}[queueType],
-		"IsDelay":   isDelay,
-		"Retry":     retry,
-		"DelayMs":   delayMs,
+		"Package":     "consumer",
+		"Name":        camelName,
+		"LowerName":   lowerName,
+		"Type":        queueType,
+		"TypeTitle":   map[string]string{"kafka": "Kafka", "rabbitmq": "RabbitMQ"}[queueType],
+		"IsDelay":     isDelay,
+		"Retry":       retry,
+		"DelayMs":     delayMs,
+		"Description": values["desc"],
 	}
 
-	// Kafka 参数
+	// Kafka参数
 	if queueType == "kafka" {
 		topic := values["topic"]
 		if topic == "" {
@@ -165,49 +163,45 @@ func (m *MakeQueue) generateQueue(queueType, name string, isDelay bool, values m
 	}
 
 	// 获取模板
-	tmplConsumer, err := template.ParseFiles("common/template/consumer.tpl")
+	consumerFile := m.GetTemplate("consumer")
+	consumerTpl, err := template.ParseFiles(consumerFile)
 	if err != nil {
-		flag.Errorf("解析消费者模板失败: %v", err)
+		flag.Errorf("Error parsing consumer template: %s", err.Error())
+		os.Exit(1)
+	}
+	producerFile := m.GetTemplate("producer")
+	producerTpl, err := template.ParseFiles(producerFile)
+	if err != nil {
+		flag.Errorf("Error parsing producer template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	tmplProducer, err := template.ParseFiles("common/template/producer.tpl")
-	if err != nil {
-		flag.Errorf("解析生产者模板失败: %v", err)
-		os.Exit(1)
-	}
-
-	// 生成消费者文件
-	consumerFile := filepath.Join("app/queue", queueType, "consumer", queueName+".go")
-	err = os.MkdirAll(filepath.Dir(consumerFile), 0755)
-	if err != nil {
+	f1 := filepath.Join("app/queue", queueType, "consumer", queueName+".go")
+	cf := m.CheckDirAndFile(f1)
+	if cf == nil {
 		return
 	}
 
-	f1 := m.CheckDirAndFile(consumerFile)
-	if f1 == nil {
+	f2 := filepath.Join("app/queue", queueType, "producer", queueName+".go")
+	pf := m.CheckDirAndFile(f2)
+	if pf == nil {
 		return
 	}
 
 	data["Package"] = "consumer"
-	if err = tmplConsumer.Execute(f1, data); err != nil {
-		flag.Errorf("执行消费者模板失败: %v", err)
+	err = consumerTpl.Execute(cf, data)
+	if err != nil {
+		flag.Errorf("Error executing consumer template: %s", err.Error())
 		os.Exit(1)
-	}
-
-	// 生成生产者文件
-	producerFile := filepath.Join("app/queue", queueType, "producer", queueName+".go")
-	f2 := m.CheckDirAndFile(producerFile)
-	if f2 == nil {
-		return
 	}
 
 	data["Package"] = "producer"
-	if err = tmplProducer.Execute(f2, data); err != nil {
-		flag.Errorf("执行生产者模板失败: %v", err)
+	err = producerTpl.Execute(pf, data)
+	if err != nil {
+		flag.Errorf("Error executing producer template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("消费者文件: %s 生成成功!", consumerFile)
-	flag.Successf("生产者文件: %s 生成成功!", producerFile)
+	flag.Successf("消费者文件: %s 生成成功!", f1)
+	flag.Successf("生产者文件: %s 生成成功!", f2)
 }

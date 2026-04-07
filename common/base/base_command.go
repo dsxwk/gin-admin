@@ -196,7 +196,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 
 	switch _make {
 	case "model-old":
-	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider":
+	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer":
 		templateFile = filepath.Join(pkg.GetRootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")
