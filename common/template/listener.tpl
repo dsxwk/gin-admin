@@ -3,7 +3,6 @@ package {{.Package}}
 import (
     "fmt"
     "gin/app/event"
-    "gin/common/base"
     "gin/pkg/eventbus"
     "github.com/goccy/go-json"
     "time"
@@ -11,7 +10,7 @@ import (
 
 type {{.Name}}Listener struct{}
 
-func (l *{{.Name}}Listener) Handle(e base.Event) {
+func (l *{{.Name}}Listener) Handle(e eventbus.Event) {
     ev, ok := e.(event.{{.EventName}})
 	if !ok {
 		return

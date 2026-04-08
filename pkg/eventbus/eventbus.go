@@ -3,7 +3,6 @@ package eventbus
 import (
 	"context"
 	"fmt"
-	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/pkg/debugger"
 	"gin/pkg/message"
@@ -21,19 +20,19 @@ type EventInfo struct {
 }
 
 var (
-	listenerMap sync.Map // key: event name -> []base.Listener[T]
+	listenerMap sync.Map // key: event name -> []Listener[T]
 	eventInfos  sync.Map // key: event name -> EventInfo
 )
 
 // Register 注册监听
-func Register(listener base.Listener, e base.Event) {
+func Register(listener Listener, e Event) {
 	name := e.Name()
 	desc := e.Description()
 
 	// 获取当前已注册监听
-	var listen []base.Listener
+	var listen []Listener
 	if v, ok := listenerMap.Load(name); ok {
-		listen = v.([]base.Listener)
+		listen = v.([]Listener)
 	}
 
 	// 添加新的监听
@@ -55,7 +54,7 @@ func Register(listener base.Listener, e base.Event) {
 }
 
 // Publish 发布事件
-func Publish(ctx context.Context, e base.Event) {
+func Publish(ctx context.Context, e Event) {
 	message.GetEventBus().Publish(debugger.TopicListener, debugger.ListenerEvent{
 		TraceId:     ctx.Value(ctxkey.TraceIdKey).(string),
 		Name:        e.Name(),
@@ -64,7 +63,7 @@ func Publish(ctx context.Context, e base.Event) {
 	})
 
 	if v, ok := listenerMap.Load(e.Name()); ok {
-		for _, listener := range v.([]base.Listener) {
+		for _, listener := range v.([]Listener) {
 			// 可替换goroutine为队列
 			go listener.Handle(e)
 		}

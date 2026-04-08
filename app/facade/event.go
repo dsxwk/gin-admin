@@ -2,7 +2,6 @@ package facade
 
 import (
 	"context"
-	"gin/common/base"
 	"gin/pkg/eventbus"
 )
 
@@ -12,12 +11,12 @@ var Event = &eventFacade{}
 type eventFacade struct{}
 
 // Register 注册监听器
-func (f *eventFacade) Register(listener base.Listener, event base.Event) {
+func (f *eventFacade) Register(listener eventbus.Listener, event eventbus.Event) {
 	eventbus.Register(listener, event)
 }
 
 // Publish 发布事件
-func (f *eventFacade) Publish(ctx context.Context, e base.Event) {
+func (f *eventFacade) Publish(ctx context.Context, e eventbus.Event) {
 	eventbus.Publish(ctx, e)
 }
 
