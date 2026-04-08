@@ -1,3 +1,6 @@
+## v2.0.6
+> - Optimize code generator model creation, add Connection method to specify database connection name, optimize service layer, add DB method to automatically identify connected databases through the model.
+
 ## v2.0.5
 > - Optimize code generator queue creation issues.
 
