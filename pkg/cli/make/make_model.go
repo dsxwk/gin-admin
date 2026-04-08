@@ -1,14 +1,12 @@
 package make
 
 import (
-	"bytes"
 	"fmt"
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
@@ -131,15 +129,8 @@ func (m *MakeModel) Execute(args []string) {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	db := facade.DB.Connection(conn)
 	for _, table := range tables {
-		color.Cyan("开始生成模型: %s", table)
-
-		err := m.generateModel(_make, db, table, path, camel)
-		if err != nil {
-			flag.Errorf("生成失败: %s", err.Error())
-			continue
-		}
-
-		flag.Successf("模型生成成功: " + filepath.Join(path, table+".go"))
+		flag.Infof("开始生成模型: %s", table)
+		m.generateModel(_make, db, table, path, conn, camel)
 	}
 }
 
@@ -148,11 +139,12 @@ func init() {
 }
 
 // generateModel 根据表结构生成 Model 文件
-func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDir string, camel bool) error {
+func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDir, conn string, camel bool) {
 	// 获取表字段
 	cols, err := db.Migrator().ColumnTypes(table)
 	if err != nil {
-		return err
+		flag.Errorf("获取表字段失败: %s", err.Error())
+		os.Exit(1)
 	}
 
 	im := NewImport()
@@ -236,28 +228,29 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		Struct     string
 		Table      string
 		TableConst string
+		Connection string
 		Fields     []string
 	}{
 		Imports:    im.Render(),
 		Struct:     structName,
 		Table:      table,
 		TableConst: tableConst,
+		Connection: conn,
 		Fields:     fieldLines,
 	}
 
-	var buf bytes.Buffer
-	if err = tpl.Execute(&buf, data); err != nil {
-		return err
-	}
-
-	err = os.MkdirAll(outDir, 0755)
-	if err != nil {
-		return err
-	}
-
 	file := filepath.Join(outDir, table+".go")
+	f := m.CheckDirAndFile(file)
+	if f == nil {
+		return
+	}
+	err = tpl.Execute(f, data)
+	if err != nil {
+		flag.Errorf("Error executing template: %s", err.Error())
+		os.Exit(1)
+	}
 
-	return os.WriteFile(file, buf.Bytes(), 0644)
+	flag.Successf("模型文件: " + file + " 生成成功!")
 }
 
 // goType 将数据库类型转换为go类型

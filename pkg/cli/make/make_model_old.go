@@ -1,12 +1,12 @@
 package make
 
 import (
+	"fmt"
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 	"os"
@@ -54,6 +54,15 @@ func (m *MakeModelOld) Help() []base.CommandOption {
 			"是否驼峰字段, 如: true",
 			false,
 		},
+		{
+			base.Flag{
+				Short:   "C",
+				Long:    "connection",
+				Default: "mysql",
+			},
+			"数据库连接",
+			false,
+		},
 	}
 }
 
@@ -67,7 +76,7 @@ func (m *MakeModelOld) Execute(args []string) {
 		flag.Successf("创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
 	}
 
-	m.generateFiles(p, tables, m.StringToBool(values["camel"]))
+	m.generateFiles(p, values["connection"], tables, m.StringToBool(values["camel"]))
 }
 
 func init() {
@@ -75,7 +84,7 @@ func init() {
 }
 
 // generateFiles 生成模型文件
-func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
+func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel bool) {
 	var (
 		root    = pkg.GetRootPath()
 		p       = filepath.Base(path)
@@ -138,25 +147,20 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 		})
 	}
 
-	color.Cyan("开始生成模型, 共 %d 张表", len(tables))
+	flag.Infof("开始生成模型, 共 %d 张表", len(tables))
 
 	for _, table := range tables {
-		color.Yellow("→ 正在生成表: %s", table)
-
-		model := g.GenerateModel(table)
-		g.ApplyBasic(model)
-	}
-
-	g.Execute()
-
-	// 自动追加 swaggerignore:"true"
-	files, _ := os.ReadDir(path)
-	for _, file := range files {
-		if !strings.HasSuffix(file.Name(), ".go") {
+		flag.Infof("→ 正在生成表: %s", table)
+		fileName := filepath.Join(path, table+".gen.go")
+		f := m.CheckDirAndFile(fileName)
+		if f == nil {
 			continue
 		}
-		filePath := filepath.Join(path, file.Name())
-		content, err := os.ReadFile(filePath)
+		model := g.GenerateModel(table)
+		g.ApplyBasic(model)
+		g.Execute()
+		// 自动追加swaggerignore:"true"
+		content, err := os.ReadFile(fileName)
 		if err != nil {
 			continue
 		}
@@ -171,13 +175,57 @@ func (m *MakeModelOld) generateFiles(path string, tables []string, camel bool) {
 			return strings.TrimSuffix(match, "`") + " swaggerignore:\"true\"`"
 		})
 
-		if err = os.WriteFile(filePath, []byte(text), 0644); err != nil {
-			flag.Errorf("为文件 %s 添加 swaggerignore 失败", file.Name())
+		if err = os.WriteFile(fileName, []byte(text), 0644); err != nil {
+			flag.Errorf("为文件 %s 添加 swaggerignore 失败", fileName)
 			os.Exit(1)
 		}
+
+		// 为每个生成的模型文件追加Connection方法
+		if conn != "" {
+			structName := pkg.SnakeToCamel(table)
+			err = appendConnection(path, table, structName, conn)
+			if err != nil {
+				flag.Errorf("为模型 %s 追加 Connection 方法失败: %s", table, err.Error())
+			}
+		}
+
+		flag.Successf("模型文件: " + fileName + " 生成成功!")
 	}
 
-	flag.Successf("模型生成成功! 输出目录: %s", path)
-
 	_ = os.RemoveAll(outPath)
+}
+
+// appendConnection 为模型文件追加Connection方法
+func appendConnection(path, table, structName, conn string) error {
+	filePath := filepath.Join(path, table+".gen.go")
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	text := string(content)
+	// 检查是否已经存在Connection方法
+	if strings.Contains(text, "func (*"+structName+") Connection() string") {
+		flag.Infof("模型 %s 已存在 Connection 方法,跳过添加", structName)
+		return nil
+	}
+
+	// 在TableName方法后面追加Connection方法
+	function := fmt.Sprintf(`
+// Connection 数据库连接名称
+func (*%s) Connection() string {
+    return "%s"
+}`, structName, conn)
+
+	// 查找TableName方法结束的位置
+	tableNamePattern := regexp.MustCompile(`func \(\*` + structName + `\) TableName\(\) string \{[\s\S]*?\n\}`)
+
+	if tableNamePattern.MatchString(text) {
+		// 在TableName方法后面插入
+		text = tableNamePattern.ReplaceAllStringFunc(text, func(match string) string {
+			return match + "\n" + function
+		})
+	}
+
+	return os.WriteFile(filePath, []byte(text), 0644)
 }
