@@ -3,7 +3,7 @@
 package main
 
 import (
-	_ "gin/cmd/imports"
+	_ "gin/cmd/import"
 	"gin/config"
 	"gin/pkg/cli"
 )

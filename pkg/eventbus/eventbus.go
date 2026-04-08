@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gin/common/ctxkey"
+	"gin/common/flag"
 	"gin/pkg/debugger"
 	"gin/pkg/message"
 	"github.com/fatih/color"
@@ -68,7 +69,7 @@ func Publish(ctx context.Context, e Event) {
 			go listener.Handle(e)
 		}
 	} else {
-		color.Yellow("未找到事件监听: %s", e.Name())
+		flag.Errorf("未找到事件监听: %s", e.Name())
 	}
 }
 
@@ -92,7 +93,7 @@ func DebugPrint() {
 	})
 
 	if len(events) == 0 {
-		color.Yellow("暂无注册的事件")
+		flag.Warningf("暂无注册的事件")
 		return
 	}
 

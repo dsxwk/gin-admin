@@ -1,4 +1,4 @@
-package imports
+package _import
 
 import (
 	_ "gin/app/command"
