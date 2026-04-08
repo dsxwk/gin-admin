@@ -3,7 +3,6 @@ package listener
 import (
 	"fmt"
 	"gin/app/event"
-	"gin/common/base"
 	"gin/pkg/eventbus"
 	"github.com/goccy/go-json"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 type UserLoginListener struct{}
 
-func (l *UserLoginListener) Handle(e base.Event) {
+func (l *UserLoginListener) Handle(e eventbus.Event) {
 	ev, ok := e.(event.UserLoginEvent)
 	if !ok {
 		return
