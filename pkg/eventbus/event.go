@@ -1,4 +1,4 @@
-package base
+package eventbus
 
 // Event 事件接口
 type Event interface {

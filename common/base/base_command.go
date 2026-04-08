@@ -223,7 +223,7 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 	}
 
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
-		fmt.Printf("%s 文件 %s 已存在,是否覆盖?(%s/%s): ",
+		fmt.Printf("%s文件 %s 已存在,是否覆盖?(%s/%s): ",
 			color.YellowString(flag.Warning()),
 			color.CyanString(file),
 			color.GreenString("Y"),
