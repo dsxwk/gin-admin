@@ -18,7 +18,7 @@ type LoginService struct {
 // Login 登录
 func (s *LoginService) Login(username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
 	var (
-		db   = facade.DB.Connection().WithContext(s.Ctx)
+		db   = s.DB(&model.User{})
 		conf = facade.Config.Get()
 	)
 

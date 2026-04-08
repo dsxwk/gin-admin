@@ -1,7 +1,6 @@
 package service
 
 import (
-	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -17,12 +16,10 @@ func (s *MenuService) List(req request.Menu, _search map[string]interface{}) (pa
 	var (
 		m    []model.Menu
 		menu model.Menu
-		db   = facade.DB.Connection().WithContext(s.Ctx)
+		db   = s.DB(&menu)
 	)
 
 	offset, limit := request.Pagination(req.Page, req.PageSize)
-
-	db = db.Model(&menu)
 
 	if _search != nil {
 		whereSql, args, _err := orm.BuildCondition(_search, db, menu)

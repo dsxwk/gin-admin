@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -19,13 +18,12 @@ type UserService struct {
 func (s *UserService) List(req request.User, _search map[string]interface{}) (pageData request.PageData, err error) {
 	var (
 		m  []model.User
-		db = facade.DB.Connection().WithContext(s.Ctx)
+		db = s.DB(&model.User{})
 	)
 
 	offset, limit := request.Pagination(req.Page, req.PageSize)
 
-	db = db.Model(&model.User{}).
-		Preload("UserRoles")
+	db = db.Preload("UserRoles")
 
 	if _search != nil {
 		whereSql, args, _err := orm.BuildCondition(_search, db, model.User{})
@@ -56,11 +54,11 @@ func (s *UserService) List(req request.User, _search map[string]interface{}) (pa
 func (s *UserService) Create(m model.User) (model.User, error) {
 	var (
 		count int64
-		db    = facade.DB.Connection().WithContext(s.Ctx)
+		db    = s.DB(&model.User{})
 	)
 
 	// 校验用户名是否重复
-	err := db.Model(&model.User{}).Where("username = ?", m.Username).Count(&count).Error
+	err := db.Where("username = ?", m.Username).Count(&count).Error
 	if err != nil {
 		return m, err
 	}
@@ -82,11 +80,11 @@ func (s *UserService) Create(m model.User) (model.User, error) {
 func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	var (
 		count int64
-		db    = facade.DB.Connection().WithContext(s.Ctx)
+		db    = s.DB(&model.User{})
 	)
 
 	// 校验用户名是否重复
-	err := db.Model(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
+	err := db.Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -109,7 +107,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 
 // Detail 详情
 func (s *UserService) Detail(id int64) (m model.User, err error) {
-	err = facade.DB.Connection().WithContext(s.Ctx).First(&m, id).Error
+	err = s.DB(&model.User{}).WithContext(s.Ctx).First(&m, id).Error
 	if err != nil {
 		return m, err
 	}
@@ -119,7 +117,7 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 
 // Delete 删除
 func (s *UserService) Delete(id int64) (m model.User, err error) {
-	err = facade.DB.Connection().WithContext(s.Ctx).Delete(&m, id).Error
+	err = s.DB(&model.User{}).Delete(&m, id).Error
 	if err != nil {
 		return m, err
 	}
