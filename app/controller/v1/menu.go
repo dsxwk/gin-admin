@@ -27,20 +27,13 @@ type MenuController struct {
 // @Router /api/v1/menu [get]
 func (s *MenuController) List(c *gin.Context) {
 	var (
-		ctx    = c.Request.Context()
-		req    request.Menu
-		search request.Search
+		ctx = c.Request.Context()
+		req request.Menu
 	)
 
 	s.service.WithContext(c.Request.Context())
 
-	err := c.ShouldBind(&search)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-
-	err = c.ShouldBind(&req)
+	err := c.ShouldBind(&req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -53,7 +46,7 @@ func (s *MenuController) List(c *gin.Context) {
 		return
 	}
 
-	res, err := s.service.List(req, search.Search)
+	res, err := s.service.List(req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return

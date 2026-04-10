@@ -134,8 +134,8 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.0.6
-> - [版本更新详细记录](VersionHistoryZh.md)
+> - 最新版本: v2.0.7
+> - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
 > 项目基于Golang 1.25.2版本开发, 低版本可能存在版本差异, 建议版本 >= 1.25.2。
@@ -873,18 +873,11 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
   var (
-    ctx    = c.Request.Context()
-    req    request.User
-    search request.Search
+    ctx = c.Request.Context()
+    req request.User
   )
 
   s.service.WithContext(ctx)
-
-  err := c.ShouldBind(&search)
-  if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-    return
-  }
 
   err = c.ShouldBind(&req)
   if err != nil {
@@ -899,7 +892,7 @@ func (s *UserController) List(c *gin.Context) {
     return
   }
 
-  res, err := s.service.List(req, search.Search)
+  res, err := s.service.List(req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
@@ -2338,13 +2331,13 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
     var (
-        ctx    = c.Request.Context()
-		search request.Search
-        m      []model.User
-		db     = facade.DB.Connection().WithContext(ctx)
+        ctx = c.Request.Context()
+		req request.User
+        m   []model.User
+		db  = facade.DB.Connection().WithContext(ctx)
 	)
 
-    err := c.ShouldBind(&search)
+    err := c.ShouldBind(&req)
     if err != nil {
         s.Error(c, errcode.SystemError().WithMsg(err.Error()))
         return
@@ -2352,8 +2345,8 @@ func (s *TestController) Test(c *gin.Context) {
 
     db = db.Model(&model.User{})
 	
-    if search != nil {
-        whereSql, args, err := orm.BuildCondition(search, db, model.User{})
+    if req.Search != nil {
+        whereSql, args, err := orm.BuildCondition(req.Search, db, model.User{})
         if err != nil {
             s.Error(c, errcode.SystemError().WithMsg(err.Error()))
             return

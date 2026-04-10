@@ -31,20 +31,13 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
 	var (
-		ctx    = c.Request.Context()
-		req    request.User
-		search request.Search
+		ctx = c.Request.Context()
+		req request.User
 	)
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&search)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-
-	err = c.ShouldBind(&req)
+	err := c.ShouldBind(&req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -57,7 +50,7 @@ func (s *UserController) List(c *gin.Context) {
 		return
 	}
 
-	res, err := s.service.List(req, search.Search)
+	res, err := s.service.List(req)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return

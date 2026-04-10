@@ -1,3 +1,6 @@
+## v2.0.7
+> - Public validation request adjustment, Gorm dynamic filtering optimization adjustment.
+
 ## v2.0.6
 > - Optimize code generator model creation, add Connection method to specify database connection name, optimize service layer, add DB method to automatically identify connected databases through the model.
 
@@ -17,7 +20,7 @@
 > - Optimize queue auto loading and optimize command-line output.
 
 ## v2.0.0
-> - Add facade and provider 
+> - Add facade and provider
 > - Optimize Command Line,log,context,middleware
 > - Command line create file template adjustment
 > - Complete documentation

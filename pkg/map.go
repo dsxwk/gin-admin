@@ -2,8 +2,6 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
-	"gorm.io/gorm"
 	"strings"
 )
 
@@ -114,34 +112,7 @@ func filterMap(data map[string]any, filter map[string]any) map[string]any {
 	return filtered
 }
 
-// StructToMap 将结构体转换为map
-func StructToMap[T any](v T) any {
-	var (
-		m map[string]any
-	)
-
-	b, _ := json.Marshal(v)
-	_ = json.Unmarshal(b, &m)
-	return m
-}
-
 // ArrayToString 将数组格式化为字符串
 func ArrayToString(array []interface{}) string {
 	return strings.Replace(strings.Trim(fmt.Sprint(array), "[]"), " ", ",", -1)
-}
-
-// FilterModelFields 过滤非模型字段
-func FilterModelFields(db *gorm.DB, model any, raw map[string]interface{}) map[string]interface{} {
-	stmt := &gorm.Statement{DB: db}
-	_ = stmt.Parse(model)
-
-	filtered := make(map[string]interface{})
-
-	for k, v := range raw {
-		if _, ok := stmt.Schema.FieldsByDBName[CamelToSnake(k)]; ok {
-			filtered[CamelToSnake(k)] = v
-		}
-	}
-
-	return filtered
 }

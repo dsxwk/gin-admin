@@ -15,7 +15,7 @@ type UserService struct {
 }
 
 // List 列表
-func (s *UserService) List(req request.User, _search map[string]interface{}) (pageData request.PageData, err error) {
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
 	var (
 		m  []model.User
 		db = s.DB(&model.User{})
@@ -25,8 +25,8 @@ func (s *UserService) List(req request.User, _search map[string]interface{}) (pa
 
 	db = db.Preload("UserRoles")
 
-	if _search != nil {
-		whereSql, args, _err := orm.BuildCondition(_search, db, model.User{})
+	if req.Search != nil {
+		whereSql, args, _err := orm.BuildCondition(req.Search, db, model.User{})
 		if _err != nil {
 			return pageData, err
 		}
@@ -94,7 +94,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	if pkg.HasKey(data, "password") && data["password"] != "" {
 		data["password"] = pkg.BcryptHash(data["password"].(string))
 	}
-	rows := pkg.FilterModelFields(db, model.User{}, data)
+	rows := model.FilterFields(db, model.User{}, data)
 	rows["updated_at"] = time.DateTime
 
 	err = db.Model(&model.User{}).Where("id = ?", id).Updates(rows).Error

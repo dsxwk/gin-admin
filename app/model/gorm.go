@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql/driver"
 	"fmt"
+	"gin/pkg"
 	"github.com/goccy/go-json"
 	"gorm.io/gorm"
 	"time"
@@ -145,4 +146,20 @@ func (j *ArrayInt64) Scan(value interface{}) error {
 		return fmt.Errorf("cannot scan %T into ArrayInt64", value)
 	}
 	return json.Unmarshal(bytes, j)
+}
+
+// FilterFields 过滤非模型字段
+func FilterFields(db *gorm.DB, model any, raw map[string]interface{}) map[string]interface{} {
+	stmt := &gorm.Statement{DB: db}
+	_ = stmt.Parse(model)
+
+	filtered := make(map[string]interface{})
+
+	for k, v := range raw {
+		if _, ok := stmt.Schema.FieldsByDBName[pkg.CamelToSnake(k)]; ok {
+			filtered[pkg.CamelToSnake(k)] = v
+		}
+	}
+
+	return filtered
 }

@@ -35,14 +35,6 @@ type UserDelete struct {
 	ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
 }
 
-// UserSearch 用户搜索
-type UserSearch struct {
-	Username string `form:"username" validate:"required" label:"用户名"`
-	FullName string `form:"fullName" validate:"required" label:"姓名"`
-	Nickname string `form:"nickname" validate:"required" label:"昵称"`
-	Gender   int    `form:"gender" validate:"required|int" label:"性别"`
-}
-
 // User 用户请求验证
 type User struct {
 	base.BaseRequest

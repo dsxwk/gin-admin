@@ -12,7 +12,7 @@ type MenuService struct {
 }
 
 // List 列表
-func (s *MenuService) List(req request.Menu, _search map[string]interface{}) (pageData request.PageData, err error) {
+func (s *MenuService) List(req request.Menu) (pageData request.PageData, err error) {
 	var (
 		m    []model.Menu
 		menu model.Menu
@@ -21,8 +21,8 @@ func (s *MenuService) List(req request.Menu, _search map[string]interface{}) (pa
 
 	offset, limit := request.Pagination(req.Page, req.PageSize)
 
-	if _search != nil {
-		whereSql, args, _err := orm.BuildCondition(_search, db, menu)
+	if req.Search != nil {
+		whereSql, args, _err := orm.BuildCondition(req.Search, db, menu)
 		if _err != nil {
 			return pageData, err
 		}

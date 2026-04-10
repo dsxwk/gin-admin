@@ -134,8 +134,8 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.0.6
-> - [Version update detailed record](VersionHistoryEn.md)
+> - Latest Version: v2.0.7
+> - [Version update detailed record](version_history.md)
 
 # Installation Instructions
 > The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
@@ -870,18 +870,11 @@ type UserController struct {
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
   var (
-    ctx    = c.Request.Context()
-    req    request.User
-    search request.Search
+    ctx = c.Request.Context()
+    req request.User
   )
 
   s.service.WithContext(ctx)
-
-  err := c.ShouldBind(&search)
-  if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-    return
-  }
 
   err = c.ShouldBind(&req)
   if err != nil {
@@ -896,7 +889,7 @@ func (s *UserController) List(c *gin.Context) {
     return
   }
 
-  res, err := s.service.List(req, search.Search)
+  res, err := s.service.List(req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
     return
@@ -2326,13 +2319,13 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
     var (
-        ctx    = c.Request.Context()
-		search request.Search
-        m      []model.User
-		db     = facade.DB.Connection().WithContext(ctx)
+        ctx = c.Request.Context()
+		req request.User
+        m   []model.User
+		db  = facade.DB.Connection().WithContext(ctx)
 	)
 
-    err := c.ShouldBind(&search)
+    err := c.ShouldBind(&req)
     if err != nil {
         s.Error(c, errcode.SystemError().WithMsg(err.Error()))
         return
@@ -2341,7 +2334,7 @@ func (s *TestController) Test(c *gin.Context) {
     db = db.Model(&model.User{})
 	
     if search != nil {
-        whereSql, args, err := orm.BuildCondition(search, db, model.User{})
+        whereSql, args, err := orm.BuildCondition(req.Search, db, model.User{})
         if err != nil {
             s.Error(c, errcode.SystemError().WithMsg(err.Error()))
             return
