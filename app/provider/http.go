@@ -19,7 +19,7 @@ func (p *HttpProvider) Name() string {
 
 // Register 注册服务到门面
 func (p *HttpProvider) Register(app foundation.App) {
-	// 只注册Http门面,RequestJson是函数不需要注册
+	// 只注册Http门面,SendToJson是函数不需要注册
 	facade.Register("http", facade.Http)
 }
 

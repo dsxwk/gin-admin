@@ -6,22 +6,16 @@ import (
 )
 
 // Http HTTP客户端门面
-var Http = &httpFacade{
-	Json: &jsonHttpFacadeHelper{},
+var Http = &httpFacade{}
+
+type httpFacade struct{}
+
+// SendToJson 发送HTTP请求并解析JSON响应
+func SendToJson[T any](ctx context.Context, method, uri string, opt *http.Option) (*T, error) {
+	return http.SendToJson[T](ctx, method, uri, opt)
 }
 
-type httpFacade struct {
-	Json *jsonHttpFacadeHelper
-}
-
-type jsonHttpFacadeHelper struct{}
-
-// RequestJson 泛型函数,通过helper调用
-func RequestJson[T any](ctx context.Context, method, uri string, opt *http.Option) (*T, error) {
-	return http.RequestJson[T](ctx, method, uri, opt)
-}
-
-// Request 发送HTTP请求
-func (h *httpFacade) Request(ctx context.Context, method, uri string, opt *http.Option) (string, error) {
-	return http.Request(ctx, method, uri, opt)
+// Send 发送HTTP请求
+func (h *httpFacade) Send(ctx context.Context, method, uri string, opt *http.Option) ([]byte, error) {
+	return http.Send(ctx, method, uri, opt)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 )
@@ -60,6 +61,72 @@ func setupTestServer() *httptest.Server {
 		})
 	})
 
+	// 单文件上传测试
+	r.POST("/upload", func(c *gin.Context) {
+		file, err := c.FormFile("file")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			return
+		}
+
+		description := c.PostForm("description")
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "upload success",
+			"data": gin.H{
+				"filename":    file.Filename,
+				"size":        file.Size,
+				"description": description,
+			},
+		})
+	})
+
+	// 多文件上传测试
+	r.POST("/multi-upload", func(c *gin.Context) {
+		form, err := c.MultipartForm()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			return
+		}
+
+		files := form.File["files"]
+		var fileInfos []gin.H
+		for _, file := range files {
+			fileInfos = append(fileInfos, gin.H{
+				"filename": file.Filename,
+				"size":     file.Size,
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "multi upload success",
+			"data": gin.H{
+				"files":      fileInfos,
+				"file_count": len(fileInfos),
+			},
+		})
+	})
+
+	// 带自定义字段名的文件上传
+	r.POST("/upload-custom", func(c *gin.Context) {
+		file, err := c.FormFile("custom_file")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "upload success",
+			"data": gin.H{
+				"filename": file.Filename,
+				"size":     file.Size,
+			},
+		})
+	})
+
 	// 错误响应测试
 	r.GET("/error", func(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -91,18 +158,18 @@ func TestHttpRequest(t *testing.T) {
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
 
 	// 测试GET请求
-	resp, err := facade.Http.Request(ctx, "GET", ts.URL+"/ping", nil)
+	resp, err := facade.Http.Send(ctx, "GET", ts.URL+"/ping", nil)
 	require.NoError(t, err)
 
 	var result map[string]interface{}
-	err = json.Unmarshal([]byte(resp), &result)
+	err = json.Unmarshal(resp, &result)
 	require.NoError(t, err)
 	require.Equal(t, float64(0), result["code"])
 	require.Equal(t, "pong", result["msg"])
 }
 
-// TestHttpRequestJson 测试JSON响应解析
-func TestHttpRequestJson(t *testing.T) {
+// TestHttpSendToJson 测试JSON响应解析
+func TestHttpSendToJson(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
@@ -111,7 +178,7 @@ func TestHttpRequestJson(t *testing.T) {
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
 
 	// 测试GET请求并解析JSON
-	resp, err := facade.RequestJson[errcode.SuccessResponse](
+	resp, err := facade.SendToJson[errcode.SuccessResponse](
 		ctx,
 		"GET",
 		ts.URL+"/ping",
@@ -130,7 +197,7 @@ func TestHttpRequestWithQuery(t *testing.T) {
 	ctx := context.Background()
 
 	opt := &h.Option{
-		Query: map[string]string{
+		Query: map[string]interface{}{
 			"name": "张三",
 			"age":  "18",
 		},
@@ -142,7 +209,7 @@ func TestHttpRequestWithQuery(t *testing.T) {
 		Data map[string]interface{} `json:"data"`
 	}
 
-	resp, err := facade.RequestJson[EchoResponse](
+	resp, err := facade.SendToJson[EchoResponse](
 		ctx,
 		"GET",
 		ts.URL+"/echo",
@@ -153,6 +220,39 @@ func TestHttpRequestWithQuery(t *testing.T) {
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "张三", resp.Data["name"])
 	require.Equal(t, "18", resp.Data["age"])
+}
+
+// TestHttpForm 测试普通表单提交
+func TestHttpForm(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	// 使用普通表单接口
+	opt := &h.Option{
+		Form: map[string]interface{}{
+			"name":  "张三",
+			"email": "zhangsan@example.com",
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type FormResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Name  string `json:"name"`
+			Email string `json:"email"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[FormResponse](ctx, "POST", ts.URL+"/form", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, "张三", resp.Data.Name)
+	require.Equal(t, "zhangsan@example.com", resp.Data.Email)
 }
 
 // TestHttpRequestWithBody 测试带Body的POST请求
@@ -181,7 +281,7 @@ func TestHttpRequestWithBody(t *testing.T) {
 		Data map[string]interface{} `json:"data"`
 	}
 
-	resp, err := facade.RequestJson[EchoResponse](
+	resp, err := facade.SendToJson[EchoResponse](
 		ctx,
 		"POST",
 		ts.URL+"/echo",
@@ -202,7 +302,7 @@ func TestHttpRequestWithForm(t *testing.T) {
 	ctx := context.Background()
 
 	opt := &h.Option{
-		Form: map[string]string{
+		Form: map[string]interface{}{
 			"name":  "王五",
 			"email": "wangwu@example.com",
 		},
@@ -214,7 +314,7 @@ func TestHttpRequestWithForm(t *testing.T) {
 		Data map[string]interface{} `json:"data"`
 	}
 
-	resp, err := facade.RequestJson[FormResponse](
+	resp, err := facade.SendToJson[FormResponse](
 		ctx,
 		"POST",
 		ts.URL+"/form",
@@ -262,7 +362,7 @@ func TestHttpRequestWithHeaders(t *testing.T) {
 		Data map[string]interface{} `json:"data"`
 	}
 
-	resp, err := facade.RequestJson[HeaderResponse](
+	resp, err := facade.SendToJson[HeaderResponse](
 		ctx,
 		"GET",
 		ts2.URL+"/headers",
@@ -286,7 +386,7 @@ func TestHttpRequestWithTimeout(t *testing.T) {
 		Timeout: 100 * time.Millisecond,
 	}
 
-	_, err := facade.Http.Request(ctx, "GET", ts.URL+"/delay?delay=200ms", opt)
+	_, err := facade.Http.Send(ctx, "GET", ts.URL+"/delay?delay=200ms", opt)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "请求失败")
 }
@@ -299,17 +399,17 @@ func TestHttpRequestPostForm(t *testing.T) {
 	ctx := context.Background()
 
 	opt := &h.Option{
-		Form: map[string]string{
+		Form: map[string]interface{}{
 			"name":  "赵六",
 			"email": "zhaoliu@example.com",
 		},
 	}
 
-	resp, err := facade.Http.Request(ctx, "POST", ts.URL+"/form", opt)
+	resp, err := facade.Http.Send(ctx, "POST", ts.URL+"/form", opt)
 	require.NoError(t, err)
 
 	var result map[string]interface{}
-	err = json.Unmarshal([]byte(resp), &result)
+	err = json.Unmarshal(resp, &result)
 	require.NoError(t, err)
 
 	data := result["data"].(map[string]interface{})
@@ -324,13 +424,13 @@ func TestHttpRequestErrorResponse(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := facade.Http.Request(ctx, "GET", ts.URL+"/error", nil)
+	_, err := facade.Http.Send(ctx, "GET", ts.URL+"/error", nil)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "状态码: 500")
 }
 
-// TestHttpRequestJsonErrorResponse 测试JSON解析错误响应
-func TestHttpRequestJsonErrorResponse(t *testing.T) {
+// TestHttpSendToJsonErrorResponse 测试JSON解析错误响应
+func TestHttpSendToJsonErrorResponse(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
@@ -341,7 +441,7 @@ func TestHttpRequestJsonErrorResponse(t *testing.T) {
 		Msg  string `json:"msg"`
 	}
 
-	resp, err := facade.RequestJson[ErrorResponse](
+	resp, err := facade.SendToJson[ErrorResponse](
 		ctx,
 		"GET",
 		ts.URL+"/error",
@@ -355,6 +455,395 @@ func TestHttpRequestJsonErrorResponse(t *testing.T) {
 func TestHttpRequestInvalidURL(t *testing.T) {
 	ctx := context.Background()
 
-	_, err := facade.Http.Request(ctx, "GET", "http://invalid.url.that.does.not.exist", nil)
+	_, err := facade.Http.Send(ctx, "GET", "http://invalid.url.that.does.not.exist", nil)
 	require.Error(t, err)
+}
+
+// 创建测试文件
+func createTestFile(t *testing.T, content string) string {
+	tmpFile, err := os.CreateTemp("", "test-*.txt")
+	require.NoError(t, err)
+	defer tmpFile.Close()
+
+	_, err = tmpFile.WriteString(content)
+	require.NoError(t, err)
+
+	return tmpFile.Name()
+}
+
+// TestHttpUploadFile 测试单文件上传
+func TestHttpUploadFile(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	// 创建测试文件
+	testContent := "Hello, this is a test file"
+	testFilePath := createTestFile(t, testContent)
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		},
+		Form: map[string]interface{}{
+			"description": "测试文件上传",
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type UploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Filename    string `json:"filename"`
+			Size        int64  `json:"size"`
+			Description string `json:"description"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, "upload success", resp.Msg)
+	// 只检查文件名前缀因为临时文件名是动态的
+	require.Contains(t, resp.Data.Filename, "test-")
+	require.Equal(t, int64(len(testContent)), resp.Data.Size)
+	require.Equal(t, "测试文件上传", resp.Data.Description)
+}
+
+// TestHttpUploadFileWithData 测试使用字节数据上传文件
+func TestHttpUploadFileWithData(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	fileData := []byte("This is file content from byte data")
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FileData:  fileData,
+				FileName:  "test.txt",
+				FieldName: "file",
+			},
+		},
+		Form: map[string]interface{}{
+			"description": "使用字节数据上传",
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type UploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Filename    string `json:"filename"`
+			Size        int64  `json:"size"`
+			Description string `json:"description"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, "test.txt", resp.Data.Filename)
+	require.Equal(t, int64(len(fileData)), resp.Data.Size)
+	require.Equal(t, "使用字节数据上传", resp.Data.Description)
+}
+
+// TestHttpUploadMultipleFiles 测试多文件上传
+func TestHttpUploadMultipleFiles(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	// 创建多个测试文件
+	file1Content := "Content of file 1"
+	file1Path := createTestFile(t, file1Content)
+	defer os.Remove(file1Path)
+
+	file2Content := "Content of file 2"
+	file2Path := createTestFile(t, file2Content)
+	defer os.Remove(file2Path)
+
+	file3Data := []byte("Content of file 3")
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file1": {
+				FilePath:  file1Path,
+				FieldName: "files",
+			},
+			"file2": {
+				FilePath:  file2Path,
+				FieldName: "files",
+			},
+			"file3": {
+				FileData:  file3Data,
+				FileName:  "file3.txt",
+				FieldName: "files",
+			},
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type MultiUploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Files     []gin.H `json:"files"`
+			FileCount int     `json:"file_count"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[MultiUploadResponse](ctx, "POST", ts.URL+"/multi-upload", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, "multi upload success", resp.Msg)
+	require.Equal(t, 3, resp.Data.FileCount)
+}
+
+// TestHttpUploadFileWithCustomFieldName 测试自定义表单字段名的文件上传
+func TestHttpUploadFileWithCustomFieldName(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	testContent := "Test file with custom field name"
+	testFilePath := createTestFile(t, testContent)
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"myfile": {
+				FilePath:  testFilePath,
+				FieldName: "custom_file", // 自定义字段名
+			},
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type UploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Filename string `json:"filename"`
+			Size     int64  `json:"size"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[UploadResponse](ctx, "POST", ts.URL+"/upload-custom", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, "upload success", resp.Msg)
+}
+
+// TestHttpUploadFileWithRequestMethod 测试使用Request方法上传文件
+func TestHttpUploadFileWithRequestMethod(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	testContent := "Test file using Request method"
+	testFilePath := createTestFile(t, testContent)
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		},
+		Form: map[string]interface{}{
+			"description": "使用Request方法上传",
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	resp, err := facade.Http.Send(ctx, "POST", ts.URL+"/upload", opt)
+	require.NoError(t, err)
+
+	var result map[string]interface{}
+	err = json.Unmarshal(resp, &result)
+	require.NoError(t, err)
+	require.Equal(t, float64(0), result["code"])
+	require.Equal(t, "upload success", result["msg"])
+}
+
+// TestHttpUploadFileWithTimeout 测试文件上传超时
+func TestHttpUploadFileWithTimeout(t *testing.T) {
+	// 创建一个延迟响应的上传服务器
+	r := gin.Default()
+	r.POST("/slow-upload", func(c *gin.Context) {
+		time.Sleep(500 * time.Millisecond)
+		file, err := c.FormFile("file")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "upload success",
+			"data": gin.H{"filename": file.Filename},
+		})
+	})
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	testContent := "Test timeout file"
+	testFilePath := createTestFile(t, testContent)
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		},
+		Timeout: 100 * time.Millisecond, // 100ms超时,但服务器需要500ms
+	}
+
+	_, err := facade.Http.Send(ctx, "POST", ts.URL+"/slow-upload", opt)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "请求失败")
+}
+
+// TestHttpUploadFileLargeFile 测试大文件上传(模拟)
+func TestHttpUploadFileLargeFile(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	// 创建一个大文件(1MB)
+	largeContent := make([]byte, 1024*1024)
+	for i := range largeContent {
+		largeContent[i] = byte('A' + i%26)
+	}
+
+	testFilePath := createTestFile(t, string(largeContent))
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		},
+		Form: map[string]interface{}{
+			"description": "大文件上传测试",
+		},
+		Timeout: 60 * time.Second, // 大文件需要更长的超时时间
+	}
+
+	type UploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Filename    string `json:"filename"`
+			Size        int64  `json:"size"`
+			Description string `json:"description"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, int64(len(largeContent)), resp.Data.Size)
+}
+
+// TestHttpUploadFileWithContext 测试带Context的文件上传
+func TestHttpUploadFileWithContext(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "upload-trace-id")
+
+	testContent := "Test file with context"
+	testFilePath := createTestFile(t, testContent)
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type UploadResponse struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+}
+
+// TestHttpUploadFileAndFormData 测试同时上传文件和表单数据
+func TestHttpUploadFileAndFormData(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	testContent := "Test file with form data"
+	testFilePath := createTestFile(t, testContent)
+	defer os.Remove(testFilePath)
+
+	opt := &h.Option{
+		Files: map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		},
+		Form: map[string]interface{}{
+			"description": "文件描述",
+			"user_id":     "12345",
+			"category":    "test",
+		},
+		Timeout: 30 * time.Second,
+	}
+
+	type UploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Filename    string `json:"filename"`
+			Size        int64  `json:"size"`
+			Description string `json:"description"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, err := facade.SendToJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Equal(t, 0, resp.Code)
+	require.Equal(t, "文件描述", resp.Data.Description)
 }
