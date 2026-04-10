@@ -1,3 +1,6 @@
+## v2.0.8
+> - Optimize http request package.
+
 ## v2.0.7
 > - Public validation request adjustment, Gorm dynamic filtering optimization adjustment.
 
