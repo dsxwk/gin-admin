@@ -1,4 +1,3 @@
-// app/provider/database_provider.go
 package provider
 
 import (
