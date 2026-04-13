@@ -6,4 +6,4 @@
 /storage/logs
 /tmp
 /tests/storage
-/*.config.yaml
+*.config.yaml
