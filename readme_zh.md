@@ -134,7 +134,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.0.9
+> - 最新版本: v2.0.10
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
@@ -143,6 +143,7 @@
 ```bash
 $ git clone https://github.com/dsxwk/gin.git
 $ cd gin
+$ mv dev.config.yaml.example dev.config.yaml
 ```
 ## 初始化Go环境与依赖
 ### 方式一

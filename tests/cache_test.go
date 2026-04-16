@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"context"
 	"gin/app/facade"
 	"gin/pkg/cache"
 	"github.com/stretchr/testify/require"
@@ -11,7 +10,7 @@ import (
 
 // TestCacheSetGet 测试缓存设置和获取
 func TestCacheSetGet(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	tests := []struct {
 		name      string
@@ -61,7 +60,7 @@ func TestCacheSetGet(t *testing.T) {
 
 // TestCacheExpiration 测试缓存过期
 func TestCacheExpiration(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	_cache := facade.Cache.WithContext(ctx)
 	key := "expire_test"
 
@@ -85,7 +84,7 @@ func TestCacheExpiration(t *testing.T) {
 
 // TestCacheDelete 测试缓存删除
 func TestCacheDelete(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	_cache := facade.Cache.WithContext(ctx)
 	key := "delete_test"
 
@@ -110,7 +109,7 @@ func TestCacheDelete(t *testing.T) {
 
 // TestCacheDifferentTypes 测试不同类型缓存
 func TestCacheDifferentTypes(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 测试各种类型
 	testCases := []struct {
@@ -143,7 +142,7 @@ func TestCacheDifferentTypes(t *testing.T) {
 
 // TestCacheWithContext 测试带上下文的缓存
 func TestCacheWithContext(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 创建带上下文的缓存
 	_cache := facade.Cache.WithContext(ctx)
@@ -160,7 +159,7 @@ func TestCacheWithContext(t *testing.T) {
 
 // TestCacheStoreMethods 测试不同的Store方法
 func TestCacheStoreMethods(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	key := "store_method_test"
 	value := "test_value"
 

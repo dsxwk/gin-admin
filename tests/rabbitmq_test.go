@@ -16,7 +16,7 @@ func TestRabbitMQPublish(t *testing.T) {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
 
 	// 等待消费者启动
@@ -59,7 +59,7 @@ func TestRabbitMQDelayPublish(t *testing.T) {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-delay-trace-id")
 
 	// 等待消费者启动
@@ -103,7 +103,7 @@ func TestRabbitMQMultipleMessages(t *testing.T) {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-batch")
 
 	// 等待消费者启动

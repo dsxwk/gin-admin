@@ -133,10 +133,19 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 		}
 	}
 
-	// header设置
-	req.Header.Set("Content-Type", contentType)
-	for k, v := range opt.Headers {
-		req.Header.Set(k, v)
+	// 设置默认Content-Type
+	if contentType != "" && opt.Headers["Content-Type"] == "" {
+		opt.Headers["Content-Type"] = contentType
+	}
+	if contentType == "" && opt.Headers["Content-Type"] == "" {
+		opt.Headers["Content-Type"] = "application/json"
+	}
+
+	// 设置自定义headers(会覆盖默认设置)
+	if opt.Headers != nil {
+		for k, v := range opt.Headers {
+			req.Header.Set(k, v)
+		}
 	}
 
 	// 创建客户端并设置超时

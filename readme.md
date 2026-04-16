@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.0.9
+> - Latest Version: v2.0.10
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -143,6 +143,7 @@
 ```bash
 $ git clone https://github.com/dsxwk/gin.git
 $ cd gin
+$ mv dev.config.yaml.example dev.config.yaml
 ```
 ## Initialize Go Environment And Dependencies
 ### Method One

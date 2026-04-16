@@ -194,7 +194,7 @@ func TestHttpRequestWithQuery(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	opt := &h.Option{
 		Query: map[string]interface{}{
@@ -227,7 +227,7 @@ func TestHttpForm(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 使用普通表单接口
 	opt := &h.Option{
@@ -260,7 +260,7 @@ func TestHttpRequestWithBody(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	bodyData := map[string]interface{}{
 		"name":  "李四",
@@ -299,7 +299,7 @@ func TestHttpRequestWithForm(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	opt := &h.Option{
 		Form: map[string]interface{}{
@@ -332,7 +332,7 @@ func TestHttpRequestWithHeaders(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	opt := &h.Option{
 		Headers: map[string]string{
@@ -379,7 +379,7 @@ func TestHttpRequestWithTimeout(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 设置100ms超时,但服务器会延迟200ms
 	opt := &h.Option{
@@ -396,7 +396,7 @@ func TestHttpRequestPostForm(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	opt := &h.Option{
 		Form: map[string]interface{}{
@@ -422,7 +422,7 @@ func TestHttpRequestErrorResponse(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	_, err := facade.Http.Send(ctx, "GET", ts.URL+"/error", nil)
 	require.Error(t, err)
@@ -434,7 +434,7 @@ func TestHttpSendToJsonErrorResponse(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	type ErrorResponse struct {
 		Code int    `json:"code"`
@@ -453,7 +453,7 @@ func TestHttpSendToJsonErrorResponse(t *testing.T) {
 
 // TestHttpRequestInvalidURL 测试无效URL
 func TestHttpRequestInvalidURL(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	_, err := facade.Http.Send(ctx, "GET", "http://invalid.url.that.does.not.exist", nil)
 	require.Error(t, err)
@@ -476,7 +476,7 @@ func TestHttpUploadFile(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 创建测试文件
 	testContent := "Hello, this is a test file"
@@ -522,7 +522,7 @@ func TestHttpUploadFileWithData(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	fileData := []byte("This is file content from byte data")
 
@@ -564,7 +564,7 @@ func TestHttpUploadMultipleFiles(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 创建多个测试文件
 	file1Content := "Content of file 1"
@@ -618,7 +618,7 @@ func TestHttpUploadFileWithCustomFieldName(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testContent := "Test file with custom field name"
 	testFilePath := createTestFile(t, testContent)
@@ -655,7 +655,7 @@ func TestHttpUploadFileWithRequestMethod(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testContent := "Test file using Request method"
 	testFilePath := createTestFile(t, testContent)
@@ -704,7 +704,7 @@ func TestHttpUploadFileWithTimeout(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testContent := "Test timeout file"
 	testFilePath := createTestFile(t, testContent)
@@ -730,7 +730,7 @@ func TestHttpUploadFileLargeFile(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// 创建一个大文件(1MB)
 	largeContent := make([]byte, 1024*1024)
@@ -810,7 +810,7 @@ func TestHttpUploadFileAndFormData(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testContent := "Test file with form data"
 	testFilePath := createTestFile(t, testContent)

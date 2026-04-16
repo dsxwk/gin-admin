@@ -16,7 +16,7 @@ func TestKafkaPublish(t *testing.T) {
 		t.Skip("Kafka not enabled, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
 
 	// 等待消费者启动
@@ -59,7 +59,7 @@ func TestKafkaDelayPublish(t *testing.T) {
 		t.Skip("Kafka not enabled, skipping test")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-delay-trace-id")
 
 	// 等待消费者启动
