@@ -15,11 +15,12 @@ func openPgsql() (*gorm.DB, error) {
 
 func getPgsqlDsn() string {
 	return pkg.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		conf.Pgsql.Host,
-		conf.Pgsql.Username,
-		conf.Pgsql.Password,
-		conf.Pgsql.Database,
-		conf.Pgsql.Port,
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		conf.Databases.Pgsql.Host,
+		conf.Databases.Pgsql.Username,
+		conf.Databases.Pgsql.Password,
+		conf.Databases.Pgsql.Database,
+		conf.Databases.Pgsql.Port,
+		conf.Databases.Pgsql.SSLMode,
 	)
 }

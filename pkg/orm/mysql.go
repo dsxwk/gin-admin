@@ -21,6 +21,6 @@ func openMysql() (db *gorm.DB, err error) {
 func getMysqlDsn() string {
 	return pkg.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
-		conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Host, conf.Mysql.Port, conf.Mysql.Database,
+		conf.Databases.Mysql.Username, conf.Databases.Mysql.Password, conf.Databases.Mysql.Host, conf.Databases.Mysql.Port, conf.Databases.Mysql.Database,
 	)
 }

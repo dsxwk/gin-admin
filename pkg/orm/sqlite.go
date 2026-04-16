@@ -9,7 +9,7 @@ import (
 )
 
 func openSqlite() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(conf.Sqlite.Path), &gorm.Config{
+	db, err := gorm.Open(sqlite.Open(conf.Databases.Sqlite.Path), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},

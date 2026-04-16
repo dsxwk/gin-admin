@@ -16,11 +16,6 @@ import (
 type Config struct {
 	App       App       `mapstructure:"app" yaml:"app"`
 	Databases Databases `mapstructure:"databases" yaml:"databases"`
-	Mysql     Mysql     `mapstructure:"mysql" yaml:"mysql"`
-	Sqlite    Sqlite    `mapstructure:"sqlite" yaml:"sqlite"`
-	Pgsql     Pgsql     `mapstructure:"pgsql" yaml:"pgsql"`
-	Sqlsrv    Sqlsrv    `mapstructure:"sqlsrv" yaml:"sqlsrv"`
-	Redis     Redis     `mapstructure:"redis" yaml:"redis"`
 	Cors      Cors      `mapstructure:"cors" yaml:"cors"`
 	Jwt       Jwt       `mapstructure:"jwt" yaml:"jwt"`
 	Log       Log       `mapstructure:"log" yaml:"log"`

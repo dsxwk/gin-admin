@@ -11,50 +11,42 @@ app:
 
 # 数据库
 databases:
-  db-connection: mysql # 默认数据库
-  # 慢查询的时间(ms) 超过这个时间会记录到日志中
-  slow-query-duration: 3000ms # 3秒(time.Duration)
+  default: mysql # 默认数据库
+  # 慢查询的时间,超过这个时间会记录到日志中
+  slow-query-duration: 3s # 3秒(time.Duration)
+  # Mysql数据库
+  mysql:
+    driver: mysql
+    # host: "username:password@tcp(127.0.0.1:3306)/databaseName?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: root
+    database: gin
 
-# Mysql数据库
-mysql:
-  driver: mysql
-  # host: "username:password@tcp(127.0.0.1:3306)/databaseName?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
-  host: 127.0.0.1
-  port: 3306
-  username: root
-  password: root
-  database: gin
-  # 慢查询的时间(ms) 超过这个时间会记录到日志中
-  slow-query-duration: 3000ms # 3秒(time.Duration)
+  # Postgresql数据库
+  pgsql:
+    driver: pgsql
+    host: 127.0.0.1
+    port: 5432
+    username: testuser
+    password: 123456
+    database: testdb
+    ssl-mode: disable
 
-# Postgresql数据库
-pgsql:
-  driver: pgsql
-  host: 127.0.0.1
-  port: 5432
-  username: testuser
-  password: 123456
-  database: testdb
-  # 慢查询的时间(ms) 超过这个时间会记录到日志中
-  slow-query-duration: 3000ms # 3秒(time.Duration)
+  # sqlite数据库
+  sqlite:
+    driver: sqlite
+    path: E:/sqlite/gin.db
 
-# sqlite数据库
-sqlite:
-  driver: sqlite
-  path: E:/sqlite/gin.db
-  # 慢查询的时间(ms) 超过这个时间会记录到日志中
-  slow-query-duration: 3000ms # 3秒(time.Duration)
-
-# sqlsrv数据库
-sqlsrv:
-  driver: sqlsrv
-  host: 127.0.0.1
-  port: 1433
-  username: sa
-  password: Aa123456
-  database: gin
-  # 慢查询的时间(ms) 超过这个时间会记录到日志中
-  slow-query-duration: 3000ms # 3秒(time.Duration)
+  # sqlsrv数据库
+  sqlsrv:
+    driver: sqlsrv
+    host: 127.0.0.1
+    port: 1433
+    username: sa
+    password: Aa123456
+    database: gin
 
 # 缓存
 cache:
@@ -75,11 +67,24 @@ cache:
 # 跨域
 cors:
   enabled: true # 是否开启跨域
-  allow-origin: "*" # 允许访问的域名列表
-  allow-headers: "*" # 允许的请求头列表
-  expose-headers: "*" # 允许返回的响应头列表
-  allow-methods: GET, POST, PUT, DELETE, OPTIONS # 允许的请求方法列表
-  allow-credentials: "true" # 是否允许发送cookie
+  mode: "allow-all" # allow-all|whitelist # 跨域模式 allow-all: 允许所有域名访问 whitelist: 白名单模式
+  allow-all:
+    allow-origin: "*" # 允许访问的域名列表
+    allow-headers: "*" # 允许的请求头列表
+    expose-headers: "*" # 允许返回的响应头列表
+    allow-methods: GET, POST, PUT, DELETE, OPTIONS # 允许的请求方法列表
+    allow-credentials: "true" # 是否允许发送cookie
+  whitelist:
+    - allow-origin: http://127.0.0.1:8080 # 允许访问的域名列表
+      allow-headers: Content-Type, AccessToken, Authorization, Token # 允许的请求头列表
+      expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type # 允许返回的响应头列表
+      allow-methods: GET, POST, PUT, DELETE, OPTIONS # 允许的请求方法列表
+      allow-credentials: "true" # 是否允许发送cookie
+    - allow-origin: example2.com # 允许访问的域名列表
+      allow-headers: Content-Type, AccessToken, Authorization, Token # 允许的请求头列表
+      expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type # 允许返回的响应头列表
+      allow-methods: GET, POST, PUT, DELETE, OPTIONS # 允许的请求方法列表
+      allow-credentials: "true" # 是否允许发送cookie
 
 # Jwt
 jwt:

@@ -28,7 +28,7 @@ var (
 // Connection 连接数据库
 func Connection(conn ...string) *gorm.DB {
 	if len(conn) == 0 || conn[0] == "" {
-		return getConnection(conf.Databases.DbConnection)
+		return getConnection(conf.Databases.Default)
 	}
 
 	return getConnection(conn[0])
@@ -106,7 +106,7 @@ func gormLogger() logger.Interface {
 	return logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // 输出到控制台
 		logger.Config{
-			SlowThreshold: conf.Mysql.SlowQueryDuration, // 慢sql阈值转Duration
+			SlowThreshold: conf.Databases.SlowQueryDuration, // 慢sql阈值转Duration
 			LogLevel:      logger.Info,
 			Colorful:      true, // 彩色日志
 			// IgnoreRecordNotFoundError: true, // 如果需要忽略 record not found
@@ -165,7 +165,7 @@ func after(db *gorm.DB) {
 	costMs := float64(cost.Nanoseconds()) / 1e6 // 精确到小数
 
 	// 慢查询警告
-	if cost > conf.Mysql.SlowQueryDuration {
+	if cost > conf.Databases.SlowQueryDuration {
 		l.NewLogger().Warn(
 			"Slow Sql",
 			zap.Float64("costMs", costMs),

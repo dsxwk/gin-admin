@@ -24,10 +24,10 @@ func getSqlsrvDsn() string {
 
 	return pkg.Sprintf(
 		"sqlserver://%s:%s@%s:%s?database=%s",
-		conf.Sqlsrv.Username,
-		conf.Sqlsrv.Password,
-		conf.Sqlsrv.Host,
-		conf.Sqlsrv.Port,
-		conf.Sqlsrv.Database,
+		conf.Databases.Sqlsrv.Username,
+		conf.Databases.Sqlsrv.Password,
+		conf.Databases.Sqlsrv.Host,
+		conf.Databases.Sqlsrv.Port,
+		conf.Databases.Sqlsrv.Database,
 	)
 }

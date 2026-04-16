@@ -30,6 +30,11 @@ func LcFirst(s string) string {
 	return string(runes)
 }
 
+// StringLength 获取字符串长度
+func StringLength(s string) int {
+	return len([]rune(s))
+}
+
 // SnakeToCamel 将下划线命名转换为驼峰命名
 func SnakeToCamel(s string) string {
 	s = strings.ToLower(s)

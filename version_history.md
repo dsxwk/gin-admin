@@ -1,3 +1,6 @@
+## v2.1.0
+> - Optimize configuration items and optimize the two modes of cross domain addition: allow all and whitelist.
+
 ## v2.0.10
 > - Optimize HTTP request packets, context, and test cases.
 

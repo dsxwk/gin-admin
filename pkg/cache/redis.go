@@ -88,9 +88,9 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 		)
 
 		client := redis.NewClient(&redis.Options{
-			Addr:     conf.Redis.Address,
-			Password: conf.Redis.Password,
-			DB:       conf.Redis.DB,
+			Addr:     conf.Cache.Redis.Address,
+			Password: conf.Cache.Redis.Password,
+			DB:       conf.Cache.Redis.DB,
 		})
 
 		// 添加Hook

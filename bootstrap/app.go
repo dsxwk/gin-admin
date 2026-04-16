@@ -111,7 +111,7 @@ func (a *App) printStartupInfo(conf *config.Config) {
 		"应用":  conf.App.Name,
 		"环境":  conf.App.Env,
 		"端口":  color.YellowString(pkg.IntToString[int64](conf.App.Port)),
-		"数据库": conf.Mysql.Database,
+		"数据库": conf.Databases.Default,
 	}
 
 	// 地址信息

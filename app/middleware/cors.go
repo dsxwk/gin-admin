@@ -17,11 +17,21 @@ var conf = facade.Config.Get()
 func (s Cors) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if conf.Cors.Enabled {
-			c.Header("Access-Control-Allow-Origin", conf.Cors.AllowOrigin)
-			c.Header("Access-Control-Allow-Headers", conf.Cors.AllowHeaders)
-			c.Header("Access-Control-Expose-Headers", conf.Cors.ExposeHeaders)
-			c.Header("Access-Control-Allow-Methods", conf.Cors.AllowMethods)
-			c.Header("Access-Control-Allow-Credentials", conf.Cors.AllowCredentials)
+			origin := c.Request.Header.Get("Origin")
+
+			// 获取当前请求对应的跨域配置
+			corsConfig := conf.Cors.GetConfig(origin)
+			// 不在白名单中拒绝请求
+			if corsConfig == nil {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
+			}
+
+			c.Header("Access-Control-Allow-Origin", corsConfig.AllowOrigin)
+			c.Header("Access-Control-Allow-Headers", corsConfig.AllowHeaders)
+			c.Header("Access-Control-Expose-Headers", corsConfig.ExposeHeaders)
+			c.Header("Access-Control-Allow-Methods", corsConfig.AllowMethods)
+			c.Header("Access-Control-Allow-Credentials", corsConfig.AllowCredentials)
 
 			// 放行所有OPTIONS方法
 			if c.Request.Method == "OPTIONS" {

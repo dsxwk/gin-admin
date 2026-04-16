@@ -2,19 +2,17 @@ package ctxkey
 
 import "context"
 
-type contextKey string
-
 const (
-	UserIdKey    string     = "userId"
-	TraceIdKey   contextKey = "traceId"
-	IpKey        contextKey = "ip"
-	PathKey      contextKey = "path"
-	MethodKey    contextKey = "method"
-	ParamsKey    contextKey = "params"
-	MsKey        contextKey = "ms"
-	LangKey      contextKey = "lang"
-	StartTimeKey contextKey = "startTime"
-	DebuggerKey  contextKey = "debugger"
+	UserIdKey    string = "userId"
+	TraceIdKey   string = "traceId"
+	IpKey        string = "ip"
+	PathKey      string = "path"
+	MethodKey    string = "method"
+	ParamsKey    string = "params"
+	MsKey        string = "ms"
+	LangKey      string = "lang"
+	StartTimeKey string = "startTime"
+	DebuggerKey  string = "debugger"
 )
 
 // WithValue 将值注入到context
