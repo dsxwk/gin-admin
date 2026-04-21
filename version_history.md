@@ -1,3 +1,6 @@
+## v2.1.1
+> - Optimize the document and optimize the use of some tool package functions with third-party packages.
+
 ## v2.1.0
 > - Optimize configuration items and optimize the two modes of cross domain addition: allow all and whitelist.
 

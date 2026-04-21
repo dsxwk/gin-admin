@@ -5,8 +5,8 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,13 +88,13 @@ func (m *MakeRequest) Execute(args []string) {
 	file := m.GetMakeFile(values["file"], "request")
 	templateName := "request"
 
-	structName := pkg.SnakeToCamel(strings.TrimSuffix(filepath.Base(file), filepath.Ext(file)))
+	structName := lo.CamelCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(file)))
 
 	var fields []Field
 
 	// table模式
 	if values["table"] != "" {
-		structName = pkg.SnakeToCamel(values["table"])
+		structName = lo.CamelCase(values["table"])
 		fields = m.loadTableFields(values["connection"], values["table"], values["camel"] == "true")
 	} else {
 		// 默认ID模式
@@ -360,5 +360,5 @@ func (m *MakeRequest) toGoName(name string, camel bool) string {
 	}
 
 	// 转换下划线命名为大驼峰命名
-	return pkg.ToUpperCamel(name)
+	return lo.PascalCase(name)
 }

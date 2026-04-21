@@ -5,10 +5,10 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/mattn/go-runewidth"
+	"github.com/samber/lo"
 	"os"
 	"sort"
 	"strings"
@@ -182,11 +182,11 @@ func printText() {
 			items = append(items, []string{name, cmd.Description()})
 		}
 
-		printAlign(items, 2, pkg.Ter(true, maxWidth, optMax))
+		printAlign(items, 2, lo.Ternary(true, maxWidth, optMax))
 	}
 
 	color.Yellow("\nOptions:")
-	printAlign(options, 2, pkg.Ter(true, maxWidth, optMax))
+	printAlign(options, 2, lo.Ternary(true, maxWidth, optMax))
 }
 
 // 打印单个命令帮助

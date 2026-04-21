@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"time"
@@ -72,7 +72,7 @@ func (m *%s) Rollback(db *gorm.DB) error {
 	// todo: 实现回滚逻辑
 	return nil
 }
-`, "Create"+pkg.ToUpperCamel(name)+timestamp, "Create"+pkg.ToUpperCamel(name)+timestamp, id, "Create"+pkg.ToUpperCamel(name)+timestamp, "Create"+pkg.ToUpperCamel(name)+timestamp)
+`, "Create"+lo.PascalCase(name)+timestamp, "Create"+lo.PascalCase(name)+timestamp, id, "Create"+lo.PascalCase(name)+timestamp, "Create"+lo.PascalCase(name)+timestamp)
 
 	// 创建文件
 	f := s.CheckDirAndFile(filePath)

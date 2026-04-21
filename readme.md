@@ -103,8 +103,8 @@
     - [Ordinary Translation](#Ordinary-Translation) 
     - [Template Translation](#Template-Translation) 
     - [Add Language Support](#Add-Language-Support) 
-  - [Provider Service](#Provider-Service)
-    - [Provider Service Creation](#Provider-Service-Creation)
+  - [Service Provider](#Service-Provider)
+    - [Service Provider Creation](#Service-Provider-Creation)
   - [Facade](#Facade)
     - [Facade Creation](#Facade-Creation)
     - [Facade Usage](#Facade-Usage)
@@ -115,7 +115,7 @@
   - [Swagger Documents](#Swagger-Documents)
 
 # Project Introduction
-> A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `jwt`, `log`、 `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
+> A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`, `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
 ## Project Address
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.1.0
+> - Latest Version: v2.1.1
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -2185,10 +2185,10 @@ i18n:
   lang: "zh,en" # Default language, multiple languages separated by commas
 ```
 
-# Provider Service
-> The provider service will automatically load the registration upon startup and release it upon shutdown.
-## Provider Service Creation
-> 同模型、控制器等使用命令行创建,具体参考之前文档。
+# Service Provider 
+> The service provider will automatically load the registration upon startup and release it upon shutdown.
+## Service Provider Creation
+> Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
 # Facade
 ## Facade Creation

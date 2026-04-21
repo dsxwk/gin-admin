@@ -3,8 +3,8 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -89,8 +89,8 @@ func (m *MakeService) generateFile(_make, file, function, desc string) {
 		Description string // 如果为空,使用默认值
 	}{
 		Package:     packageName,
-		Name:        pkg.ToUpperCamel(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
-		Function:    pkg.ToUpperCamel(function),
+		Name:        lo.PascalCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
+		Function:    lo.PascalCase(function),
 		Description: desc,
 	}
 

@@ -7,6 +7,7 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 	"os"
@@ -143,7 +144,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 	// 自定义JSON tag
 	if camel {
 		g.WithJSONTagNameStrategy(func(columnName string) string {
-			return pkg.ToLowerCamel(columnName)
+			return lo.CamelCase(columnName)
 		})
 	}
 
@@ -182,7 +183,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 
 		// 为每个生成的模型文件追加Connection方法
 		if conn != "" {
-			structName := pkg.SnakeToCamel(table)
+			structName := lo.CamelCase(table)
 			err = appendConnection(path, table, structName, conn)
 			if err != nil {
 				flag.Errorf("为模型 %s 追加 Connection 方法失败: %s", table, err.Error())

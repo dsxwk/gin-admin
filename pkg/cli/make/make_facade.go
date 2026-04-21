@@ -3,8 +3,8 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
@@ -77,11 +77,10 @@ func (m *MakeFacade) generateFacade(_make, file, facadeDesc string) {
 	baseName := strings.TrimSuffix(filepath.Base(file), ".go")
 
 	// 转换为大驼峰作为门面名称
-	facadeName := pkg.ToUpperCamel(strings.ReplaceAll(baseName, "_", " "))
-	facadeName = strings.ReplaceAll(facadeName, " ", "")
+	facadeName := lo.PascalCase(baseName)
 
 	// 生成小驼峰变量名
-	facadeVar := pkg.SnakeToCamel(facadeName)
+	facadeVar := lo.CamelCase(facadeName)
 
 	data := struct {
 		Package    string // 包名(facade)

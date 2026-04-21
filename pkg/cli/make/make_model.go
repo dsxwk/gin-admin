@@ -5,8 +5,8 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
@@ -167,7 +167,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		})
 	}
 
-	structName := pkg.SnakeToCamel(table)
+	structName := lo.CamelCase(table)
 	tableConst := "TableName" + structName
 
 	// 计算字段对齐长度
@@ -175,7 +175,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	maxTypeLen := 0
 
 	for _, c := range columns {
-		name := pkg.SnakeToCamel(c.Name)
+		name := lo.CamelCase(c.Name)
 		typ := goType(c, im, pkgName)
 
 		if len(name) > maxNameLen {
@@ -190,12 +190,12 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	var fieldLines []string
 
 	for _, c := range columns {
-		fieldName := pkg.SnakeToCamel(c.Name)
+		fieldName := lo.CamelCase(c.Name)
 		fieldType := goType(c, im, pkgName)
 
 		var jsonName string
 		if camel {
-			jsonName = pkg.ToLowerCamel(c.Name)
+			jsonName = fieldName
 		} else {
 			jsonName = c.Name
 		}

@@ -18,6 +18,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/samber/lo v1.53.0
 	github.com/segmentio/kafka-go v0.4.49
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0

@@ -3,8 +3,8 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -77,7 +77,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 		EventName string
 	}{
 		Package:   packageName,
-		Name:      pkg.ToUpperCamel(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
+		Name:      lo.PascalCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
 		EventName: eventName,
 	}
 

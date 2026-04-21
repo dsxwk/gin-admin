@@ -31,29 +31,6 @@ func InArrayFast[T comparable](val T, arr []T) bool {
 	return ok
 }
 
-// ArrayUnique 数组去重
-func ArrayUnique[T comparable](arr []T) []T {
-	m := make(map[T]struct{})
-	res := make([]T, 0, len(arr))
-	for _, v := range arr {
-		if _, exists := m[v]; !exists {
-			m[v] = struct{}{}
-			res = append(res, v)
-		}
-	}
-	return res
-}
-
-// IndexOf 返回元素在切片中的下标,未找到返回-1
-func IndexOf[T comparable](val T, arr []T) int {
-	for i, v := range arr {
-		if v == val {
-			return i
-		}
-	}
-	return -1
-}
-
 // ArrayFilter 过滤切片,保留满足条件的元素
 func ArrayFilter[T any](arr []T, fn func(T) bool) []T {
 	res := make([]T, 0)

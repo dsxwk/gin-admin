@@ -3,8 +3,8 @@ package model
 import (
 	"database/sql/driver"
 	"fmt"
-	"gin/pkg"
 	"github.com/goccy/go-json"
+	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -156,8 +156,8 @@ func FilterFields(db *gorm.DB, model any, raw map[string]interface{}) map[string
 	filtered := make(map[string]interface{})
 
 	for k, v := range raw {
-		if _, ok := stmt.Schema.FieldsByDBName[pkg.CamelToSnake(k)]; ok {
-			filtered[pkg.CamelToSnake(k)] = v
+		if _, ok := stmt.Schema.FieldsByDBName[lo.SnakeCase(k)]; ok {
+			filtered[lo.SnakeCase(k)] = v
 		}
 	}
 

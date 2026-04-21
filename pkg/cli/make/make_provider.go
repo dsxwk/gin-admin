@@ -3,8 +3,8 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,11 +94,11 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 	baseName := strings.TrimSuffix(filepath.Base(file), ".go")
 
 	// 转换为大驼峰作为提供者名称
-	providerName := pkg.ToUpperCamel(strings.ReplaceAll(baseName, "_", " "))
+	providerName := lo.PascalCase(strings.ReplaceAll(baseName, "_", " "))
 	providerName = strings.ReplaceAll(providerName, " ", "")
 
 	// 生成小驼峰变量名
-	providerVar := pkg.SnakeToCamel(providerName)
+	providerVar := lo.CamelCase(providerName)
 
 	// 处理依赖
 	dependencyList := strings.Split(deps, ",")
@@ -119,7 +119,7 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 	}{
 		Package:      "provider",
 		ProviderName: providerName,
-		ProviderVar:  pkg.CamelToSnake(providerVar),
+		ProviderVar:  lo.SnakeCase(providerVar),
 		Desc:         providerDesc,
 		Deps:         dependencyList,
 		HasRunner:    withRunner,

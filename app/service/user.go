@@ -7,6 +7,7 @@ import (
 	"gin/common/base"
 	"gin/pkg"
 	"gin/pkg/orm"
+	"github.com/samber/lo"
 	"time"
 )
 
@@ -91,7 +92,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	if count > 0 {
 		return errors.New("用户名已存在")
 	}
-	if pkg.HasKey(data, "password") && data["password"] != "" {
+	if lo.HasKey(data, "password") && data["password"] != "" {
 		data["password"] = pkg.BcryptHash(data["password"].(string))
 	}
 	rows := model.FilterFields(db, model.User{}, data)

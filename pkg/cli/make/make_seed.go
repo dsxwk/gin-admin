@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"time"
@@ -78,7 +78,7 @@ func (s *%s) Run(db *gorm.DB) error {
 	// todo: 实现填充逻辑
 	return nil
 }
-`, pkg.ToUpperCamel(name), pkg.ToUpperCamel(name), name+"_"+timestamp, pkg.ToUpperCamel(name))
+`, lo.PascalCase(name), lo.PascalCase(name), name+"_"+timestamp, lo.PascalCase(name))
 
 	// 创建文件
 	f := s.CheckDirAndFile(filePath)

@@ -3,8 +3,8 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
+	"github.com/samber/lo"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -79,7 +79,7 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 		Description string // 如果为空,使用默认值
 	}{
 		Package:     packageName,
-		Name:        pkg.ToUpperCamel(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
+		Name:        lo.PascalCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
 		Description: desc,
 	}
 
