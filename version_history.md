@@ -1,3 +1,6 @@
+## v2.1.2
+> - Facade added request validator usage and request path parameter acquisition, service provider added automatic registration of validator.
+
 ## v2.1.1
 > - Optimize the document and optimize the use of some tool package functions with third-party packages.
 

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
@@ -10,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/copier"
-	"strconv"
 )
 
 type UserController struct {
@@ -37,14 +37,8 @@ func (s *UserController) List(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-
-	// 验证
-	err = req.Validate(req, "List")
+	// 绑定参数并验证
+	err := facade.Request.BindValidate(c, &req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -78,14 +72,8 @@ func (s *UserController) Create(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-
-	// 验证
-	err = req.Validate(req, "Create")
+	// 绑定参数并验证
+	err := facade.Request.BindValidate(c, &req, "Create")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -119,7 +107,6 @@ func (s *UserController) Create(c *gin.Context) {
 // @Router /api/v1/user/{id} [put]
 func (s *UserController) Update(c *gin.Context) {
 	var (
-		id   int64
 		ctx  = c.Request.Context()
 		data map[string]interface{}
 		req  request.User
@@ -128,27 +115,16 @@ func (s *UserController) Update(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBindBodyWith(&req, binding.JSON)
+	err := c.ShouldBindBodyWith(&data, binding.JSON)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	err = c.ShouldBindBodyWith(&data, binding.JSON)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
+	req.ID = facade.RequestPath[int64](c, "id", 0)
 
-	id, err = strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-	req.ID = id
-
-	// 验证
-	err = req.Validate(req, "Update")
+	// 绑定参数并验证
+	err = facade.Request.BindValidate(c, &req, "Update")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -160,7 +136,7 @@ func (s *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	err = s.service.Update(user.ID, data)
+	err = s.service.Update(req.ID, data)
 	if err != nil {
 		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -181,22 +157,16 @@ func (s *UserController) Update(c *gin.Context) {
 // @Router /api/v1/user/{id} [get]
 func (s *UserController) Detail(c *gin.Context) {
 	var (
-		id  int64
 		ctx = c.Request.Context()
 		req request.User
 	)
 
 	s.service.WithContext(ctx)
 
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-	req.ID = id
+	req.ID = facade.RequestPath[int64](c, "id", 0)
 
-	// 验证
-	err = req.Validate(req, "Detail")
+	// 绑定参数并验证
+	err := facade.Request.BindValidate(c, &req, "Detail")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -223,22 +193,16 @@ func (s *UserController) Detail(c *gin.Context) {
 // @Router /api/v1/user/{id} [delete]
 func (s *UserController) Delete(c *gin.Context) {
 	var (
-		id  int64
 		ctx = c.Request.Context()
 		req request.User
 	)
 
 	s.service.WithContext(ctx)
 
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-	req.ID = id
+	req.ID = facade.RequestPath[int64](c, "id", 0)
 
-	// 验证
-	err = req.Validate(req, "Delete")
+	// 绑定参数并验证
+	err := facade.Request.BindValidate(c, &req, "Delete")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

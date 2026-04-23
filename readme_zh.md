@@ -134,7 +134,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.1.1
+> - 最新版本: v2.1.2
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
@@ -230,6 +230,9 @@ $ ./cli demo:command --args=11
 │   ├──├── message                      # 消息事件
 │   ├──├── orm                          # orm工具
 │   ├──├── queue                        # 队列
+│   ├──├── ratelimit                    # 限流
+│   ├──├── request                      # 请求
+│   ├──├── queue                        # 队列
 │   ├──├── time                         # 时间处理
 ├── public                              # 静态资源
 ├── router                              # 路由
@@ -252,8 +255,8 @@ $ ./cli demo:command --args=11
 ├── main.go                             # 入口文件
 ├── readme.md                           # 英文文档
 ├── readme_zh.md                        # 中文文档
-├── VersionHistoryEn.md                 # 版本记录英文文档
-└── VersionHistoryZn.md                 # 版本记录中文文档
+├── version_history.md                  # 版本记录英文文档
+└── version_history_zh.md               # 版本记录中文文档
 ```
 
 # 使用方法
@@ -880,7 +883,8 @@ func (s *UserController) List(c *gin.Context) {
 
   s.service.WithContext(ctx)
 
-  err = c.ShouldBind(&req)
+  // 方式1
+  /*err := c.ShouldBind(&req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
@@ -888,6 +892,13 @@ func (s *UserController) List(c *gin.Context) {
 
   // 验证
   err = req.Validate(req, "List")
+  if err != nil {
+    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }*/
+  // 方式2
+  // 绑定参数并验证
+  err := facade.Request.BindValidate(c, &req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -2206,7 +2217,7 @@ i18n:
 > 同模型、控制器等使用命令行创建,具体参考之前文档。
 
 ## 门面使用
-> 项目以默认集成了日志、数据库、缓存、限流等门面，当前以缓存为示例。数据库、缓存、http请求、队列绑定了上下文会记录到调试日志中。
+> 项目以默认集成了日志、数据库、缓存、验证器、限流等门面，当前以缓存为示例。数据库、缓存、http请求、队列绑定了上下文会记录到调试日志中。
 ```go
 package controller
 

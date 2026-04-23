@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.1.1
+> - Latest Version: v2.1.2
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -230,6 +230,8 @@ Excute Command: demo:command, Argument: 11
 │   ├──├── message                      # Message Event
 │   ├──├── orm                          # Orm Tool
 │   ├──├── queue                        # Queue
+│   ├──├── ratelimit                    # Rate Limit
+│   ├──├── request                      # Request
 │   ├──├── time                         # Time Processing
 ├── public                              # Static Resources
 ├── router                              # Router
@@ -251,8 +253,8 @@ Excute Command: demo:command, Argument: 11
 ├── main.go                             # Entry File
 ├── readme.md                           # English Document
 ├── readme_zh.md                        # Chinese Document
-├── VersionHistoryEn.md                 # Version History English Document
-└── VersionHistoryZn.md                 # Version History Chinese Document
+├── version_history.md                  # Version History English Document
+└── version_history_zh.md               # Version History Chinese Document
 ```
 
 # Instructions For Use
@@ -877,7 +879,8 @@ func (s *UserController) List(c *gin.Context) {
 
   s.service.WithContext(ctx)
 
-  err = c.ShouldBind(&req)
+  // Method One
+  /*err := c.ShouldBind(&req)
   if err != nil {
     s.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
@@ -885,6 +888,13 @@ func (s *UserController) List(c *gin.Context) {
 
   // Validator
   err = req.Validate(req, "List")
+  if err != nil {
+    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }*/
+  // Method Two
+  // Bind And Validate
+  err := facade.Request.BindValidate(c, &req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -2195,7 +2205,7 @@ i18n:
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
 ## Facade Usage
-> The project integrates features such as logs, databases, caches, and throttling by Facade. Currently, cache is used as an example. The binding of context to databases, caches, HTTP requests, and queues will be recorded in the debugging log.
+> The project integrates features such as logs, databases, validator, caches, and throttling by Facade. Currently, cache is used as an example. The binding of context to databases, caches, HTTP requests, and queues will be recorded in the debugging log.
 ```go
 package controller
 

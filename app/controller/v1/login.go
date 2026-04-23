@@ -48,14 +48,8 @@ func (s *LoginController) Login(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-
-	// 验证
-	err = req.Validate(req, "Login")
+	// 绑定参数并验证
+	err := facade.Request.BindValidate(c, &req, "Login")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

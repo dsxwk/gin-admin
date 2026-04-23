@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"gin/app/facade"
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
@@ -33,14 +34,8 @@ func (s *MenuController) List(c *gin.Context) {
 
 	s.service.WithContext(c.Request.Context())
 
-	err := c.ShouldBind(&req)
-	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-	}
-
-	// 验证
-	err = request.Menu{}.Validate(req, "List")
+	// 绑定参数并验证
+	err := facade.Request.BindValidate(c, &req, "List")
 	if err != nil {
 		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
