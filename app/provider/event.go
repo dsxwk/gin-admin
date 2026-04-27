@@ -2,6 +2,7 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/pkg/eventbus"
 	"gin/pkg/foundation"
 )
 
@@ -18,7 +19,7 @@ func (p *EventProvider) Name() string {
 
 func (p *EventProvider) Register(app foundation.App) {
 	// 注册事件门面
-	facade.Register("event", facade.Event)
+	facade.Register("event", facade.Event[eventbus.Event])
 }
 
 func (p *EventProvider) Boot(app foundation.App) {

@@ -26,36 +26,37 @@ var (
 )
 
 // Register 注册监听
-func Register(listener Listener, e Event) {
-	name := e.Name()
-	desc := e.Description()
+func Register[T Event](listener Listener[T], event T) {
+	name := event.Name()
+	desc := event.Description()
 
 	// 获取当前已注册监听
-	var listen []Listener
+	var listen []Listener[T]
 	if v, ok := listenerMap.Load(name); ok {
-		listen = v.([]Listener)
+		listen = v.([]Listener[T])
 	}
 
 	// 添加新的监听
 	listen = append(listen, listener)
 	listenerMap.Store(name, listen)
 
-	// 记录事件信息
+	// 更新事件信息
+	info := EventInfo{
+		Name:        name,
+		Description: desc,
+	}
 	if v, ok := eventInfos.Load(name); ok {
-		info := v.(EventInfo)
-		info.Listeners = append(info.Listeners, fmt.Sprintf("%T", listener))
-		eventInfos.Store(name, info)
+		existing := v.(EventInfo)
+		existing.Listeners = append(existing.Listeners, fmt.Sprintf("%T", listener))
+		eventInfos.Store(name, existing)
 	} else {
-		eventInfos.Store(name, EventInfo{
-			Name:        name,
-			Description: desc,
-			Listeners:   []string{fmt.Sprintf("%T", listener)},
-		})
+		info.Listeners = []string{fmt.Sprintf("%T", listener)}
+		eventInfos.Store(name, info)
 	}
 }
 
 // Publish 发布事件
-func Publish(ctx context.Context, e Event) {
+func Publish[T Event](ctx context.Context, e T) {
 	message.GetEventBus().Publish(debugger.TopicListener, debugger.ListenerEvent{
 		TraceId:     ctx.Value(ctxkey.TraceIdKey).(string),
 		Name:        e.Name(),
@@ -64,12 +65,12 @@ func Publish(ctx context.Context, e Event) {
 	})
 
 	if v, ok := listenerMap.Load(e.Name()); ok {
-		for _, listener := range v.([]Listener) {
+		for _, listener := range v.([]Listener[T]) {
 			// 可替换goroutine为队列
 			go listener.Handle(e)
 		}
 	} else {
-		flag.Errorf("未找到事件监听: %s", e.Name())
+		flag.Warningf("未找到事件监听: %s", e.Name())
 	}
 }
 

@@ -46,7 +46,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 	}
 
 	// 发布事件
-	facade.Event.Publish(s.Ctx, event.UserLoginEvent{
+	facade.Event[event.UserLoginEvent]().Publish(s.Ctx, event.UserLoginEvent{
 		UserId:   m.ID,
 		Username: m.Username,
 	})

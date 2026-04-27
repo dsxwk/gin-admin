@@ -1,3 +1,6 @@
+## v2.1.3
+> - Optimize the Event, Http, Request facade to support generics.
+
 ## v2.1.2
 > - Facade added request validator usage and request path parameter acquisition, service provider added automatic registration of validator.
 

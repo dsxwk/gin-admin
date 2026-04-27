@@ -21,6 +21,17 @@ import (
 
 const timeout = 5 * time.Second
 
+// Http 泛型函数,返回对应类型的门面实例
+// 使用示例:
+//
+//	user, err := http.Http[UserResponse]().Get(ctx, "https://api.example.com/user/1", nil)
+//	data, err := http.Http[any]().Send(ctx, "GET", url, nil)
+func Http[T any]() HttpFacade[T] {
+	return HttpFacade[T]{}
+}
+
+type HttpFacade[T any] struct{}
+
 // File 文件
 type File struct {
 	FileName  string // 文件名
@@ -38,23 +49,63 @@ type Option struct {
 	Timeout time.Duration          // 超时时间
 }
 
-// buildURL 拼接get请求query参数
-func buildUrl(baseURL string, query map[string]interface{}) string {
-	if len(query) == 0 {
-		return baseURL
-	}
-	q := url.Values{}
-	for k, v := range query {
-		q.Set(k, fmt.Sprintf("%v", v))
-	}
-	if strings.Contains(baseURL, "?") {
-		return baseURL + "&" + q.Encode()
-	}
-	return baseURL + "?" + q.Encode()
+// ResponseWrapper 响应包装器,支持链式调用
+type ResponseWrapper struct {
+	ctx  context.Context
+	data []byte
+	err  error
 }
 
-// Send 发送http请求
-func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
+// Send 发送HTTP请求
+func (h HttpFacade[T]) Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
+	return doSend(ctx, method, uri, opt)
+}
+
+// Get 发送GET请求
+func (h HttpFacade[T]) Get(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return h.Send(ctx, "GET", uri, opt)
+}
+
+// Post 发送POST请求
+func (h HttpFacade[T]) Post(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return h.Send(ctx, "POST", uri, opt)
+}
+
+// Put 发送PUT请求
+func (h HttpFacade[T]) Put(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return h.Send(ctx, "PUT", uri, opt)
+}
+
+// Delete 发送DELETE请求
+func (h HttpFacade[T]) Delete(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return h.Send(ctx, "DELETE", uri, opt)
+}
+
+// AsJson 将响应体解析为T类型
+func (h HttpFacade[T]) AsJson(data []byte) (*T, error) {
+	var result T
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, data)
+	}
+	return &result, nil
+}
+
+// SendAsJson 发送请求并解析为T类型
+func (h HttpFacade[T]) SendAsJson(ctx context.Context, method, uri string, opt *Option) (*T, error) {
+	data, err := h.Send(ctx, method, uri, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	var result T
+	if err = json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, data)
+	}
+	return &result, nil
+}
+
+// doSend 发送请求
+func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
 	start := time.Now()
 	req := fasthttp.AcquireRequest()
 	resp := fasthttp.AcquireResponse()
@@ -78,51 +129,41 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 
 	// 判断是否有文件上传
 	if opt.Files != nil && len(opt.Files) > 0 {
-		return fileUpload(ctx, req, resp, uri, opt, requestTimeout, start)
+		return doFileUpload(ctx, req, resp, uri, opt, requestTimeout, start)
 	}
 
 	// 构建请求体
 	contentType := ""
 	if opt.Form != nil && len(opt.Form) > 0 {
-		// x-www-form-urlencoded
 		values := url.Values{}
 		for k, v := range opt.Form {
 			values.Set(k, fmt.Sprintf("%v", v))
 		}
-
 		req.SetBodyString(values.Encode())
 		contentType = "application/x-www-form-urlencoded"
 	}
 
 	if opt.Body != nil {
-		// 处理Body参数
 		method = strings.ToUpper(method)
-		// GET和HEAD请求不应该有body
 		if method != http.MethodGet && method != http.MethodHead {
 			switch v := opt.Body.(type) {
 			case []byte:
 				req.SetBody(v)
 				contentType = "application/octet-stream"
-
 			case string:
 				req.SetBodyString(v)
 				contentType = "text/plain"
-
 			case *bytes.Buffer:
 				req.SetBody(v.Bytes())
 				contentType = "application/octet-stream"
-
 			case *strings.Reader:
-				// 读取strings.Reader的内容
 				data, err := io.ReadAll(v)
 				if err != nil {
 					return nil, fmt.Errorf("读取Body失败: %w", err)
 				}
 				req.SetBody(data)
 				contentType = "text/plain"
-
 			default:
-				// 尝试JSON序列化
 				jsonBytes, err := json.Marshal(v)
 				if err != nil {
 					return nil, fmt.Errorf("JSON序列化失败: %w", err)
@@ -134,6 +175,9 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 	}
 
 	// 设置默认Content-Type
+	if opt.Headers == nil {
+		opt.Headers = make(map[string]string)
+	}
 	if contentType != "" && opt.Headers["Content-Type"] == "" {
 		opt.Headers["Content-Type"] = contentType
 	}
@@ -141,18 +185,15 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 		opt.Headers["Content-Type"] = "application/json"
 	}
 
-	// 设置自定义headers(会覆盖默认设置)
-	if opt.Headers != nil {
-		for k, v := range opt.Headers {
-			req.Header.Set(k, v)
-		}
+	// 设置自定义headers
+	for k, v := range opt.Headers {
+		req.Header.Set(k, v)
 	}
 
-	// 创建客户端并设置超时
 	client := &fasthttp.Client{
-		MaxConnsPerHost: 100,            // 最大连接数
-		ReadTimeout:     requestTimeout, // 读取超时
-		WriteTimeout:    requestTimeout, // 写入超时
+		MaxConnsPerHost: 100,
+		ReadTimeout:     requestTimeout,
+		WriteTimeout:    requestTimeout,
 	}
 
 	var (
@@ -160,7 +201,6 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 		status   int
 	)
 	defer func() {
-		// 耗时
 		cost := time.Since(start)
 		costMs := float64(cost.Nanoseconds()) / 1e6
 
@@ -185,12 +225,10 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 		})
 	}()
 
-	// 发送请求
 	if err := client.Do(req, resp); err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
 
-	// 获取响应内容
 	respBody := resp.Body()
 	err := json.Unmarshal(respBody, &respJson)
 	if err != nil {
@@ -204,12 +242,11 @@ func Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) 
 	return respBody, nil
 }
 
-// fileUpload 处理multipart/form-data上传
-func fileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Response, uri string, opt *Option, requestTimeout time.Duration, start time.Time) ([]byte, error) {
+// doFileUpload 文件上传内部函数
+func doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Response, uri string, opt *Option, requestTimeout time.Duration, start time.Time) ([]byte, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	// 添加文件字段
 	for fieldName, file := range opt.Files {
 		var fileData []byte
 		var fileName string
@@ -231,7 +268,6 @@ func fileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Respo
 			continue
 		}
 
-		// 使用自定义字段名或默认字段名
 		formFieldName := file.FieldName
 		if formFieldName == "" {
 			formFieldName = fieldName
@@ -247,7 +283,6 @@ func fileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Respo
 		}
 	}
 
-	// 添加普通表单字段
 	for k, v := range opt.Form {
 		if err := writer.WriteField(k, fmt.Sprintf("%v", v)); err != nil {
 			return nil, fmt.Errorf("写入表单字段失败: %w", err)
@@ -310,7 +345,6 @@ func fileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Respo
 	respBody := resp.Body()
 	status = resp.StatusCode()
 
-	// 获取响应内容
 	err := json.Unmarshal(respBody, &respJson)
 	if err != nil {
 		respJson = respBody
@@ -323,17 +357,17 @@ func fileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Respo
 	return respBody, nil
 }
 
-// SendToJson 发送请求并解析json响应
-func SendToJson[T any](ctx context.Context, method, url string, opt *Option) (*T, error) {
-	resp, err := Send(ctx, method, url, opt)
-	if err != nil {
-		return nil, err
+// buildURL 拼接get请求query参数
+func buildUrl(baseURL string, query map[string]interface{}) string {
+	if len(query) == 0 {
+		return baseURL
 	}
-
-	var result T
-	if err = json.Unmarshal(resp, &result); err != nil {
-		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, resp)
+	q := url.Values{}
+	for k, v := range query {
+		q.Set(k, fmt.Sprintf("%v", v))
 	}
-
-	return &result, nil
+	if strings.Contains(baseURL, "?") {
+		return baseURL + "&" + q.Encode()
+	}
+	return baseURL + "?" + q.Encode()
 }

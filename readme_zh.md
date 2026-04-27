@@ -134,7 +134,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.1.2
+> - 最新版本: v2.1.3
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
@@ -898,7 +898,7 @@ func (s *UserController) List(c *gin.Context) {
   }*/
   // 方式2
   // 绑定参数并验证
-  err := facade.Request.BindValidate(c, &req, "List")
+  err := facade.Request[any]().BindValidate(c, &req, "List")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1256,22 +1256,22 @@ func (s *TestController) Test() {
     }
 	
     // Get 获取缓存
-    key := "test_key"
-    value := "test_value"
+    key = "test_key"
+    value = "test_value"
     result, ok := cache.Get(key)
 	if ok {
 	    println(result) // test_value	
     }
 	
 	// Delete 删除缓存
-	key := "test_key"
-	err := cache.Delete(key)
+	key = "test_key"
+	err = cache.Delete(key)
 	if err != nil {
         // 处理错误	
     }
 	
 	// Expire 获取缓存过期时间
-	key := "test_key"
+	key = "test_key"
     val, expireAt, ok, err := cache.Expire(key)
 	if err != nil {
 	    // 处理错误
@@ -1308,22 +1308,22 @@ func (s *TestController) Test() {
     }
 	
     // Get 获取缓存
-    key := "test_key"
-    value := "test_value"
+    key = "test_key"
+    value = "test_value"
     result, ok := redisCache.Get(key)
 	if ok {
 	    println(result) // test_value	
     }
 	
 	// Delete 删除缓存
-	key := "test_key"
-	err := redisCache.Delete(key)
+	key = "test_key"
+	err = redisCache.Delete(key)
 	if err != nil {
         // 处理错误	
     }
 	
 	// Expire 获取缓存过期时间
-	key := "test_key"
+	key = "test_key"
     val, expireAt, ok, err := redisCache.Expire(key)
 	if err != nil {
 	    // 处理错误
@@ -1362,22 +1362,22 @@ func (s *TestController) Test() {
     }
 	
     // Get 获取缓存
-    key := "test_key"
-    value := "test_value"
+    key = "test_key"
+    value = "test_value"
     result, ok := memoryCache.Get(key)
 	if ok {
 	    println(result) // test_value	
     }
 	
 	// Delete 删除缓存
-	key := "test_key"
-	err := memoryCache.Delete(key)
+	key = "test_key"
+	err = memoryCache.Delete(key)
 	if err != nil {
         // 处理错误	
     }
 	
 	// Expire 获取缓存过期时间
-	key := "test_key"
+	key = "test_key"
     val, expireAt, ok, err := memoryCache.Expire(key)
 	if err != nil {
 	    // 处理错误
@@ -1416,22 +1416,22 @@ func (s *TestController) Test() {
     }
     
     // Get 获取缓存
-    key := "test_key"
-    value := "test_value"
+    key = "test_key"
+    value = "test_value"
     result, ok := diskCache.Get(key)
     if ok {
         println(result) // test_value	
     }
     
     // Delete 删除缓存
-    key := "test_key"
-    err := diskCache.Delete(key)
+    key = "test_key"
+    err = diskCache.Delete(key)
     if err != nil {
         // 处理错误	
     }
     
     // Expire 获取缓存过期时间
-    key := "test_key"
+    key = "test_key"
     val, expireAt, ok, err := diskCache.Expire(key)
     if err != nil {
         // 处理错误
@@ -1515,26 +1515,24 @@ package listener
 import (
     "fmt"
     "gin/app/event"
-    "gin/common/base"
     "gin/pkg/eventbus"
-    "github.com/goccy/go-json"
     "time"
 )
 
 type UserLoginListener struct{}
 
-func (l *UserLoginListener) Handle(e base.Event) {
-    ev, ok := e.(event.UserLoginEvent)
-    if !ok {
-        return
-    }
-  
-	data, _ := json.Marshal(e)
-	fmt.Printf("收到事件: %s 事件描述: %s 事件数据: %s, 时间: %s\n", ev.Name(), ev.Description(), data, time.Now().Format("2006-01-02 15:04:05"))
+func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
+  fmt.Printf(
+    "收到事件: %s 描述: %s 数据: %T 时间: %s\n",
+    e.Name(),
+    e.Description(),
+    e,
+    time.Now().Format("2006-01-02 15:04:05"),
+  )
 }
 
 func init() {
-	eventbus.Register(&UserLoginListener{}, event.UserLoginEvent{})
+  eventbus.Register(&UserLoginListener{}, event.UserLoginEvent{})
 }
 
 ```
@@ -1802,14 +1800,8 @@ func (s *LoginController) Login(c *gin.Context) {
 
   s.service.WithContext(ctx)
 
-  err := c.ShouldBind(&req)
-  if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
-    return
-  }
-
-  // 验证
-  err = req.Validate(req, "Login")
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Login")
   if err != nil {
     s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1828,7 +1820,7 @@ func (s *LoginController) Login(c *gin.Context) {
   }
 
   // 发布事件
-  facade.Event.Publish(ctx, event.UserLoginEvent{
+  facade.Event[event.UserLoginEvent]().Publish(ctx, event.UserLoginEvent{
     UserId:   userModel.ID,
     Username: userModel.Username,
   })

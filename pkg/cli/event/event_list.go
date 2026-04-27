@@ -5,6 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/eventbus"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"sort"
@@ -26,7 +27,7 @@ func (s *EventList) Help() []base.CommandOption {
 }
 
 func (s *EventList) Execute(args []string) {
-	list := facade.Event.List()
+	list := facade.Event[eventbus.Event]().List()
 	if len(list) == 0 {
 		color.Yellow("暂无注册的事件")
 		return
