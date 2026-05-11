@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/queue"
+	"gin/pkg/provider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
 	{{- end}}
@@ -23,9 +23,9 @@ type {{.Name}}{{if .IsDelay}}Delay{{end}}Producer struct {
 
 // New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer 创建生产者实例
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	{{- if eq .Type "kafka"}}
 	kfk := base.NewKafka(cfg, log, bus)
@@ -95,7 +95,7 @@ func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Close() error {
 }
 
 func init() {
-    cfg := facade.Config.Get()
+    cfg := facade.Config()
 	if cfg != nil && cfg.{{if eq .Type "kafka"}}Kafka{{else}}Rabbitmq{{end}}.Enabled {
 	    queue.GetProducerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer())
 	}

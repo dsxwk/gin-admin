@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/queue"
+	"gin/pkg/provider/queue"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"sort"

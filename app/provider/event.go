@@ -2,8 +2,8 @@ package provider
 
 import (
 	"gin/app/facade"
-	"gin/pkg/eventbus"
 	"gin/pkg/foundation"
+	"gin/pkg/provider/message"
 )
 
 func init() {
@@ -19,13 +19,13 @@ func (p *EventProvider) Name() string {
 
 func (p *EventProvider) Register(app foundation.App) {
 	// 注册事件门面
-	facade.Register("event", facade.Event[eventbus.Event])
+	facade.Register[*message.Event]("event", facade.Message())
 }
 
 func (p *EventProvider) Boot(app foundation.App) {
-	facade.Log.Info("事件总线服务启动成功")
+	facade.Log().Info("事件总线服务启动成功")
 }
 
 func (p *EventProvider) Dependencies() []string {
-	return []string{"log"} // 依赖日志服务
+	return []string{"message", "log"} // 依赖日志服务
 }

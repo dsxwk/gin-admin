@@ -11,7 +11,7 @@ type Cors struct {
 	base.BaseMiddleware
 }
 
-var conf = facade.Config.Get()
+var conf = facade.Config()
 
 // Handle 跨域中间件
 func (s Cors) Handle() gin.HandlerFunc {
@@ -20,7 +20,7 @@ func (s Cors) Handle() gin.HandlerFunc {
 			origin := c.Request.Header.Get("Origin")
 
 			// 获取当前请求对应的跨域配置
-			corsConfig := conf.Cors.GetConfig(origin)
+			corsConfig := conf.Cors.GetWhiteListConfig(origin)
 			// 不在白名单中拒绝请求
 			if corsConfig == nil {
 				c.AbortWithStatus(http.StatusForbidden)

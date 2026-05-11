@@ -6,7 +6,7 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/orm"
+	"gin/pkg/provider/orm"
 	"github.com/samber/lo"
 	"time"
 )

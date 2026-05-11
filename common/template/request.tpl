@@ -10,7 +10,7 @@ import (
 type {{.StructName}} struct {
     base.BaseRequest
 {{- range .Fields}}
-    {{.Name}} {{.Type}} `json:"{{.JSON}}" form:"{{.JSON}}" validate:"{{.Validate}}" label:"{{.Label}}"`
+{{.FormattedField}}
 {{- end}}
     PageListValidate
 }

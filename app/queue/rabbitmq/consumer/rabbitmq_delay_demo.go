@@ -5,8 +5,8 @@ import (
 	"gin/common/base"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/logger"
-	"gin/pkg/queue"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/queue"
 )
 
 // RabbitmqDelayDemoConsumer RabbitMQ延迟消费者
@@ -16,9 +16,9 @@ type RabbitmqDelayDemoConsumer struct {
 
 // NewRabbitmqDelayDemoConsumer 创建延迟消费者实例
 func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	mq, err := base.NewRabbitMQ(cfg, log, bus)
 	if err != nil {
@@ -65,13 +65,13 @@ func (c *RabbitmqDelayDemoConsumer) Status() queue.ConsumerStatus {
 }
 
 func (c *RabbitmqDelayDemoConsumer) Handle(msg string) error {
-	facade.Log.Info(pkg.Sprintf("RabbitMq Delay Received Msg: %s", msg))
+	facade.Log().Info(pkg.Sprintf("RabbitMq Delay Received Msg: %s", msg))
 	// todo 处理业务逻辑
 	return nil
 }
 
 func init() {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if cfg != nil && cfg.Rabbitmq.Enabled {
 		queue.GetConsumerRegistry().Register(NewRabbitmqDelayDemoConsumer())
 	}

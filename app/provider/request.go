@@ -24,7 +24,7 @@ func (p *RequestProvider) Register(app foundation.App) {
 
 // Boot 启动服务
 func (p *RequestProvider) Boot(app foundation.App) {
-	facade.Log.Info("请求验证服务启动成功")
+	facade.Log().Info("请求验证服务启动成功")
 }
 
 // Dependencies 依赖服务

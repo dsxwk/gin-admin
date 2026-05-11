@@ -1,12 +1,12 @@
 package db
 
 import (
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/database"
 	"gin/database/migrations"
 	"gin/pkg/cli"
-	"gin/pkg/orm"
 	"github.com/fatih/color"
 )
 
@@ -39,7 +39,7 @@ func (s *Rollback) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
 	flag.Infof("开始执行数据回滚...")
 
-	db := orm.Connection()
+	db := facade.DB.Connection()
 	id := values["id"]
 	for _, m := range migrations.AllMigrations() {
 		if id != "" && m.ID() != id {

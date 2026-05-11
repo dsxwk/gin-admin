@@ -1,12 +1,12 @@
 package db
 
 import (
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/database"
 	"gin/database/migrations"
 	"gin/pkg/cli"
-	"gin/pkg/orm"
 	"github.com/fatih/color"
 )
 
@@ -39,7 +39,7 @@ func (s *Migrate) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
 	flag.Infof("开始执行数据迁移...")
 
-	db := orm.Connection()
+	db := facade.DB.Connection()
 	db.Exec(`
 CREATE TABLE IF NOT EXISTS migrations (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

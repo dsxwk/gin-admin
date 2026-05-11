@@ -3,7 +3,7 @@ package request
 import (
 	"errors"
 	"gin/common/base"
-	"gin/pkg/lang"
+	"gin/pkg/provider/lang"
 	"github.com/gookit/validate"
 )
 

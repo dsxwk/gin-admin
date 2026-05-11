@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-type Utils[T any] struct{}
+type Client[T any] struct{}
 
 // Query 泛型获取请求查询参数
-func (r Utils[T]) Query(ctx *gin.Context, key string, defaultValue T) T {
+func (c Client[T]) Query(ctx *gin.Context, key string, defaultValue T) T {
 	val := ctx.Query(key)
 	if val == "" {
 		return defaultValue
@@ -84,7 +84,7 @@ func getValue[T any](val string, defaultValue T) T {
 }
 
 // Path 泛型获取请求路径参数
-func (r Utils[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
+func (c Client[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
 	val := ctx.Param(key)
 	if val == "" {
 		return defaultValue
@@ -94,7 +94,7 @@ func (r Utils[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
 }
 
 // Bind 绑定请求参数
-func (r Utils[T]) Bind(ctx *gin.Context, v any) error {
+func (c Client[T]) Bind(ctx *gin.Context, v any) error {
 	ct := ctx.ContentType()
 
 	switch {
@@ -111,15 +111,15 @@ func (r Utils[T]) Bind(ctx *gin.Context, v any) error {
 }
 
 // BindValidate 绑定参数并验证
-func (r Utils[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
-	if err := r.Bind(ctx, v); err != nil {
+func (c Client[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
+	if err := c.Bind(ctx, v); err != nil {
 		return err
 	}
-	return r.Validate(v, scene)
+	return c.Validate(v, scene)
 }
 
 // ValidateWithMessages 验证并自定义错误消息
-func (r Utils[T]) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
+func (c Client[T]) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
 	v := validate.Struct(data, scene)
 	v.WithMessages(messages)
 	if !v.Validate(scene) {
@@ -129,7 +129,7 @@ func (r Utils[T]) ValidateWithMessages(data interface{}, scene string, messages 
 }
 
 // ValidateWithTranslates 验证并自定义字段翻译
-func (r Utils[T]) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
+func (c Client[T]) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
 	v := validate.Struct(data, scene)
 	v.WithTranslates(translates)
 	if !v.Validate(scene) {
@@ -139,12 +139,12 @@ func (r Utils[T]) ValidateWithTranslates(data interface{}, scene string, transla
 }
 
 // GetValidator 获取验证器实例
-func (r Utils[T]) GetValidator(data interface{}, scene string) *validate.Validation {
+func (c Client[T]) GetValidator(data interface{}, scene string) *validate.Validation {
 	return validate.Struct(data, scene)
 }
 
 // Validate 通用验证函数
-func (r Utils[T]) Validate(data interface{}, scene string) error {
+func (c Client[T]) Validate(data interface{}, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())

@@ -19,7 +19,7 @@ type LoginService struct {
 func (s *LoginService) Login(username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
 	var (
 		db   = s.DB(&model.User{})
-		conf = facade.Config.Get()
+		conf = facade.Config()
 	)
 
 	if err = db.
@@ -57,7 +57,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 // RefreshToken 刷新token
 func (s *LoginService) RefreshToken(token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
 	var (
-		conf = facade.Config.Get()
+		conf = facade.Config()
 	)
 
 	j := middleware.Jwt{}

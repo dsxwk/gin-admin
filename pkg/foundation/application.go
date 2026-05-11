@@ -49,6 +49,7 @@ func (app *Application) Boot() error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
+	// 检查是否已启动,避免重复初始化
 	if app.initialized {
 		return nil
 	}

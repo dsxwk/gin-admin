@@ -4,7 +4,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/eventbus"
+	"gin/pkg/provider/eventbus"
 )
 
 type EventListenerList struct{}

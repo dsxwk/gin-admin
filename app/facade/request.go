@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/request"
+	"gin/pkg/provider/request"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/validate"
 )
@@ -23,35 +23,35 @@ type RequestFacade[T any] struct{}
 //
 //	name := facade.Request[string]().Path(ctx, "name", "default")
 func (r RequestFacade[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
-	return request.Utils[T]{}.Path(ctx, key, defaultValue)
+	return request.Client[T]{}.Path(ctx, key, defaultValue)
 }
 
 // Bind 绑定请求参数
 func (r RequestFacade[T]) Bind(ctx *gin.Context, v any) error {
-	return request.Utils[T]{}.Bind(ctx, v)
+	return request.Client[T]{}.Bind(ctx, v)
 }
 
 // Validate 验证请求数据
 func (r RequestFacade[T]) Validate(data interface{}, scene string) error {
-	return request.Utils[T]{}.Validate(data, scene)
+	return request.Client[T]{}.Validate(data, scene)
 }
 
 // BindValidate 绑定参数并验证
 func (r RequestFacade[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
-	return request.Utils[T]{}.BindValidate(ctx, v, scene)
+	return request.Client[T]{}.BindValidate(ctx, v, scene)
 }
 
 // ValidateWithMessages 验证并自定义错误消息
 func (r RequestFacade[T]) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
-	return request.Utils[T]{}.ValidateWithMessages(data, scene, messages)
+	return request.Client[T]{}.ValidateWithMessages(data, scene, messages)
 }
 
 // ValidateWithTranslates 验证并自定义字段翻译
 func (r RequestFacade[T]) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
-	return request.Utils[T]{}.ValidateWithTranslates(data, scene, translates)
+	return request.Client[T]{}.ValidateWithTranslates(data, scene, translates)
 }
 
 // GetValidator 获取验证器实例
 func (r RequestFacade[T]) GetValidator(data interface{}, scene string) *validate.Validation {
-	return request.Utils[T]{}.GetValidator(data, scene)
+	return request.Client[T]{}.GetValidator(data, scene)
 }

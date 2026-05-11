@@ -1,8 +1,7 @@
 package facade
 
 import (
-	"context"
-	"gin/pkg/cache"
+	"gin/pkg/provider/cache"
 )
 
 // Cache 缓存门面-缓存统一入口
@@ -10,7 +9,7 @@ import (
 //
 //	facade.Cache.Set("key", "value", 5*time.Minute)
 //	value, ok := facade.Cache.Store("redis").Get("key")
-//	cache := facade.Cache.WithContext(ctx)  // 获取带上下文的缓存
+//	cache := facade.Cache.Store("redis").WithContext(ctx)  // 获取带上下文的缓存
 var Cache = &cacheFacade{}
 
 type cacheFacade struct{}
@@ -42,15 +41,11 @@ func (c *cacheFacade) Store(cacheType ...string) *cache.CacheProxy {
 		key = "cache"
 	}
 
-	if _cache := Get(key); _cache != nil {
-		return _cache.(*cache.CacheProxy)
+	_cache := Get[*cache.CacheProxy](key)
+	if _cache != nil {
+		return _cache
 	}
-	return cache.NewCache(Config.Get())
-}
-
-// WithContext 获取带上下文的缓存
-func (c *cacheFacade) WithContext(ctx context.Context) *cache.CacheProxy {
-	return c.Store().WithContext(ctx)
+	return cache.NewCache(Config())
 }
 
 // Redis 获取Redis缓存

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"gin/config"
-	"gin/pkg/logger"
-	"gin/pkg/message"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/message"
 	"github.com/dgraph-io/badger/v4"
 	"sync"
 	"time"
@@ -28,11 +28,11 @@ func NewDiskCache(conf *config.Config) *CacheProxy {
 		opts := badger.DefaultOptions(conf.Cache.Disk.Path)
 		db, err := badger.Open(opts)
 		if err != nil {
-			logger.NewLogger().Error(fmt.Sprintf("init disk cache failed: %s", err.Error()))
+			logger.NewLogger(conf).Error(fmt.Sprintf("init disk cache failed: %s", err.Error()))
 		}
 		disk := &DiskCache{db: db}
 
-		diskCache = NewCacheProxy("disk", disk, message.GetEventBus())
+		diskCache = NewCacheProxy("disk", disk, message.NewEvent())
 	})
 	return diskCache
 }

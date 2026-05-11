@@ -7,7 +7,7 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/lang"
+	"gin/pkg/provider/lang"
 	"github.com/gin-gonic/gin"
 )
 
@@ -63,7 +63,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
 	s.Success(
 		c, errcode.Success().WithMsg(
-			facade.Lang.T(ctx, "login.success", map[string]interface{}{
+			facade.Lang().T(ctx, "login.success", map[string]interface{}{
 				"name": userModel.Username,
 			}),
 		).WithData(LoginResponse{

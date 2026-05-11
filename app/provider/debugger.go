@@ -4,6 +4,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/pkg/foundation"
+	"gin/pkg/provider/debugger"
 )
 
 func init() {
@@ -18,13 +19,13 @@ func (p *DebuggerProvider) Name() string {
 }
 
 func (p *DebuggerProvider) Register(app foundation.App) {
-	facade.Register("debugger", facade.Debugger)
+	facade.Register[*debugger.Debugger]("debugger", debugger.NewDebugger(facade.Message()))
 }
 
 func (p *DebuggerProvider) Boot(app foundation.App) {
 	// 启动调试器
 	facade.Debugger.Start()
-	facade.Log.Info("调试器服务启动成功")
+	facade.Log().Info("调试器服务启动成功")
 }
 
 func (p *DebuggerProvider) Runners() []foundation.Runner {
@@ -34,7 +35,7 @@ func (p *DebuggerProvider) Runners() []foundation.Runner {
 }
 
 func (p *DebuggerProvider) Dependencies() []string {
-	return []string{"event", "log"}
+	return []string{"message", "event", "log"}
 }
 
 // DebuggerRunner 调试器后台任务

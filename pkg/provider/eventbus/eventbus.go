@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/common/flag"
-	"gin/pkg/debugger"
-	"gin/pkg/message"
+	"gin/pkg/provider/debugger"
+	"gin/pkg/provider/message"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"sort"
@@ -57,7 +57,7 @@ func Register[T Event](listener Listener[T], event T) {
 
 // Publish 发布事件
 func Publish[T Event](ctx context.Context, e T) {
-	message.GetEventBus().Publish(debugger.TopicListener, debugger.ListenerEvent{
+	message.NewEvent().Publish(debugger.TopicListener, debugger.ListenerEvent{
 		TraceId:     ctx.Value(ctxkey.TraceIdKey).(string),
 		Name:        e.Name(),
 		Description: e.Description(),

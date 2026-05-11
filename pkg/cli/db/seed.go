@@ -1,11 +1,11 @@
 package db
 
 import (
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/database/migrations"
 	"gin/pkg/cli"
-	"gin/pkg/orm"
 )
 
 type Seed struct {
@@ -34,7 +34,7 @@ func (s *Seed) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
 	flag.Infof("开始执行数据填充...")
 
-	db := orm.Connection()
+	db := facade.DB.Connection()
 	id := values["id"]
 	for _, seed := range migrations.AllSeeds() {
 		if id != "" && seed.ID() != id {

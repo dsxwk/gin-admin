@@ -4,7 +4,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/queue"
+	"gin/pkg/provider/queue"
 )
 
 // RabbitmqDelayDemoProducer RabbitMQ延迟生产者
@@ -14,9 +14,9 @@ type RabbitmqDelayDemoProducer struct {
 
 // NewRabbitmqDelayDemoProducer 创建延迟生产者实例
 func NewRabbitmqDelayDemoProducer() *RabbitmqDelayDemoProducer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	mq, err := base.NewRabbitMQ(cfg, log, bus)
 	if err != nil {
@@ -45,7 +45,7 @@ func (p *RabbitmqDelayDemoProducer) Description() string {
 }
 
 func init() {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if cfg != nil && cfg.Rabbitmq.Enabled {
 		queue.GetProducerRegistry().Register(NewRabbitmqDelayDemoProducer())
 	}

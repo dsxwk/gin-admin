@@ -5,8 +5,8 @@ import (
 	"gin/common/base"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/logger"
-	"gin/pkg/queue"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/queue"
 	"github.com/segmentio/kafka-go"
 	"time"
 )
@@ -18,9 +18,9 @@ type KafkaDemoConsumer struct {
 
 // NewKafkaDemoConsumer 创建消费者实例
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	kfk := base.NewKafka(cfg, log, bus)
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
@@ -71,13 +71,13 @@ func (c *KafkaDemoConsumer) Status() queue.ConsumerStatus {
 }
 
 func (c *KafkaDemoConsumer) Handle(msg string) error {
-	facade.Log.Info(pkg.Sprintf("Kafka Received Msg: %s", msg))
+	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: %s", msg))
 	// todo 处理业务逻辑
 	return nil
 }
 
 func init() {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if cfg != nil && cfg.Kafka.Enabled {
 		queue.GetConsumerRegistry().Register(NewKafkaDemoConsumer())
 	}

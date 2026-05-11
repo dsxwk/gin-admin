@@ -3,7 +3,7 @@ package provider
 import (
 	"gin/app/facade"
 	"gin/pkg/foundation"
-	"gin/pkg/logger"
+	"gin/pkg/provider/logger"
 )
 
 func init() {
@@ -21,12 +21,12 @@ func (p *LogProvider) Name() string {
 // Register 注册日志服务到门面
 func (p *LogProvider) Register(app foundation.App) {
 	// 注册到门面
-	facade.Register("log", logger.NewLogger())
+	facade.Register[*logger.Logger]("log", logger.NewLogger(facade.Config()))
 }
 
 // Boot 启动服务
 func (p *LogProvider) Boot(app foundation.App) {
-	facade.Log.Info("日志服务启动成功")
+	facade.Log().Info("日志服务启动成功")
 }
 
 // Dependencies 依赖服务

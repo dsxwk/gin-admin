@@ -11,7 +11,7 @@ import (
 
 // TestRabbitMQPublish 测试RabbitMQ普通消息发布和消费
 func TestRabbitMQPublish(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
@@ -23,7 +23,7 @@ func TestRabbitMQPublish(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// 获取生产者
-	producer := facade.Queue.Producer("rabbitmq_demo")
+	producer := facade.Queue().Producer("rabbitmq_demo")
 	if producer == nil {
 		t.Skip("RabbitMQ producer not registered")
 	}
@@ -54,7 +54,7 @@ func TestRabbitMQPublish(t *testing.T) {
 
 // TestRabbitMQDelayPublish 测试RabbitMQ延迟消息
 func TestRabbitMQDelayPublish(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
@@ -66,7 +66,7 @@ func TestRabbitMQDelayPublish(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// 获取延迟生产者
-	producer := facade.Queue.Producer("rabbitmq_delay_demo")
+	producer := facade.Queue().Producer("rabbitmq_delay_demo")
 	if producer == nil {
 		t.Skip("RabbitMQ delay producer not registered")
 	}
@@ -98,7 +98,7 @@ func TestRabbitMQDelayPublish(t *testing.T) {
 
 // TestRabbitMQMultipleMessages 测试批量消息
 func TestRabbitMQMultipleMessages(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
@@ -109,7 +109,7 @@ func TestRabbitMQMultipleMessages(t *testing.T) {
 	// 等待消费者启动
 	time.Sleep(500 * time.Millisecond)
 
-	producer := facade.Queue.Producer("rabbitmq_demo")
+	producer := facade.Queue().Producer("rabbitmq_demo")
 	if producer == nil {
 		t.Skip("RabbitMQ producer not registered")
 	}
@@ -139,13 +139,13 @@ func TestRabbitMQMultipleMessages(t *testing.T) {
 
 // TestRabbitMQConsumerStatus 测试消费者状态
 func TestRabbitMQConsumerStatus(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
 	// 获取所有消费者
-	consumers := facade.Queue.GetAllConsumers()
+	consumers := facade.Queue().GetAllConsumers()
 	if len(consumers) == 0 {
 		t.Skip("No consumers registered")
 	}
@@ -155,7 +155,7 @@ func TestRabbitMQConsumerStatus(t *testing.T) {
 	}
 
 	// 获取消费者统计
-	stats := facade.Queue.GetAllConsumerStats()
+	stats := facade.Queue().GetAllConsumerStats()
 	for _, s := range stats {
 		t.Logf("统计 - 消费者: %s, 状态: %s, 启用: %v", s.Name, s.Status, s.Enabled)
 	}

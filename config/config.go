@@ -124,21 +124,21 @@ func GetRootPath() string {
 }
 
 // Get 获取配置项
-func Get(key string) interface{} {
+func (c *Config) Get(key string) interface{} {
 	return vp.Get(key)
 }
 
 // GetString 获取字符串
-func GetString(key string) string {
+func (c *Config) GetString(key string) string {
 	return vp.GetString(key)
 }
 
 // GetInt 获取整数
-func GetInt(key string) int {
+func (c *Config) GetInt(key string) int {
 	return vp.GetInt(key)
 }
 
 // GetBool 获取布尔值
-func GetBool(key string) bool {
+func (c *Config) GetBool(key string) bool {
 	return vp.GetBool(key)
 }

@@ -1,40 +1,47 @@
 package facade
 
 import (
-	"gin/pkg/debugger"
+	"gin/pkg/provider/debugger"
 )
 
 // Debugger 调试器门面-调试器统一入口
 var Debugger = &debuggerFacade{}
 
-type debuggerFacade struct {
-	instance *debugger.Debugger
+type debuggerFacade struct{}
+
+// instance 从Manager获取调试器实例
+func (d *debuggerFacade) instance() *debugger.Debugger {
+	dbg := Get[*debugger.Debugger]("debugger")
+	if dbg != nil {
+		return dbg
+	}
+	return debugger.NewDebugger(Message())
 }
 
 // Start 启动调试器
 func (d *debuggerFacade) Start() {
-	if d.instance == nil {
-		d.instance = debugger.NewDebugger(Message.GetBus())
+	if inst := d.instance(); inst != nil {
+		inst.Start()
 	}
-	d.instance.Start()
 }
 
 // Stop 停止调试器
 func (d *debuggerFacade) Stop() {
-	if d.instance != nil {
-		d.instance.Stop()
+	if inst := d.instance(); inst != nil {
+		inst.Stop()
 	}
 }
 
 // IsRunning 检查调试器是否运行中
 func (d *debuggerFacade) IsRunning() bool {
-	if d.instance == nil {
+	inst := d.instance()
+	if inst == nil {
 		return false
 	}
-	return d.instance.IsRunning()
+	return inst.IsRunning()
 }
 
 // GetInstance 获取原始调试器实例
 func (d *debuggerFacade) GetInstance() *debugger.Debugger {
-	return d.instance
+	return d.instance()
 }

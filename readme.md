@@ -134,7 +134,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.1.3
+> - Latest Version: v2.1.4
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -143,7 +143,7 @@
 ```bash
 $ git clone https://github.com/dsxwk/gin.git
 $ cd gin
-$ mv dev.config.yaml.example dev.config.yaml
+$ copy dev.config.yaml.example dev.config.yaml
 ```
 ## Initialize Go Environment And Dependencies
 ### Method One
@@ -219,19 +219,20 @@ Excute Command: demo:command, Argument: 11
 ├── database                            # Database Test File 
 ├── docs                                # Swagger Doc
 ├── pkg                                 # Pakage
-│   ├──├── cache                        # Cache
 │   ├──├── cli                          # Command
-│   ├──├── debugger                     # Debugger
-│   ├──├── eventbus                     # Event Bus
-│   ├──├── foundation                   # Providers
-│   ├──├── http                         # Http Request
-│   ├──├── lang                         # Language
-│   ├──├── logger                       # Logger
-│   ├──├── message                      # Message Event
-│   ├──├── orm                          # Orm Tool
-│   ├──├── queue                        # Queue
-│   ├──├── ratelimit                    # Rate Limit
-│   ├──├── request                      # Request
+│   ├──├── foundation                   # Service Provider
+│   ├──├── provider                     # Service Providers Package
+│   ├──├──├── cache                        # Cache
+│   ├──├──├── debugger                     # Debugger
+│   ├──├──├── eventbus                     # Event Bus
+│   ├──├──├── http                         # Http Request
+│   ├──├──├── lang                         # Language
+│   ├──├──├── logger                       # Logger
+│   ├──├──├── message                      # Message Event
+│   ├──├──├── orm                          # Orm Tool
+│   ├──├──├── queue                        # Queue
+│   ├──├──├── ratelimit                    # Rate Limit
+│   ├──├──├── request                      # Request
 │   ├──├── time                         # Time Processing
 ├── public                              # Static Resources
 ├── router                              # Router
@@ -902,7 +903,7 @@ func (s *UserController) List(c *gin.Context) {
 
   res, err := s.service.List(req)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
     return
   }
 
@@ -1583,9 +1584,9 @@ type RabbitmqDemoConsumer struct {
 
 // NewRabbitmqDemoConsumer Consumer Creation
 func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
-  cfg := facade.Config.Get()
-  log := facade.Log.Logger()
-  bus := facade.Message.GetBus()
+  cfg := facade.Config()
+  log := facade.Log()
+  bus := facade.Message()
 
   // RabbitMQ Connection Creation
   mq, err := base.NewRabbitMQ(cfg, log, bus)
@@ -1630,7 +1631,7 @@ func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
 
 // Handle Process business logic
 func (c *RabbitmqDemoConsumer) Handle(msg string) error {
-  facade.Log.Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
+  facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
   // todo Process business logic
   return nil
 }
@@ -1656,9 +1657,9 @@ type RabbitmqDemoProducer struct {
 
 // NewRabbitmqDemoProducer Producer Creation
 func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
-  cfg := facade.Config.Get()
-  log := facade.Log.Logger()
-  bus := facade.Message.GetBus()
+  cfg := facade.Config()
+  log := facade.Log()
+  bus := facade.Message()
 
   mq, err := base.NewRabbitMQ(cfg, log, bus)
   if err != nil {
@@ -1703,7 +1704,7 @@ type TestController struct {
 
 func (s *TestController) Test() {
     // Get Producer
-    producer := facade.Queue.Producer("rabbitmq_demo")
+    producer := facade.Queue().Producer("rabbitmq_demo")
 	_ = producer.Publish(ctx, []byte(`{"orderId":111, "message":"message 111"}`))
 }
 ```
@@ -1798,13 +1799,13 @@ func (s *LoginController) Login(c *gin.Context) {
 
   userModel, err := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
     return
   }
 
   err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(facade.Lang.T(ctx, err.Error(), nil)))
+    s.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
     return
   }
 
@@ -1816,7 +1817,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
   s.Success(
     c, errcode.Success().WithMsg(
-      facade.Lang.T(ctx, "login.success", map[string]interface{}{
+      facade.Lang().T(ctx, "login.success", map[string]interface{}{
         "name": userModel.Username,
       }),
     ).WithData(LoginResponse{
@@ -2056,7 +2057,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    facade.Log.Error("System Error")
+    facade.Log().Error("System Error")
 }
 ```
 
@@ -2077,7 +2078,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
     ctx := c.Request.Context()
-    facade.Log.WithDebugger(ctx).Error("System Error")
+    facade.Log().WithDebugger(ctx).Error("System Error")
 }
 ```
 ```json
@@ -2140,7 +2141,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := facade.Lang.T(ctx, "login.username", nil)
+    trans := facade.Lang().T(ctx, "login.username", nil)
 	fmt.Println(trans) // Output: 用户名, English Output: Username
 }
 ```
@@ -2171,7 +2172,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := facade.Lang.T(ctx, "login.success", map[string]interface{}{
+    trans := facade.Lang().T(ctx, "login.success", map[string]interface{}{
         "name": "admin",
     }),
 	fmt.Println(trans) // Output: admin,登录成功 English Output: admin,Login Success

@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	timeoutMiddleware   = middleware.Timeout{}.Handle(facade.Config.Get().App.Timeout)
+	timeoutMiddleware   = middleware.Timeout{}.Handle(facade.Config().App.Timeout)
 	loggerMiddleware    = middleware.Logger{}.Handle()
 	corsMiddleware      = middleware.Cors{}.Handle()
 	jwtMiddleware       = middleware.Jwt{}.Handle()

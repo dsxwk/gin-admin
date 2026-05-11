@@ -29,7 +29,7 @@ func (p *{{.ProviderName}}Provider) Register(app foundation.App) {
 // Boot 启动服务
 func (p *{{.ProviderName}}Provider) Boot(app foundation.App) {
 	// TODO: 初始化服务
-	facade.Log.Info("{{.ProviderName}}服务启动成功")
+	facade.Log().Info("{{.ProviderName}}服务启动成功")
 }
 {{- if .HasRunner}}
 
@@ -60,7 +60,7 @@ func (r *{{.ProviderName}}CleanupRunner) Run(ctx context.Context) error {
 // Stop 停止时清理资源
 func (r *{{.ProviderName}}CleanupRunner) Stop() error {
 	// TODO: 清理资源
-	facade.Log.Info("{{.ProviderVar}}服务已关闭")
+	facade.Log().Info("{{.ProviderVar}}服务已关闭")
 	return nil
 }
 

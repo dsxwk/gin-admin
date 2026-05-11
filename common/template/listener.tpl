@@ -3,7 +3,7 @@ package {{.Package}}
 import (
     "fmt"
     "gin/app/event"
-    "gin/pkg/eventbus"
+    "gin/pkg/provider/eventbus"
     "time"
 )
 

@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 	"gin/common/ctxkey"
-	"gin/pkg/debugger"
-	"gin/pkg/message"
+	"gin/pkg/provider/debugger"
+	"gin/pkg/provider/message"
 	"github.com/goccy/go-json"
 	"github.com/valyala/fasthttp"
 	"io"
@@ -16,21 +16,57 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
 const timeout = 5 * time.Second
 
-// Http 泛型函数,返回对应类型的门面实例
-// 使用示例:
-//
-//	user, err := http.Http[UserResponse]().Get(ctx, "https://api.example.com/user/1", nil)
-//	data, err := http.Http[any]().Send(ctx, "GET", url, nil)
-func Http[T any]() HttpFacade[T] {
-	return HttpFacade[T]{}
+var (
+	defaultClient *fasthttp.Client
+	once          sync.Once
+)
+
+// InitClient 初始化全局HTTP客户端
+func InitClient() {
+	once.Do(func() {
+		defaultClient = &fasthttp.Client{
+			MaxConnsPerHost: 100,
+			ReadTimeout:     timeout,
+			WriteTimeout:    timeout,
+		}
+	})
 }
 
-type HttpFacade[T any] struct{}
+// GetClient 获取全局HTTP客户端
+func GetClient() *fasthttp.Client {
+	if defaultClient == nil {
+		InitClient()
+	}
+	return defaultClient
+}
+
+// Client HTTP客户端
+type Client[T any] struct {
+	client  *fasthttp.Client
+	timeout time.Duration
+}
+
+// NewClient 创建HTTP客户端
+func NewClient[T any]() *Client[T] {
+	return &Client[T]{
+		timeout: timeout,
+		client:  GetClient(),
+	}
+}
+
+// WithTimeout 自定义超时的HTTP客户端
+func (c *Client[T]) WithTimeout(timeout time.Duration) *Client[T] {
+	return &Client[T]{
+		timeout: timeout,
+		client:  c.client,
+	}
+}
 
 // File 文件
 type File struct {
@@ -49,40 +85,33 @@ type Option struct {
 	Timeout time.Duration          // 超时时间
 }
 
-// ResponseWrapper 响应包装器,支持链式调用
-type ResponseWrapper struct {
-	ctx  context.Context
-	data []byte
-	err  error
-}
-
 // Send 发送HTTP请求
-func (h HttpFacade[T]) Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
-	return doSend(ctx, method, uri, opt)
+func (c *Client[T]) Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
+	return c.doSend(ctx, method, uri, opt)
 }
 
 // Get 发送GET请求
-func (h HttpFacade[T]) Get(ctx context.Context, uri string, opt *Option) ([]byte, error) {
-	return h.Send(ctx, "GET", uri, opt)
+func (c *Client[T]) Get(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return c.Send(ctx, "GET", uri, opt)
 }
 
 // Post 发送POST请求
-func (h HttpFacade[T]) Post(ctx context.Context, uri string, opt *Option) ([]byte, error) {
-	return h.Send(ctx, "POST", uri, opt)
+func (c *Client[T]) Post(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return c.Send(ctx, "POST", uri, opt)
 }
 
 // Put 发送PUT请求
-func (h HttpFacade[T]) Put(ctx context.Context, uri string, opt *Option) ([]byte, error) {
-	return h.Send(ctx, "PUT", uri, opt)
+func (c *Client[T]) Put(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return c.Send(ctx, "PUT", uri, opt)
 }
 
 // Delete 发送DELETE请求
-func (h HttpFacade[T]) Delete(ctx context.Context, uri string, opt *Option) ([]byte, error) {
-	return h.Send(ctx, "DELETE", uri, opt)
+func (c *Client[T]) Delete(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+	return c.Send(ctx, "DELETE", uri, opt)
 }
 
 // AsJson 将响应体解析为T类型
-func (h HttpFacade[T]) AsJson(data []byte) (*T, error) {
+func (c *Client[T]) AsJson(data []byte) (*T, error) {
 	var result T
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, data)
@@ -91,21 +120,17 @@ func (h HttpFacade[T]) AsJson(data []byte) (*T, error) {
 }
 
 // SendAsJson 发送请求并解析为T类型
-func (h HttpFacade[T]) SendAsJson(ctx context.Context, method, uri string, opt *Option) (*T, error) {
-	data, err := h.Send(ctx, method, uri, opt)
+func (c *Client[T]) SendAsJson(ctx context.Context, method, uri string, opt *Option) (*T, error) {
+	data, err := c.doSend(ctx, method, uri, opt)
 	if err != nil {
 		return nil, err
 	}
 
-	var result T
-	if err = json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, data)
-	}
-	return &result, nil
+	return c.AsJson(data)
 }
 
 // doSend 发送请求
-func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
+func (c *Client[T]) doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
 	start := time.Now()
 	req := fasthttp.AcquireRequest()
 	resp := fasthttp.AcquireResponse()
@@ -123,13 +148,13 @@ func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error
 	}
 
 	method = strings.ToUpper(method)
-	uri = buildUrl(uri, opt.Query)
+	uri = c.buildUrl(uri, opt.Query)
 	req.Header.SetMethod(method)
 	req.SetRequestURI(uri)
 
 	// 判断是否有文件上传
 	if opt.Files != nil && len(opt.Files) > 0 {
-		return doFileUpload(ctx, req, resp, uri, opt, requestTimeout, start)
+		return c.doFileUpload(ctx, req, resp, uri, opt, requestTimeout, start)
 	}
 
 	// 构建请求体
@@ -190,11 +215,8 @@ func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error
 		req.Header.Set(k, v)
 	}
 
-	client := &fasthttp.Client{
-		MaxConnsPerHost: 100,
-		ReadTimeout:     requestTimeout,
-		WriteTimeout:    requestTimeout,
-	}
+	c.client.ReadTimeout = requestTimeout
+	c.client.WriteTimeout = requestTimeout
 
 	var (
 		respJson interface{}
@@ -213,7 +235,7 @@ func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error
 			}
 		}
 
-		message.GetEventBus().Publish(debugger.TopicHttp, debugger.HttpEvent{
+		message.NewEvent().Publish(debugger.TopicHttp, debugger.HttpEvent{
 			TraceId:  traceId,
 			Url:      uri,
 			Method:   method,
@@ -225,7 +247,7 @@ func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error
 		})
 	}()
 
-	if err := client.Do(req, resp); err != nil {
+	if err := c.client.Do(req, resp); err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
 
@@ -243,7 +265,7 @@ func doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error
 }
 
 // doFileUpload 文件上传内部函数
-func doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Response, uri string, opt *Option, requestTimeout time.Duration, start time.Time) ([]byte, error) {
+func (c *Client[T]) doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Response, uri string, opt *Option, requestTimeout time.Duration, start time.Time) ([]byte, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -303,11 +325,8 @@ func doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Res
 		req.Header.Set(k, v)
 	}
 
-	client := &fasthttp.Client{
-		MaxConnsPerHost: 100,
-		ReadTimeout:     requestTimeout,
-		WriteTimeout:    requestTimeout,
-	}
+	c.client.ReadTimeout = requestTimeout
+	c.client.WriteTimeout = requestTimeout
 
 	var (
 		respJson interface{}
@@ -326,7 +345,7 @@ func doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Res
 			}
 		}
 
-		message.GetEventBus().Publish(debugger.TopicHttp, debugger.HttpEvent{
+		message.NewEvent().Publish(debugger.TopicHttp, debugger.HttpEvent{
 			TraceId:  traceId,
 			Url:      uri,
 			Method:   "POST",
@@ -338,7 +357,7 @@ func doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Res
 		})
 	}()
 
-	if err := client.Do(req, resp); err != nil {
+	if err := c.client.Do(req, resp); err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
 
@@ -358,7 +377,7 @@ func doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Res
 }
 
 // buildURL 拼接get请求query参数
-func buildUrl(baseURL string, query map[string]interface{}) string {
+func (c *Client[T]) buildUrl(baseURL string, query map[string]interface{}) string {
 	if len(query) == 0 {
 		return baseURL
 	}

@@ -3,13 +3,15 @@
 package main
 
 import (
+	"gin/app/facade"
 	_ "gin/cmd/import"
-	"gin/config"
 	"gin/pkg/cli"
+	"gin/pkg/provider/orm"
 )
 
 func main() {
-	_ = config.NewConfig()
+	conf := facade.Config()
+	orm.SetConfig(conf)
 
 	cli.Execute()
 }

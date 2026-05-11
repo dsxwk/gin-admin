@@ -5,8 +5,8 @@ import (
 	"gin/common/base"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/logger"
-	"gin/pkg/queue"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
 	"time"
@@ -24,9 +24,9 @@ type {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer struct {
 
 // New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer 创建消费者实例
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	{{- if eq .Type "kafka"}}
 	kfk := base.NewKafka(cfg, log, bus)
@@ -117,13 +117,13 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Status() queue.ConsumerSt
 }
 
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(msg string) error {
-	facade.Log.Info(pkg.Sprintf("%s Received Msg: %s", "{{.TypeTitle}}", msg))
+	facade.Log().Info(pkg.Sprintf("%s Received Msg: %s", "{{.TypeTitle}}", msg))
 	// todo 处理业务逻辑
 	return nil
 }
 
 func init() {
-    cfg := facade.Config.Get()
+    cfg := facade.Config()
 	if cfg != nil && cfg.{{if eq .Type "kafka"}}Kafka{{else}}Rabbitmq{{end}}.Enabled {
 	    queue.GetConsumerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
 	}

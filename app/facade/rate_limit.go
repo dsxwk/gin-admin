@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/common/errcode"
 	"gin/common/response"
-	"gin/pkg/ratelimit"
+	"gin/pkg/provider/ratelimit"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 	"sync"
@@ -12,10 +12,12 @@ import (
 )
 
 var (
-	rlErr         = errcode.RateLimitError()
-	userStore     *ratelimit.Store
-	ipStore       *ratelimit.Store
-	rateLimitOnce sync.Once
+	rlErr                     = errcode.RateLimitError()
+	userStore                 *ratelimit.Store
+	ipStore                   *ratelimit.Store
+	rateLimitOnce             sync.Once
+	rateLimiterFacadeInstance *RateLimiterFacade
+	rateLimiterOnce           sync.Once
 )
 
 // initRateLimit 初始化限流
@@ -87,35 +89,44 @@ func userRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 }
 
 // RateLimiter 限流门面
-var RateLimiter = &rateLimiterFacade{}
+// 使用示例:
+//
+//	router.Use(facade.RateLimiter().Global())
+//	router.Use(facade.RateLimiter().IP(10, 20))
+func RateLimiter() *RateLimiterFacade {
+	rateLimiterOnce.Do(func() {
+		rateLimiterFacadeInstance = &RateLimiterFacade{}
+	})
+	return rateLimiterFacadeInstance
+}
 
-type rateLimiterFacade struct{}
+type RateLimiterFacade struct{}
 
 // Global 全局限流中间件
-func (rl *rateLimiterFacade) Global() gin.HandlerFunc {
+func (rl *RateLimiterFacade) Global() gin.HandlerFunc {
 	return globalRateLimit()
 }
 
 // IP IP限流中间件
 // r: 每秒产生多少token
 // burst: 桶容量
-func (rl *rateLimiterFacade) IP(r rate.Limit, burst int) gin.HandlerFunc {
+func (rl *RateLimiterFacade) IP(r rate.Limit, burst int) gin.HandlerFunc {
 	return ipRateLimit(r, burst)
 }
 
 // User 用户限流中间件
 // r: 每秒产生多少token
 // burst: 桶容量
-func (rl *rateLimiterFacade) User(r rate.Limit, burst int) gin.HandlerFunc {
+func (rl *RateLimiterFacade) User(r rate.Limit, burst int) gin.HandlerFunc {
 	return userRateLimit(r, burst)
 }
 
 // Init 初始化限流器
-func (rl *rateLimiterFacade) Init() {
+func (rl *RateLimiterFacade) Init() {
 	initRateLimit()
 }
 
 // Shutdown 关闭限流器
-func (rl *rateLimiterFacade) Shutdown() {
+func (rl *RateLimiterFacade) Shutdown() {
 	shutdownRateLimit()
 }

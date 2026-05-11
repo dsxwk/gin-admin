@@ -60,12 +60,13 @@ func init() {
 }
 
 type Field struct {
-	Name     string
-	JSON     string
-	Type     string
-	Label    string
-	Validate string
-	IsID     bool
+	FormattedField string // 格式化后的完整字段行
+	Name           string
+	JSON           string
+	Type           string
+	Label          string
+	Validate       string
+	IsID           bool
 }
 
 // TableColumn 表字段结构
@@ -88,13 +89,13 @@ func (m *MakeRequest) Execute(args []string) {
 	file := m.GetMakeFile(values["file"], "request")
 	templateName := "request"
 
-	structName := lo.CamelCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(file)))
+	structName := lo.PascalCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(file)))
 
 	var fields []Field
 
 	// table模式
 	if values["table"] != "" {
-		structName = lo.CamelCase(values["table"])
+		structName = lo.PascalCase(values["table"])
 		fields = m.loadTableFields(values["connection"], values["table"], values["camel"] == "true")
 	} else {
 		// 默认ID模式
@@ -110,7 +111,34 @@ func (m *MakeRequest) Execute(args []string) {
 		}
 	}
 
+	// 计算对齐宽度
+	m.formatFields(fields)
+
 	m.generateFile(templateName, file, structName, fields, values["desc"])
+}
+
+// formatFields 预处理字段对齐
+func (m *MakeRequest) formatFields(fields []Field) {
+	// 1. 计算最大宽度
+	maxNameLen := 0
+	maxTypeLen := 0
+	for _, f := range fields {
+		if len(f.Name) > maxNameLen {
+			maxNameLen = len(f.Name)
+		}
+		if len(f.Type) > maxTypeLen {
+			maxTypeLen = len(f.Type)
+		}
+	}
+
+	// 2. 生成格式化后的字段行
+	for i := range fields {
+		f := &fields[i]
+		paddedName := fmt.Sprintf("%-*s", maxNameLen, f.Name)
+		paddedType := fmt.Sprintf("%-*s", maxTypeLen, f.Type)
+		f.FormattedField = fmt.Sprintf("\t%s %s `json:\"%s\" form:\"%s\" validate:\"%s\" label:\"%s\"`",
+			paddedName, paddedType, f.JSON, f.JSON, f.Validate, f.Label)
+	}
 }
 
 func (m *MakeRequest) generateFile(templateName, file, structName string, fields []Field, desc string) {
@@ -157,7 +185,7 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 		// 格式: "Name": "Label",
 		line := fmt.Sprintf("\"%s\":%s%q,",
 			field.Name,
-			strings.Repeat(" ", maxNameLen-len(field.Name)+2),
+			strings.Repeat(" ", maxNameLen-len(field.Name)+1),
 			field.Label,
 		)
 		formattedTranslates = append(formattedTranslates, line)
@@ -165,13 +193,13 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 
 	// 添加Page
 	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"Page\":%s%q,",
-		strings.Repeat(" ", maxNameLen-len("Page")+2),
+		strings.Repeat(" ", maxNameLen-len("Page")+1),
 		"页码",
 	))
 
 	// 添加PageSize
 	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"PageSize\":%s%q,",
-		strings.Repeat(" ", maxNameLen-len("PageSize")+2),
+		strings.Repeat(" ", maxNameLen-len("PageSize")+1),
 		"每页数量",
 	))
 

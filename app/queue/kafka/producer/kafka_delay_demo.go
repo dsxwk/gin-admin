@@ -3,7 +3,7 @@ package producer
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/queue"
+	"gin/pkg/provider/queue"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -14,9 +14,9 @@ type KafkaDelayDemoProducer struct {
 
 // NewKafkaDelayDemoProducer 创建延迟生产者实例
 func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	kfk := base.NewKafka(cfg, log, bus)
 	kfk.Writer = &kafka.Writer{
@@ -46,7 +46,7 @@ func (p *KafkaDelayDemoProducer) Description() string {
 }
 
 func init() {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if cfg != nil && cfg.Kafka.Enabled {
 		queue.GetProducerRegistry().Register(NewKafkaDelayDemoProducer())
 	}

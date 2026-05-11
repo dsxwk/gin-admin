@@ -4,9 +4,9 @@ import (
 	"context"
 	"gin/common/ctxkey"
 	"gin/config"
-	"gin/pkg/debugger"
-	"gin/pkg/logger"
-	"gin/pkg/message"
+	"gin/pkg/provider/debugger"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/message"
 	"sync"
 	"time"
 )
@@ -22,11 +22,11 @@ type Cache interface {
 type CacheProxy struct {
 	driver string
 	c      Cache
-	bus    *message.EventBus
+	bus    *message.Event
 	ctx    context.Context
 }
 
-func NewCacheProxy(driver string, c Cache, bus *message.EventBus) *CacheProxy {
+func NewCacheProxy(driver string, c Cache, bus *message.Event) *CacheProxy {
 	return &CacheProxy{
 		driver: driver,
 		c:      c,
@@ -53,7 +53,7 @@ func NewCache(conf *config.Config) *CacheProxy {
 			instance = NewDiskCache(conf)
 
 		default:
-			logger.NewLogger().Fatal("不支持的缓存驱动: " + conf.Cache.Driver)
+			logger.NewLogger(conf).Fatal("不支持的缓存驱动: " + conf.Cache.Driver)
 		}
 	})
 

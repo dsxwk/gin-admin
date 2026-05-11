@@ -167,7 +167,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		})
 	}
 
-	structName := lo.CamelCase(table)
+	structName := lo.PascalCase(table)
 	tableConst := "TableName" + structName
 
 	// 计算字段对齐长度
@@ -190,7 +190,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	var fieldLines []string
 
 	for _, c := range columns {
-		fieldName := lo.CamelCase(c.Name)
+		fieldName := lo.PascalCase(c.Name)
 		fieldType := goType(c, im, pkgName)
 
 		var jsonName string

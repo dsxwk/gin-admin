@@ -183,7 +183,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 
 		// 为每个生成的模型文件追加Connection方法
 		if conn != "" {
-			structName := lo.CamelCase(table)
+			structName := lo.PascalCase(table)
 			err = appendConnection(path, table, structName, conn)
 			if err != nil {
 				flag.Errorf("为模型 %s 追加 Connection 方法失败: %s", table, err.Error())

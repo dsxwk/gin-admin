@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/orm"
+	"gin/pkg/provider/orm"
 	"gorm.io/gorm"
 )
 
@@ -11,6 +11,11 @@ var DB = &dbFacade{}
 type dbFacade struct{}
 
 // Connection 获取指定名称的数据库连接
-func (d *dbFacade) Connection(connName ...string) *gorm.DB {
-	return orm.Connection(connName...)
+func (d *dbFacade) Connection(conn ...string) *gorm.DB {
+	db := Get[*gorm.DB]("db")
+	if db != nil {
+		return db
+	}
+	// orm.SetConfig(facade.Config())
+	return orm.Connection(conn...)
 }

@@ -6,7 +6,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg/debugger"
+	"gin/pkg/provider/debugger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -19,7 +19,6 @@ import (
 )
 
 var (
-	conf           = config.NewConfig()
 	loggerInstance *Logger
 	loggerOnce     sync.Once
 	// 全局日志级别(支持动态修改)
@@ -31,7 +30,7 @@ type Logger struct {
 	*zap.Logger
 }
 
-func NewLogger() *Logger {
+func NewLogger(conf *config.Config) *Logger {
 	loggerOnce.Do(func() {
 		// 初始化日志级别(默认info)
 		logLevel = zap.NewAtomicLevel()

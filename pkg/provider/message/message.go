@@ -6,18 +6,18 @@ import (
 )
 
 var (
-	eventBus  *EventBus
+	event     *Event
 	eventOnce sync.Once
 )
 
-func GetEventBus() *EventBus {
+func NewEvent() *Event {
 	eventOnce.Do(func() {
-		eventBus = &EventBus{
+		event = &Event{
 			subscribers: make(map[string][]*subscriber),
 		}
 	})
 
-	return eventBus
+	return event
 }
 
 type SubscriberFunc func(event any)
@@ -28,24 +28,24 @@ type subscriber struct {
 	Handle SubscriberFunc
 }
 
-type EventBus struct {
+type Event struct {
 	subscribers map[string][]*subscriber
 	mu          sync.RWMutex
 	idCounter   uint64
 }
 
 // SubscribeAsync 订阅(异步)
-func (b *EventBus) SubscribeAsync(topic string, fn SubscriberFunc) uint64 {
+func (b *Event) SubscribeAsync(topic string, fn SubscriberFunc) uint64 {
 	return b.addSubscriber(topic, fn, true)
 }
 
 // Subscribe 订阅(同步)
-func (b *EventBus) Subscribe(topic string, fn SubscriberFunc) uint64 {
+func (b *Event) Subscribe(topic string, fn SubscriberFunc) uint64 {
 	return b.addSubscriber(topic, fn, false)
 }
 
 // 通用订阅
-func (b *EventBus) addSubscriber(topic string, fn SubscriberFunc, async bool) uint64 {
+func (b *Event) addSubscriber(topic string, fn SubscriberFunc, async bool) uint64 {
 	id := atomic.AddUint64(&b.idCounter, 1)
 
 	sub := &subscriber{
@@ -62,7 +62,7 @@ func (b *EventBus) addSubscriber(topic string, fn SubscriberFunc, async bool) ui
 }
 
 // Unsubscribe 删除订阅者
-func (b *EventBus) Unsubscribe(topic string, id uint64) bool {
+func (b *Event) Unsubscribe(topic string, id uint64) bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -90,7 +90,7 @@ func (b *EventBus) Unsubscribe(topic string, id uint64) bool {
 }
 
 // Publish 发布事件
-func (b *EventBus) Publish(topic string, event any) {
+func (b *Event) Publish(topic string, event any) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
@@ -106,7 +106,7 @@ func (b *EventBus) Publish(topic string, event any) {
 }
 
 // SubscribeIds 查询该topic所有订阅者id
-func (b *EventBus) SubscribeIds(topic string) []uint64 {
+func (b *Event) SubscribeIds(topic string) []uint64 {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
@@ -123,7 +123,7 @@ func (b *EventBus) SubscribeIds(topic string) []uint64 {
 }
 
 // QueryAll 查询所有topic+订阅者Id
-func (b *EventBus) QueryAll() map[string][]uint64 {
+func (b *Event) QueryAll() map[string][]uint64 {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 

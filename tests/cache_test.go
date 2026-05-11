@@ -2,7 +2,7 @@ package tests
 
 import (
 	"gin/app/facade"
-	"gin/pkg/cache"
+	"gin/pkg/provider/cache"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -27,11 +27,7 @@ func TestCacheSetGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// 获取带上下文的缓存实例
 			var _cache *cache.CacheProxy
-			if tt.cacheType != "" {
-				_cache = facade.Cache.Store(tt.cacheType).WithContext(ctx)
-			} else {
-				_cache = facade.Cache.WithContext(ctx)
-			}
+			_cache = facade.Cache.Store(tt.cacheType).WithContext(ctx)
 
 			// 设置缓存
 			err := _cache.Set(tt.key, 123, 10*time.Second)
@@ -61,7 +57,7 @@ func TestCacheSetGet(t *testing.T) {
 // TestCacheExpiration 测试缓存过期
 func TestCacheExpiration(t *testing.T) {
 	ctx := t.Context()
-	_cache := facade.Cache.WithContext(ctx)
+	_cache := facade.Cache.Store().WithContext(ctx)
 	key := "expire_test"
 
 	// 设置1秒过期的缓存
@@ -85,7 +81,7 @@ func TestCacheExpiration(t *testing.T) {
 // TestCacheDelete 测试缓存删除
 func TestCacheDelete(t *testing.T) {
 	ctx := t.Context()
-	_cache := facade.Cache.WithContext(ctx)
+	_cache := facade.Cache.Store().WithContext(ctx)
 	key := "delete_test"
 
 	// 设置缓存
@@ -145,7 +141,7 @@ func TestCacheWithContext(t *testing.T) {
 	ctx := t.Context()
 
 	// 创建带上下文的缓存
-	_cache := facade.Cache.WithContext(ctx)
+	_cache := facade.Cache.Store().WithContext(ctx)
 
 	// 测试设置和获取
 	key := "context_test"

@@ -20,10 +20,8 @@ func (p *ConfigProvider) Name() string {
 
 // Register 注册服务到门面
 func (p *ConfigProvider) Register(app foundation.App) {
-	// 获取配置实例
-	cfg := config.NewConfig()
 	// 注册到门面
-	facade.Register("config", cfg)
+	facade.Register[*config.Config]("config", config.NewConfig())
 }
 
 // Boot 启动服务(配置服务无需额外启动逻辑)

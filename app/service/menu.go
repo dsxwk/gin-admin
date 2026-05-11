@@ -4,7 +4,7 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg/orm"
+	"gin/pkg/provider/orm"
 )
 
 type MenuService struct {

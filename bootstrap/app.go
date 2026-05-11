@@ -59,7 +59,7 @@ func NewApp() *App {
 func setupEngine() *gin.Engine {
 	r := gin.New()
 
-	conf := facade.Config.Get()
+	conf := facade.Config()
 
 	// 设置运行模式
 	gin.SetMode(conf.App.Mode)
@@ -82,7 +82,7 @@ func (a *App) Run() {
 	// 系统优化设置50：更积极回收
 	debug.SetGCPercent(50)
 
-	conf := facade.Config.Get()
+	conf := facade.Config()
 	if conf == nil {
 		flag.Errorf("配置未加载,无法启动服务")
 		os.Exit(1)

@@ -27,9 +27,9 @@ func (s *BaseService) WithContext(ctx context.Context) *BaseService {
 func (s *BaseService) DB(model Model) *gorm.DB {
 	var db *gorm.DB
 	if connModel, ok := model.(HasConnection); ok {
-		connName := connModel.Connection()
-		if connName != "" {
-			db = facade.DB.Connection(connName).WithContext(s.Ctx)
+		conn := connModel.Connection()
+		if conn != "" {
+			db = facade.DB.Connection(conn).WithContext(s.Ctx)
 		} else {
 			db = facade.DB.Connection().WithContext(s.Ctx)
 		}

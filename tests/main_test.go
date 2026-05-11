@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// 打印启动信息
-	facade.Log.Info("Test environment initialized")
+	facade.Log().Info("Test environment initialized")
 
 	// 运行测试
 	code := m.Run()

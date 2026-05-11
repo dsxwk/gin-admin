@@ -9,7 +9,7 @@ import (
 	_ "gin/app/queue/rabbitmq/producer"
 	"gin/pkg"
 	"gin/pkg/foundation"
-	"gin/pkg/queue"
+	"gin/pkg/provider/queue"
 )
 
 func init() {
@@ -31,16 +31,16 @@ func (p *QueueProvider) Name() string {
 // Register 注册服务到门面
 func (p *QueueProvider) Register(app foundation.App) {
 	// 注册队列门面
-	facade.Register("queue", facade.Queue)
+	facade.Register("queue", facade.Queue())
 	p.consumers = queue.GetConsumerRegistry().GetAll()
 	p.producers = queue.GetProducerRegistry().GetAll()
-	facade.Log.Info(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
+	facade.Log().Info(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
 }
 
 // Boot 启动服务(只启动消费者,生产者按需使用)
 func (p *QueueProvider) Boot(app foundation.App) {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
+	cfg := facade.Config()
+	log := facade.Log()
 
 	if cfg == nil {
 		return
@@ -49,15 +49,15 @@ func (p *QueueProvider) Boot(app foundation.App) {
 	// 启动所有启用的消费者
 	for _, consumer := range p.consumers {
 		if consumer.Enabled(cfg) {
-			facade.Log.Info(pkg.Sprintf("启动消费者: %s", consumer.Name()))
+			facade.Log().Info(pkg.Sprintf("启动消费者: %s", consumer.Name()))
 			if err := consumer.Start(cfg, log); err != nil {
-				facade.Log.Error(pkg.Sprintf("启动消费者 %s 失败: %v", consumer.Name(), err))
+				facade.Log().Error(pkg.Sprintf("启动消费者 %s 失败: %v", consumer.Name(), err))
 			}
 		}
 	}
 
 	// 获取所有生产者引用
-	p.producers = facade.Queue.GetAllProducers()
+	p.producers = facade.Queue().GetAllProducers()
 }
 
 // Runners 后台运行任务
@@ -92,18 +92,18 @@ func (r *queueShutdownRunner) Stop() error {
 	// 停止消费者
 	for _, consumer := range r.consumers {
 		if err := consumer.Stop(); err != nil {
-			facade.Log.Error(pkg.Sprintf("停止消费者 %s 失败: %v", consumer.Name(), err))
+			facade.Log().Error(pkg.Sprintf("停止消费者 %s 失败: %v", consumer.Name(), err))
 		}
 	}
 
 	// 关闭生产者
 	for _, producer := range r.producers {
 		if err := producer.Close(); err != nil {
-			facade.Log.Error(pkg.Sprintf("关闭生产者 %s 失败: %v", producer.Name(), err))
+			facade.Log().Error(pkg.Sprintf("关闭生产者 %s 失败: %v", producer.Name(), err))
 		}
 	}
 
-	facade.Log.Info("所有队列服务已关闭")
+	facade.Log().Info("所有队列服务已关闭")
 	return nil
 }
 

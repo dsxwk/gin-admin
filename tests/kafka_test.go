@@ -11,7 +11,7 @@ import (
 
 // TestKafkaPublish 测试Kafka普通消息发布和消费
 func TestKafkaPublish(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Kafka.Enabled {
 		t.Skip("Kafka not enabled, skipping test")
 	}
@@ -23,7 +23,7 @@ func TestKafkaPublish(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// 获取生产者
-	producer := facade.Queue.Producer("kafka_demo")
+	producer := facade.Queue().Producer("kafka_demo")
 	if producer == nil {
 		t.Skip("Kafka producer not registered")
 	}
@@ -54,7 +54,7 @@ func TestKafkaPublish(t *testing.T) {
 
 // TestKafkaDelayPublish 测试Kafka延迟消息
 func TestKafkaDelayPublish(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Kafka.Enabled {
 		t.Skip("Kafka not enabled, skipping test")
 	}
@@ -66,7 +66,7 @@ func TestKafkaDelayPublish(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// 获取延迟生产者
-	producer := facade.Queue.Producer("kafka_delay_demo")
+	producer := facade.Queue().Producer("kafka_delay_demo")
 	if producer == nil {
 		t.Skip("Kafka delay producer not registered")
 	}
@@ -98,13 +98,13 @@ func TestKafkaDelayPublish(t *testing.T) {
 
 // TestKafkaConsumerStatus 测试消费者状态
 func TestKafkaConsumerStatus(t *testing.T) {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if !cfg.Kafka.Enabled {
 		t.Skip("Kafka not enabled, skipping test")
 	}
 
 	// 获取所有消费者
-	consumers := facade.Queue.GetAllConsumers()
+	consumers := facade.Queue().GetAllConsumers()
 	if len(consumers) == 0 {
 		t.Skip("No consumers registered")
 	}
@@ -114,7 +114,7 @@ func TestKafkaConsumerStatus(t *testing.T) {
 	}
 
 	// 获取消费者统计
-	stats := facade.Queue.GetAllConsumerStats()
+	stats := facade.Queue().GetAllConsumerStats()
 	for _, s := range stats {
 		t.Logf("统计 - 消费者: %s, 状态: %s, 启用: %v", s.Name, s.Status, s.Enabled)
 	}

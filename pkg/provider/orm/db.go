@@ -5,9 +5,9 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg/debugger"
-	l "gin/pkg/logger"
-	"gin/pkg/message"
+	"gin/pkg/provider/debugger"
+	l "gin/pkg/provider/logger"
+	"gin/pkg/provider/message"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -20,13 +20,23 @@ import (
 )
 
 var (
-	conf        = config.NewConfig()
+	conf        *config.Config
 	dbInstances = make(map[string]*gorm.DB)
 	dbLocks     sync.Map
 )
 
+// SetConfig 设置配置
+func SetConfig(c *config.Config) {
+	conf = c
+}
+
 // Connection 连接数据库
 func Connection(conn ...string) *gorm.DB {
+	if conf == nil {
+		flag.Errorf("配置未初始化,请先调用SetConfig")
+		os.Exit(1)
+	}
+
 	if len(conn) == 0 || conn[0] == "" {
 		return getConnection(conf.Databases.Default)
 	}
@@ -166,7 +176,7 @@ func after(db *gorm.DB) {
 
 	// 慢查询警告
 	if cost > conf.Databases.SlowQueryDuration {
-		l.NewLogger().Warn(
+		l.NewLogger(conf).Warn(
 			"Slow Sql",
 			zap.Float64("costMs", costMs),
 			zap.String("sql", sql),
@@ -178,7 +188,7 @@ func after(db *gorm.DB) {
 		traceId = "unknown"
 	}
 
-	message.GetEventBus().Publish(debugger.TopicSql, debugger.SqlEvent{
+	message.NewEvent().Publish(debugger.TopicSql, debugger.SqlEvent{
 		TraceId: traceId,
 		Sql:     sql,
 		Rows:    db.Statement.RowsAffected,

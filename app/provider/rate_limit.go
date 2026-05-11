@@ -4,7 +4,6 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/pkg/foundation"
-	"os"
 )
 
 func init() {
@@ -27,8 +26,8 @@ func (p *RateLimitProvider) Register(app foundation.App) {
 // Boot 启动服务
 func (p *RateLimitProvider) Boot(app foundation.App) {
 	// 初始化限流
-	facade.RateLimiter.Init()
-	facade.Log.Info("限流服务启动成功")
+	facade.RateLimiter().Init()
+	facade.Log().Info("限流服务启动成功")
 }
 
 // Runners 后台运行任务(用于优雅关闭)
@@ -56,10 +55,7 @@ func (r *RateLimitCleanupRunner) Run(ctx context.Context) error {
 
 // Stop 停止时关闭限流器
 func (r *RateLimitCleanupRunner) Stop() error {
-	facade.RateLimiter.Shutdown()
-	if os.Getenv("CLI_MODE") != "true" {
-		facade.Log.Info("限流服务已关闭")
-	}
+	facade.RateLimiter().Shutdown()
 	return nil
 }
 

@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
-	"gin/pkg/debugger"
+	"gin/pkg/provider/debugger"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
@@ -41,7 +41,7 @@ func (s Logger) Handle() gin.HandlerFunc {
 		c.Header("Trace-Id", traceId)
 
 		// 注入日志
-		log := facade.Log.Logger()
+		log := facade.Log()
 		ctx = ctxkey.WithValue(ctx, ctxkey.DebuggerKey, log.WithDebugger(ctx))
 
 		// 更新请求的context

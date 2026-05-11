@@ -7,10 +7,10 @@ import (
 	"gin/common/ctxkey"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/debugger"
-	"gin/pkg/logger"
-	"gin/pkg/message"
-	"gin/pkg/queue"
+	"gin/pkg/provider/debugger"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/message"
+	"gin/pkg/provider/queue"
 	"github.com/segmentio/kafka-go"
 	"sync"
 	"time"
@@ -18,15 +18,15 @@ import (
 
 // Kafka Kafka连接
 type Kafka struct {
-	Writer  *kafka.Writer     // Kafka Writer
-	Reader  *kafka.Reader     // Kafka Reader
-	Conf    *config.Config    // 配置
-	Log     *logger.Logger    // 日志
-	Message *message.EventBus // 事件总线
+	Writer  *kafka.Writer  // Kafka Writer
+	Reader  *kafka.Reader  // Kafka Reader
+	Conf    *config.Config // 配置
+	Log     *logger.Logger // 日志
+	Message *message.Event // 事件总线
 }
 
 // NewKafka 创建Kafka连接
-func NewKafka(conf *config.Config, log *logger.Logger, bus *message.EventBus) *Kafka {
+func NewKafka(conf *config.Config, log *logger.Logger, bus *message.Event) *Kafka {
 	return &Kafka{
 		Conf:    conf,
 		Log:     log,

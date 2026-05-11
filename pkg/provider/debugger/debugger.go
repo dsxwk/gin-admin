@@ -1,15 +1,15 @@
 package debugger
 
 import (
-	"gin/pkg/message"
+	"gin/pkg/provider/message"
 )
 
 type Debugger struct {
-	Bus    *message.EventBus
+	Bus    *message.Event
 	subIds map[string]uint64
 }
 
-func NewDebugger(bus *message.EventBus) *Debugger {
+func NewDebugger(bus *message.Event) *Debugger {
 	return &Debugger{
 		Bus:    bus,
 		subIds: make(map[string]uint64),

@@ -17,8 +17,8 @@ type CorsConfig struct {
 	AllowCredentials string `mapstructure:"allow-credentials" yaml:"allow-credentials"`
 }
 
-// GetConfig 根据模式获取当前生效的跨域配置
-func (c *Cors) GetConfig(origin string) *CorsConfig {
+// GetWhiteListConfig 根据模式获取当前生效的跨域配置
+func (c *Cors) GetWhiteListConfig(origin string) *CorsConfig {
 	if !c.Enabled {
 		return nil
 	}

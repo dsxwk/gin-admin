@@ -5,8 +5,8 @@ import (
 	"gin/common/base"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/logger"
-	"gin/pkg/queue"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/queue"
 )
 
 // RabbitmqDemoConsumer RabbitMQ普通消费者
@@ -16,9 +16,9 @@ type RabbitmqDemoConsumer struct {
 
 // NewRabbitmqDemoConsumer 创建消费者实例
 func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
-	cfg := facade.Config.Get()
-	log := facade.Log.Logger()
-	bus := facade.Message.GetBus()
+	cfg := facade.Config()
+	log := facade.Log()
+	bus := facade.Message()
 
 	// 创建RabbitMQ连接
 	mq, err := base.NewRabbitMQ(cfg, log, bus)
@@ -72,14 +72,14 @@ func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
 
 // Handle 处理消息的业务逻辑
 func (c *RabbitmqDemoConsumer) Handle(msg string) error {
-	facade.Log.Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
+	facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
 	// todo 处理业务逻辑
 	return nil
 }
 
 // init 注册消费者到注册表
 func init() {
-	cfg := facade.Config.Get()
+	cfg := facade.Config()
 	if cfg != nil && cfg.Rabbitmq.Enabled {
 		queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
 	}

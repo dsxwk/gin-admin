@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"gin/config"
-	"gin/pkg/debugger"
-	"gin/pkg/message"
+	"gin/pkg/provider/debugger"
+	"gin/pkg/provider/message"
 	"github.com/go-redis/redis/v8"
 	"github.com/goccy/go-json"
 	"sync"
@@ -13,7 +13,7 @@ import (
 )
 
 type RedisHook struct {
-	bus *message.EventBus
+	bus *message.Event
 }
 
 func (h *RedisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
@@ -73,7 +73,7 @@ type RedisCache struct {
 	client  *redis.Client
 	pubsubs map[string]*redis.PubSub
 	ctx     context.Context
-	bus     *message.EventBus
+	bus     *message.Event
 }
 
 var (
@@ -84,7 +84,7 @@ var (
 func NewRedisCache(conf *config.Config) *CacheProxy {
 	redisOnce.Do(func() {
 		var (
-			bus = message.GetEventBus()
+			bus = message.NewEvent()
 		)
 
 		client := redis.NewClient(&redis.Options{

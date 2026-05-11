@@ -5,10 +5,10 @@ import (
 	"gin/common/ctxkey"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/debugger"
-	"gin/pkg/logger"
-	"gin/pkg/message"
-	"gin/pkg/queue"
+	"gin/pkg/provider/debugger"
+	"gin/pkg/provider/logger"
+	"gin/pkg/provider/message"
+	"gin/pkg/provider/queue"
 	"github.com/rabbitmq/amqp091-go"
 	"sync"
 	"time"
@@ -20,11 +20,11 @@ type RabbitMQ struct {
 	Channel *amqp091.Channel    // AMQP通道
 	Conf    *config.Config      // 配置
 	Log     *logger.Logger      // 日志
-	Message *message.EventBus   // 事件总线
+	Message *message.Event      // 事件总线
 }
 
 // NewRabbitMQ 创建RabbitMQ连接
-func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *message.EventBus) (*RabbitMQ, error) {
+func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *message.Event) (*RabbitMQ, error) {
 	conn, err := amqp091.Dial(conf.Rabbitmq.Url)
 	if err != nil {
 		return nil, err

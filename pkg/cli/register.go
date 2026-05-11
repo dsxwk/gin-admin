@@ -225,7 +225,7 @@ func printJSON() {
 	}
 
 	data := map[string]interface{}{
-		"version":  "Gin Cli " + facade.Config.Get().App.CliVersion,
+		"version":  "Gin Cli " + facade.Config().App.CliVersion,
 		"commands": list,
 	}
 
@@ -234,7 +234,7 @@ func printJSON() {
 }
 
 func getVersion() string {
-	return color.GreenString(facade.Config.Get().App.CliVersion)
+	return color.GreenString(facade.Config().App.CliVersion)
 }
 
 // 打印对齐
