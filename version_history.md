@@ -1,4 +1,4 @@
-## v2.1.4
+## v2.2.0
 > - Service provider and facade optimization.
 
 ## v2.1.3
