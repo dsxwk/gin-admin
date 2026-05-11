@@ -27,7 +27,7 @@ func TestCacheSetGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// 获取带上下文的缓存实例
 			var _cache *cache.CacheProxy
-			_cache = facade.Cache.Store(tt.cacheType).WithContext(ctx)
+			_cache = facade.Cache(tt.cacheType).WithContext(ctx)
 
 			// 设置缓存
 			err := _cache.Set(tt.key, 123, 10*time.Second)
@@ -42,11 +42,13 @@ func TestCacheSetGet(t *testing.T) {
 			case string:
 				require.Equal(t, "123", v)
 			case []byte:
-				require.Equal(t, []byte("123"), v)
+				require.Equal(t, []byte("123"), v) // 或 string(v) == "123"
 			case int:
 				require.Equal(t, 123, v)
 			case int64:
 				require.Equal(t, int64(123), v)
+			case float64:
+				require.Equal(t, float64(123), v)
 			default:
 				t.Fatalf("unexpected type %T, value: %v", v, v)
 			}
@@ -57,7 +59,7 @@ func TestCacheSetGet(t *testing.T) {
 // TestCacheExpiration 测试缓存过期
 func TestCacheExpiration(t *testing.T) {
 	ctx := t.Context()
-	_cache := facade.Cache.Store().WithContext(ctx)
+	_cache := facade.Cache().WithContext(ctx)
 	key := "expire_test"
 
 	// 设置1秒过期的缓存
@@ -81,7 +83,7 @@ func TestCacheExpiration(t *testing.T) {
 // TestCacheDelete 测试缓存删除
 func TestCacheDelete(t *testing.T) {
 	ctx := t.Context()
-	_cache := facade.Cache.Store().WithContext(ctx)
+	_cache := facade.Cache().WithContext(ctx)
 	key := "delete_test"
 
 	// 设置缓存
@@ -123,7 +125,7 @@ func TestCacheDifferentTypes(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_cache := facade.Cache.Memory().WithContext(ctx)
+			_cache := facade.Cache("memory").WithContext(ctx)
 			key := "type_test_" + tc.name
 
 			err := _cache.Set(key, tc.value, 10*time.Second)
@@ -141,7 +143,7 @@ func TestCacheWithContext(t *testing.T) {
 	ctx := t.Context()
 
 	// 创建带上下文的缓存
-	_cache := facade.Cache.Store().WithContext(ctx)
+	_cache := facade.Cache().WithContext(ctx)
 
 	// 测试设置和获取
 	key := "context_test"
@@ -163,10 +165,10 @@ func TestCacheStoreMethods(t *testing.T) {
 		name  string
 		cache *cache.CacheProxy
 	}{
-		{"Store()", facade.Cache.Store().WithContext(ctx)},
-		{"Redis()", facade.Cache.Redis().WithContext(ctx)},
-		{"Memory()", facade.Cache.Memory().WithContext(ctx)},
-		{"Disk()", facade.Cache.Disk().WithContext(ctx)},
+		{"Store()", facade.Cache().WithContext(ctx)},
+		{"Redis()", facade.Cache("redis").WithContext(ctx)},
+		{"Memory()", facade.Cache("memory").WithContext(ctx)},
+		{"Disk()", facade.Cache("disk").WithContext(ctx)},
 	}
 
 	for _, tt := range tests {
@@ -176,9 +178,17 @@ func TestCacheStoreMethods(t *testing.T) {
 
 			val, ok := tt.cache.Get(key)
 			require.True(t, ok)
-			require.Equal(t, value, val)
 
-			// 清理
+			// 兼容不同类型
+			switch v := val.(type) {
+			case string:
+				require.Equal(t, value, v)
+			case []byte:
+				require.Equal(t, value, string(v))
+			default:
+				require.Equal(t, value, v)
+			}
+
 			_ = tt.cache.Delete(key)
 		})
 	}

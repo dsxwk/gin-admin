@@ -34,7 +34,7 @@ func (s *Seed) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
 	flag.Infof("开始执行数据填充...")
 
-	db := facade.DB.Connection()
+	db := facade.DB()
 	id := values["id"]
 	for _, seed := range migrations.AllSeeds() {
 		if id != "" && seed.ID() != id {

@@ -39,7 +39,7 @@ func (s *Migrate) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
 	flag.Infof("开始执行数据迁移...")
 
-	db := facade.DB.Connection()
+	db := facade.DB()
 	db.Exec(`
 CREATE TABLE IF NOT EXISTS migrations (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -127,7 +127,7 @@ func (m *MakeModel) Execute(args []string) {
 	camel := m.StringToBool(values["camel"])
 	conn := values["connection"]
 	_make := strings.TrimPrefix(m.Name(), "make:")
-	db := facade.DB.Connection(conn)
+	db := facade.DB(conn)
 	for _, table := range tables {
 		flag.Infof("开始生成模型: %s", table)
 		m.generateModel(_make, db, table, path, conn, camel)

@@ -39,7 +39,7 @@ func (s *Rollback) Execute(args []string) {
 	values := s.ParseFlags(s.Name(), args, s.Help())
 	flag.Infof("开始执行数据回滚...")
 
-	db := facade.DB.Connection()
+	db := facade.DB()
 	id := values["id"]
 	for _, m := range migrations.AllMigrations() {
 		if id != "" && m.ID() != id {

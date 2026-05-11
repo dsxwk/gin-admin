@@ -4,41 +4,21 @@ import (
 	"gin/pkg/provider/cache"
 )
 
-// Cache 缓存门面-缓存统一入口
-// 使用示例:
-//
-//	facade.Cache.Set("key", "value", 5*time.Minute)
-//	value, ok := facade.Cache.Store("redis").Get("key")
-//	cache := facade.Cache.Store("redis").WithContext(ctx)  // 获取带上下文的缓存
-var Cache = &cacheFacade{}
-
-type cacheFacade struct{}
-
-// Store 获取指定类型的缓存存储
-// 参数说明:
-//   - cacheType: 缓存类型，可选 "redis", "memory", "disk"，不传时返回默认缓存
+// Cache 获取缓存实例
+// 不传参数返回默认缓存，传参返回指定缓存
 //
 // 使用示例:
 //
-//	facade.Cache.Store()           // 获取默认缓存
-//	facade.Cache.Store("redis")    // 获取Redis缓存
-//	facade.Cache.Store("memory")   // 获取内存缓存
-func (c *cacheFacade) Store(cacheType ...string) *cache.CacheProxy {
-	typ := "default"
+//	// 默认缓存
+//	facade.Cache().Set("key", "value", 5*time.Minute)
+//
+//	// 指定缓存
+//	facade.Cache("redis").Set("key", "value", 5*time.Minute)
+//	facade.Cache("memory").Get("key")
+func Cache(cacheType ...string) *cache.CacheProxy {
+	key := "cache"
 	if len(cacheType) > 0 && cacheType[0] != "" {
-		typ = cacheType[0]
-	}
-
-	var key string
-	switch typ {
-	case "redis":
-		key = "redis_cache"
-	case "memory":
-		key = "memory_cache"
-	case "disk":
-		key = "disk_cache"
-	default:
-		key = "cache"
+		key = cacheType[0]
 	}
 
 	_cache := Get[*cache.CacheProxy](key)
@@ -46,19 +26,4 @@ func (c *cacheFacade) Store(cacheType ...string) *cache.CacheProxy {
 		return _cache
 	}
 	return cache.NewCache(Config())
-}
-
-// Redis 获取Redis缓存
-func (c *cacheFacade) Redis() *cache.CacheProxy {
-	return c.Store("redis")
-}
-
-// Memory 获取内存缓存
-func (c *cacheFacade) Memory() *cache.CacheProxy {
-	return c.Store("memory")
-}
-
-// Disk 获取磁盘缓存
-func (c *cacheFacade) Disk() *cache.CacheProxy {
-	return c.Store("disk")
 }

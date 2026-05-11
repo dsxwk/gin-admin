@@ -29,13 +29,13 @@ func (s *BaseService) DB(model Model) *gorm.DB {
 	if connModel, ok := model.(HasConnection); ok {
 		conn := connModel.Connection()
 		if conn != "" {
-			db = facade.DB.Connection(conn).WithContext(s.Ctx)
+			db = facade.DB(conn).WithContext(s.Ctx)
 		} else {
-			db = facade.DB.Connection().WithContext(s.Ctx)
+			db = facade.DB().WithContext(s.Ctx)
 		}
 	} else {
 		// 默认连接
-		db = facade.DB.Connection().WithContext(s.Ctx)
+		db = facade.DB().WithContext(s.Ctx)
 	}
 
 	return db.Model(model)

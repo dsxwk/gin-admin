@@ -103,7 +103,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 		ModelPkgPath:      path,
 	})
 
-	g.UseDB(facade.DB.Connection())
+	g.UseDB(facade.DB())
 
 	dataMap := map[string]func(detailType gorm.ColumnType) (dataType string){
 		"tinyint":   func(detailType gorm.ColumnType) (dataType string) { return "int64" },

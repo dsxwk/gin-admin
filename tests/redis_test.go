@@ -16,7 +16,7 @@ func TestRedisPubSub(t *testing.T) {
 	defer cancel()
 
 	// 使用门面获取Redis缓存实例
-	redisCache := facade.Cache.Store("redis").WithContext(ctx)
+	redisCache := facade.Cache("redis").WithContext(ctx)
 
 	done := make(chan struct{})
 
@@ -52,7 +52,7 @@ func TestRedisSetGet(t *testing.T) {
 	defer cancel()
 
 	// 使用门面获取Redis缓存实例
-	redisCache := facade.Cache.Store("redis").WithContext(ctx)
+	redisCache := facade.Cache("redis").WithContext(ctx)
 	key := "test:setget"
 	value := "hello redis"
 
@@ -80,7 +80,7 @@ func TestRedisLock(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	redisCache := facade.Cache.Store("redis").WithContext(ctx)
+	redisCache := facade.Cache("redis").WithContext(ctx)
 	key := "test:lock"
 	value := "lock-value"
 
@@ -107,7 +107,7 @@ func TestRedisExpire(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	redisCache := facade.Cache.Store("redis").WithContext(ctx)
+	redisCache := facade.Cache("redis").WithContext(ctx)
 	key := "test:expire"
 	value := "expire test"
 
@@ -134,7 +134,7 @@ func TestRedisDifferentDataTypes(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	redisCache := facade.Cache.Store("redis").WithContext(ctx)
+	redisCache := facade.Cache("redis").WithContext(ctx)
 
 	testCases := []struct {
 		name  string

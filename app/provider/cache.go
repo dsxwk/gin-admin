@@ -24,11 +24,11 @@ func (p *CacheProvider) Register(app foundation.App) {
 	// 注册默认缓存
 	facade.Register[*cache.CacheProxy]("cache", cache.NewCache(conf))
 	// 注册Redis缓存
-	facade.Register[*cache.CacheProxy]("redis_cache", cache.NewRedisCache(conf))
+	facade.Register[*cache.CacheProxy]("redis", cache.NewRedisCache(conf))
 	// 注册内存缓存
-	facade.Register[*cache.CacheProxy]("memory_cache", cache.NewMemoryCache(conf))
+	facade.Register[*cache.CacheProxy]("memory", cache.NewMemoryCache(conf))
 	// 注册磁盘缓存
-	facade.Register[*cache.CacheProxy]("disk_cache", cache.NewDiskCache(conf))
+	facade.Register[*cache.CacheProxy]("disk", cache.NewDiskCache(conf))
 }
 
 // Boot 启动服务

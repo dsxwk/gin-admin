@@ -1249,8 +1249,8 @@ func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	cache := facade.Cache.Store()
-	cache = facade.Cache.Store("redis")
+	cache := facade.Cache()
+	cache = facade.Cache("redis")
     err := cache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1302,7 +1302,7 @@ func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	redisCache := facade.Cache.Store("redis")
+	redisCache := facade.Cache("redis")
     err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1356,7 +1356,7 @@ func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-    memoryCache := facade.Cache.Store("memory")
+    memoryCache := facade.Cache("memory")
     err := memoryCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	
@@ -1410,7 +1410,7 @@ func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-    diskCache := facade.Cache.Store("disk")
+    diskCache := facade.Cache("disk")
     err := diskCache.Set(key, value, time.Second*10)
     if err != nil {
         // 处理错误	
@@ -2226,12 +2226,12 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    cache := facade.Cache.Store()
-	redisCache := facade.Cache.Store('redis')   // 或 facade.Cache.Redis()
+    cache := facade.Cache()
+	redisCache := facade.Cache("redis")   
 	// 绑定上下文
     redisCache = redisCache.WithContext(ctx)
-	memoryCache := facade.Cache.Store('memory') // 或 facade.Cache.Memory()
-	diskCache := facade.Cache.Store('disk')     // 或 facade.Cache.Disk()
+	memoryCache := facade.Cache("memory") 
+	diskCache := facade.Cache("disk")     
     // 其他门面使用 ...
 }
 ```
@@ -2306,13 +2306,13 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
     // 默认连接
-    db := facade.DB.Connection()
+    db := facade.DB()
     // 使用上下文
-    db1 := facade.DB.Connection().WithContext(ctx)
+    db1 := facade.DB().WithContext(ctx)
     // 连接pgsql
-    db2 := facade.DB.Connection("pgsql").WithContext(ctx)
+    db2 := facade.DB("pgsql").WithContext(ctx)
     // 连接sqlsrv
-    db3 := facade.DB.Connection("sqlsrv").WithContext(ctx)
+    db3 := facade.DB("sqlsrv").WithContext(ctx)
     // todo ...
 }
 ```
@@ -2339,7 +2339,7 @@ func (s *TestController) Test(c *gin.Context) {
         ctx = c.Request.Context()
 		req request.User
         m   []model.User
-		db  = facade.DB.Connection().WithContext(ctx)
+		db  = facade.DB().WithContext(ctx)
 	)
 
     err := c.ShouldBind(&req)

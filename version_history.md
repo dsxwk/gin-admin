@@ -1,5 +1,5 @@
 ## v2.2.0
-> - Service provider and facade optimization.
+> - Service Provider and Facade optimization, after optimization, the test case is perfect.
 
 ## v2.1.3
 > - Optimize the Event, Http, Request facade to support generics.

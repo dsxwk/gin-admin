@@ -232,7 +232,7 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 
 // 加载表字段
 func (m *MakeRequest) loadTableFields(conn, table string, camel bool) []Field {
-	db := facade.DB.Connection(conn)
+	db := facade.DB(conn)
 
 	// 获取表字段
 	cols, err := db.Migrator().ColumnTypes(table)

@@ -1245,8 +1245,8 @@ func (s *TestController) Test()  {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    cache := facade.Cache.Store()
-    cache = facade.Cache.Store("redis")
+    cache := facade.Cache()
+    cache = facade.Cache("redis")
     err := cache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // Handle error	
@@ -1298,7 +1298,7 @@ func (s *TestController) Test()  {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    redisCache := facade.Cache.Store("redis")
+    redisCache := facade.Cache("redis")
     err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // Handle error	
@@ -1352,7 +1352,7 @@ func (s *TestController) Test()  {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    memoryCache := facade.Cache.Store("memory")
+    memoryCache := facade.Cache("memory")
     err := memoryCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // Handle error	
@@ -1406,7 +1406,7 @@ func (s *TestController) Test() {
     // Set Set-Cache	
     key := "test_key"
     value := "test_value"
-    diskCache := facade.Cache.Store("disk")
+    diskCache := facade.Cache("disk")
     err := diskCache.Set(key, value, time.Second*10)
     if err != nil {
         // Handle error	
@@ -2214,12 +2214,12 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    cache := facade.Cache.Store()
-    redisCache := facade.Cache.Store('redis')   // OR facade.Cache.Redis()
+    cache := facade.Cache()
+    redisCache := facade.Cache("redis")
     // Bind context to cache
     redisCache = redisCache.WithContext(ctx)
-    memoryCache := facade.Cache.Store('memory') // OR facade.Cache.Memory()
-    diskCache := facade.Cache.Store('disk')     // OR facade.Cache.Disk()
+    memoryCache := facade.Cache("memory") 
+    diskCache := facade.Cache("disk")    
     // Other facade usage ...
 }
 ```
@@ -2294,13 +2294,13 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context)  {
   ctx := c.Request.Context()
   // Default Connection
-  db := facade.DB.Connection()
+  db := facade.DB()
   // Using context
-  db1 := facade.DB.Connection().WithContext(ctx)
+  db1 := facade.DB().WithContext(ctx)
   // Connection pgsql
-  db2 := facade.DB.Connection("pgsql").WithContext(ctx)
+  db2 := facade.DB("pgsql").WithContext(ctx)
   // Connection sqlsrv
-  db3 := facade.DB.Connection("sqlsrv").WithContext(ctx)
+  db3 := facade.DB("sqlsrv").WithContext(ctx)
   // todo ...
 }
 ```
@@ -2326,7 +2326,7 @@ func (s *TestController) Test(c *gin.Context) {
         ctx = c.Request.Context()
 		req request.User
         m   []model.User
-		db  = facade.DB.Connection().WithContext(ctx)
+		db  = facade.DB().WithContext(ctx)
 	)
 
     err := c.ShouldBind(&req)
