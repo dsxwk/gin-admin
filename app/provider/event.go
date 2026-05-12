@@ -2,6 +2,7 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/message"
 )
@@ -23,7 +24,7 @@ func (p *EventProvider) Register(app foundation.App) {
 }
 
 func (p *EventProvider) Boot(app foundation.App) {
-	facade.Log().Info("事件总线服务启动成功")
+	flag.Infof("事件服务启动成功")
 }
 
 func (p *EventProvider) Dependencies() []string {

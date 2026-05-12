@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 )
 
@@ -27,7 +28,7 @@ func (p *RateLimitProvider) Register(app foundation.App) {
 func (p *RateLimitProvider) Boot(app foundation.App) {
 	// 初始化限流
 	facade.RateLimiter().Init()
-	facade.Log().Info("限流服务启动成功")
+	flag.Infof("限流服务启动成功")
 }
 
 // Runners 后台运行任务(用于优雅关闭)

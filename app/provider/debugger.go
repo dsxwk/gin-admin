@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/debugger"
 )
@@ -25,7 +26,7 @@ func (p *DebuggerProvider) Register(app foundation.App) {
 func (p *DebuggerProvider) Boot(app foundation.App) {
 	// 启动调试器
 	facade.Debugger.Start()
-	facade.Log().Info("调试器服务启动成功")
+	flag.Infof("调试器服务启动成功")
 }
 
 func (p *DebuggerProvider) Runners() []foundation.Runner {

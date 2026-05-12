@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gin/common/ctxkey"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/provider/logger"
@@ -51,7 +52,7 @@ func LoadLang(conf *config.Config, logger *logger.Logger) {
 			Localizers[langCode] = i18n.NewLocalizer(Bundle, langCode)
 		}
 
-		log.Info(pkg.Sprintf("翻译服务加载成功,支持语言: %s", conf.I18n.Lang))
+		flag.Infof(pkg.Sprintf("翻译服务加载成功,支持语言: %s", conf.I18n.Lang))
 	})
 }
 

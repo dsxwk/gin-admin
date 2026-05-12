@@ -16,6 +16,6 @@ func DB(conn ...string) *gorm.DB {
 	if db != nil {
 		return db
 	}
-	// orm.SetConfig(facade.Config())
-	return orm.Connection(conn...)
+
+	return orm.Connection(name, Config())
 }

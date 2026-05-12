@@ -2,9 +2,10 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
+	"gin/pkg"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/orm"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -22,19 +23,20 @@ func (p *DbProvider) Name() string {
 
 // Register 注册服务到门面
 func (p *DbProvider) Register(app foundation.App) {
-	orm.SetConfig(facade.Config())
-	facade.Register[*gorm.DB]("db", orm.Connection())
+	cfg := facade.Config()
+	facade.Register[*gorm.DB]("db", orm.Connection(cfg.Databases.Default, cfg))
 }
 
 // Boot 启动服务-测试数据库连接
 func (p *DbProvider) Boot(app foundation.App) {
+	cfg := facade.Config()
 	// 测试默认连接是否正常
-	db := orm.Connection()
+	db := orm.Connection(cfg.Databases.Default, cfg)
 	if db != nil {
 		sqlDB, err := db.DB()
 		if err == nil {
 			if err = sqlDB.Ping(); err == nil {
-				facade.Log().Info("数据库连接成功", zap.String("driver", "mysql"))
+				flag.Infof(pkg.Sprintf("%s数据库连接成功", cfg.Databases.Default))
 			}
 		}
 	}

@@ -64,7 +64,7 @@ func NewConfig() *Config {
 				flag.Errorf("合并环境配置失败: %v", err)
 				os.Exit(1)
 			}
-			flag.Successf("已加载环境配置文件: %s", configFile)
+			flag.Infof("已加载环境配置文件: %s", configFile)
 		} else {
 			flag.Warningf("未找到环境配置文件: %s，使用默认配置\n", configFile)
 		}

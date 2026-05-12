@@ -2,6 +2,7 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/logger"
 )
@@ -26,7 +27,7 @@ func (p *LogProvider) Register(app foundation.App) {
 
 // Boot 启动服务
 func (p *LogProvider) Boot(app foundation.App) {
-	facade.Log().Info("日志服务启动成功")
+	flag.Infof("日志服务启动成功")
 }
 
 // Dependencies 依赖服务

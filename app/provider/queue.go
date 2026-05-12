@@ -7,6 +7,7 @@ import (
 	_ "gin/app/queue/kafka/producer"
 	_ "gin/app/queue/rabbitmq/consumer"
 	_ "gin/app/queue/rabbitmq/producer"
+	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/queue"
@@ -34,7 +35,7 @@ func (p *QueueProvider) Register(app foundation.App) {
 	facade.Register("queue", facade.Queue())
 	p.consumers = queue.GetConsumerRegistry().GetAll()
 	p.producers = queue.GetProducerRegistry().GetAll()
-	facade.Log().Info(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
+	flag.Infof(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
 }
 
 // Boot 启动服务(只启动消费者,生产者按需使用)
@@ -103,7 +104,7 @@ func (r *queueShutdownRunner) Stop() error {
 		}
 	}
 
-	facade.Log().Info("所有队列服务已关闭")
+	flag.Infof("所有队列服务已关闭")
 	return nil
 }
 

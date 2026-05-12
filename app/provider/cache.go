@@ -2,6 +2,7 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/cache"
 )
@@ -22,12 +23,12 @@ func (p *CacheProvider) Name() string {
 func (p *CacheProvider) Register(app foundation.App) {
 	cfg := facade.Config()
 	// 注册默认缓存
-	facade.Register[*cache.CacheProxy](cfg.Cache.Driver, cache.NewCache(cfg.Cache.Driver, facade.Config()))
+	facade.Register[*cache.CacheProxy](cfg.Cache.Driver, cache.NewCache(cfg.Cache.Driver, cfg))
 }
 
 // Boot 启动服务
 func (p *CacheProvider) Boot(app foundation.App) {
-	facade.Log().Info("缓存服务启动成功")
+	flag.Infof("缓存服务启动成功")
 }
 
 // Dependencies 依赖服务

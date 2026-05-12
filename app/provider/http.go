@@ -2,6 +2,7 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/http"
 )
@@ -26,7 +27,7 @@ func (p *HttpProvider) Register(app foundation.App) {
 // Boot 启动服务
 func (p *HttpProvider) Boot(app foundation.App) {
 	http.InitClient()
-	facade.Log().Info("HTTP客户端服务启动成功")
+	flag.Infof("HTTP客户端服务启动成功")
 }
 
 // Dependencies 依赖的服务

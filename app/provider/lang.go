@@ -2,6 +2,7 @@ package provider
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
 	"gin/pkg/foundation"
 	"gin/pkg/provider/lang"
 )
@@ -28,7 +29,7 @@ func (p *LangProvider) Register(app foundation.App) {
 func (p *LangProvider) Boot(app foundation.App) {
 	// 加载翻译文件(会从facade.Config()获取配置)
 	lang.LoadLang(facade.Config(), facade.Log())
-	facade.Log().Info("翻译服务启动成功")
+	flag.Infof("翻译服务启动成功")
 }
 
 // Dependencies 依赖服务
