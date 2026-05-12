@@ -113,14 +113,70 @@ func TestCacheDifferentTypes(t *testing.T) {
 	testCases := []struct {
 		name  string
 		value interface{}
+		check func(t *testing.T, got interface{})
 	}{
-		{"string", "hello world"},
-		{"int", 12345},
-		{"int64", int64(12345)},
-		{"float64", 3.14159},
-		{"bool", true},
-		{"map", map[string]interface{}{"name": "test", "value": 100}},
-		{"slice", []int{1, 2, 3, 4, 5}},
+		{"string", "hello world", func(t *testing.T, got interface{}) {
+			require.Equal(t, "hello world", got)
+		}},
+		{"int", 12345, func(t *testing.T, got interface{}) {
+			// JSON序列化后int会变成float64
+			switch v := got.(type) {
+			case int:
+				require.Equal(t, 12345, v)
+			case int64:
+				require.Equal(t, int64(12345), v)
+			case float64:
+				require.Equal(t, float64(12345), v)
+			default:
+				t.Fatalf("unexpected type: %T", v)
+			}
+		}},
+		{"int64", int64(12345), func(t *testing.T, got interface{}) {
+			switch v := got.(type) {
+			case int64:
+				require.Equal(t, int64(12345), v)
+			case float64:
+				require.Equal(t, float64(12345), v)
+			default:
+				t.Fatalf("unexpected type: %T", v)
+			}
+		}},
+		{"float64", 3.14159, func(t *testing.T, got interface{}) {
+			require.Equal(t, 3.14159, got)
+		}},
+		{"bool", true, func(t *testing.T, got interface{}) {
+			require.Equal(t, true, got)
+		}},
+		{"map", map[string]interface{}{"name": "test", "value": 100}, func(t *testing.T, got interface{}) {
+			m, ok := got.(map[string]interface{})
+			require.True(t, ok)
+			require.Equal(t, "test", m["name"])
+			// map中的数字也会变成float64
+			switch v := m["value"].(type) {
+			case int:
+				require.Equal(t, 100, v)
+			case float64:
+				require.Equal(t, float64(100), v)
+			default:
+				t.Fatalf("unexpected type for value: %T", v)
+			}
+		}},
+		{"slice", []int{1, 2, 3, 4, 5}, func(t *testing.T, got interface{}) {
+			// JSON序列化后slice会变成[]interface{}
+			s, ok := got.([]interface{})
+			require.True(t, ok)
+			require.Len(t, s, 5)
+			for i, v := range s {
+				switch v.(type) {
+				case int:
+					require.Equal(t, i+1, v)
+				case float64:
+					require.Equal(t, float64(i+1), v)
+				default:
+					t.Fatalf("unexpected type at index %d: %T", i, v)
+				}
+			}
+		}},
 	}
 
 	for _, tc := range testCases {
@@ -133,7 +189,7 @@ func TestCacheDifferentTypes(t *testing.T) {
 
 			val, ok := _cache.Get(key)
 			require.True(t, ok)
-			require.Equal(t, tc.value, val)
+			tc.check(t, val)
 		})
 	}
 }
