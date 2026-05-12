@@ -16,14 +16,14 @@ import (
 //	facade.Cache("redis").Set("key", "value", 5*time.Minute)
 //	facade.Cache("memory").Get("key")
 func Cache(cacheType ...string) *cache.CacheProxy {
-	key := "cache"
+	name := Config().Cache.Driver
 	if len(cacheType) > 0 && cacheType[0] != "" {
-		key = cacheType[0]
+		name = cacheType[0]
 	}
 
-	_cache := Get[*cache.CacheProxy](key)
+	_cache := Get[*cache.CacheProxy](name)
 	if _cache != nil {
 		return _cache
 	}
-	return cache.NewCache(Config())
+	return cache.NewCache(name, Config())
 }

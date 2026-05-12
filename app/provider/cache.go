@@ -20,15 +20,9 @@ func (p *CacheProvider) Name() string {
 
 // Register 注册服务到门面
 func (p *CacheProvider) Register(app foundation.App) {
-	conf := facade.Config()
+	cfg := facade.Config()
 	// 注册默认缓存
-	facade.Register[*cache.CacheProxy]("cache", cache.NewCache(conf))
-	// 注册Redis缓存
-	facade.Register[*cache.CacheProxy]("redis", cache.NewRedisCache(conf))
-	// 注册内存缓存
-	facade.Register[*cache.CacheProxy]("memory", cache.NewMemoryCache(conf))
-	// 注册磁盘缓存
-	facade.Register[*cache.CacheProxy]("disk", cache.NewDiskCache(conf))
+	facade.Register[*cache.CacheProxy](cfg.Cache.Driver, cache.NewCache(cfg.Cache.Driver, facade.Config()))
 }
 
 // Boot 启动服务

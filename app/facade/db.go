@@ -7,7 +7,12 @@ import (
 
 // DB 数据库门面-数据库访问统一入口
 func DB(conn ...string) *gorm.DB {
-	db := Get[*gorm.DB]("db")
+	name := "mysql"
+	if len(conn) > 0 && conn[0] != "" {
+		name = conn[0]
+	}
+
+	db := Get[*gorm.DB](name)
 	if db != nil {
 		return db
 	}

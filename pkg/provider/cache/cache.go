@@ -39,9 +39,9 @@ var (
 	cacheOnce sync.Once
 )
 
-func NewCache(conf *config.Config) *CacheProxy {
+func NewCache(driver string, conf *config.Config) *CacheProxy {
 	cacheOnce.Do(func() {
-		switch conf.Cache.Driver {
+		switch driver {
 
 		case "redis":
 			instance = NewRedisCache(conf)
