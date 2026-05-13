@@ -2,6 +2,8 @@ package errcode
 
 import (
 	"fmt"
+	"github.com/samber/lo"
+	"net/http"
 	"strconv"
 )
 
@@ -24,10 +26,16 @@ func (e ErrorCode) WithPrefix(prefix int64) ErrorCode {
 	return e
 }
 
-func NewError(code int64, msg string) ErrorCode {
+func NewError(code int64, msg string, httpCode ...int) ErrorCode {
+	httpCodeValue := lo.FirstOr(httpCode, http.StatusOK)
+	if httpCodeValue == 0 {
+		httpCodeValue = http.StatusOK
+	}
+
 	return ErrorCode{
-		Code: code,
-		Msg:  msg,
+		Code:     code,
+		Msg:      msg,
+		HttpCode: httpCodeValue,
 	}
 }
 
@@ -52,54 +60,61 @@ func (e ErrorCode) WithHttpCode(httpCode int) ErrorCode {
 }
 
 func Success() ErrorCode {
-	return ErrorCode{Code: 0, Msg: "Success"}
+	return ErrorCode{Code: 0, Msg: "Success", HttpCode: http.StatusOK}
 }
 
 func Redirect() ErrorCode {
 	return ErrorCode{
-		Code: 301,
-		Msg:  "Redirect",
+		Code:     301,
+		Msg:      "Redirect",
+		HttpCode: http.StatusMovedPermanently,
 	}
 }
 
 func ArgsError() ErrorCode {
 	return ErrorCode{
-		Code: 400,
-		Msg:  "Invalid arguments",
+		Code:     400,
+		Msg:      "Invalid arguments",
+		HttpCode: http.StatusBadRequest,
 	}
 }
 
 func Unauthorized() ErrorCode {
 	return ErrorCode{
-		Code: 401,
-		Msg:  "Unauthorized",
+		Code:     401,
+		Msg:      "Unauthorized",
+		HttpCode: http.StatusUnauthorized,
 	}
 }
 
 func NotFound() ErrorCode {
 	return ErrorCode{
-		Code: 404,
-		Msg:  "Resource not found",
+		Code:     404,
+		Msg:      "Resource not found",
+		HttpCode: http.StatusNotFound,
 	}
 }
 
 func RateLimitError() ErrorCode {
 	return ErrorCode{
-		Code: 429,
-		Msg:  "Rate limit exceeded",
+		Code:     429,
+		Msg:      "Rate limit exceeded",
+		HttpCode: http.StatusTooManyRequests,
 	}
 }
 
 func SystemError() ErrorCode {
 	return ErrorCode{
-		Code: 500,
-		Msg:  "Internal server error",
+		Code:     500,
+		Msg:      "Internal server error",
+		HttpCode: http.StatusInternalServerError,
 	}
 }
 
 func TimeoutError() ErrorCode {
 	return ErrorCode{
-		Code: 504,
-		Msg:  "Request Timeout",
+		Code:     504,
+		Msg:      "Request Timeout",
+		HttpCode: http.StatusGatewayTimeout,
 	}
 }

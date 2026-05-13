@@ -8,7 +8,6 @@ import (
 	"gin/common/errcode"
 	"gin/pkg/provider/lang"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type MenuController struct {
@@ -38,7 +37,7 @@ func (s *MenuController) List(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithMsg(err.Error()))
+		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 

@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/copier"
-	"net/http"
 )
 
 type UserController struct {
@@ -41,7 +40,7 @@ func (s *UserController) List(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithMsg(err.Error()))
+		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
