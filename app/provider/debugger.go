@@ -25,7 +25,7 @@ func (p *DebuggerProvider) Register(app foundation.App) {
 
 func (p *DebuggerProvider) Boot(app foundation.App) {
 	// 启动调试器
-	facade.Debugger.Start()
+	facade.Debugger().Start()
 	flag.Infof("调试器服务启动成功")
 }
 
@@ -49,7 +49,7 @@ func (r *DebuggerRunner) Run(ctx context.Context) error {
 }
 
 func (r *DebuggerRunner) Stop() error {
-	facade.Debugger.Stop()
+	facade.Debugger().Stop()
 	return nil
 }
 

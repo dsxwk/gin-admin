@@ -9,6 +9,7 @@ import (
 	"gin/common/errcode"
 	"gin/pkg/provider/lang"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type LoginController struct {
@@ -51,7 +52,7 @@ func (s *LoginController) Login(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Login")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithMsg(err.Error()))
 		return
 	}
 
@@ -102,7 +103,7 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "RefreshToken")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithMsg(err.Error()))
 		return
 	}
 

@@ -33,20 +33,21 @@ func (s Recover) Handle() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				ctx := c.Request.Context()
 
-				// 返回错误响应
-				errCode := errcode.SystemError().
+				response.Error(c, errcode.SystemError().
 					WithMsg(fmt.Sprintf("%v", err)).
-					WithData(&ErrData{
-						TraceId: getString(ctx, ctxkey.TraceIdKey),
-						Error:   err,
-						IP:      getString(ctx, ctxkey.IpKey),
-						Lang:    getString(ctx, ctxkey.LangKey),
-						Path:    getString(ctx, ctxkey.PathKey),
-						Method:  getString(ctx, ctxkey.MethodKey),
-						Params:  ctx.Value(ctxkey.ParamsKey),
-						Stack:   getStackTrace(3),
-					})
-				response.Error(c, &errCode)
+					WithData(
+						&ErrData{
+							TraceId: getString(ctx, ctxkey.TraceIdKey),
+							Error:   err,
+							IP:      getString(ctx, ctxkey.IpKey),
+							Lang:    getString(ctx, ctxkey.LangKey),
+							Path:    getString(ctx, ctxkey.PathKey),
+							Method:  getString(ctx, ctxkey.MethodKey),
+							Params:  ctx.Value(ctxkey.ParamsKey),
+							Stack:   getStackTrace(3),
+						},
+					),
+				)
 			}
 		}()
 		c.Next()

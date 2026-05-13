@@ -5,12 +5,14 @@ import (
 )
 
 // Debugger 调试器门面-调试器统一入口
-var Debugger = &debuggerFacade{}
+func Debugger() *DebuggerFacade {
+	return &DebuggerFacade{}
+}
 
-type debuggerFacade struct{}
+type DebuggerFacade struct{}
 
 // instance 从Manager获取调试器实例
-func (d *debuggerFacade) instance() *debugger.Debugger {
+func (d *DebuggerFacade) instance() *debugger.Debugger {
 	dbg := Get[*debugger.Debugger]("debugger")
 	if dbg != nil {
 		return dbg
@@ -19,21 +21,21 @@ func (d *debuggerFacade) instance() *debugger.Debugger {
 }
 
 // Start 启动调试器
-func (d *debuggerFacade) Start() {
+func (d *DebuggerFacade) Start() {
 	if inst := d.instance(); inst != nil {
 		inst.Start()
 	}
 }
 
 // Stop 停止调试器
-func (d *debuggerFacade) Stop() {
+func (d *DebuggerFacade) Stop() {
 	if inst := d.instance(); inst != nil {
 		inst.Stop()
 	}
 }
 
 // IsRunning 检查调试器是否运行中
-func (d *debuggerFacade) IsRunning() bool {
+func (d *DebuggerFacade) IsRunning() bool {
 	inst := d.instance()
 	if inst == nil {
 		return false
@@ -42,6 +44,6 @@ func (d *debuggerFacade) IsRunning() bool {
 }
 
 // GetInstance 获取原始调试器实例
-func (d *debuggerFacade) GetInstance() *debugger.Debugger {
+func (d *DebuggerFacade) GetInstance() *debugger.Debugger {
 	return d.instance()
 }

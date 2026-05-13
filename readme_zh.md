@@ -95,6 +95,7 @@
       - [失败错误码](#失败错误码)
       - [失败提示](#失败提示)
       - [失败数据](#失败数据)
+      - [HTTP状态码](#HTTP状态码)
   - [日志](#日志)
     - [记录日志](#记录日志)
     - [错误调试](#错误调试)
@@ -2017,6 +2018,26 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
     return s.Error(c, errcode.SystemError().WithData([]string{"test data"}))
+}
+```
+
+## HTTP状态码
+```go
+package v1
+
+import (
+    "gin/common/base"
+    "gin/common/errcode"
+    "github.com/gin-gonic/gin"
+    "net/http"
+)
+
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context) {
+    return s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
 }
 ```
 

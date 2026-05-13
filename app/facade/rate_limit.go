@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	rlErr                     = errcode.RateLimitError()
 	userStore                 *ratelimit.Store
 	ipStore                   *ratelimit.Store
 	rateLimitOnce             sync.Once
@@ -46,7 +45,7 @@ func globalRateLimit() gin.HandlerFunc {
 			return
 		}
 		if !userStore.AllowGlobal() {
-			response.Error(c, &rlErr)
+			response.Error(c, errcode.RateLimitError())
 			return
 		}
 		c.Next()
@@ -62,7 +61,7 @@ func ipRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 		}
 		key := c.ClientIP() + ":" + c.FullPath()
 		if !ipStore.AllowKey(key, r, burst) {
-			response.Error(c, &rlErr)
+			response.Error(c, errcode.RateLimitError())
 			return
 		}
 		c.Next()
@@ -81,7 +80,7 @@ func userRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 100*time.Millisecond)
 		defer cancel()
 		if err := userStore.WaitKey(ctx, key, r, burst); err != nil {
-			response.Error(c, &rlErr)
+			response.Error(c, errcode.RateLimitError())
 			return
 		}
 		c.Next()

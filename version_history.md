@@ -1,3 +1,6 @@
+## v2.2.1
+> - Service Provider and Facade optimization, public error code optimization.
+
 ## v2.2.0
 > - Service Provider and Facade optimization, after optimization, the test case is perfect.
 

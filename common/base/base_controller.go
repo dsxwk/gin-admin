@@ -18,10 +18,10 @@ func (s *BaseController) GetUserId(ctx *gin.Context) int64 {
 
 // Success 成功返回
 func (s *BaseController) Success(c *gin.Context, e errcode.ErrorCode) {
-	response.Success(c, &e)
+	response.Success(c, e)
 }
 
 // Error 失败返回
 func (s *BaseController) Error(c *gin.Context, e errcode.ErrorCode) {
-	response.Error(c, &e)
+	response.Error(c, e)
 }

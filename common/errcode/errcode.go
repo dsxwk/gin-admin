@@ -5,17 +5,11 @@ import (
 	"strconv"
 )
 
-// 业务码
-const (
-	LoginErrorPrefix = 1000 // 登录错误码前缀
-	UserErrorPrefix  = 1001 // 用户错误码前缀
-	MenuErrorPrefix  = 1001 // 菜单错误码前缀
-)
-
 type ErrorCode struct {
-	Code int64       `json:"code"` // 错误码
-	Msg  string      `json:"msg"`  // 错误描述
-	Data interface{} `json:"data"` // 返回数据
+	Code     int64       `json:"code"`     // 错误码
+	Msg      string      `json:"msg"`      // 错误描述
+	Data     interface{} `json:"data"`     // 返回数据
+	HttpCode int         `json:"HttpCode"` // http状态码
 }
 
 // Error 实现error接口
@@ -49,6 +43,11 @@ func (e ErrorCode) WithMsg(msg string) ErrorCode {
 
 func (e ErrorCode) WithData(data interface{}) ErrorCode {
 	e.Data = data
+	return e
+}
+
+func (e ErrorCode) WithHttpCode(httpCode int) ErrorCode {
+	e.HttpCode = httpCode
 	return e
 }
 

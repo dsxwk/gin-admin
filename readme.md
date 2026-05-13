@@ -95,6 +95,7 @@
       - [Response Error With Code](#Response-Error-With-Code)
       - [Response Error With Message](#Response-Error-With-Message)
       - [Response Error With Data](#Response-Error-With-Data)
+      - [Response Error With HTTP Code](#Response-Error-With-HTTP-Code)
   - [Log](#Log)
     - [Write Log](#Write-Log)
     - [Error Debug](#Error-Debug)
@@ -2006,6 +2007,26 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
     return s.Error(c, errcode.SystemError().WithData([]string{"test data"}))
+}
+```
+
+## Response Error With HTTP Code
+```go
+package v1
+
+import (
+    "gin/common/base"
+    "gin/common/errcode"
+    "github.com/gin-gonic/gin"
+    "net/http"
+)
+
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context) {
+    return s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
 }
 ```
 
