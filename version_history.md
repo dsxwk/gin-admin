@@ -1,3 +1,6 @@
+## v2.2.3
+> - Debugger package and Debugger Facade optimization.
+
 ## v2.2.2
 > - Public error code optimization.
 

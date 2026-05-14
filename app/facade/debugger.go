@@ -43,6 +43,15 @@ func (d *DebuggerFacade) IsRunning() bool {
 	return inst.IsRunning()
 }
 
+// GetSubId 获取指定主题的订阅ID
+func (d *DebuggerFacade) GetSubId(topic string) (uint64, bool) {
+	inst := d.instance()
+	if inst == nil {
+		return 0, false
+	}
+	return inst.GetSubId(topic)
+}
+
 // GetInstance 获取原始调试器实例
 func (d *DebuggerFacade) GetInstance() *debugger.Debugger {
 	return d.instance()
