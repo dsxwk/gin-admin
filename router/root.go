@@ -37,7 +37,7 @@ func LoadRouters(router *gin.Engine) {
 	// 全局限流:rateLimitMiddleware.Handle() 用户限流:rateLimitMiddleware.UserRateLimit(1, 1) ip限流:rateLimitMiddleware.IpRateLimit(1, 1)
 	// 健康检查
 	public.GET("/ping", rateLimitMiddleware.IpRateLimit(1, 1), func(c *gin.Context) {
-		response.Success(c, errcode.NewError(0, "pong"))
+		response.Response{}.Success(c, errcode.NewError(0, "pong"))
 	})
 
 	// 自动注册

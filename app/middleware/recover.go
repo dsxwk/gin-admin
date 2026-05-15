@@ -33,7 +33,7 @@ func (s Recover) Handle() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				ctx := c.Request.Context()
 
-				response.Error(c, errcode.SystemError().
+				response.Response{}.Error(c, errcode.SystemError().
 					WithMsg(fmt.Sprintf("%v", err)).
 					WithData(
 						&ErrData{

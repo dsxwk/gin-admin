@@ -37,15 +37,15 @@ func (s *MenuController) List(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	res, err := s.service.List(req)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(res))
+	s.Response.Success(c, errcode.Success().WithData(res))
 }

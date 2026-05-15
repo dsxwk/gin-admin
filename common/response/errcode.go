@@ -14,15 +14,15 @@ type Response struct {
 	Data interface{} `json:"data"` // 返回数据
 }
 
-// Json 输出Json响应
-func (r Response) Json(c *gin.Context, httpCode int) {
+// json 输出Json响应
+func (r Response) json(c *gin.Context, httpCode int) {
 	c.Header("Content-Type", "application/json")
 	c.JSON(httpCode, r)
 	c.Abort()
 }
 
 // Success 返回成功响应,可传ErrorCode
-func Success(c *gin.Context, e errcode.ErrorCode) {
+func (r Response) Success(c *gin.Context, e errcode.ErrorCode) {
 	var (
 		resp Response
 	)
@@ -42,11 +42,11 @@ func Success(c *gin.Context, e errcode.ErrorCode) {
 		Data: e.Data,
 	}
 
-	resp.Json(c, e.HttpCode)
+	resp.json(c, e.HttpCode)
 }
 
 // Error 返回失败响应,可传ErrorCode
-func Error(c *gin.Context, e errcode.ErrorCode) {
+func (r Response) Error(c *gin.Context, e errcode.ErrorCode) {
 	var (
 		resp Response
 		ctx  = c.Request.Context()
@@ -73,5 +73,5 @@ func Error(c *gin.Context, e errcode.ErrorCode) {
 		Data: e.Data,
 	}
 
-	resp.Json(c, e.HttpCode)
+	resp.json(c, e.HttpCode)
 }

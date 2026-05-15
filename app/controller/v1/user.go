@@ -40,17 +40,17 @@ func (s *UserController) List(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	res, err := s.service.List(req)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(res))
+	s.Response.Success(c, errcode.Success().WithData(res))
 }
 
 // Create 创建
@@ -75,23 +75,23 @@ func (s *UserController) Create(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Create")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	err = copier.Copy(&user, &req)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
 	user, err = s.service.Create(user)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(user))
+	s.Response.Success(c, errcode.Success().WithData(user))
 }
 
 // Update 更新
@@ -117,7 +117,7 @@ func (s *UserController) Update(c *gin.Context) {
 
 	err := c.ShouldBindBodyWith(&data, binding.JSON)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
@@ -126,23 +126,23 @@ func (s *UserController) Update(c *gin.Context) {
 	// 绑定参数并验证
 	err = facade.Request[any]().BindValidate(c, &req, "Update")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	err = copier.Copy(&user, &req)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
 	err = s.service.Update(req.ID, data)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(data))
+	s.Response.Success(c, errcode.Success().WithData(data))
 }
 
 // Detail 详情
@@ -168,17 +168,17 @@ func (s *UserController) Detail(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Detail")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	m, err := s.service.Detail(req.ID)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(m))
+	s.Response.Success(c, errcode.Success().WithData(m))
 }
 
 // Delete 删除
@@ -204,15 +204,15 @@ func (s *UserController) Delete(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Delete")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	m, err := s.service.Delete(req.ID)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(m))
+	s.Response.Success(c, errcode.Success().WithData(m))
 }

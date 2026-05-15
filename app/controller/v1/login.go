@@ -51,17 +51,17 @@ func (s *LoginController) Login(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Login")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(
+	s.Response.Success(
 		c, errcode.Success().WithMsg(
 			facade.Lang().T(ctx, "login.success", map[string]interface{}{
 				"name": userModel.Username,
@@ -102,17 +102,17 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "RefreshToken")
 	if err != nil {
-		s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
 	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := s.service.RefreshToken(token)
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
 	}
 
-	s.Success(c, errcode.Success().WithData(Token{
+	s.Response.Success(c, errcode.Success().WithData(Token{
 		AccessToken:        accessToken,
 		RefreshToken:       refreshToken,
 		TokenExpire:        tokenExpire,
@@ -121,5 +121,5 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 }
 
 func (s *LoginController) Test(c *gin.Context) {
-	s.Success(c, errcode.Success())
+	s.Response.Success(c, errcode.Success())
 }

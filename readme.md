@@ -135,7 +135,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.2.3
+> - Latest Version: v2.2.4
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -521,7 +521,7 @@ type TestController struct {
 // @Router /test [get]
 func (s *TestController) List(c *gin.Context) {
     // Define your function here
-    s.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
+    s.Response.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
 }
 ```
 ## Model
@@ -884,31 +884,31 @@ func (s *UserController) List(c *gin.Context) {
   // Method One
   /*err := c.ShouldBind(&req)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
     return
   }
 
   // Validator
   err = req.Validate(req, "List")
   if err != nil {
-    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }*/
   // Method Two
   // Bind And Validate
   err := facade.Request[any]().BindValidate(c, &req, "List")
   if err != nil {
-    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }
 
   res, err := s.service.List(req)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
     return
   }
 
-  s.Success(c, errcode.Success().WithData(res))
+  s.Response.Success(c, errcode.Success().WithData(res))
 }
 ```
 
@@ -1794,19 +1794,19 @@ func (s *LoginController) Login(c *gin.Context) {
   // Bind And Validate
   err := facade.Request[any]().BindValidate(c, &req, "Login")
   if err != nil {
-    s.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
   }
 
   userModel, err := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
     return
   }
 
   err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
     return
   }
 
@@ -1816,7 +1816,7 @@ func (s *LoginController) Login(c *gin.Context) {
     Username: userModel.Username,
   })
 
-  s.Success(
+  s.Response.Success(
     c, errcode.Success().WithMsg(
       facade.Lang().T(ctx, "login.success", map[string]interface{}{
         "name": userModel.Username,
@@ -1892,7 +1892,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Success(c, errcode.Success())
+    return s.Response.Success(c, errcode.Success())
 }
 ```
 
@@ -1911,7 +1911,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Success(c, errcode.Success().WithMsg("Success"))
+    return s.Response.Success(c, errcode.Success().WithMsg("Success"))
 }
 ```
 
@@ -1930,7 +1930,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Success(c, errcode.Success().WithData([]string{"test data"}))
+    return s.Response.Success(c, errcode.Success().WithData([]string{"test data"}))
 }
 ```
 
@@ -1949,7 +1949,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Error(c, errcode.SystemError())
+    return s.Response.Error(c, errcode.SystemError())
 }
 ```
 
@@ -1968,7 +1968,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Error(c, errcode.SystemError().WithCode(500))
+    return s.Response.Error(c, errcode.SystemError().WithCode(500))
 }
 ```
 
@@ -1987,7 +1987,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Error(c, errcode.SystemError().WithMsg("System Error"))
+    return s.Response.Error(c, errcode.SystemError().WithMsg("System Error"))
 }
 ```
 
@@ -2006,7 +2006,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Error(c, errcode.SystemError().WithData([]string{"test data"}))
+    return s.Response.Error(c, errcode.SystemError().WithData([]string{"test data"}))
 }
 ```
 
@@ -2026,7 +2026,7 @@ type TestController struct {
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
+    return s.Response.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
 }
 ```
 
@@ -2352,7 +2352,7 @@ func (s *TestController) Test(c *gin.Context) {
 
     err := c.ShouldBind(&req)
     if err != nil {
-        s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
         return
     }
 
@@ -2361,7 +2361,7 @@ func (s *TestController) Test(c *gin.Context) {
     if search != nil {
         whereSql, args, err := orm.BuildCondition(req.Search, db, model.User{})
         if err != nil {
-            s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+            s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
             return
         }
     
@@ -2372,11 +2372,11 @@ func (s *TestController) Test(c *gin.Context) {
 
     err = db.Offset(10).Limit(10).Order("id DESC").Find(&m).Error
 	if err != nil {
-		s.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
     }
 	
-	s.Success(c, m)
+	s.Response.Success(c, m)
 }
 
 ```

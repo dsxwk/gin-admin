@@ -1,3 +1,6 @@
+## v2.2.4
+> - Common response optimization.
+
 ## v2.2.3
 > - Debugger package and Debugger Facade optimization.
 

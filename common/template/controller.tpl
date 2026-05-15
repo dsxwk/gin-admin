@@ -14,5 +14,5 @@ type {{.Name}}Controller struct {
 // @Router {{.Router}} [{{.Method}}]
 func (s *{{.Name}}Controller) {{.Function}}(c *gin.Context) {
     // Define your function here
-    s.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
+    s.Response.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
 }

@@ -23,14 +23,14 @@ func (s Jwt) Handle() gin.HandlerFunc {
 		token := c.Request.Header.Get("token")
 		errCode := errcode.Unauthorized()
 		if token == "" || token == "null" {
-			response.Error(c, errCode)
+			response.Response{}.Error(c, errCode)
 			return
 		}
 
 		data, err := s.Decode(token)
 		if err != nil {
 			errCode = errCode.WithMsg(err.Error())
-			response.Error(c, errCode)
+			response.Response{}.Error(c, errCode)
 			return
 		}
 

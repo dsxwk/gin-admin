@@ -34,7 +34,7 @@ func (s Timeout) Handle(timeout time.Duration) gin.HandlerFunc {
 			return
 
 		case <-ctx.Done():
-			response.Error(c, errcode.TimeoutError())
+			response.Response{}.Error(c, errcode.TimeoutError())
 			return
 		}
 	}
