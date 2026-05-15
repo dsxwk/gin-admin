@@ -348,13 +348,11 @@ func LoadRouters(router *gin.Engine) {
 	r := group.Group("") 
 	{
         r.GET("/global-test1", func(c *gin.Context) {
-            err := errcode.NewError(0, "global test1")
-            response.Success(c, &err)
+            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
         })
 
         r.GET("/global-test2", func(c *gin.Context) {
-            err := errcode.NewError(0, "global test2")
-            response.Success(c, &err)
+            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
         })
     }
 
@@ -366,13 +364,11 @@ func LoadRouters(router *gin.Engine) {
 	r1 := userGroup.Group("")
 	{
 		r1.GET("/user-test1", func(c *gin.Context) {
-            err := errcode.NewError(0, "user test1")
-            response.Success(c, &err)
+            response.Response{}.Success(c, errcode.NewError(0, "user test1"))
         })
 
         r1.GET("/user-test2", func(c *gin.Context) {
-            err := errcode.NewError(0, "user test2")
-            response.Success(c, &err)
+            response.Response{}.Success(c, errcode.NewError(0, "user test2"))
         })
     }
 
@@ -384,13 +380,11 @@ func LoadRouters(router *gin.Engine) {
 	r2 := ipGroup.Group("")
 	{
 		r2.GET("/ip-test1", func(c *gin.Context) {
-            err := errcode.NewError(0, "ip test1")
-            response.Success(c, &err)
+            response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
         })
 
         r2.GET("/ip-test2", func(c *gin.Context) {
-            err := errcode.NewError(0, "ip test2")
-            response.Success(c, &err)
+            response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
 		})
     }
 }

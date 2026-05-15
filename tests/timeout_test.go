@@ -22,13 +22,13 @@ func TestTimeoutMiddleware(t *testing.T) {
 	// 慢接口(3秒)
 	r.GET("/slow", func(c *gin.Context) {
 		time.Sleep(3 * time.Second)
-		response.Success(c, errcode.Success())
+		response.Response{}.Success(c, errcode.Success())
 	})
 
 	// 快接口(1秒)
 	r.GET("/fast", func(c *gin.Context) {
 		time.Sleep(1 * time.Second)
-		response.Success(c, errcode.Success())
+		response.Response{}.Success(c, errcode.Success())
 	})
 
 	t.Run("timeout case", func(t *testing.T) {

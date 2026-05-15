@@ -23,7 +23,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 	r.Use(rateLimitMiddleware.IpRateLimit(1, 1))
 
 	r.GET("/test", func(c *gin.Context) {
-		response.Success(c, errcode.Success())
+		response.Response{}.Success(c, errcode.Success())
 	})
 
 	t.Run("limit trigger", func(t *testing.T) {
