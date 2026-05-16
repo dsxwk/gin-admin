@@ -46,7 +46,7 @@ func (s Jwt) Encode(id int64, accessExp int64) (string, int64, error) {
 	)
 
 	if accessExp == 0 {
-		accessExp = now.Add(time.Duration(config.Jwt{}.Exp) * time.Second).Unix()
+		accessExp = now.Add(time.Duration(config.NewConfig().Jwt.Exp) * time.Second).Unix()
 	} else {
 		accessExp = now.Add(time.Duration(accessExp) * time.Second).Unix()
 	}
@@ -56,7 +56,7 @@ func (s Jwt) Encode(id int64, accessExp int64) (string, int64, error) {
 		"exp": accessExp,
 	})
 
-	jwtToken, err := token.SignedString([]byte(config.Jwt{}.Key))
+	jwtToken, err := token.SignedString([]byte(config.NewConfig().Jwt.Key))
 
 	return jwtToken, accessExp, err
 }
@@ -69,8 +69,7 @@ func (s Jwt) Decode(jwtToken string) (map[string]interface{}, error) {
 			return nil, fmt.Errorf(lang.T(s.Ctx, "middleware.jwt.unsupportedSignatureMethod", nil)+": %v", token.Header["alg"])
 		}
 
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("your_secret_key")
-		return []byte(config.Jwt{}.Key), nil
+		return []byte(config.NewConfig().Jwt.Key), nil
 	})
 
 	if err != nil {
@@ -91,13 +90,13 @@ func (s Jwt) WithRefresh(id, accessExp, refreshExp int64) (accessToken, refreshT
 	)
 
 	if accessExp == 0 {
-		accessExp = now.Add(time.Duration(config.Jwt{}.Exp) * time.Second).Unix()
+		accessExp = now.Add(time.Duration(config.NewConfig().Jwt.Exp) * time.Second).Unix()
 	} else {
 		accessExp = now.Add(time.Duration(accessExp) * time.Second).Unix()
 	}
 
 	if refreshExp == 0 {
-		refreshExp = now.Add(time.Duration(config.Jwt{}.RefreshExp) * time.Second).Unix()
+		refreshExp = now.Add(time.Duration(config.NewConfig().Jwt.RefreshExp) * time.Second).Unix()
 	} else {
 		refreshExp = now.Add(time.Duration(refreshExp) * time.Second).Unix()
 	}
@@ -108,7 +107,7 @@ func (s Jwt) WithRefresh(id, accessExp, refreshExp int64) (accessToken, refreshT
 		"exp": accessExp,
 	}
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessToken, err = at.SignedString([]byte(config.Jwt{}.Key))
+	accessToken, err = at.SignedString([]byte(config.NewConfig().Jwt.Key))
 	if err != nil {
 		return "", "", 0, 0, err
 	}
@@ -120,7 +119,7 @@ func (s Jwt) WithRefresh(id, accessExp, refreshExp int64) (accessToken, refreshT
 		"typ": "refresh", // 标记为 refresh token
 	}
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshToken, err = rt.SignedString([]byte(config.Jwt{}.Key))
+	refreshToken, err = rt.SignedString([]byte(config.NewConfig().Jwt.Key))
 	if err != nil {
 		return "", "", 0, 0, err
 	}
