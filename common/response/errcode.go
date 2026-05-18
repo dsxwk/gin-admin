@@ -15,7 +15,6 @@ type Response struct {
 	Code int64       `json:"code"` // 错误码
 	Msg  string      `json:"msg"`  // 提示信息
 	Data interface{} `json:"data"` // 返回数据
-	log  *logger.Logger
 }
 
 func SetLogger(l *logger.Logger) {
@@ -31,55 +30,38 @@ func (r Response) json(c *gin.Context, httpCode int) {
 
 // Success 返回成功响应,可传ErrorCode
 func (r Response) Success(c *gin.Context, e errcode.ErrorCode) {
-	var (
-		resp Response
-	)
-
+	r.Code = e.Code
 	if e.Msg == "" {
-		e.Msg = errcode.Success().Msg
+		r.Msg = errcode.Success().Msg
+	} else {
+		r.Msg = e.Msg
 	}
 	if e.Data == nil {
-		e.Data = []string{}
+		r.Data = []string{}
 	}
 	if e.HttpCode == 0 {
 		e.HttpCode = 200
 	}
-	resp = Response{
-		Code: e.Code,
-		Msg:  e.Msg,
-		Data: e.Data,
-	}
 
-	resp.json(c, e.HttpCode)
+	r.json(c, e.HttpCode)
 }
 
 // Error 返回失败响应,可传ErrorCode
 func (r Response) Error(c *gin.Context, e errcode.ErrorCode) {
-	var (
-		resp Response
-		ctx  = c.Request.Context()
-	)
-
+	r.Code = e.Code
 	if e.Msg != "" {
-		log.WithDebugger(ctx).Error(e.Msg)
+		r.Msg = e.Msg
+		log.WithDebugger(c.Request.Context()).Error(e.Msg)
 	} else {
-		log.WithDebugger(ctx).Error(errcode.SystemError().Msg)
-	}
-
-	if e.Msg == "" {
-		e.Msg = errcode.SystemError().Msg
+		r.Msg = errcode.SystemError().Msg
+		log.WithDebugger(c.Request.Context()).Error(errcode.SystemError().Msg)
 	}
 	if e.Data == nil {
-		e.Data = []string{}
+		r.Data = []string{}
 	}
 	if e.HttpCode == 0 {
 		e.HttpCode = 500
 	}
-	resp = Response{
-		Code: e.Code,
-		Msg:  e.Msg,
-		Data: e.Data,
-	}
 
-	resp.json(c, e.HttpCode)
+	r.json(c, e.HttpCode)
 }

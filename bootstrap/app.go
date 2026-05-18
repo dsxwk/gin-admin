@@ -8,6 +8,7 @@ import (
 	_ "gin/app/listener"
 	_ "gin/app/provider"
 	"gin/common/flag"
+	"gin/common/response"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/foundation"
@@ -60,6 +61,7 @@ func setupEngine() *gin.Engine {
 	r := gin.New()
 
 	conf := facade.Config()
+	response.SetLogger(facade.Log())
 
 	// 设置运行模式
 	gin.SetMode(conf.App.Mode)
