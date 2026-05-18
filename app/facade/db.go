@@ -7,7 +7,7 @@ import (
 
 // DB 数据库门面-数据库访问统一入口
 func DB(conn ...string) *gorm.DB {
-	name := "mysql"
+	name := Config().Databases.Driver
 	if len(conn) > 0 && conn[0] != "" {
 		name = conn[0]
 	}

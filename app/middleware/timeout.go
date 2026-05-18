@@ -4,7 +4,6 @@ import (
 	"context"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/common/response"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -34,7 +33,7 @@ func (s Timeout) Handle(timeout time.Duration) gin.HandlerFunc {
 			return
 
 		case <-ctx.Done():
-			response.Response{}.Error(c, errcode.TimeoutError())
+			s.Response.Error(c, errcode.TimeoutError())
 			return
 		}
 	}

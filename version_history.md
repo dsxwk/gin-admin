@@ -1,3 +1,6 @@
+## v2.2.5
+> - Optimize public response and database connection.
+
 ## v2.2.4
 > - Common response optimization.
 

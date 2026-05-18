@@ -2,9 +2,12 @@ package response
 
 import (
 	"gin/common/errcode"
-	"gin/config"
 	"gin/pkg/provider/logger"
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	log *logger.Logger
 )
 
 // Response 通用响应结构体
@@ -12,6 +15,11 @@ type Response struct {
 	Code int64       `json:"code"` // 错误码
 	Msg  string      `json:"msg"`  // 提示信息
 	Data interface{} `json:"data"` // 返回数据
+	log  *logger.Logger
+}
+
+func SetLogger(l *logger.Logger) {
+	log = l
 }
 
 // json 输出Json响应
@@ -53,9 +61,9 @@ func (r Response) Error(c *gin.Context, e errcode.ErrorCode) {
 	)
 
 	if e.Msg != "" {
-		logger.NewLogger(config.NewConfig()).WithDebugger(ctx).Error(e.Msg)
+		log.WithDebugger(ctx).Error(e.Msg)
 	} else {
-		logger.NewLogger(config.NewConfig()).WithDebugger(ctx).Error(errcode.SystemError().Msg)
+		log.WithDebugger(ctx).Error(errcode.SystemError().Msg)
 	}
 
 	if e.Msg == "" {

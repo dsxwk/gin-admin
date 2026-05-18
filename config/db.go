@@ -4,7 +4,7 @@ import "time"
 
 // Databases 数据库
 type Databases struct {
-	Default           string        `mapstructure:"default" yaml:"default"`                         // 默认数据库
+	Driver            string        `mapstructure:"driver" yaml:"driver"`                           // 默认数据库
 	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间,超过这个时间会记录到日志中
 	Mysql             Mysql         `mapstructure:"mysql" yaml:"mysql"`                             // mysql
 	Sqlite            Sqlite        `mapstructure:"sqlite" yaml:"sqlite"`                           // sqlite

@@ -98,7 +98,7 @@ func (s Logger) getParams(c *gin.Context) any {
 }
 
 // getLang 获取语言
-func (s *Logger) getLang(c *gin.Context) string {
+func (s Logger) getLang(c *gin.Context) string {
 	// 配置支持的语言如["zh", "en"]
 	supported := strings.Split(conf.I18n.Lang, ",")
 
@@ -118,7 +118,7 @@ func (s *Logger) getLang(c *gin.Context) string {
 }
 
 // matchLang 匹配语言
-func (s *Logger) matchLang(input string, supported []string) string {
+func (s Logger) matchLang(input string, supported []string) string {
 	for _, lang := range supported {
 		lang = strings.ToLower(strings.TrimSpace(lang))
 		// 支持en/en-US/en_US/zh/zh-CN/zh_CN

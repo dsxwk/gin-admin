@@ -6,7 +6,6 @@ import (
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
-	"gin/common/response"
 	"github.com/gin-gonic/gin"
 	"runtime"
 )
@@ -33,7 +32,7 @@ func (s Recover) Handle() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				ctx := c.Request.Context()
 
-				response.Response{}.Error(c, errcode.SystemError().
+				s.Response.Error(c, errcode.SystemError().
 					WithMsg(fmt.Sprintf("%v", err)).
 					WithData(
 						&ErrData{

@@ -5,7 +5,6 @@ import (
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
-	"gin/common/response"
 	"gin/config"
 	"gin/pkg/provider/lang"
 	"github.com/dgrijalva/jwt-go"
@@ -23,14 +22,14 @@ func (s Jwt) Handle() gin.HandlerFunc {
 		token := c.Request.Header.Get("token")
 		errCode := errcode.Unauthorized()
 		if token == "" || token == "null" {
-			response.Response{}.Error(c, errCode)
+			s.Response.Error(c, errCode)
 			return
 		}
 
 		data, err := s.Decode(token)
 		if err != nil {
 			errCode = errCode.WithMsg(err.Error())
-			response.Response{}.Error(c, errCode)
+			s.Response.Error(c, errCode)
 			return
 		}
 

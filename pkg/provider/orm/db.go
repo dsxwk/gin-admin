@@ -26,10 +26,10 @@ var (
 )
 
 // Connection 连接数据库
-func Connection(dbType string, cfg *config.Config) *gorm.DB {
+func Connection(driver string, cfg *config.Config) *gorm.DB {
 	conf = cfg
 	// 每个连接只初始化一次
-	onceAny, _ := dbLocks.LoadOrStore(dbType, &sync.Once{})
+	onceAny, _ := dbLocks.LoadOrStore(driver, &sync.Once{})
 	once := onceAny.(*sync.Once)
 
 	once.Do(func() {
@@ -38,8 +38,8 @@ func Connection(dbType string, cfg *config.Config) *gorm.DB {
 			err error
 		)
 
-		// 根据连接类型打开数据库
-		switch dbType {
+		// 根据连接打开数据库
+		switch driver {
 		case "mysql":
 			db, err = openMysql()
 		case "pgsql":
@@ -49,19 +49,19 @@ func Connection(dbType string, cfg *config.Config) *gorm.DB {
 		case "sqlsrv":
 			db, err = openSqlsrv()
 		default:
-			flag.Errorf("不支持的数据库类型: %s", dbType)
+			flag.Errorf("不支持的数据库: %s", driver)
 			os.Exit(1)
 		}
 
 		if err != nil {
-			flag.Errorf("%s数据库连接失败: %v", dbType, err)
+			flag.Errorf("%s数据库连接失败: %v", driver, err)
 			os.Exit(1)
 		}
 
 		// 配置连接池
 		sqlDB, e := db.DB()
 		if e != nil {
-			flag.Errorf("%s数据库连接池配置失败: %v", dbType, e)
+			flag.Errorf("%s数据库连接池配置失败: %v", driver, e)
 			os.Exit(1)
 		}
 
@@ -73,17 +73,17 @@ func Connection(dbType string, cfg *config.Config) *gorm.DB {
 
 		// 测试Ping
 		if err = sqlDB.Ping(); err != nil {
-			flag.Errorf("%s数据库连接ping失败: %v", dbType, err)
+			flag.Errorf("%s数据库连接ping失败: %v", driver, err)
 			os.Exit(1)
 		}
 
 		// 注册gorm sql回调
 		SqlCallback(db)
 
-		dbInstances[dbType] = db
+		dbInstances[driver] = db
 	})
 
-	return dbInstances[dbType]
+	return dbInstances[driver]
 }
 
 // configNaming 全局表名策略

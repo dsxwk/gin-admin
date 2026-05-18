@@ -1,6 +1,7 @@
 package base
 
 import (
+	"gin/app/facade"
 	"gin/common/ctxkey"
 	"gin/common/response"
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,10 @@ import (
 
 type BaseController struct {
 	Response response.Response
+}
+
+func init() {
+	response.SetLogger(facade.Log())
 }
 
 // GetUserId 获取当前登录用户id
