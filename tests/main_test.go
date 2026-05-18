@@ -2,6 +2,8 @@ package tests
 
 import (
 	"gin/app/facade"
+	"gin/common/flag"
+	"gin/common/response"
 	"gin/pkg/foundation"
 	"os"
 	"testing"
@@ -17,6 +19,13 @@ func TestMain(m *testing.M) {
 
 	// 打印启动信息
 	facade.Log().Info("Test environment initialized")
+	err := app.Boot()
+	if err != nil {
+		flag.Errorf("初始化应用失败: %v", err)
+		os.Exit(1)
+	}
+
+	response.SetLogger(facade.Log())
 
 	// 运行测试
 	code := m.Run()
