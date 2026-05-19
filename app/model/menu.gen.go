@@ -20,10 +20,10 @@ type Menu struct {
 	Status    int64          `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"`       // 状态 1=启用 2=停用
 	Sort      int64          `gorm:"column:sort;type:int(10) unsigned;not null;comment:排序" json:"sort"`                                  // 排序
 	Meta      *JsonValue     `gorm:"column:meta;type:json;comment:meta" json:"meta"`                                                     // meta
-	Children  []pkg.TreeNode `gorm:"-" json:"children"`
-	CreatedAt *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                      // 创建时间
-	UpdatedAt *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                      // 更新时间
-	DeletedAt *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"` // 删除时间
+	Children  []pkg.TreeNode `gorm:"-" json:"children"`                                                                                  // 子节点
+	CreatedAt *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                      // 创建时间
+	UpdatedAt *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                      // 更新时间
+	DeletedAt *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`                 // 删除时间
 }
 
 // TableName Menu's table name

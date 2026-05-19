@@ -195,7 +195,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 
 		var jsonName string
 		if camel {
-			jsonName = fieldName
+			jsonName = lo.CamelCase(fieldName)
 		} else {
 			jsonName = c.Name
 		}
