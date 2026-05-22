@@ -38,6 +38,8 @@ func (r Response) Success(c *gin.Context, e errcode.ErrorCode) {
 	}
 	if e.Data == nil {
 		r.Data = []string{}
+	} else {
+		r.Data = e.Data
 	}
 	if e.HttpCode == 0 {
 		e.HttpCode = 200
@@ -58,6 +60,8 @@ func (r Response) Error(c *gin.Context, e errcode.ErrorCode) {
 	}
 	if e.Data == nil {
 		r.Data = []string{}
+	} else {
+		r.Data = e.Data
 	}
 	if e.HttpCode == 0 {
 		e.HttpCode = 500

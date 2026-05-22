@@ -1,9 +1,9 @@
 package request
 
 type PageListValidate struct {
-	Page     int                    `form:"page" validate:"required|int|gt:0" label:"页码"`
-	PageSize int                    `form:"pageSize" validate:"required|int|gt:0" label:"每页数量"`
-	NotPage  bool                   `form:"notPage" validate:"bool" label:"不分页"`
+	Page     int                    `form:"page" json:"page" validate:"required|int|gt:0" label:"页码"`
+	PageSize int                    `form:"pageSize" json:"pageSize" validate:"required|int|gt:0" label:"每页数量"`
+	NotPage  bool                   `form:"notPage" json:"notPage" validate:"bool" label:"不分页"`
 	Search   map[string]interface{} `form:"__search" json:"__search"`
 	Sort     map[string]interface{} `form:"__sort" json:"__sort"`
 }
