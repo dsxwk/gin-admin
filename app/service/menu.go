@@ -19,6 +19,8 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 		db   = s.DB(&menu)
 	)
 
+	pageData.Page = req.Page
+	pageData.PageSize = req.PageSize
 	offset, limit := request.Pagination(req.Page, req.PageSize)
 
 	if req.Search != nil {

@@ -22,6 +22,8 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 		db = s.DB(&model.User{})
 	)
 
+	pageData.Page = req.Page
+	pageData.PageSize = req.PageSize
 	offset, limit := request.Pagination(req.Page, req.PageSize)
 
 	db = db.Preload("UserRoles")

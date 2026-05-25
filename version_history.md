@@ -1,3 +1,6 @@
+## v2.2.6
+> - Fix the request facade parameter binding and validation.
+
 ## v2.2.5
 > - Optimize public response and database connection.
 

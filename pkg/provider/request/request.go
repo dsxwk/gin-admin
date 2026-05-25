@@ -2,6 +2,7 @@ package request
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/validate"
 	"strconv"
@@ -95,19 +96,26 @@ func (c Client[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
 
 // Bind 绑定请求参数
 func (c Client[T]) Bind(ctx *gin.Context, v any) error {
-	ct := ctx.ContentType()
-
-	switch {
-	case strings.HasPrefix(ct, "application/json"):
-		return ctx.ShouldBindJSON(v)
-
-	case strings.HasPrefix(ct, "application/x-www-form-urlencoded"),
-		strings.HasPrefix(ct, "multipart/form-data"):
-		return ctx.ShouldBind(v)
-
-	default:
-		return ctx.ShouldBind(v)
+	// 先绑定Query参数
+	if err := ctx.ShouldBindQuery(v); err != nil {
+		return fmt.Errorf("bind query error: %w", err)
 	}
+
+	// 如果有请求体再绑定Body
+	if ctx.Request.ContentLength > 0 {
+		switch {
+		case strings.HasPrefix(ctx.ContentType(), "application/json"):
+			if err := ctx.ShouldBindJSON(v); err != nil {
+				return fmt.Errorf("bind json error: %w", err)
+			}
+		default:
+			if err := ctx.ShouldBind(v); err != nil {
+				return fmt.Errorf("bind form error: %w", err)
+			}
+		}
+	}
+
+	return nil
 }
 
 // BindValidate 绑定参数并验证
