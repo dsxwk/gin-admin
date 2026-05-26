@@ -35,10 +35,11 @@
     - [模型创建帮助](#模型创建帮助)
     - [模型创建](#模型创建)
     - [ORM动态筛选](#ORM动态筛选)
-    - [OR条件查询](#OR条件查询)
-    - [AND条件查询](#AND条件查询)
-    - [json字段查询](#json字段查询)
-    - [复杂查询](#复杂查询)
+      - [OR条件查询](#OR条件查询)
+      - [AND条件查询](#AND条件查询)
+      - [json字段查询](#json字段查询)
+      - [复杂查询](#复杂查询)
+      - [查询示例](#查询示例)
   - [表单验证](#表单验证)
     - [验证创建帮助](#验证创建帮助)
     - [验证创建](#验证创建)
@@ -135,7 +136,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.2.6
+> - 最新版本: v2.2.7
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
@@ -615,6 +616,53 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 ```
 ```sql
  SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
+```
+
+### 查询示例
+```go
+package service
+
+import (
+	"errors"
+	"gin/app/model"
+	"gin/app/request"
+	"gin/common/base"
+	"gin/pkg"
+	"github.com/samber/lo"
+	"time"
+)
+
+type UserService struct {
+	base.BaseService
+}
+
+// List 列表
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+	var (
+		m  []model.User
+		db = s.DB(&model.User{})
+	)
+
+	pageData.Page = req.Page
+	pageData.PageSize = req.PageSize
+	offset, limit := request.Pagination(req.Page, req.PageSize)
+	// 搜索
+	db = s.Search(db, req.Search)
+
+	db = db.Preload("UserRoles")
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
+
+	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+	if err != nil {
+		return pageData, err
+	}
+	pageData.List = m
+
+	return pageData, nil
+}
 ```
 
 ## 表单验证

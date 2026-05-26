@@ -22,6 +22,9 @@ func (r *MenuRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 	{
 		// 列表
 		router.GET("/menu", menu.List)
+
+		// 角色菜单
+		router.GET("/role-menu", menu.RoleMenu)
 	}
 }
 

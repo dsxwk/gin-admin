@@ -1,3 +1,6 @@
+## v2.2.7
+> - Optimize gorm dynamic query and complete the query example document.
+
 ## v2.2.6
 > - Fix the request facade parameter binding and validation.
 

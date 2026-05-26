@@ -77,10 +77,15 @@ SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created
 
 // BuildCondition 构建动态sql条件
 // filters: map[string]interface{}格式参考示例
-// model: 必须是非切片类型模型,用于解析schema
-func BuildCondition(filters map[string]interface{}, db *gorm.DB, model interface{}) (string, []interface{}, error) {
+// db: 必须已经通过Model()或Table()设置了模型
+func BuildCondition(db *gorm.DB, filters map[string]interface{}) (string, []interface{}, error) {
+	// 从 db.Statement 获取模型
+	if db.Statement == nil || db.Statement.Model == nil {
+		return "", nil, fmt.Errorf("db must have a model, please use db.Model() first")
+	}
+
 	stmt := &gorm.Statement{DB: db}
-	if err := stmt.Parse(model); err != nil {
+	if err := stmt.Parse(db.Statement.Model); err != nil {
 		return "", nil, err
 	}
 

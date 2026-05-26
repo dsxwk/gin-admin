@@ -49,3 +49,36 @@ func (s *MenuController) List(c *gin.Context) {
 
 	s.Response.Success(c, errcode.Success().WithData(res))
 }
+
+// RoleMenu 角色菜单
+// @Tags 菜单管理
+// @Summary 角色菜单
+// @Description 角色菜单
+// @Param token header string true "认证Token"
+// @Success 200 {object} errcode.SuccessResponse{data=[]pkg.TreeNode} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/role-menu [get]
+func (s *MenuController) RoleMenu(c *gin.Context) {
+	var (
+		ctx = c.Request.Context()
+		req request.Menu
+	)
+
+	s.service.WithContext(c.Request.Context())
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "RoleMenu")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	res, err := s.service.RoleMenu(req)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(res))
+}

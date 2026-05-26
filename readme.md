@@ -35,10 +35,11 @@
     - [Model Creation Help](#Model-Creation-Help)
     - [Model Creation](#Model-Creation)
     - [ORM Dynamic Filtering](#ORM-Dynamic-Filtering)
-    - [OR Condition Query](#OR-Condition-Query)
-    - [AND Condition Query](#AND-Condition-Query)
-    - [JSON Field Query](#JSON-Field-Query)
-    - [Complex Condition Query](#Complex-Condition-Query)
+      - [OR Condition Query](#OR-Condition-Query)
+      - [AND Condition Query](#AND-Condition-Query)
+      - [JSON Field Query](#JSON-Field-Query)
+      - [Complex Condition Query](#Complex-Condition-Query)
+        - [Query Example](#Query-Example)
   - [Form Validation](#Form-Validation)
     - [Validator Creation Help](#Validator-Creation-Help)
     - [Validator Creation](#Validator-Creation)
@@ -135,7 +136,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.2.6
+> - Latest Version: v2.2.7
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -614,6 +615,53 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 ```
 ```sql
  SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
+```
+
+### Query Example
+```go
+package service
+
+import (
+	"errors"
+	"gin/app/model"
+	"gin/app/request"
+	"gin/common/base"
+	"gin/pkg"
+	"github.com/samber/lo"
+	"time"
+)
+
+type UserService struct {
+	base.BaseService
+}
+
+// List
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+	var (
+		m  []model.User
+		db = s.DB(&model.User{})
+	)
+
+	pageData.Page = req.Page
+	pageData.PageSize = req.PageSize
+	offset, limit := request.Pagination(req.Page, req.PageSize)
+	// Search
+	db = s.Search(db, req.Search)
+
+	db = db.Preload("UserRoles")
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
+
+	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+	if err != nil {
+		return pageData, err
+	}
+	pageData.List = m
+
+	return pageData, nil
+}
 ```
 
 ## Form Validation

@@ -6,7 +6,6 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/provider/orm"
 	"github.com/samber/lo"
 	"time"
 )
@@ -25,20 +24,10 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 	pageData.Page = req.Page
 	pageData.PageSize = req.PageSize
 	offset, limit := request.Pagination(req.Page, req.PageSize)
+	// 搜索
+	db = s.Search(db, req.Search)
 
 	db = db.Preload("UserRoles")
-
-	if req.Search != nil {
-		whereSql, args, _err := orm.BuildCondition(req.Search, db, model.User{})
-		if _err != nil {
-			return pageData, err
-		}
-
-		if whereSql != "" {
-			db = db.Where(whereSql, args...)
-		}
-	}
-
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
 		return pageData, err

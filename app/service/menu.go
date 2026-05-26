@@ -4,7 +4,7 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg/provider/orm"
+	"gin/pkg"
 )
 
 type MenuService struct {
@@ -22,17 +22,8 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 	pageData.Page = req.Page
 	pageData.PageSize = req.PageSize
 	offset, limit := request.Pagination(req.Page, req.PageSize)
-
-	if req.Search != nil {
-		whereSql, args, _err := orm.BuildCondition(req.Search, db, menu)
-		if _err != nil {
-			return pageData, err
-		}
-
-		if whereSql != "" {
-			db = db.Where(whereSql, args...)
-		}
-	}
+	// 搜索
+	db = s.Search(db, req.Search)
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -54,4 +45,29 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 	}
 
 	return pageData, nil
+}
+
+// RoleMenu 角色菜单
+func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error) {
+	var (
+		m     []model.Menu
+		menu  model.Menu
+		db    = s.DB(&menu)
+		total int64
+	)
+
+	// 搜索
+	db = s.Search(db, req.Search)
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return tree, err
+	}
+
+	err = db.Order("id DESC").Find(&m).Error
+	if err != nil {
+		return tree, err
+	}
+
+	return menu.GetTree(m), nil
 }
