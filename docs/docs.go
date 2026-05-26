@@ -213,6 +213,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/role/{roleId}/menu": {
+            "get": {
+                "description": "角色菜单",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "角色菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user": {
             "get": {
                 "description": "用户列表",
@@ -569,16 +620,11 @@ const docTemplate = `{
                 }
             }
         },
-        "model.JsonValue": {
-            "type": "object",
-            "properties": {
-                "data": {}
-            }
-        },
         "model.Menu": {
             "type": "object",
             "properties": {
                 "children": {
+                    "description": "子节点",
                     "type": "array",
                     "items": {}
                 },
@@ -598,11 +644,18 @@ const docTemplate = `{
                     "description": "是否外链 1=是 2=否 默认=2",
                     "type": "integer"
                 },
+                "menuActions": {
+                    "description": "菜单功能",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.MenuActions"
+                    }
+                },
                 "meta": {
                     "description": "meta",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.JsonValue"
+                            "$ref": "#/definitions/model.Meta"
                         }
                     ]
                 },
@@ -622,6 +675,13 @@ const docTemplate = `{
                     "description": "重定向",
                     "type": "string"
                 },
+                "roleMenus": {
+                    "description": "角色菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.RoleMenus"
+                    }
+                },
                 "sort": {
                     "description": "排序",
                     "type": "integer"
@@ -632,6 +692,150 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "model.MenuActions": {
+            "type": "object",
+            "properties": {
+                "authValue": {
+                    "type": "string"
+                },
+                "btnSize": {
+                    "type": "string"
+                },
+                "btnStyle": {
+                    "type": "string"
+                },
+                "btnType": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isConfirm": {
+                    "type": "integer"
+                },
+                "isLink": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "menuId": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "$ref": "#/definitions/model.MenuActions"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "roleActions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.RoleActions"
+                    }
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Meta": {
+            "type": "object",
+            "properties": {
+                "authBtnList": {
+                    "description": "按钮权限列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.MenuActions"
+                    }
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "isAffix": {
+                    "type": "boolean"
+                },
+                "isHide": {
+                    "type": "boolean"
+                },
+                "isIframe": {
+                    "description": "是否内嵌，开启条件，` + "`" + `1、isIframe:true 2、isLink：链接地址不为空` + "`" + `",
+                    "type": "boolean"
+                },
+                "isKeepAlive": {
+                    "type": "boolean"
+                },
+                "isLink": {
+                    "description": "外链/内嵌时链接地址（http:xxx.com），开启外链条件，` + "`" + `1、isLink: 链接地址不为空` + "`" + `",
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "权限标识，取角色管理",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.RoleActions": {
+            "type": "object",
+            "properties": {
+                "actionId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "roleId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.RoleMenus": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "menuId": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "roleId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

@@ -9,6 +9,7 @@
     - [Method One](#Method-One)
     - [Method Two](#Method-Two)
   - [Start](#Start)
+  - [Initialize Database](#Initialize-Database)
     - [Use Air Hot Update](#Use-Air-Hot-Update)
   - [Compile](#Compile)
     - [Compile Project](#Compile-Project)
@@ -136,17 +137,19 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.2.7
+> - Latest Version: v2.2.8
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
 > The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
+
 ## Clone Project
 ```bash
 $ git clone https://github.com/dsxwk/gin.git
 $ cd gin
 $ copy dev.config.yaml.example dev.config.yaml
 ```
+
 ## Initialize Go Environment And Dependencies
 ### Method One
 ```bash
@@ -162,6 +165,12 @@ $ go mod tidy
 # $ go mod download
 $ go mod vendor
 ```
+
+## Initialize Database
+```bash
+$ go run ./cmd/cli.go db:seed --init=true
+```
+
 ## Start
 ```bash
 $ go run main.go

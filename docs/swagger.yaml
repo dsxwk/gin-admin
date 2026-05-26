@@ -29,13 +29,10 @@ definitions:
         example: Internal server error
         type: string
     type: object
-  model.JsonValue:
-    properties:
-      data: {}
-    type: object
   model.Menu:
     properties:
       children:
+        description: 子节点
         items: {}
         type: array
       component:
@@ -50,9 +47,14 @@ definitions:
       isLink:
         description: 是否外链 1=是 2=否 默认=2
         type: integer
+      menuActions:
+        description: 菜单功能
+        items:
+          $ref: '#/definitions/model.MenuActions'
+        type: array
       meta:
         allOf:
-        - $ref: '#/definitions/model.JsonValue'
+        - $ref: '#/definitions/model.Meta'
         description: meta
       name:
         description: 路由名称
@@ -66,6 +68,11 @@ definitions:
       redirect:
         description: 重定向
         type: string
+      roleMenus:
+        description: 角色菜单
+        items:
+          $ref: '#/definitions/model.RoleMenus'
+        type: array
       sort:
         description: 排序
         type: integer
@@ -74,6 +81,102 @@ definitions:
         type: integer
       updatedAt:
         description: 更新时间
+        type: string
+    type: object
+  model.MenuActions:
+    properties:
+      authValue:
+        type: string
+      btnSize:
+        type: string
+      btnStyle:
+        type: string
+      btnType:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      isConfirm:
+        type: integer
+      isLink:
+        type: integer
+      label:
+        type: string
+      menuId:
+        type: integer
+      parent:
+        $ref: '#/definitions/model.MenuActions'
+      pid:
+        type: integer
+      roleActions:
+        items:
+          $ref: '#/definitions/model.RoleActions'
+        type: array
+      sort:
+        type: integer
+      type:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  model.Meta:
+    properties:
+      authBtnList:
+        description: 按钮权限列表
+        items:
+          $ref: '#/definitions/model.MenuActions'
+        type: array
+      icon:
+        type: string
+      isAffix:
+        type: boolean
+      isHide:
+        type: boolean
+      isIframe:
+        description: 是否内嵌，开启条件，`1、isIframe:true 2、isLink：链接地址不为空`
+        type: boolean
+      isKeepAlive:
+        type: boolean
+      isLink:
+        description: '外链/内嵌时链接地址（http:xxx.com），开启外链条件，`1、isLink: 链接地址不为空`'
+        type: string
+      roles:
+        description: 权限标识，取角色管理
+        items:
+          type: integer
+        type: array
+      title:
+        type: string
+    type: object
+  model.RoleActions:
+    properties:
+      actionId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      roleId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  model.RoleMenus:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      menuId:
+        type: integer
+      name:
+        type: string
+      roleId:
+        type: integer
+      updatedAt:
         type: string
     type: object
   model.User:
@@ -355,6 +458,37 @@ paths:
       summary: 刷新token
       tags:
       - 登录相关
+  /api/v1/role/{roleId}/menu:
+    get:
+      description: 角色菜单
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items: {}
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 角色菜单
+      tags:
+      - 菜单管理
   /api/v1/user:
     get:
       description: 用户列表

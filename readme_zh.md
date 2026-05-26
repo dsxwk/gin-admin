@@ -8,6 +8,7 @@
   - [初始化Go环境与依赖](#初始化Go环境与依赖)
     - [方式一](#方式一)
     - [方式二](#方式二)
+  - [初始化数据库](#初始化数据库)
   - [启动](#启动)
     - [使用air热更新](#使用air热更新)
   - [编译](#编译)
@@ -136,17 +137,19 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.2.7
+> - 最新版本: v2.2.8
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
 > 项目基于Golang 1.25.2版本开发, 低版本可能存在版本差异, 建议版本 >= 1.25.2。
+
 ## 克隆项目
 ```bash
 $ git clone https://github.com/dsxwk/gin.git
 $ cd gin
 $ copy dev.config.yaml.example dev.config.yaml
 ```
+
 ## 初始化Go环境与依赖
 ### 方式一
 ```bash
@@ -162,6 +165,12 @@ $ go mod tidy
 # $ go mod download
 $ go mod vendor
 ```
+
+## 初始化数据库
+```bash
+$ go run ./cmd/cli.go db:seed --init=true
+```
+
 ## 启动
 ```bash
 $ go run main.go
