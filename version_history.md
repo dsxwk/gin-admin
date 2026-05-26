@@ -1,3 +1,9 @@
+## v2.2.8
+> - Database backup file
+> - Document update
+> - Optimize database seed command to add initialization options
+> - Add role menu apis
+
 ## v2.2.7
 > - Optimize gorm dynamic query and complete the query example document.
 
