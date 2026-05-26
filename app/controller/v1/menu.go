@@ -58,7 +58,7 @@ func (s *MenuController) List(c *gin.Context) {
 // @Success 200 {object} errcode.SuccessResponse{data=[]pkg.TreeNode} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
-// @Router /api/v1/role-menu [get]
+// @Router /api/v1/role/{roleId}/menu [get]
 func (s *MenuController) RoleMenu(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
@@ -66,6 +66,8 @@ func (s *MenuController) RoleMenu(c *gin.Context) {
 	)
 
 	s.service.WithContext(c.Request.Context())
+
+	req.RoleId = facade.Request[string]().Path(c, "roleId", "0")
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "RoleMenu")

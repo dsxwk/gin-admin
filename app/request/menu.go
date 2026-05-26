@@ -10,6 +10,7 @@ import (
 type Menu struct {
 	base.BaseRequest
 	PageListValidate
+	RoleId string `json:"roleId" form:"roleId" validate:"required" label:"角色id"`
 }
 
 // Validate 请求验证
@@ -27,11 +28,12 @@ func (s Menu) Validate(data Menu, scene string) error {
 // - 也可以添加验证设置
 func (s Menu) ConfigValidation(v *validate.Validation) {
 	v.WithScenes(validate.SValues{
-		"list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"create": []string{},
-		"update": []string{"ID"},
-		"detail": []string{"ID"},
-		"delete": []string{"ID"},
+		"List":     []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+		"RoleMenu": []string{"RoleId"},
+		"Create":   []string{},
+		"Update":   []string{"ID"},
+		"Detail":   []string{"ID"},
+		"Delete":   []string{"ID"},
 	})
 }
 

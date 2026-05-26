@@ -5,6 +5,7 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
+	"strings"
 )
 
 type MenuService struct {
@@ -56,6 +57,8 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 		total int64
 	)
 
+	roleIds := strings.Split(req.RoleId, ",")
+
 	// 搜索
 	db = s.Search(db, req.Search)
 
@@ -64,7 +67,15 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 		return tree, err
 	}
 
-	err = db.Order("id DESC").Find(&m).Error
+	err = db.
+		Preload("RoleMenus").
+		Preload("MenuActions").
+		Preload("MenuActions.RoleActions", "role_id IN ?", roleIds).
+		Joins("LEFT JOIN role_menus ON menu.id = role_menus.menu_id").
+		Where("role_menus.role_id IN ?", roleIds).
+		Order("sort asc").
+		Group("menu.id").
+		Find(&m).Error
 	if err != nil {
 		return tree, err
 	}

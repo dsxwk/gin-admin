@@ -123,6 +123,10 @@ func (c Client[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
 	if err := c.Bind(ctx, v); err != nil {
 		return err
 	}
+	// 场景为空不验证
+	if scene == "" {
+		return nil
+	}
 	return c.Validate(v, scene)
 }
 
