@@ -489,6 +489,27 @@ paths:
       summary: 角色菜单
       tags:
       - 菜单管理
+  /api/v1/test:
+    post:
+      consumes:
+      - application/json
+      description: 测试
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  additionalProperties: {}
+                  type: object
+              type: object
+      summary: 测试
+      tags:
+      - 登录相关
   /api/v1/user:
     get:
       description: 用户列表

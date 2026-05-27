@@ -15,107 +15,110 @@
     - [Compile Project](#Compile-Project)
     - [Compile Command](#Compile-Command)
 - [Directory Structure](#Directory-Structure)
-- [Instructions For Use](#Instructions-For-Use)
-  - [Start Service](#Start-Service)
-    - [Air Hot Update](#Air-Hot-Update)
-  - [Configuration File](#Configuration-File)
-    - [Project Configuration](#Project-Configuration)
-    - [Hot Update Configuration](#Hot-Update-Configuration)
-  - [Middleware](#Middleware)
-    - [Middleware Creation Help](#Middleware-Creation-Help)
-    - [Middleware Creation](#Middleware-Creation)
-    - [Rate Limit Middleware](#Rate-Limit-Middleware)
-  - [Route](#Route)
-    - [Route Creation Help](#Route-Creation-Help)
-    - [Route Creation](#Route-Creation)
-    - [Route List](#Route-List)
-  - [Controller](#Controller)
-    - [Controller Creation Help](#Controller-Creation-Help)
-    - [Controller Creation](#Controller-Creation)
-  - [Model](#Model)
-    - [Model Creation Help](#Model-Creation-Help)
-    - [Model Creation](#Model-Creation)
-    - [ORM Dynamic Filtering](#ORM-Dynamic-Filtering)
-      - [OR Condition Query](#OR-Condition-Query)
-      - [AND Condition Query](#AND-Condition-Query)
-      - [JSON Field Query](#JSON-Field-Query)
-      - [Complex Condition Query](#Complex-Condition-Query)
-        - [Query Example](#Query-Example)
-  - [Form Validation](#Form-Validation)
-    - [Validator Creation Help](#Validator-Creation-Help)
-    - [Validator Creation](#Validator-Creation)
-    - [Validator Rules](#Validator-Rules)
-    - [Validator Scenes](#Validator-Scenes)
-    - [Prompt Message](#Prompt-Message)
-    - [Field Translation](#Field-Translation)
-    - [Custom Validation](#Custom-Validation)
-      - [Global Rules](#Global-Rules)
-      - [Local Rules](#Local-Rules)
-      - [Temporary Rules](#Temporary-Rules)
-      - [Validator Usage](#Validator-Usage)
-      - [Used In The Controller](#Used-In-The-Controller)
-  - [Service](#Service)
-    - [Service Creation Help](#Service-Creation-Help)
-    - [Service Creation](#Service-Creation)
-  - [Command](#Command)
-    - [Get Version](#Get-Version)
-    - [Command Help](#Command-Help)
-    - [Command List](#Command-List)
-    - [Command Creation Help](#Command-Creation-Help)
-    - [Command Creation](#Command-Creation)
-    - [Command Structure](#Command-Structure)
-    - [Command Registration](#Command-Registration)
-    - [Help Options](#Help-Options)
-    - [Execute Command](#Execute-Command)
-    - [Compile And Execute Commands](#Compile-And-Execute-Commands)
-  - [Cache](#Cache)
-    - [Global Cache](#Global-Cache)
-    - [Redis Cache](#Redis-Cache)
-    - [Memory Cache](#Memory-Cache)
-    - [Disk Cache](#Disk-Cache)
-  - [Event](#Event)
-    - [Event Creation Help](#Event-Creation-Help)
-    - [Event Creation](#Event-Creation)
-  - [Listener](#Listener)
-    - [Listener Creation Help](#Listener-Creation-Help)
-    - [Listener Creation](#Listener-Creation)
-  - [Queue](#Queue)
-    - [Queue Creation Help](#Queue-Creation-Help)
-    - [Queue Creation](#Queue-Creation)
-    - [Queue Usage](#Queue-Usage)
-    - [Consumer List](#Consumer-List)
-    - [Producer List](#Producer-List)
-  - [Publish Event](#Publish-Event)
-    - [Event Test](#Event-Test)
-  - [Event List](#Event-List)
-    - [Event Listener List](#Event-Listener-List)
-  - [Response](#Response)
-    - [Response Success](#Response-Success)
-      - [Response Success With Message](#Response-Success-With-Message)
-      - [Response Success With Data](#Response-Success-With-Data)
-    - [Response Error](#Response-Error)
-      - [Response Error With Code](#Response-Error-With-Code)
-      - [Response Error With Message](#Response-Error-With-Message)
-      - [Response Error With Data](#Response-Error-With-Data)
-      - [Response Error With HTTP Code](#Response-Error-With-HTTP-Code)
-  - [Log](#Log)
-    - [Write Log](#Write-Log)
-    - [Error Debug](#Error-Debug)
-  - [Language Support](#Language-Support)
-    - [Directory Configuration](#Directory-Configuration) 
-    - [Ordinary Translation](#Ordinary-Translation) 
-    - [Template Translation](#Template-Translation) 
-    - [Add Language Support](#Add-Language-Support) 
-  - [Service Provider](#Service-Provider)
-    - [Service Provider Creation](#Service-Provider-Creation)
-  - [Facade](#Facade)
-    - [Facade Creation](#Facade-Creation)
-    - [Facade Usage](#Facade-Usage)
-  - [Database](#Database)
-    - [Database Configuration](#Database-Configuration)
-    - [Database Connection](#Database-Connection)
-    - [Database Search](#Database-Search)
-  - [Swagger Documents](#Swagger-Documents)
+- [Start Service](#Start-Service)
+  - [Air Hot Update](#Air-Hot-Update)
+- [Configuration File](#Configuration-File)
+  - [Project Configuration](#Project-Configuration)
+  - [Hot Update Configuration](#Hot-Update-Configuration)
+- [Middleware](#Middleware)
+  - [Middleware Creation Help](#Middleware-Creation-Help)
+  - [Middleware Creation](#Middleware-Creation)
+  - [Rate Limit Middleware](#Rate-Limit-Middleware)
+- [Route](#Route)
+  - [Route Creation Help](#Route-Creation-Help)
+  - [Route Creation](#Route-Creation)
+  - [Route List](#Route-List)
+- [Controller](#Controller)
+  - [Controller Creation Help](#Controller-Creation-Help)
+  - [Controller Creation](#Controller-Creation)
+- [Model](#Model)
+  - [Model Creation Help](#Model-Creation-Help)
+  - [Model Creation](#Model-Creation)
+  - [ORM Dynamic Filtering](#ORM-Dynamic-Filtering)
+    - [OR Condition Query](#OR-Condition-Query)
+    - [AND Condition Query](#AND-Condition-Query)
+    - [JSON Field Query](#JSON-Field-Query)
+    - [Complex Condition Query](#Complex-Condition-Query)
+    - [Query Example](#Query-Example)
+- [Form Validation](#Form-Validation)
+  - [Validator Creation Help](#Validator-Creation-Help)
+  - [Validator Creation](#Validator-Creation)
+  - [Validator Rules](#Validator-Rules)
+  - [Validator Scenes](#Validator-Scenes)
+  - [Prompt Message](#Prompt-Message)
+  - [Field Translation](#Field-Translation)
+  - [Custom Validation](#Custom-Validation)
+    - [Global Rules](#Global-Rules)
+    - [Local Rules](#Local-Rules)
+    - [Temporary Rules](#Temporary-Rules)
+    - [Validator Usage](#Validator-Usage)
+    - [Used In The Controller](#Used-In-The-Controller)
+- [Service](#Service)
+  - [Service Creation Help](#Service-Creation-Help)
+  - [Service Creation](#Service-Creation)
+- [Command](#Command)
+  - [Get Version](#Get-Version)
+  - [Command Help](#Command-Help)
+  - [Command List](#Command-List)
+  - [Command Creation Help](#Command-Creation-Help)
+  - [Command Creation](#Command-Creation)
+  - [Command Structure](#Command-Structure)
+  - [Command Registration](#Command-Registration)
+  - [Help Options](#Help-Options)
+  - [Execute Command](#Execute-Command)
+  - [Compile And Execute Commands](#Compile-And-Execute-Commands)
+- [Cache](#Cache)
+  - [Global Cache](#Global-Cache)
+  - [Redis Cache](#Redis-Cache)
+  - [Memory Cache](#Memory-Cache)
+  - [Disk Cache](#Disk-Cache)
+- [Event](#Event)
+  - [Event Creation Help](#Event-Creation-Help)
+  - [Event Creation](#Event-Creation)
+- [Listener](#Listener)
+  - [Listener Creation Help](#Listener-Creation-Help)
+  - [Listener Creation](#Listener-Creation)
+- [Queue](#Queue)
+  - [Queue Creation Help](#Queue-Creation-Help)
+  - [Queue Creation](#Queue-Creation)
+  - [Queue Usage](#Queue-Usage)
+  - [Consumer List](#Consumer-List)
+  - [Producer List](#Producer-List)
+- [Publish Event](#Publish-Event)
+  - [Event Test](#Event-Test)
+- [Event List](#Event-List)
+  - [Event Listener List](#Event-Listener-List)
+- [Response](#Response)
+  - [Response Success](#Response-Success)
+    - [Response Success With Message](#Response-Success-With-Message)
+    - [Response Success With Data](#Response-Success-With-Data)
+  - [Response Error](#Response-Error)
+    - [Response Error With Code](#Response-Error-With-Code)
+    - [Response Error With Message](#Response-Error-With-Message)
+    - [Response Error With Data](#Response-Error-With-Data)
+    - [Response Error With HTTP Code](#Response-Error-With-HTTP-Code)
+- [Log](#Log)
+  - [Write Log](#Write-Log)
+  - [Error Debug](#Error-Debug)
+- [Language Support](#Language-Support)
+  - [Directory Configuration](#Directory-Configuration) 
+  - [Ordinary Translation](#Ordinary-Translation) 
+  - [Template Translation](#Template-Translation) 
+  - [Add Language Support](#Add-Language-Support) 
+- [Service Provider](#Service-Provider)
+  - [Service Provider Creation](#Service-Provider-Creation)
+- [Facade](#Facade)
+  - [Facade Creation](#Facade-Creation)
+  - [Facade Usage](#Facade-Usage)
+- [Enum](#Enum)
+  - [Enum Creation](#Enum-Creation)
+  - [Enum Example](#Enum-Example)
+  - [Enum Usage](#Enum-Usage)
+- [Database](#Database)
+  - [Database Configuration](#Database-Configuration)
+  - [Database Connection](#Database-Connection)
+  - [Database Search](#Database-Search)
+- [Swagger Documents](#Swagger-Documents)
 
 # Project Introduction
 > A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`, `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
@@ -201,6 +204,7 @@ Excute Command: demo:command, Argument: 11
 ├── app                                 # Application
 │   ├── command                         # Command
 │   ├── controller                      # Controller
+│   ├── enum                            # Enum
 │   ├── event                           # Event
 │   ├── facade                          # Facade
 │   ├── listener                        # Listener
@@ -269,12 +273,11 @@ Excute Command: demo:command, Argument: 11
 └── version_history_zh.md               # Version History Chinese Document
 ```
 
-# Instructions For Use
-## Start Service
+# Start Service
 ```bash
 $ go run main.go
 ```
-### Air Hot Update
+## Air Hot Update
 ```bash
 $ go install github.com/air-verse/air@latest
 $ air
@@ -303,23 +306,29 @@ Database:              gin
  SUCCESS  Gin server started successfully!
 ```
 
-## Configuration File
-### Project Configuration
+# Configuration File
+## Project Configuration
 > `config.yaml` is the default configuration file and can be modified by oneself. `dev.config.yaml` corresponds to the local environment configuration, and environment variables can be configured through the following app.exe file to switch environments
 > ```
 > app:
 >   env: dev # dev|testing|production dev=local-environment testing=test-environment production=production-environment
 > ```
 
-### Hot Update Configuration
+## Hot Update Configuration
 > `.air.toml` is the default configuration file in Windows environment, and `.air.Linux.toml` is the default configuration file in Linux environment. You can modify it according to the overall needs of the project.
 
-## Middleware
+# Middleware
 > `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
-### Middleware Creation Help
+## Middleware Creation Help
 ```bash
 $ go run ./cmd/cli.go make:middleware -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -332,12 +341,12 @@ Options:
   -d, --desc  Description, Expample: Authorization-Middleware  required:false
 ```
 
-### Middleware Creation
+## Middleware Creation
 ```bash
 $ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middleware
 ```
 
-### Rate Limit Middleware
+## Rate Limit Middleware
 > The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow limiting, IP interface flow limiting, and global flow limiting.
 ```go
 package router
@@ -398,12 +407,18 @@ func LoadRouters(router *gin.Engine) {
 }
 ```
 
-## Route
+# Route
 > The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need to be defaulted.
-### Route Creation Help
+## Route Creation Help
 ```bash
 $ go run ./cmd/cli.go make:router -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -416,7 +431,7 @@ Options:
   -d, --desc  Route Description, Expample: User-Routing   required:false
 ```
 
-### Route Creation
+## Route Creation
 ```bash
 $ go run ./cmd/cli.go make:router --file=user --desc=User-Routing
 ```
@@ -463,7 +478,7 @@ func (r *UserRouter) IsAuth() bool {
 
 ```
 
-### Route List
+## Route List
 ```bash
 $ go run ./cmd/cli.go route:list
 
@@ -484,11 +499,17 @@ GET      /swagger/*any                       github.com/swaggo/gin-swagger.Custo
 A total of 10 routes
 ```
 
-## Controller
-### Controller Creation Help
+# Controller
+## Controller Creation Help
 ```bash
 $ go run ./cmd/cli.go make:controller -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -504,7 +525,7 @@ Options:
   -d, --desc      Description, Example: Test-List   required:false
 ```
 
-### Controller Creation
+## Controller Creation
 ```bash
 $ go run ./cmd/cli.go make:controller --file=v1/test --router=/test --method=get --desc=Test-List --function=list
 ```
@@ -528,11 +549,17 @@ func (s *TestController) List(c *gin.Context) {
     s.Response.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
 }
 ```
-## Model
-### Model Creation Help
+# Model
+## Model Creation Help
 ```bash
 $ go run ./cmd/cli.go make:model -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -547,7 +574,7 @@ Options:
   -C, --connection  Database Connection                        required:false
 ```
 
-### Model Creation
+## Model Creation
 > Support the creation of multiple model files simultaneously. If multiple model files need to be created, please separate the table name parameters of the descendants with commas, such as: user, menu
 ```bash
 $ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
@@ -673,11 +700,17 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 }
 ```
 
-## Form Validation
-### Validator Creation Help
+# Form Validation
+## Validator Creation Help
 ```bash
 $ go run ./cmd/cli.go make:request -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -693,7 +726,7 @@ Options:
   -C, --connection  Database connection                        required:false
 ```
 
-### Validator Creation
+## Validator Creation
 ```bash
 $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-request-validation
 ```
@@ -777,7 +810,7 @@ type Roles struct {
 }
 ```
 
-### Validator Scenes
+## Validator Scenes
 ```go
 package request
 
@@ -796,7 +829,7 @@ func (s Roles) ConfigValidation(v *validate.Validation) {
 }
 ```
 
-### Prompt Message
+## Prompt Message
 ```go
 package request
 
@@ -811,7 +844,7 @@ func (s Roles) Messages() map[string]string {
 }
 ```
 
-### Field Translation
+## Field Translation
 ```go
 package request
 
@@ -828,8 +861,8 @@ func (s Roles) Translates() map[string]string {
 }
 ```
 
-### Custom Validation
-#### Global Rules
+## Custom Validation
+### Global Rules
 > Global rules only need to be defined in the entry file `main.go`,applicable to all validators, without the need for repeated definitions.
 ```go
 package main
@@ -850,7 +883,7 @@ func init() {
 }
 ```
 
-#### Local Rules
+### Local Rules
 ```go
 package request
 
@@ -861,7 +894,7 @@ func (s User) ValidateIsEven(val any) bool {
 }
 ```
 
-#### Temporary Rules
+### Temporary Rules
 ```go
 package request
 
@@ -883,7 +916,7 @@ func (s User) Validate(data User, scene string) error {
 }
 ```
 
-#### Validator Usage
+### Validator Usage
 ```go
 package request
 
@@ -892,7 +925,7 @@ type User struct {
 }
 ```
 
-#### Used In The Controller
+### Used In The Controller
 ```go
 package v1
 
@@ -963,11 +996,17 @@ func (s *UserController) List(c *gin.Context) {
 }
 ```
 
-## Service
-### Service Creation Help
+# Service
+## Service Creation Help
 ```bash
 $ go run ./cmd/cli.go make:service -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -982,22 +1021,34 @@ Options:
 exit status 3
 ```
 
-### Service Creation
+## Service Creation
 ```bash
 $ go run ./cmd/cli.go make:service -f=user --function=list --desc="list"
 ```
 
-## Command
-### Get Version
+# Command
+## Get Version
 ```bash
 $ go run ./cmd/cli.go --version # -v
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 ```
 
-### Command Help
+## Command Help
 ```bash
 $ go run ./cmd/cli.go -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1042,7 +1093,7 @@ Options:
   -v, --version    Display CLI version
 ```
 
-### Command List
+## Command List
 ```bash
 $ go run ./cmd/cli.go --format=json # -f=json
 {
@@ -1151,7 +1202,13 @@ $ go run ./cmd/cli.go --format=json # -f=json
 ## Command Creation Help
 ```bash
 $ go run ./cmd/cli.go make:command -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1252,7 +1309,13 @@ func (m *DemoCommand) Help() []base.CommandOption {
 ```
 ```bash
 $ go run ./cmd/cli.go demo-test -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1498,7 +1561,13 @@ func (s *TestController) Test() {
 ## Event Creation Help
 ```bash
 $ go run ./cmd/cli.go make:event -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1541,7 +1610,13 @@ func (u UserLoginEvent) Description() string {
 ## Listener Creation Help
 ```bash
 $ go run ./cmd/cli.go make:listener -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1591,7 +1666,13 @@ func init() {
 ## Queue Creation Help
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2296,13 +2377,122 @@ func (s *TestController) Test(c *gin.Context)  {
 }
 ```
 
+# Enum
+## Enum Creation
+> Create models, controllers, etc. using the command line, refer to the previous documentation for details.
+
+## 枚举示例
+```go
+package enum
+
+import (
+	"gin/common/base"
+)
+
+const (
+	UserGenderSecret = 0 // secrecy
+	UserGenderMale   = 1 // male
+	UserGenderFemale = 2 // female
+)
+
+const (
+	UserStatusEnabled  = "enable"  // enable
+	UserStatusDisabled = "disable" // disable
+)
+
+// UserEnum user-enum
+type UserEnum struct{}
+
+// Gender gender
+func (s *UserEnum) Gender() *base.Enum[int] {
+	return base.NewEnum(
+		base.Item[int]{Value: UserGenderSecret, Desc: "secrecy"},
+		base.Item[int]{Value: UserGenderMale, Desc: "male"},
+		base.Item[int]{Value: UserGenderFemale, Desc: "female"},
+	)
+}
+
+// Status status
+func (s *UserEnum) Status() *base.Enum[string] {
+	return base.NewEnum(
+		base.Item[string]{Value: UserStatusEnabled, Desc: "enable"},
+		base.Item[string]{Value: UserStatusDisabled, Desc: "disable"},
+	)
+}
+
+```
+
+## Enum Usage
+```go
+package v1
+
+import (
+  "gin/app/enum"
+  "gin/common/base"
+  "gin/common/errcode"
+  "github.com/gin-gonic/gin"
+)
+
+type LoginController struct {
+  base.BaseController
+  service service.LoginService
+}
+
+// Test 
+// @Tags Login
+// @Summary test
+// @Description test
+// @Accept json
+// @Produce json
+// @Success 200 {object} errcode.SuccessResponse{data=map[string]any{}} "success"
+// @Router /api/v1/test [post]
+func (s *LoginController) Test(c *gin.Context) {
+	var (
+		userEnum enum.UserEnum
+	)
+
+	status := userEnum.Status().Get()
+	desc1 := userEnum.Status().Desc(enum.UserStatusEnabled)
+	value1 := userEnum.Status().Value("enable")
+	_map := userEnum.Status().Map()
+	containsValue := userEnum.Status().ContainsValue(enum.UserStatusEnabled)
+	containsDesc := userEnum.Status().ContainsDesc("disable")
+	length := userEnum.Status().Len()
+
+	gender := userEnum.Gender().Get()
+	desc2 := userEnum.Gender().Desc(enum.UserGenderMale)
+	value2 := userEnum.Gender().Value("male")
+	_map2 := userEnum.Gender().Map()
+	containsValue2 := userEnum.Gender().ContainsValue(enum.UserGenderMale)
+	containsDesc2 := userEnum.Gender().ContainsDesc("male")
+	length2 := userEnum.Gender().Len()
+
+	s.Response.Success(c, errcode.Success().WithData(map[string]any{
+		"status":         status,
+		"desc1":          desc1,
+		"value1":         value1,
+		"map":            _map,
+		"containsValue":  containsValue,
+		"containsDesc":   containsDesc,
+		"length":         length,
+		"gender":         gender,
+		"desc2":          desc2,
+		"value2":         value2,
+		"map2":           _map2,
+		"containsValue2": containsValue2,
+		"containsDesc2":  containsDesc2,
+		"length2":        length2,
+	}))
+}
+```
+
 # Database
 > The database is initialized through a container and bound to the context through middleware, so that database instances can be obtained wherever there is context. You can also obtain database instances separately. By default, MySQL, pgSQL, SQLite, and SQLSRV are integrated, and the default database can be configured and the database connection can be specified through the Connection method.
 ## Database Configuration
 ```yaml
 # Database
 databases:
-  db-connection: mysql # Default database connection
+  driver: mysql # Default database connection
   # Slow query time (ms) exceeding this time will be recorded in the log
   slow-query-duration: 3000ms # 3 Second(time.Duration)
 
@@ -2386,50 +2576,80 @@ import (
     "gin/app/facade"
     "gin/app/model"
     "gin/app/request"
+    "gin/app/service"
     "github.com/gin-gonic/gin"
 )
 
-type TestController struct {
+type UserController struct {
     base.BaseController
+    service service.UserService
 }
 
 func (s *TestController) Test(c *gin.Context) {
     var (
         ctx = c.Request.Context()
 		req request.User
-        m   []model.User
-		db  = facade.DB().WithContext(ctx)
 	)
-
-    err := c.ShouldBind(&req)
+  
+    s.service.WithContext(ctx)
+  
+    // Bind and validate parameters
+    err := facade.Request[any]().BindValidate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
         return
     }
-
-    db = db.Model(&model.User{})
-	
-    if search != nil {
-        whereSql, args, err := orm.BuildCondition(req.Search, db, model.User{})
-        if err != nil {
-            s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-            return
-        }
-    
-        if whereSql != "" {
-            db = db.Where(whereSql, args...)
-        }
+  
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+        return
     }
-
-    err = db.Offset(10).Limit(10).Order("id DESC").Find(&m).Error
-	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-    }
-	
-	s.Response.Success(c, m)
+  
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 
+```
+```go
+package service
+
+import (
+	"gin/app/model"
+	"gin/app/request"
+	"gin/common/base"
+)
+
+type UserService struct {
+	base.BaseService
+}
+
+// List
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+	var (
+		m  []model.User
+		db = s.DB(&model.User{})
+	)
+
+	pageData.Page = req.Page
+	pageData.PageSize = req.PageSize
+	offset, limit := request.Pagination(req.Page, req.PageSize)
+	// search
+	db = s.Search(db, req.Search)
+
+	db = db.Preload("UserRoles")
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
+
+	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+	if err != nil {
+		return pageData, err
+	}
+	pageData.List = m
+
+	return pageData, nil
+}
 ```
 
 # Swagger Documents

@@ -15,107 +15,110 @@
     - [编译项目](#编译项目)
     - [编译命令行](#编译命令行)
 - [目录结构](#目录结构)
-- [使用方法](#使用方法)
-  - [启动服务](#启动服务)
-    - [air热更新](#air热更新)
-  - [配置文件](#配置文件)
-    - [项目配置](#项目配置)
-    - [热更新配置](#热更新配置)
-  - [中间件](#中间件)
-    - [中间件创建帮助](#中间件创建帮助)
-    - [中间件创建](#中间件创建)
-    - [限流中间件](#限流中间件)
-  - [路由](#路由)
-    - [路由创建帮助](#路由创建帮助)
-    - [路由创建](#路由创建)
-    - [路由列表](#路由列表)
-  - [控制器](#控制器)
-    - [控制器创建帮助](#控制器创建帮助)
-    - [控制器创建](#控制器创建)
-  - [模型](#模型)
-    - [模型创建帮助](#模型创建帮助)
-    - [模型创建](#模型创建)
-    - [ORM动态筛选](#ORM动态筛选)
-      - [OR条件查询](#OR条件查询)
-      - [AND条件查询](#AND条件查询)
-      - [json字段查询](#json字段查询)
-      - [复杂查询](#复杂查询)
-      - [查询示例](#查询示例)
-  - [表单验证](#表单验证)
-    - [验证创建帮助](#验证创建帮助)
-    - [验证创建](#验证创建)
-    - [验证规则](#验证规则)
-    - [验证场景](#验证场景)
-    - [提示信息](#提示信息)
-    - [字段翻译](#字段翻译)
-    - [自定义验证](#自定义验证)
-      - [全局规则](#全局规则)
-      - [局部规则](#局部规则)
-      - [临时规则](#临时规则)
-      - [验证使用](#验证使用)
-      - [在控制器中使用](#在控制器中使用)
-  - [服务](#服务)
-    - [服务创建帮助](#服务创建帮助)
-    - [服务创建](#服务创建)
-  - [命令行](#命令行)
-    - [获取版本](#获取版本)
-    - [命令帮助](#命令帮助)
-    - [命令列表](#命令列表)
-    - [命令创建帮助](#命令创建帮助)
-    - [命令创建](#命令创建)
-    - [命令结构](#命令结构)
-    - [命令注册](#命令注册)
-    - [帮助选项](#帮助选项)
-    - [执行命令](#执行命令)
-    - [编译执行](#编译执行)
-  - [缓存](#缓存)
-    - [全局缓存](#全局缓存)
-    - [Redis缓存](#Redis缓存)
-    - [内存缓存](#内存缓存)
-    - [磁盘缓存](#磁盘缓存)
-  - [事件](#事件)
-    - [事件创建帮助](#事件创建帮助)
-    - [事件创建](#事件创建)
-  - [监听](#监听)
-    - [监听创建帮助](#监听创建帮助)
-    - [监听创建](#监听创建)
-  - [队列](#队列)
-    - [队列创建帮助](#队列创建帮助)
-    - [队列创建](#队列创建)
-    - [队列使用](#队列使用)
-    - [消费者列表](#消费者列表)
-    - [生产者列表](#生产者列表)
-  - [发布事件](#发布事件)
-    - [测试事件](#测试事件)
-  - [事件列表](#事件列表)
-    - [事件监听列表](#事件监听列表)
-  - [响应](#响应)
-    - [成功响应](#成功响应)
-      - [成功提示](#成功提示)
-      - [成功数据](#成功数据)
-    - [失败响应](#失败响应)
-      - [失败错误码](#失败错误码)
-      - [失败提示](#失败提示)
-      - [失败数据](#失败数据)
-      - [HTTP状态码](#HTTP状态码)
-  - [日志](#日志)
-    - [记录日志](#记录日志)
-    - [错误调试](#错误调试)
-  - [多语言](#多语言)
-    - [目录配置](#目录配置)
-    - [常规翻译](#常规翻译)
-    - [模版翻译](#模版翻译)
-    - [添加语言](#添加语言)
-  - [服务提供者](#服务提供者)
-    - [服务提供者创建](#服务提供者创建)
-  - [门面](#门面)
-    - [门面创建](#门面创建)
-    - [门面使用](#门面使用)
-  - [数据库](#数据库)
-    - [数据库配置](#数据库配置)
-    - [数据库连接](#数据库连接)
-    - [数据库搜索](#数据库搜索)
-  - [swagger文档](#swagger文档)
+- [启动服务](#启动服务)
+  - [air热更新](#air热更新)
+- [配置文件](#配置文件)
+  - [项目配置](#项目配置)
+  - [热更新配置](#热更新配置)
+- [中间件](#中间件)
+  - [中间件创建帮助](#中间件创建帮助)
+  - [中间件创建](#中间件创建)
+  - [限流中间件](#限流中间件)
+- [路由](#路由)
+  - [路由创建帮助](#路由创建帮助)
+  - [路由创建](#路由创建)
+  - [路由列表](#路由列表)
+- [控制器](#控制器)
+  - [控制器创建帮助](#控制器创建帮助)
+  - [控制器创建](#控制器创建)
+- [模型](#模型)
+  - [模型创建帮助](#模型创建帮助)
+  - [模型创建](#模型创建)
+  - [ORM动态筛选](#ORM动态筛选)
+    - [OR条件查询](#OR条件查询)
+    - [AND条件查询](#AND条件查询)
+    - [json字段查询](#json字段查询)
+    - [复杂查询](#复杂查询)
+    - [查询示例](#查询示例)
+- [表单验证](#表单验证)
+  - [验证创建帮助](#验证创建帮助)
+  - [验证创建](#验证创建)
+  - [验证规则](#验证规则)
+  - [验证场景](#验证场景)
+  - [提示信息](#提示信息)
+  - [字段翻译](#字段翻译)
+  - [自定义验证](#自定义验证)
+    - [全局规则](#全局规则)
+    - [局部规则](#局部规则)
+    - [临时规则](#临时规则)
+    - [验证使用](#验证使用)
+    - [在控制器中使用](#在控制器中使用)
+- [服务](#服务)
+  - [服务创建帮助](#服务创建帮助)
+  - [服务创建](#服务创建)
+- [命令行](#命令行)
+  - [获取版本](#获取版本)
+  - [命令帮助](#命令帮助)
+  - [命令列表](#命令列表)
+  - [命令创建帮助](#命令创建帮助)
+  - [命令创建](#命令创建)
+  - [命令结构](#命令结构)
+  - [命令注册](#命令注册)
+  - [帮助选项](#帮助选项)
+  - [执行命令](#执行命令)
+  - [编译执行](#编译执行)
+- [缓存](#缓存)
+  - [全局缓存](#全局缓存)
+  - [Redis缓存](#Redis缓存)
+  - [内存缓存](#内存缓存)
+  - [磁盘缓存](#磁盘缓存)
+- [事件](#事件)
+  - [事件创建帮助](#事件创建帮助)
+  - [事件创建](#事件创建)
+- [监听](#监听)
+  - [监听创建帮助](#监听创建帮助)
+  - [监听创建](#监听创建)
+- [队列](#队列)
+  - [队列创建帮助](#队列创建帮助)
+  - [队列创建](#队列创建)
+  - [队列使用](#队列使用)
+  - [消费者列表](#消费者列表)
+  - [生产者列表](#生产者列表)
+- [发布事件](#发布事件)
+  - [测试事件](#测试事件)
+- [事件列表](#事件列表)
+  - [事件监听列表](#事件监听列表)
+- [响应](#响应)
+  - [成功响应](#成功响应)
+    - [成功提示](#成功提示)
+    - [成功数据](#成功数据)
+  - [失败响应](#失败响应)
+    - [失败错误码](#失败错误码)
+    - [失败提示](#失败提示)
+    - [失败数据](#失败数据)
+    - [HTTP状态码](#HTTP状态码)
+- [日志](#日志)
+  - [记录日志](#记录日志)
+  - [错误调试](#错误调试)
+- [多语言](#多语言)
+  - [目录配置](#目录配置)
+  - [常规翻译](#常规翻译)
+  - [模版翻译](#模版翻译)
+  - [添加语言](#添加语言)
+- [服务提供者](#服务提供者)
+  - [服务提供者创建](#服务提供者创建)
+- [门面](#门面)
+  - [门面创建](#门面创建)
+  - [门面使用](#门面使用)
+- [枚举](#枚举)
+  - [枚举创建](#枚举创建)
+  - [枚举示例](#枚举示例)
+  - [枚举使用](#枚举使用)
+- [数据库](#数据库)
+  - [数据库配置](#数据库配置)
+  - [数据库连接](#数据库连接)
+  - [数据库搜索](#数据库搜索)
+- [swagger文档](#swagger文档)
 
 # 项目简介
 > 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
@@ -201,6 +204,7 @@ $ ./cli demo:command --args=11
 ├── app                                 # 应用程序
 │   ├── command                         # 命令
 │   ├── controller                      # 控制器
+│   ├── enum                            # 枚举
 │   ├── event                           # 事件
 │   ├── facade                          # 门面
 │   ├── listener                        # 监听
@@ -271,12 +275,11 @@ $ ./cli demo:command --args=11
 └── version_history_zh.md               # 版本记录中文文档
 ```
 
-# 使用方法
-## 启动服务
+# 启动服务
 ```bash
 $ go run main.go
 ```
-### air热更新
+## air热更新
 ```bash
 $ go install github.com/air-verse/air@latest
 $ air
@@ -305,23 +308,29 @@ watching app\controller
  SUCCESS  Gin server started successfully!
 ```
 
-## 配置文件
-### 项目配置
+# 配置文件
+## 项目配置
 > `config.yaml`为默认配置文件, 可自行修改。`dev.config.yaml`对应本地环境配置, 通过以下app.env文件配置环境变量来切换环境
 > ```
 > app:
 >   env: dev # dev|testing|production dev=本地环境 testing=测试环境 production=生产环境
 > ```
 
-### 热更新配置
+## 热更新配置
 > `.air.toml`为Windows环境下默认配置文件, `.air.linux.toml`为Linux环境下默认配置文件。可自行根据项目整体需要自行修改。
 
-## 中间件
+# 中间件
 > `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
-### 中间件创建帮助
+## 中间件创建帮助
 ```bash
 $ go run ./cmd/cli.go make:middleware -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -334,12 +343,12 @@ Options:
   -d, --desc  描述, 如: 权限中间件  required:false
 ```
 
-### 中间件创建
+## 中间件创建
 ```bash
 $ go run ./cmd/cli.go make:middleware --file=auth --desc=授权中间件
 ```
 
-### 限流中间件
+## 限流中间件
 > `middleware/rate_limit.go`文件中定义了全局限流中间件, 支持全局用户接口限流、ip接口限流以及全局限流。
 ```go
 package router
@@ -400,12 +409,18 @@ func LoadRouters(router *gin.Engine) {
 }
 ```
 
-## 路由
+# 路由
 > `router/root.go` 文件中定义了全局路由规则可自行修改,  一般情况只需要默认即可。
-### 路由创建帮助
+## 路由创建帮助
 ```bash
 $ go run ./cmd/cli.go make:router -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -418,7 +433,7 @@ Options:
   -d, --desc  路由描述, 如: 用户路由   required:false
 ```
 
-### 路由创建
+## 路由创建
 ```bash
 $ go run ./cmd/cli.go make:router --file=user --desc=用户路由
 ```
@@ -465,7 +480,7 @@ func (r *UserRouter) IsAuth() bool {
 
 ```
 
-### 路由列表
+## 路由列表
 ```bash
 $ go run ./cmd/cli.go route:list
 
@@ -486,11 +501,17 @@ GET      /swagger/*any                       github.com/swaggo/gin-swagger.Custo
 总计 10 条路由
 ```
 
-## 控制器
-### 控制器创建帮助
+# 控制器
+## 控制器创建帮助
 ```bash
 $ go run ./cmd/cli.go make:controller -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -504,7 +525,7 @@ Options:
   -m, --method    请求方式, 如: get      required:false
 ```
 
-### 控制器创建
+## 控制器创建
 ```bash
 $ go run ./cmd/cli.go make:controller --file=v1/test --router=/test --method=get --desc=列表 --function=list
 ```
@@ -529,11 +550,17 @@ func (s *TestController) List(c *gin.Context) {
 }
 ```
 
-## 模型
-### 模型创建帮助
+# 模型
+## 模型创建帮助
 ```bash
 $ go run ./cmd/cli.go make:model -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -548,7 +575,7 @@ Options:
   -C, --connection  数据库连接                   required:false
 ```
 
-### 模型创建
+## 模型创建
 > 支持创建同时多个模型文件, 如需创建多个模型文件, 传人的表名参数请使用逗号分隔, 如: user,menu
 ```bash
 $ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
@@ -674,11 +701,17 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 }
 ```
 
-## 表单验证
-### 验证创建帮助
+# 表单验证
+## 验证创建帮助
 ```bash
 $ go run ./cmd/cli.go make:request -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -694,7 +727,7 @@ Options:
   -C, --connection  数据库连接          required:false
 ```
 
-### 验证创建
+## 验证创建
 ```bash
 $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=用户请求验证
 ```
@@ -765,7 +798,7 @@ func (s Roles) Translates() map[string]string {
 }
 ```
 
-### 验证规则
+## 验证规则
 > 更多规则请查看 [gookit/validate](https://github.com/gookit/validate)
 ```go
 package request
@@ -781,7 +814,7 @@ type Roles struct {
 }
 ```
 
-### 验证场景
+## 验证场景
 ```go
 package request
 
@@ -800,7 +833,7 @@ func (s Roles) ConfigValidation(v *validate.Validation) {
 }
 ```
 
-### 提示信息
+## 提示信息
 ```go
 package request
 
@@ -815,7 +848,7 @@ func (s Roles) Messages() map[string]string {
 }
 ```
 
-### 字段翻译
+## 字段翻译
 ```go
 package request
 
@@ -832,8 +865,8 @@ func (s Roles) Translates() map[string]string {
 }
 ```
 
-### 自定义验证
-#### 全局规则
+## 自定义验证
+### 全局规则
 > 全局规则只需要在入口文件`main.go`中定义, 适用于所有验证器, 无需重复定义。
 ```go
 package main
@@ -854,7 +887,7 @@ func init() {
 }
 ```
 
-#### 局部规则
+### 局部规则
 ```go
 package request
 
@@ -865,7 +898,7 @@ func (s User) ValidateIsEven(val any) bool {
 }
 ```
 
-#### 临时规则
+### 临时规则
 ```go
 package request
 
@@ -887,7 +920,7 @@ func (s User) Validate(data User, scene string) error {
 }
 ```
 
-#### 验证使用
+### 验证使用
 ```go
 package request
 
@@ -896,7 +929,7 @@ type User struct {
 }
 ```
 
-#### 在控制器中使用
+### 在控制器中使用
 ```go
 package v1
 
@@ -967,11 +1000,17 @@ func (s *UserController) List(c *gin.Context) {
 }
 ```
 
-## 服务
-### 服务创建帮助
+# 服务
+## 服务创建帮助
 ```bash
 $ go run ./cmd/cli.go make:service -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -986,22 +1025,34 @@ Options:
 exit status 3
 ```
 
-### 服务创建
+## 服务创建
 ```bash
 $ go run ./cmd/cli.go make:service -f=user --function=list --desc="列表"
 ```
 
-## 命令行
-### 获取版本
+# 命令行
+## 获取版本
 ```bash
 $ go run ./cmd/cli.go --version # -v
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 ```
 
-### 命令帮助
+## 命令帮助
 ```bash
 $ go run ./cmd/cli.go -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1046,7 +1097,7 @@ Options:
   -v, --version    Display CLI version
 ```
 
-### 命令列表
+## 命令列表
 ```bash
 $ go run ./cmd/cli.go --format=json # -f=json
 {
@@ -1155,7 +1206,13 @@ $ go run ./cmd/cli.go --format=json # -f=json
 ## 命令创建帮助
 ```bash
 $ go run ./cmd/cli.go make:command -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1256,7 +1313,13 @@ func (m *DemoCommand) Help() []base.CommandOption {
 ```
 ```bash
 $ go run ./cmd/cli.go demo-test -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1502,7 +1565,13 @@ func (s *TestController) Test() {
 ## 事件创建帮助
 ```bash
 $ go run ./cmd/cli.go make:event -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1545,7 +1614,13 @@ func (u UserLoginEvent) Description() string {
 ## 监听创建帮助
 ```bash
 $ go run ./cmd/cli.go make:listener -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1595,7 +1670,13 @@ func init() {
 ## 队列创建帮助
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
-Gin Cli v2.0.0
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2308,13 +2389,122 @@ func (s *TestController) Test(c *gin.Context)  {
 }
 ```
 
+# 枚举
+## 枚举创建
+> 同模型、控制器等使用命令行创建,具体参考之前文档。
+
+## 枚举示例
+```go
+package enum
+
+import (
+	"gin/common/base"
+)
+
+const (
+	UserGenderSecret = 0 // 保密
+	UserGenderMale   = 1 // 男
+	UserGenderFemale = 2 // 女
+)
+
+const (
+	UserStatusEnabled  = "enable"  // 启用
+	UserStatusDisabled = "disable" // 停用
+)
+
+// UserEnum 用户枚举
+type UserEnum struct{}
+
+// Gender 性别
+func (s *UserEnum) Gender() *base.Enum[int] {
+	return base.NewEnum(
+		base.Item[int]{Value: UserGenderSecret, Desc: "保密"},
+		base.Item[int]{Value: UserGenderMale, Desc: "男"},
+		base.Item[int]{Value: UserGenderFemale, Desc: "女"},
+	)
+}
+
+// Status 状态
+func (s *UserEnum) Status() *base.Enum[string] {
+	return base.NewEnum(
+		base.Item[string]{Value: UserStatusEnabled, Desc: "启用"},
+		base.Item[string]{Value: UserStatusDisabled, Desc: "停用"},
+	)
+}
+
+```
+
+## 枚举使用
+```go
+package v1
+
+import (
+  "gin/app/enum"
+  "gin/common/base"
+  "gin/common/errcode"
+  "github.com/gin-gonic/gin"
+)
+
+type LoginController struct {
+  base.BaseController
+  service service.LoginService
+}
+
+// Test 测试
+// @Tags 登录相关
+// @Summary 测试
+// @Description 测试
+// @Accept json
+// @Produce json
+// @Success 200 {object} errcode.SuccessResponse{data=map[string]any{}} "成功"
+// @Router /api/v1/test [post]
+func (s *LoginController) Test(c *gin.Context) {
+	var (
+		userEnum enum.UserEnum
+	)
+
+	status := userEnum.Status().Get()
+	desc1 := userEnum.Status().Desc(enum.UserStatusEnabled)
+	value1 := userEnum.Status().Value("启用")
+	_map := userEnum.Status().Map()
+	containsValue := userEnum.Status().ContainsValue(enum.UserStatusEnabled)
+	containsDesc := userEnum.Status().ContainsDesc("启用")
+	length := userEnum.Status().Len()
+
+	gender := userEnum.Gender().Get()
+	desc2 := userEnum.Gender().Desc(enum.UserGenderMale)
+	value2 := userEnum.Gender().Value("男")
+	_map2 := userEnum.Gender().Map()
+	containsValue2 := userEnum.Gender().ContainsValue(enum.UserGenderMale)
+	containsDesc2 := userEnum.Gender().ContainsDesc("男")
+	length2 := userEnum.Gender().Len()
+
+	s.Response.Success(c, errcode.Success().WithData(map[string]any{
+		"status":         status,
+		"desc1":          desc1,
+		"value1":         value1,
+		"map":            _map,
+		"containsValue":  containsValue,
+		"containsDesc":   containsDesc,
+		"length":         length,
+		"gender":         gender,
+		"desc2":          desc2,
+		"value2":         value2,
+		"map2":           _map2,
+		"containsValue2": containsValue2,
+		"containsDesc2":  containsDesc2,
+		"length2":        length2,
+	}))
+}
+```
+
 # 数据库
 > 数据库通过容器服务初始化,默认集成了mysql、pgsql、sqlite、sqlsrv,可配置默认数据库以及通过Connection方法指定数据库连接。
 ## 数据库配置
 ```yaml
 # 数据库
 databases:
-  db-connection: mysql # 默认数据库
+  driver: mysql # 默认数据库
   # 慢查询的时间(ms) 超过这个时间会记录到日志中
   slow-query-duration: 3000ms # 3秒(time.Duration)
 
@@ -2398,51 +2588,80 @@ import (
     "gin/app/facade"
     "gin/app/model"
     "gin/app/request"
-    "gin/common/base"
+    "gin/app/service"
     "github.com/gin-gonic/gin"
 )
 
-type TestController struct {
+type UserController struct {
     base.BaseController
+    service service.UserService
 }
 
 func (s *TestController) Test(c *gin.Context) {
     var (
         ctx = c.Request.Context()
 		req request.User
-        m   []model.User
-		db  = facade.DB().WithContext(ctx)
 	)
-
-    err := c.ShouldBind(&req)
+  
+    s.service.WithContext(ctx)
+  
+    // 绑定并验证参数
+    err := facade.Request[any]().BindValidate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
         return
     }
-
-    db = db.Model(&model.User{})
-	
-    if req.Search != nil {
-        whereSql, args, err := orm.BuildCondition(req.Search, db, model.User{})
-        if err != nil {
-            s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-            return
-        }
-    
-        if whereSql != "" {
-            db = db.Where(whereSql, args...)
-        }
+  
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+        return
     }
-
-    err = db.Offset(10).Limit(10).Order("id DESC").Find(&m).Error
-	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-		return
-    }
-	
-	s.Response.Success(c, m)
+  
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 
+```
+```go
+package service
+
+import (
+	"gin/app/model"
+	"gin/app/request"
+	"gin/common/base"
+)
+
+type UserService struct {
+	base.BaseService
+}
+
+// List 列表
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+	var (
+		m  []model.User
+		db = s.DB(&model.User{})
+	)
+
+	pageData.Page = req.Page
+	pageData.PageSize = req.PageSize
+	offset, limit := request.Pagination(req.Page, req.PageSize)
+	// 搜索
+	db = s.Search(db, req.Search)
+
+	db = db.Preload("UserRoles")
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
+
+	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+	if err != nil {
+		return pageData, err
+	}
+	pageData.List = m
+
+	return pageData, nil
+}
 ```
 
 # swagger文档
