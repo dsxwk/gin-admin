@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"gin/app/enum"
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
@@ -120,6 +121,49 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 	}))
 }
 
+// Test 测试
+// @Tags 登录相关
+// @Summary 测试
+// @Description 测试
+// @Accept json
+// @Produce json
+// @Success 200 {object} errcode.SuccessResponse{data=map[string]any{}} "成功"
+// @Router /api/v1/test [post]
 func (s *LoginController) Test(c *gin.Context) {
-	s.Response.Success(c, errcode.Success())
+	var (
+		userEnum enum.UserEnum
+	)
+
+	status := userEnum.Status().Get()
+	desc1 := userEnum.Status().Desc(enum.UserStatusEnabled)
+	value1 := userEnum.Status().Value("启用")
+	_map := userEnum.Status().Map()
+	containsValue := userEnum.Status().ContainsValue(enum.UserStatusEnabled)
+	containsDesc := userEnum.Status().ContainsDesc("启用")
+	length := userEnum.Status().Len()
+
+	gender := userEnum.Gender().Get()
+	desc2 := userEnum.Gender().Desc(enum.UserGenderMale)
+	value2 := userEnum.Gender().Value("男")
+	_map2 := userEnum.Gender().Map()
+	containsValue2 := userEnum.Gender().ContainsValue(enum.UserGenderMale)
+	containsDesc2 := userEnum.Gender().ContainsDesc("男")
+	length2 := userEnum.Gender().Len()
+
+	s.Response.Success(c, errcode.Success().WithData(map[string]any{
+		"status":         status,
+		"desc1":          desc1,
+		"value1":         value1,
+		"map":            _map,
+		"containsValue":  containsValue,
+		"containsDesc":   containsDesc,
+		"length":         length,
+		"gender":         gender,
+		"desc2":          desc2,
+		"value2":         value2,
+		"map2":           _map2,
+		"containsValue2": containsValue2,
+		"containsDesc2":  containsDesc2,
+		"length2":        length2,
+	}))
 }

@@ -24,6 +24,8 @@ func (r *LoginRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 		router.POST("/login", login.Login)
 		// 刷新token
 		router.POST("/refresh-token", login.RefreshToken)
+		// 测试
+		router.POST("/test", login.Test)
 	}
 }
 
