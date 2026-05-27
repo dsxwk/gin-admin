@@ -1,3 +1,8 @@
+## v2.2.9
+> - Command line optimization
+> - Added enum and enum test interface, enum test case
+> - Document update and improve the enum usage document
+
 ## v2.2.8
 > - Database backup file
 > - Document update
