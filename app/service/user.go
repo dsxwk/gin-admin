@@ -43,14 +43,14 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 }
 
 // Create 创建
-func (s *UserService) Create(m model.User) (model.User, error) {
+func (s *UserService) Create(req request.User) (m model.User, err error) {
 	var (
 		count int64
 		db    = s.DB(&model.User{})
 	)
 
 	// 校验用户名是否重复
-	err := db.Where("username = ?", m.Username).Count(&count).Error
+	err = db.Where("username = ?", req.Username).Count(&count).Error
 	if err != nil {
 		return m, err
 	}
@@ -58,8 +58,16 @@ func (s *UserService) Create(m model.User) (model.User, error) {
 		return m, errors.New("用户名已存在")
 	}
 
+	m = model.User{
+		Username: req.Username,
+		FullName: req.FullName,
+		Nickname: req.Nickname,
+		Gender:   req.Gender,
+		Age:      req.Age,
+	}
+
 	// 处理密码
-	m.Password = pkg.BcryptHash(m.Password)
+	m.Password = pkg.BcryptHash(req.Password)
 	err = db.Create(&m).Error
 	if err != nil {
 		return m, err

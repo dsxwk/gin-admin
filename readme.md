@@ -937,8 +937,6 @@ import (
   "gin/common/base"
   "gin/common/errcode"
   "github.com/gin-gonic/gin"
-  "github.com/jinzhu/copier"
-  "strconv"
 )
 
 type UserController struct {
@@ -958,41 +956,41 @@ type UserController struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
 
-  s.service.WithContext(ctx)
+    s.service.WithContext(ctx)
 
-  // Method One
-  /*err := c.ShouldBind(&req)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-    return
-  }
+    // Method One
+    /*err := c.ShouldBind(&req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
 
-  // Validator
-  err = req.Validate(req, "List")
-  if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-    return
-  }*/
-  // Method Two
-  // Bind And Validate
-  err := facade.Request[any]().BindValidate(c, &req, "List")
-  if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-    return
-  }
+    // Validator
+    err = req.Validate(req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }*/
+    // Method Two
+    // Bind And Validate
+    err := facade.Request[any]().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
 
-  res, err := s.service.List(req)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
-    return
-  }
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(res))
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 ```
 

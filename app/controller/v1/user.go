@@ -2,7 +2,6 @@ package v1
 
 import (
 	"gin/app/facade"
-	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
@@ -10,7 +9,6 @@ import (
 	"gin/pkg/provider/lang"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/jinzhu/copier"
 )
 
 type UserController struct {
@@ -65,9 +63,8 @@ func (s *UserController) List(c *gin.Context) {
 // @Router /api/v1/user [post]
 func (s *UserController) Create(c *gin.Context) {
 	var (
-		ctx  = c.Request.Context()
-		req  request.User
-		user model.User
+		ctx = c.Request.Context()
+		req request.User
 	)
 
 	s.service.WithContext(ctx)
@@ -79,13 +76,7 @@ func (s *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	err = copier.Copy(&user, &req)
-	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
-		return
-	}
-
-	user, err = s.service.Create(user)
+	user, err := s.service.Create(req)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
 		return
@@ -110,7 +101,6 @@ func (s *UserController) Update(c *gin.Context) {
 		ctx  = c.Request.Context()
 		data map[string]interface{}
 		req  request.User
-		user model.User
 	)
 
 	s.service.WithContext(ctx)
@@ -127,12 +117,6 @@ func (s *UserController) Update(c *gin.Context) {
 	err = facade.Request[any]().BindValidate(c, &req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-		return
-	}
-
-	err = copier.Copy(&user, &req)
-	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 

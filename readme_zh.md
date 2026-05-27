@@ -941,8 +941,6 @@ import (
   "gin/common/base"
   "gin/common/errcode"
   "github.com/gin-gonic/gin"
-  "github.com/jinzhu/copier"
-  "strconv"
 )
 
 type UserController struct {
@@ -962,41 +960,41 @@ type UserController struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
 
-  s.service.WithContext(ctx)
+    s.service.WithContext(ctx)
 
-  // 方式1
-  /*err := c.ShouldBind(&req)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-    return
-  }
+    // 方式1
+    /*err := c.ShouldBind(&req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
 
-  // 验证
-  err = req.Validate(req, "List")
-  if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-    return
-  }*/
-  // 方式2
-  // 绑定参数并验证
-  err := facade.Request[any]().BindValidate(c, &req, "List")
-  if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-    return
-  }
+    // 验证
+    err = req.Validate(req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }*/
+    // 方式2
+    // 绑定参数并验证
+    err := facade.Request[any]().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
 
-  res, err := s.service.List(req)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
-    return
-  }
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(res))
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 ```
 
