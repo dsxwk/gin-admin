@@ -10,6 +10,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/samber/lo"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 )
@@ -45,7 +46,7 @@ func Execute() {
 		printUsage("txt")
 		return
 	case "-v", "--version":
-		fmt.Println("Gin Cli", getVersion())
+		printVersion()
 		return
 	}
 
@@ -91,6 +92,21 @@ func Execute() {
 	cmd.Execute(cmdArgs)
 }
 
+// printVersion 打印版本信息
+func printVersion() {
+	const asciiDsx = `
+  ██████  ██████ ██   ██                                
+  ██   ██ ██      ██ ██                                
+  ██   ██ ██████   ███                                 
+  ██   ██     ██  ██ ██                                 
+  ██████  ██████ ██   ██ 
+  
+Gin Cli %s, built with Go %s`
+
+	fmt.Printf(asciiDsx, getVersion(), runtime.Version())
+	fmt.Println()
+}
+
 // 打印命令列表
 func printUsage(format string) {
 	switch format {
@@ -103,7 +119,7 @@ func printUsage(format string) {
 
 // 打印文本格式
 func printText() {
-	fmt.Println("Gin Cli", getVersion())
+	printVersion()
 	fmt.Println()
 
 	color.Yellow("Usage:")
