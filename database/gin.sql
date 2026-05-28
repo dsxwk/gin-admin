@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 26/05/2026 14:38:10
+ Date: 28/05/2026 15:24:07
 */
 
 SET NAMES utf8mb4;
@@ -34,7 +34,7 @@ CREATE TABLE `article`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of article
@@ -54,7 +54,7 @@ CREATE TABLE `category`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
@@ -81,7 +81,7 @@ CREATE TABLE `dict`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE,
   INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of dict
@@ -104,7 +104,6 @@ CREATE TABLE `menu`  (
   `is_link` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否外链 1=是 2=否 默认=2',
   `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态 1=启用 2=停用',
   `sort` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '排序',
-  `meta` json NULL COMMENT 'meta',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
@@ -115,13 +114,13 @@ CREATE TABLE `menu`  (
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
-INSERT INTO `menu` VALUES (1, 0, 'home', '/home', '', 'home/index', 2, 1, 0, '{\"icon\": \"iconfont icon-shouye\", \"roles\": [1], \"title\": \"message.router.home\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": true, \"isIframe\": false, \"isKeepAlive\": true}', '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
-INSERT INTO `menu` VALUES (2, 0, 'system', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 0, '{\"icon\": \"iconfont icon-xitongshezhi\", \"roles\": [1], \"title\": \"message.router.system\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": false, \"isIframe\": false, \"isKeepAlive\": true}', '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
-INSERT INTO `menu` VALUES (3, 2, 'systemMenu', '/system/menu', '', 'system/menu/index', 2, 1, 0, '{\"icon\": \"iconfont icon-caidan\", \"roles\": [1], \"title\": \"message.router.systemMenu\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": false, \"isIframe\": false, \"isKeepAlive\": true}', '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
-INSERT INTO `menu` VALUES (4, 2, 'systemUser', '/system/user', '', 'system/user/index', 2, 1, 0, '{\"icon\": \"iconfont icon-icon-\", \"roles\": [1], \"title\": \"message.router.systemUser\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": false, \"isIframe\": false, \"isKeepAlive\": true}', '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
-INSERT INTO `menu` VALUES (5, 2, 'systemRole', '/system/role', '', 'system/role/index', 2, 1, 0, '{\"icon\": \"fa fa-user-circle-o\", \"roles\": [1], \"title\": \"message.router.systemRole\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": false, \"isIframe\": false, \"isKeepAlive\": true}', '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
-INSERT INTO `menu` VALUES (6, 2, 'systemDic', '/system/dic', '', 'system/dic/index', 2, 1, 0, '{\"icon\": \"ele-Collection\", \"roles\": [1], \"title\": \"message.router.systemDic\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": false, \"isIframe\": false, \"isKeepAlive\": true}', '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
-INSERT INTO `menu` VALUES (10, 0, 'article', '/article', '', 'article/index', 2, 1, 0, '{\"icon\": \"ele-Collection\", \"roles\": [1], \"title\": \"message.article.title\", \"isHide\": false, \"isLink\": \"\", \"isAffix\": false, \"isIframe\": false, \"authBtnList\": null, \"isKeepAlive\": true}', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `menu` VALUES (1, 0, 'home', '/home', '', 'home/index', 2, 1, 0, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
+INSERT INTO `menu` VALUES (2, 0, 'system', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 0, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
+INSERT INTO `menu` VALUES (3, 2, 'systemMenu', '/system/menu', '', 'system/menu/index', 2, 1, 0, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
+INSERT INTO `menu` VALUES (4, 2, 'systemUser', '/system/user', '', 'system/user/index', 2, 1, 0, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
+INSERT INTO `menu` VALUES (5, 2, 'systemRole', '/system/role', '', 'system/role/index', 2, 1, 0, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
+INSERT INTO `menu` VALUES (6, 2, 'systemDic', '/system/dic', '', 'system/dic/index', 2, 1, 0, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
+INSERT INTO `menu` VALUES (10, 0, 'article', '/article', '', 'article/index', 2, 1, 0, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -174,6 +173,38 @@ INSERT INTO `menu_actions` VALUES (21, 0, 10, 2, 'btn', 'primary', 'small', 2, '
 INSERT INTO `menu_actions` VALUES (22, 0, 10, 2, 'btn', 'danger', 'small', 2, '删除', 'article.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
 
 -- ----------------------------
+-- Table structure for menu_meta
+-- ----------------------------
+DROP TABLE IF EXISTS `menu_meta`;
+CREATE TABLE `menu_meta`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `menu_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '菜单id',
+  `title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '菜单名称',
+  `icon` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '菜单图标',
+  `is_hide` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否隐藏 1=是 2=否',
+  `is_keep_alive` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否缓存 1=是 2=否',
+  `is_affix` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否固定 1=是 2=否',
+  `is_link` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '外链/内嵌时链接地址(http:xxx.com),开启外链条件`1 isLink:链接地址不为空`',
+  `is_iframe` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否内嵌 1=是 2=否 开启条件`1 isIframe:true 2 isLink:链接地址不为空`',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_menu_id`(`menu_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of menu_meta
+-- ----------------------------
+INSERT INTO `menu_meta` VALUES (1, 1, 'message.router.home', 'iconfont icon-shouye', 2, 1, 1, '', 2, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
+INSERT INTO `menu_meta` VALUES (2, 2, 'message.router.system', 'iconfont icon-xitongshezhi', 2, 1, 2, '', 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
+INSERT INTO `menu_meta` VALUES (3, 3, 'message.router.systemMenu', 'iconfont icon-caidan', 2, 1, 2, '', 2, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
+INSERT INTO `menu_meta` VALUES (4, 4, 'message.router.systemUser', 'iconfont icon-icon-', 2, 1, 2, '', 2, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
+INSERT INTO `menu_meta` VALUES (5, 5, 'message.router.systemRole', 'fa fa-user-circle-o', 2, 1, 2, '', 2, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
+INSERT INTO `menu_meta` VALUES (6, 6, 'message.router.systemDic', 'ele-Collection', 2, 1, 2, '', 2, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
+INSERT INTO `menu_meta` VALUES (7, 10, 'message.article.title', 'ele-Collection', 2, 1, 2, '', 2, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+
+-- ----------------------------
 -- Table structure for migrations
 -- ----------------------------
 DROP TABLE IF EXISTS `migrations`;
@@ -183,7 +214,7 @@ CREATE TABLE `migrations`  (
   `created_at` datetime(3) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `migration`(`migration`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of migrations
@@ -273,7 +304,7 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 37 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
@@ -318,7 +349,7 @@ CREATE TABLE `roles`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of roles
@@ -344,7 +375,7 @@ CREATE TABLE `system_config`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uni_en_name`(`en_name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of system_config
