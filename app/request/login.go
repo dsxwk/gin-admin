@@ -2,6 +2,7 @@ package request
 
 import (
 	"errors"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/provider/lang"
 	"github.com/gookit/validate"
@@ -56,15 +57,15 @@ func (s Login) ConfigValidation(v *validate.Validation) {
 // Messages 验证器错误消息
 func (s Login) Messages() map[string]string {
 	return validate.MS{
-		"required": lang.T(s.Ctx, "validator.common.field", nil) + " {field} " + lang.T(s.Ctx, "validator.common.required", nil),
+		"required": facade.Lang().Trans(s.Ctx, "validator.common.field", nil) + " {field} " + lang.Trans(s.Ctx, "validator.common.required", nil),
 	}
 }
 
 // Translates 字段翻译
 func (s Login) Translates() map[string]string {
 	return validate.MS{
-		"UserLogin.Username": lang.T(s.Ctx, "validator.login.username", nil),
-		"UserLogin.Password": lang.T(s.Ctx, "validator.login.password", nil),
-		"RefreshToken.Token": lang.T(s.Ctx, "validator.login.refreshToken", nil),
+		"UserLogin.Username": facade.Lang().Trans(s.Ctx, "validator.login.username", nil),
+		"UserLogin.Password": facade.Lang().Trans(s.Ctx, "validator.login.password", nil),
+		"RefreshToken.Token": facade.Lang().Trans(s.Ctx, "validator.login.refreshToken", nil),
 	}
 }

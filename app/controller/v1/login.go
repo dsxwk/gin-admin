@@ -47,6 +47,7 @@ func (s *LoginController) Login(c *gin.Context) {
 		req request.Login
 	)
 
+	req.WithContext(ctx)
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
@@ -58,13 +59,13 @@ func (s *LoginController) Login(c *gin.Context) {
 
 	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 
 	s.Response.Success(
 		c, errcode.Success().WithMsg(
-			facade.Lang().T(ctx, "login.success", map[string]interface{}{
+			facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
 				"name": userModel.Username,
 			}),
 		).WithData(LoginResponse{
@@ -96,6 +97,7 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 		req request.Login
 	)
 
+	req.WithContext(ctx)
 	s.service.WithContext(ctx)
 
 	token := c.Request.Header.Get("token")
@@ -109,7 +111,7 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 
 	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := s.service.RefreshToken(token)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 

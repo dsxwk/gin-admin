@@ -32,20 +32,22 @@ func (s Recover) Handle() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				ctx := c.Request.Context()
 
-				s.Response.Error(c, errcode.SystemError().
-					WithMsg(fmt.Sprintf("%v", err)).
-					WithData(
-						&ErrData{
-							TraceId: getString(ctx, ctxkey.TraceIdKey),
-							Error:   err,
-							IP:      getString(ctx, ctxkey.IpKey),
-							Lang:    getString(ctx, ctxkey.LangKey),
-							Path:    getString(ctx, ctxkey.PathKey),
-							Method:  getString(ctx, ctxkey.MethodKey),
-							Params:  ctx.Value(ctxkey.ParamsKey),
-							Stack:   getStackTrace(3),
-						},
-					),
+				s.Response.Error(
+					c,
+					errcode.SystemError().
+						WithMsg(fmt.Sprintf("%v", err)).
+						WithData(
+							&ErrData{
+								TraceId: getString(ctx, ctxkey.TraceIdKey),
+								Error:   err,
+								IP:      getString(ctx, ctxkey.IpKey),
+								Lang:    getString(ctx, ctxkey.LangKey),
+								Path:    getString(ctx, ctxkey.PathKey),
+								Method:  getString(ctx, ctxkey.MethodKey),
+								Params:  ctx.Value(ctxkey.ParamsKey),
+								Stack:   getStackTrace(3),
+							},
+						),
 				)
 			}
 		}()

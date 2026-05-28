@@ -23,35 +23,45 @@ type RequestFacade[T any] struct{}
 //
 //	name := facade.Request[string]().Path(ctx, "name", "default")
 func (r RequestFacade[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
-	return request.Client[T]{}.Path(ctx, key, defaultValue)
+	return request.NewClient[T]().Path(ctx, key, defaultValue)
+}
+
+// GetHeader 获取请求头
+func (r RequestFacade[T]) GetHeader(ctx *gin.Context, key string, defaultValue T) T {
+	return request.NewClient[T]().GetHeader(ctx, key, defaultValue)
+}
+
+// Header 设置请求头
+func (r RequestFacade[T]) Header(ctx *gin.Context, key string, value T) {
+	request.NewClient[T]().Header(ctx, key, value)
 }
 
 // Bind 绑定请求参数
 func (r RequestFacade[T]) Bind(ctx *gin.Context, v any) error {
-	return request.Client[T]{}.Bind(ctx, v)
+	return request.NewClient[T]().Bind(ctx, v)
 }
 
 // Validate 验证请求数据
 func (r RequestFacade[T]) Validate(data interface{}, scene string) error {
-	return request.Client[T]{}.Validate(data, scene)
+	return request.NewClient[T]().Validate(data, scene)
 }
 
 // BindValidate 绑定参数并验证
 func (r RequestFacade[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
-	return request.Client[T]{}.BindValidate(ctx, v, scene)
+	return request.NewClient[T]().BindValidate(ctx, v, scene)
 }
 
 // ValidateWithMessages 验证并自定义错误消息
 func (r RequestFacade[T]) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
-	return request.Client[T]{}.ValidateWithMessages(data, scene, messages)
+	return request.NewClient[T]().ValidateWithMessages(data, scene, messages)
 }
 
 // ValidateWithTranslates 验证并自定义字段翻译
 func (r RequestFacade[T]) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
-	return request.Client[T]{}.ValidateWithTranslates(data, scene, translates)
+	return request.NewClient[T]().ValidateWithTranslates(data, scene, translates)
 }
 
 // GetValidator 获取验证器实例
 func (r RequestFacade[T]) GetValidator(data interface{}, scene string) *validate.Validation {
-	return request.Client[T]{}.GetValidator(data, scene)
+	return request.NewClient[T]().GetValidator(data, scene)
 }

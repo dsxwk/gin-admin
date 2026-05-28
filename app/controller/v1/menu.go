@@ -43,7 +43,7 @@ func (s *MenuController) List(c *gin.Context) {
 
 	res, err := s.service.List(req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 
@@ -78,7 +78,7 @@ func (s *MenuController) RoleMenu(c *gin.Context) {
 
 	res, err := s.service.RoleMenu(req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 

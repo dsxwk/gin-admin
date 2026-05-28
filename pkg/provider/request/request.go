@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+func NewClient[T any]() *Client[T] {
+	return &Client[T]{}
+}
+
 type Client[T any] struct{}
 
 // Query 泛型获取请求查询参数
@@ -92,6 +96,21 @@ func (c Client[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
 	}
 
 	return getValue[T](val, defaultValue)
+}
+
+// GetHeader 泛型获取请求头参数
+func (c Client[T]) GetHeader(ctx *gin.Context, key string, defaultValue T) T {
+	val := ctx.GetHeader(key)
+	if val == "" {
+		return defaultValue
+	}
+
+	return getValue[T](val, defaultValue)
+}
+
+// Header 泛型设置请求头参数
+func (c Client[T]) Header(ctx *gin.Context, key string, value T) {
+	ctx.Header(key, fmt.Sprintf("%v", value))
 }
 
 // Bind 绑定请求参数

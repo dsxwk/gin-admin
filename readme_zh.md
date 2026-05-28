@@ -990,7 +990,7 @@ func (s *UserController) List(c *gin.Context) {
 
     res, err := s.service.List(req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
         return
     }
 
@@ -1941,13 +1941,13 @@ func (s *LoginController) Login(c *gin.Context) {
 
   userModel, err := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
     return
   }
 
   err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().T(ctx, err.Error(), nil)))
+    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
     return
   }
 
@@ -1959,7 +1959,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
   s.Response.Success(
     c, errcode.Success().WithMsg(
-      facade.Lang().T(ctx, "login.success", map[string]interface{}{
+      facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
         "name": userModel.Username,
       }),
     ).WithData(LoginResponse{
@@ -2304,7 +2304,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
 	ctx := c.Request.Context()
-    trans := facade.Lang().T(ctx, "login.username", nil)
+    trans := facade.Lang().Trans(ctx, "login.username", nil)
 	fmt.Println(trans) // 输出: 用户名, 英文输出: Username
 }
 ```
@@ -2335,7 +2335,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := facade.Lang().T(ctx, "login.success", map[string]interface{}{
+    trans := facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
         "name": "admin",
     }),
 	fmt.Println(trans) // 输出: admin,登录成功 英文输出: admin,Login Success
@@ -2612,7 +2612,7 @@ func (s *TestController) Test(c *gin.Context) {
   
     res, err := s.service.List(req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+        s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
         return
     }
   

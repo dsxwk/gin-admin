@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
@@ -19,17 +20,15 @@ type Jwt struct {
 // Handle jwt中间件
 func (s Jwt) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.Request.Header.Get("token")
-		errCode := errcode.Unauthorized()
-		if token == "" || token == "null" {
-			s.Response.Error(c, errCode)
+		token := facade.Request[string]().GetHeader(c, "token", "")
+		if token == "" /* || token == "null"*/ {
+			s.Response.Error(c, errcode.Unauthorized())
 			return
 		}
 
 		data, err := s.Decode(token)
 		if err != nil {
-			errCode = errCode.WithMsg(err.Error())
-			s.Response.Error(c, errCode)
+			s.Response.Error(c, errcode.Unauthorized().WithMsg(err.Error()))
 			return
 		}
 
@@ -65,7 +64,7 @@ func (s Jwt) Decode(jwtToken string) (map[string]interface{}, error) {
 	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 		// 验证签名方法
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf(lang.T(s.Ctx, "middleware.jwt.unsupportedSignatureMethod", nil)+": %v", token.Header["alg"])
+			return nil, fmt.Errorf(lang.Trans(s.Ctx, "middleware.jwt.unsupportedSignatureMethod", nil)+": %v", token.Header["alg"])
 		}
 
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("your_secret_key")
@@ -73,14 +72,14 @@ func (s Jwt) Decode(jwtToken string) (map[string]interface{}, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf(lang.T(s.Ctx, "middleware.jwt.TokenParseErr", nil)+": %v", err)
+		return nil, fmt.Errorf(lang.Trans(s.Ctx, "middleware.jwt.TokenParseErr", nil)+": %v", err)
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, nil
 	}
 
-	return nil, fmt.Errorf(lang.T(s.Ctx, "middleware.jwt.InvalidToken", nil))
+	return nil, fmt.Errorf(lang.Trans(s.Ctx, "middleware.jwt.InvalidToken", nil))
 }
 
 // WithRefresh 刷新token

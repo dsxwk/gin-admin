@@ -93,10 +93,9 @@ func loadLangDir(langCode, dir string) {
 	}
 }
 
-// T 翻译
-func T(ctx context.Context, messageID string, data map[string]interface{}) string {
+// Trans 翻译
+func Trans(ctx context.Context, messageID string, data map[string]interface{}) string {
 	langCode := getLangFromContext(ctx)
-
 	localizer, ok := Localizers[langCode]
 	if !ok {
 		localizer = Localizers["zh"]

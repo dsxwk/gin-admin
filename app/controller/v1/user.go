@@ -44,7 +44,7 @@ func (s *UserController) List(c *gin.Context) {
 
 	res, err := s.service.List(req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 
@@ -78,7 +78,7 @@ func (s *UserController) Create(c *gin.Context) {
 
 	user, err := s.service.Create(req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.T(ctx, err.Error(), nil)))
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 
