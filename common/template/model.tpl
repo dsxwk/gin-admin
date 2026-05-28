@@ -4,6 +4,7 @@ package model{{ if .Imports }}
 
 const {{ .TableConst }} = "{{ .Table }}"
 
+// {{.Struct}} {{.StructComment}}
 type {{ .Struct }} struct {
 {{- range .Fields }}
 	{{ . }}

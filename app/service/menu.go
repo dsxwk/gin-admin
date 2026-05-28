@@ -32,7 +32,7 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 	}
 
 	if req.NotPage {
-		err = db.Order("id DESC").Find(&m).Error
+		err = db.Order("sort DESC").Find(&m).Error
 		if err != nil {
 			return pageData, err
 		}
@@ -51,10 +51,9 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 // RoleMenu 角色菜单
 func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error) {
 	var (
-		m     []model.Menu
-		menu  model.Menu
-		db    = s.DB(&menu)
-		total int64
+		m    []model.Menu
+		menu model.Menu
+		db   = s.DB(&menu)
 	)
 
 	roleIds := strings.Split(req.RoleId, ",")
@@ -62,18 +61,15 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 	// 搜索
 	db = s.Search(db, req.Search)
 
-	err = db.Count(&total).Error
-	if err != nil {
-		return tree, err
-	}
-
 	err = db.
+		Preload("MenuMeta").
 		Preload("RoleMenus").
 		Preload("MenuActions").
 		Preload("MenuActions.RoleActions", "role_id IN ?", roleIds).
+		Preload("MenuActions.Parent").
 		Joins("LEFT JOIN role_menus ON menu.id = role_menus.menu_id").
 		Where("role_menus.role_id IN ?", roleIds).
-		Order("sort asc").
+		Order("sort DESC").
 		Group("menu.id").
 		Find(&m).Error
 	if err != nil {

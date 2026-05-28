@@ -5,24 +5,10 @@
 package model
 
 import (
-	"fmt"
 	"gin/pkg"
-	"github.com/goccy/go-json"
 )
 
 const TableNameMenu = "menu"
-
-type Meta struct {
-	Title       string         `gorm:"column:title;type:json;comment:菜单名称" json:"title"`
-	Icon        string         `gorm:"column:icon;type:json;comment:菜单图标" json:"icon"`
-	IsHide      bool           `gorm:"column:isHide;type:json;comment:是否隐藏" json:"isHide"`
-	IsKeepAlive bool           `gorm:"column:isKeepAlive;type:json;comment:是否缓存" json:"isKeepAlive"`
-	IsAffix     bool           `gorm:"column:isAffix;type:json;comment:是否固定" json:"isAffix"`
-	IsLink      string         `gorm:"column:isLink;type:json;comment:外链/内嵌时链接地址" json:"isLink"` // 外链/内嵌时链接地址（http:xxx.com），开启外链条件，`1、isLink: 链接地址不为空`
-	IsIframe    bool           `gorm:"column:isIframe;type:json;comment:是否内嵌" json:"isIframe"`   // 是否内嵌，开启条件，`1、isIframe:true 2、isLink：链接地址不为空`
-	Roles       []int64        `gorm:"column:roles;type:json;comment:菜单角色" json:"roles"`         // 权限标识，取角色管理
-	AuthBtnList []*MenuActions `gorm:"type:json;comment:按钮权限列表" json:"authBtnList"`              // 按钮权限列表
-}
 
 // Menu 菜单表
 type Menu struct {
@@ -35,10 +21,10 @@ type Menu struct {
 	IsLink      int64          `gorm:"column:is_link;type:tinyint(3) unsigned;not null;default:2;comment:是否外链 1=是 2=否 默认=2" json:"isLink"` // 是否外链 1=是 2=否 默认=2
 	Status      int64          `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"`       // 状态 1=启用 2=停用
 	Sort        int64          `gorm:"column:sort;type:int(10) unsigned;not null;comment:排序" json:"sort"`                                  // 排序
-	MenuActions []*MenuActions `json:"menuActions" gorm:"foreignkey:menu_id;references:id" comment:"菜单功能"`                                 // 菜单功能
-	RoleMenus   []*RoleMenus   `json:"roleMenus" gorm:"foreignkey:menu_id;references:id" comment:"角色菜单"`                                   // 角色菜单
-	Meta        Meta           `gorm:"column:meta;type:json;comment:meta" json:"meta"`                                                     // meta
-	Children    []pkg.TreeNode `gorm:"-" json:"children"`                                                                                  // 子节点
+	MenuActions []*MenuActions `gorm:"foreignKey:menu_id;references:id;comment:菜单功能" json:"menuActions"`                                   // 菜单功能
+	RoleMenus   []*RoleMenus   `gorm:"foreignKey:menu_id;references:id;comment:角色菜单" json:"roleMenus"`                                     // 角色菜单
+	MenuMeta    *MenuMeta      `gorm:"foreignKey:menu_id;references:id" json:"menuMeta"`                                                   // 菜单元数据
+	Children    []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`                                                                      // 子节点
 	CreatedAt   *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                      // 创建时间
 	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                      // 更新时间
 	DeletedAt   *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`                 // 删除时间
@@ -68,31 +54,4 @@ func (m *Menu) GetTree(data []Menu) []pkg.TreeNode {
 		items = append(items, &data[i])
 	}
 	return pkg.BuildTree[*Menu](items)
-}
-
-// 实现sql.Scanner接口(用于从数据库读取)
-func (m *Meta) Scan(value interface{}) error {
-	if value == nil {
-		*m = Meta{}
-		return nil
-	}
-	var data []byte
-	switch v := value.(type) {
-	case string:
-		data = []byte(v)
-	case []byte:
-		data = v
-	default:
-		return fmt.Errorf("cannot scan type %T into Meta", value)
-	}
-	return json.Unmarshal(data, m)
-}
-
-// Meta
-func (m Meta) String() string {
-	b, err := json.Marshal(m)
-	if err != nil {
-		return "{}"
-	}
-	return string(b)
 }
