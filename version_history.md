@@ -1,3 +1,8 @@
+## v2.2.10
+> - Request Facade and Translation Facade optimization
+> - Database file change
+> - Command line generate model adjustment
+
 ## v2.2.9
 > - Command line optimization
 > - Added enum and enum test interface, enum test case
