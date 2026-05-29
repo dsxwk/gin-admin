@@ -1,4 +1,4 @@
-package foundation
+package serviceprovider
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ var (
 )
 
 // Register 注册服务提供者(由各个提供者的init函数调用,实现自动注册)
-// 使用示例: foundation.Register(&ConfigProvider{})
+// 使用示例: serviceprovider.Register(&ConfigProvider{})
 func Register(provider ServiceProvider) {
 	globalRegistry.mu.Lock()
 	defer globalRegistry.mu.Unlock()

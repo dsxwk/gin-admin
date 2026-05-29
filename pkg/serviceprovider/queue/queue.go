@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg/provider/logger"
+	"gin/pkg/serviceprovider/logger"
 	"os"
 	"sync"
 )

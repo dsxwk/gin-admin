@@ -5,11 +5,11 @@ import (
 	"context"
 {{- end}}
 	"gin/app/facade"
-	"gin/pkg/foundation"
+	"gin/pkg/serviceprovider"
 )
 
 func init() {
-	foundation.Register(&{{.ProviderName}}Provider{})
+	serviceprovider.Register(&{{.ProviderName}}Provider{})
 }
 
 // {{.ProviderName}}Provider {{.Desc}}服务提供者
@@ -21,21 +21,21 @@ func (p *{{.ProviderName}}Provider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *{{.ProviderName}}Provider) Register(app foundation.App) {
+func (p *{{.ProviderName}}Provider) Register(app serviceprovider.App) {
 	// TODO: 注册服务到门面
 	// facade.Register("{{.ProviderVar}}", facade.{{.ProviderName}}Provider)
 }
 
 // Boot 启动服务
-func (p *{{.ProviderName}}Provider) Boot(app foundation.App) {
+func (p *{{.ProviderName}}Provider) Boot(app serviceprovider.App) {
 	// TODO: 初始化服务
 	facade.Log().Info("{{.ProviderName}}服务启动成功")
 }
 {{- if .HasRunner}}
 
 // Runners 后台运行任务(用于优雅关闭)
-func (p *{{.ProviderName}}Provider) Runners() []foundation.Runner {
-	return []foundation.Runner{
+func (p *{{.ProviderName}}Provider) Runners() []serviceprovider.Runner {
+	return []serviceprovider.Runner{
 		&{{.ProviderName}}CleanupRunner{},
 	}
 }

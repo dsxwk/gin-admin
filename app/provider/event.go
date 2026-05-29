@@ -3,12 +3,12 @@ package provider
 import (
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg/foundation"
-	"gin/pkg/provider/message"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/message"
 )
 
 func init() {
-	foundation.Register(&EventProvider{})
+	serviceprovider.Register(&EventProvider{})
 }
 
 // EventProvider 事件服务提供者
@@ -18,12 +18,12 @@ func (p *EventProvider) Name() string {
 	return "event"
 }
 
-func (p *EventProvider) Register(app foundation.App) {
+func (p *EventProvider) Register(app serviceprovider.App) {
 	// 注册事件门面
 	facade.Register[*message.Event]("event", facade.Message())
 }
 
-func (p *EventProvider) Boot(app foundation.App) {
+func (p *EventProvider) Boot(app serviceprovider.App) {
 	flag.Infof("事件服务启动成功")
 }
 

@@ -1,7 +1,7 @@
 package debugger
 
 import (
-	"gin/pkg/provider/message"
+	"gin/pkg/serviceprovider/message"
 	"sync"
 )
 

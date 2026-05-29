@@ -3,7 +3,7 @@ package producer
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/provider/queue"
+	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 )
 

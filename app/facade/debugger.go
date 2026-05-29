@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/provider/debugger"
+	"gin/pkg/serviceprovider/debugger"
 )
 
 // Debugger 调试器门面-调试器统一入口

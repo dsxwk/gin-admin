@@ -3,12 +3,12 @@ package provider
 import (
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg/foundation"
-	"gin/pkg/provider/lang"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/lang"
 )
 
 func init() {
-	foundation.Register(&LangProvider{})
+	serviceprovider.Register(&LangProvider{})
 }
 
 // LangProvider 翻译服务提供者
@@ -20,13 +20,13 @@ func (p *LangProvider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *LangProvider) Register(app foundation.App) {
+func (p *LangProvider) Register(app serviceprovider.App) {
 	// 翻译服务在Boot时加载,这里只做占位
 	facade.Register("lang", facade.Lang())
 }
 
 // Boot 启动服务
-func (p *LangProvider) Boot(app foundation.App) {
+func (p *LangProvider) Boot(app serviceprovider.App) {
 	// 加载翻译文件(会从facade.Config()获取配置)
 	lang.LoadLang(facade.Config(), facade.Log())
 	flag.Infof("翻译服务启动成功")

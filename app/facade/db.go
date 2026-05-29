@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/provider/orm"
+	"gin/pkg/serviceprovider/orm"
 	"gorm.io/gorm"
 )
 

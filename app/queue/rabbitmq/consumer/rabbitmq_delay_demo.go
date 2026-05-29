@@ -5,8 +5,8 @@ import (
 	"gin/common/base"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/provider/logger"
-	"gin/pkg/provider/queue"
+	"gin/pkg/serviceprovider/logger"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDelayDemoConsumer RabbitMQ延迟消费者

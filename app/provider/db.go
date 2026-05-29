@@ -4,13 +4,13 @@ import (
 	"gin/app/facade"
 	"gin/common/flag"
 	"gin/pkg"
-	"gin/pkg/foundation"
-	"gin/pkg/provider/orm"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/orm"
 	"gorm.io/gorm"
 )
 
 func init() {
-	foundation.Register(&DbProvider{})
+	serviceprovider.Register(&DbProvider{})
 }
 
 // DbProvider 数据库服务提供者
@@ -22,13 +22,13 @@ func (p *DbProvider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *DbProvider) Register(app foundation.App) {
+func (p *DbProvider) Register(app serviceprovider.App) {
 	cfg := facade.Config()
 	facade.Register[*gorm.DB]("db", orm.Connection(cfg.Databases.Driver, cfg))
 }
 
 // Boot 启动服务-测试数据库连接
-func (p *DbProvider) Boot(app foundation.App) {
+func (p *DbProvider) Boot(app serviceprovider.App) {
 	cfg := facade.Config()
 	// 测试默认连接是否正常
 	db := orm.Connection(cfg.Databases.Driver, cfg)

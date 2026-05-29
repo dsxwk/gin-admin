@@ -7,7 +7,7 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/provider/logger"
+	"gin/pkg/serviceprovider/logger"
 	"github.com/goccy/go-json"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"

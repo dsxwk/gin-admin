@@ -3,11 +3,11 @@ package provider
 import (
 	"gin/app/facade"
 	"gin/config"
-	"gin/pkg/foundation"
+	"gin/pkg/serviceprovider"
 )
 
 func init() {
-	foundation.Register(&ConfigProvider{})
+	serviceprovider.Register(&ConfigProvider{})
 }
 
 // ConfigProvider 配置服务提供者
@@ -19,13 +19,13 @@ func (p *ConfigProvider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *ConfigProvider) Register(app foundation.App) {
+func (p *ConfigProvider) Register(app serviceprovider.App) {
 	// 注册到门面
 	facade.Register[*config.Config]("config", config.NewConfig())
 }
 
 // Boot 启动服务(配置服务无需额外启动逻辑)
-func (p *ConfigProvider) Boot(app foundation.App) {}
+func (p *ConfigProvider) Boot(app serviceprovider.App) {}
 
 // Dependencies 依赖服务
 func (p *ConfigProvider) Dependencies() []string {

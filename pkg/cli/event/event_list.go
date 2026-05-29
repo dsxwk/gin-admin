@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/provider/eventbus"
+	"gin/pkg/serviceprovider/eventbus"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"sort"

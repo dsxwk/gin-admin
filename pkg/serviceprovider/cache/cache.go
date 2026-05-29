@@ -5,9 +5,9 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg/provider/debugger"
-	"gin/pkg/provider/logger"
-	"gin/pkg/provider/message"
+	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/logger"
+	"gin/pkg/serviceprovider/message"
 	"sync"
 	"time"
 )

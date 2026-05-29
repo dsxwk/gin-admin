@@ -3,8 +3,8 @@ package facade
 import (
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/provider/logger"
-	"gin/pkg/provider/queue"
+	"gin/pkg/serviceprovider/logger"
+	"gin/pkg/serviceprovider/queue"
 	"sync"
 )
 

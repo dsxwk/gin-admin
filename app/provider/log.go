@@ -3,12 +3,12 @@ package provider
 import (
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg/foundation"
-	"gin/pkg/provider/logger"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/logger"
 )
 
 func init() {
-	foundation.Register(&LogProvider{})
+	serviceprovider.Register(&LogProvider{})
 }
 
 // LogProvider 日志服务提供者
@@ -20,13 +20,13 @@ func (p *LogProvider) Name() string {
 }
 
 // Register 注册日志服务到门面
-func (p *LogProvider) Register(app foundation.App) {
+func (p *LogProvider) Register(app serviceprovider.App) {
 	// 注册到门面
 	facade.Register[*logger.Logger]("log", logger.NewLogger(facade.Config()))
 }
 
 // Boot 启动服务
-func (p *LogProvider) Boot(app foundation.App) {
+func (p *LogProvider) Boot(app serviceprovider.App) {
 	flag.Infof("日志服务启动成功")
 }
 

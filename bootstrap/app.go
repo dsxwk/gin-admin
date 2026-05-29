@@ -11,7 +11,7 @@ import (
 	"gin/common/response"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/foundation"
+	"gin/pkg/serviceprovider"
 	"gin/router"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -36,7 +36,7 @@ func Init() error {
 	// 初始化门面系统
 	facade.Init()
 	// 创建应用实例
-	app := foundation.GetApp()
+	app := serviceprovider.GetApp()
 	// 注册应用到门面
 	facade.Register("app", app)
 
@@ -259,7 +259,7 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 	color.Yellow("服务正在关闭...")
 
 	defer func() {
-		app := foundation.GetApp()
+		app := serviceprovider.GetApp()
 		err := app.Stop()
 		if err != nil {
 			flag.Errorf("关闭应用失败: %s", err.Error())

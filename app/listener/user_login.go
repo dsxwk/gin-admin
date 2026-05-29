@@ -3,7 +3,7 @@ package listener
 import (
 	"fmt"
 	"gin/app/event"
-	"gin/pkg/provider/eventbus"
+	"gin/pkg/serviceprovider/eventbus"
 	"time"
 )
 

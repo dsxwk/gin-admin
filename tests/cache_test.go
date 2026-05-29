@@ -2,7 +2,7 @@ package tests
 
 import (
 	"gin/app/facade"
-	"gin/pkg/provider/cache"
+	"gin/pkg/serviceprovider/cache"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"

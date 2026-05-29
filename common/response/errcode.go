@@ -2,7 +2,7 @@ package response
 
 import (
 	"gin/common/errcode"
-	"gin/pkg/provider/logger"
+	"gin/pkg/serviceprovider/logger"
 	"github.com/gin-gonic/gin"
 )
 

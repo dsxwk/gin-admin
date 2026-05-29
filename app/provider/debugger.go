@@ -4,12 +4,12 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg/foundation"
-	"gin/pkg/provider/debugger"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/debugger"
 )
 
 func init() {
-	foundation.Register(&DebuggerProvider{})
+	serviceprovider.Register(&DebuggerProvider{})
 }
 
 // DebuggerProvider 调试器服务提供者
@@ -19,18 +19,18 @@ func (p *DebuggerProvider) Name() string {
 	return "debugger"
 }
 
-func (p *DebuggerProvider) Register(app foundation.App) {
+func (p *DebuggerProvider) Register(app serviceprovider.App) {
 	facade.Register[*debugger.Debugger]("debugger", debugger.NewDebugger(facade.Message()))
 }
 
-func (p *DebuggerProvider) Boot(app foundation.App) {
+func (p *DebuggerProvider) Boot(app serviceprovider.App) {
 	// 启动调试器
 	facade.Debugger().Start()
 	flag.Infof("调试器服务启动成功")
 }
 
-func (p *DebuggerProvider) Runners() []foundation.Runner {
-	return []foundation.Runner{
+func (p *DebuggerProvider) Runners() []serviceprovider.Runner {
+	return []serviceprovider.Runner{
 		&DebuggerRunner{},
 	}
 }

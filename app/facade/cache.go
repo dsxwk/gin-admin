@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/provider/cache"
+	"gin/pkg/serviceprovider/cache"
 )
 
 // Cache 获取缓存实例

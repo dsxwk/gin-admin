@@ -4,7 +4,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/provider/queue"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDelayDemoProducer RabbitMQ延迟生产者

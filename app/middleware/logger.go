@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
-	"gin/pkg/provider/debugger"
+	"gin/pkg/serviceprovider/debugger"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"

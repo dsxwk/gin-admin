@@ -2,7 +2,7 @@ package facade
 
 import (
 	"context"
-	"gin/pkg/provider/http"
+	"gin/pkg/serviceprovider/http"
 )
 
 // Http 泛型函数,返回对应类型的门面实例

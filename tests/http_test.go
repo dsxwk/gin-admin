@@ -6,7 +6,7 @@ import (
 	"gin/app/facade"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
-	h "gin/pkg/provider/http"
+	h "gin/pkg/serviceprovider/http"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"net/http"

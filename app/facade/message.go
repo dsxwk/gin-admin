@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/provider/message"
+	"gin/pkg/serviceprovider/message"
 )
 
 // Message 配置门面方法

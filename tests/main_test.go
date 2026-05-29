@@ -4,7 +4,7 @@ import (
 	"gin/app/facade"
 	"gin/common/flag"
 	"gin/common/response"
-	"gin/pkg/foundation"
+	"gin/pkg/serviceprovider"
 	"os"
 	"testing"
 )
@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 	// 初始化门面系统
 	facade.Init()
 	// 创建应用实例
-	app := foundation.GetApp()
+	app := serviceprovider.GetApp()
 	// 注册应用到门面
 	facade.Register("app", app)
 

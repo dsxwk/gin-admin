@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/provider/logger"
+	"gin/pkg/serviceprovider/logger"
 )
 
 // Log 日志门面方法

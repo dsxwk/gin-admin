@@ -3,11 +3,11 @@ package provider
 import (
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg/foundation"
+	"gin/pkg/serviceprovider"
 )
 
 func init() {
-	foundation.Register(&RequestProvider{})
+	serviceprovider.Register(&RequestProvider{})
 }
 
 // RequestProvider 请求验证服务提供者
@@ -19,12 +19,12 @@ func (p *RequestProvider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *RequestProvider) Register(app foundation.App) {
+func (p *RequestProvider) Register(app serviceprovider.App) {
 	facade.Register("request", facade.Request[any]())
 }
 
 // Boot 启动服务
-func (p *RequestProvider) Boot(app foundation.App) {
+func (p *RequestProvider) Boot(app serviceprovider.App) {
 	flag.Infof("请求验证服务启动成功")
 }
 

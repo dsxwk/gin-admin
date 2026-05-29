@@ -2,7 +2,7 @@ package facade
 
 import (
 	"context"
-	"gin/pkg/provider/eventbus"
+	"gin/pkg/serviceprovider/eventbus"
 )
 
 // Event 门面泛型函数

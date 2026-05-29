@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/common/errcode"
 	"gin/common/response"
-	"gin/pkg/provider/ratelimit"
+	"gin/pkg/serviceprovider/ratelimit"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 	"sync"

@@ -2,7 +2,7 @@ package facade
 
 import (
 	"context"
-	"gin/pkg/provider/lang"
+	"gin/pkg/serviceprovider/lang"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 

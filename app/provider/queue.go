@@ -9,12 +9,12 @@ import (
 	_ "gin/app/queue/rabbitmq/producer"
 	"gin/common/flag"
 	"gin/pkg"
-	"gin/pkg/foundation"
-	"gin/pkg/provider/queue"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/queue"
 )
 
 func init() {
-	foundation.Register(&QueueProvider{})
+	serviceprovider.Register(&QueueProvider{})
 }
 
 // QueueProvider 队列服务提供者
@@ -30,7 +30,7 @@ func (p *QueueProvider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *QueueProvider) Register(app foundation.App) {
+func (p *QueueProvider) Register(app serviceprovider.App) {
 	// 注册队列门面
 	facade.Register("queue", facade.Queue())
 	p.consumers = queue.GetConsumerRegistry().GetAll()
@@ -39,7 +39,7 @@ func (p *QueueProvider) Register(app foundation.App) {
 }
 
 // Boot 启动服务(只启动消费者,生产者按需使用)
-func (p *QueueProvider) Boot(app foundation.App) {
+func (p *QueueProvider) Boot(app serviceprovider.App) {
 	cfg := facade.Config()
 	log := facade.Log()
 
@@ -62,8 +62,8 @@ func (p *QueueProvider) Boot(app foundation.App) {
 }
 
 // Runners 后台运行任务
-func (p *QueueProvider) Runners() []foundation.Runner {
-	return []foundation.Runner{
+func (p *QueueProvider) Runners() []serviceprovider.Runner {
+	return []serviceprovider.Runner{
 		&queueShutdownRunner{
 			consumers: p.consumers,
 			producers: p.producers,

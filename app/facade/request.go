@@ -1,7 +1,7 @@
 package facade
 
 import (
-	"gin/pkg/provider/request"
+	"gin/pkg/serviceprovider/request"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/validate"
 )

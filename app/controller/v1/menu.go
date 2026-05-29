@@ -6,7 +6,7 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/provider/lang"
+	"gin/pkg/serviceprovider/lang"
 	"github.com/gin-gonic/gin"
 )
 

@@ -4,11 +4,11 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg/foundation"
+	"gin/pkg/serviceprovider"
 )
 
 func init() {
-	foundation.Register(&RateLimitProvider{})
+	serviceprovider.Register(&RateLimitProvider{})
 }
 
 // RateLimitProvider 限流服务提供者
@@ -20,21 +20,21 @@ func (p *RateLimitProvider) Name() string {
 }
 
 // Register 注册服务到门面
-func (p *RateLimitProvider) Register(app foundation.App) {
+func (p *RateLimitProvider) Register(app serviceprovider.App) {
 	facade.Register("rate_limit", facade.RateLimiter)
 }
 
 // Boot 启动服务
-func (p *RateLimitProvider) Boot(app foundation.App) {
+func (p *RateLimitProvider) Boot(app serviceprovider.App) {
 	// 初始化限流
 	facade.RateLimiter().Init()
 	flag.Infof("限流服务启动成功")
 }
 
 // Runners 后台运行任务(用于优雅关闭)
-// 返回 Runner,foundation会在应用停止时自动调用Stop()
-func (p *RateLimitProvider) Runners() []foundation.Runner {
-	return []foundation.Runner{
+// 返回 Runner,serviceprovider会在应用停止时自动调用Stop()
+func (p *RateLimitProvider) Runners() []serviceprovider.Runner {
+	return []serviceprovider.Runner{
 		&RateLimitCleanupRunner{},
 	}
 }

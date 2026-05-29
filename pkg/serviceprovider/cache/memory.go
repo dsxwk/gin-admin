@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"gin/config"
-	"gin/pkg/provider/message"
+	"gin/pkg/serviceprovider/message"
 	"github.com/patrickmn/go-cache"
 	"sync"
 	"time"

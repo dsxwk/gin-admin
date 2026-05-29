@@ -6,7 +6,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg/provider/debugger"
+	"gin/pkg/serviceprovider/debugger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"

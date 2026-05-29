@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/provider/queue"
+	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
 	{{- end}}

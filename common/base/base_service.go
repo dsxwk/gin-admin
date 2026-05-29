@@ -3,7 +3,7 @@ package base
 import (
 	"context"
 	"gin/app/facade"
-	"gin/pkg/provider/orm"
+	"gin/pkg/serviceprovider/orm"
 	"gorm.io/gorm"
 )
 
