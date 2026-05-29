@@ -140,7 +140,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.2.10
+> - 最新版本: v2.2.11
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
@@ -227,7 +227,7 @@ $ ./cli demo:command --args=11
 │   ├── base                            # 基类
 │   ├── ctxkey                          # 上下文键名
 │   ├── errcode                         # 错误码
-│   ├── flag                            # 特殊符合
+│   ├── flag                            # 特殊符号
 │   ├── response                        # 响应
 │   ├── template                        # 模版
 ├── config                              # 配置文件

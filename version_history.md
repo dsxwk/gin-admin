@@ -1,3 +1,6 @@
+## v2.2.11
+> - Service Provider package name optimization
+
 ## v2.2.10
 > - Request Facade and Translation Facade optimization
 > - Database file change
