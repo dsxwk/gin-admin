@@ -32,7 +32,7 @@ func (s *MenuController) List(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(c.Request.Context())
+	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "List")
@@ -65,7 +65,7 @@ func (s *MenuController) RoleMenu(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(c.Request.Context())
+	s.service.WithContext(ctx)
 
 	req.RoleId = facade.Request[string]().Path(c, "roleId", "0")
 

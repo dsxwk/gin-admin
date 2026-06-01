@@ -23,7 +23,7 @@ type Menu struct {
 	Sort        int64          `gorm:"column:sort;type:int(10) unsigned;not null;comment:排序" json:"sort"`                                  // 排序
 	MenuActions []*MenuActions `gorm:"foreignKey:menu_id;references:id;comment:菜单功能" json:"menuActions"`                                   // 菜单功能
 	RoleMenus   []*RoleMenus   `gorm:"foreignKey:menu_id;references:id;comment:角色菜单" json:"roleMenus"`                                     // 角色菜单
-	MenuMeta    *MenuMeta      `gorm:"foreignKey:menu_id;references:id" json:"menuMeta"`                                                   // 菜单元数据
+	Meta        *MenuMeta      `gorm:"foreignKey:menu_id;references:id" json:"meta"`                                                       // 菜单元数据
 	Children    []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`                                                                      // 子节点
 	CreatedAt   *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                      // 创建时间
 	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                      // 更新时间

@@ -30,15 +30,19 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 	if err != nil {
 		return pageData, err
 	}
+	db = db.Preload("Meta").
+		Preload("Meta.AuthBtnList").
+		Preload("MenuActions").
+		Preload("RoleMenus")
 
 	if req.NotPage {
-		err = db.Order("sort DESC").Find(&m).Error
+		err = db.Order("sort Asc").Find(&m).Error
 		if err != nil {
 			return pageData, err
 		}
 		pageData.List = menu.GetTree(m)
 	} else {
-		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+		err = db.Offset(offset).Limit(limit).Order("sort Asc").Find(&m).Error
 		if err != nil {
 			return pageData, err
 		}
@@ -62,14 +66,15 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 	db = s.Search(db, req.Search)
 
 	err = db.
-		Preload("MenuMeta").
+		Preload("Meta").
+		Preload("Meta.AuthBtnList").
 		Preload("RoleMenus").
 		Preload("MenuActions").
 		Preload("MenuActions.RoleActions", "role_id IN ?", roleIds).
 		Preload("MenuActions.Parent").
 		Joins("LEFT JOIN role_menus ON menu.id = role_menus.menu_id").
 		Where("role_menus.role_id IN ?", roleIds).
-		Order("sort DESC").
+		Order("sort ASC").
 		Group("menu.id").
 		Find(&m).Error
 	if err != nil {
