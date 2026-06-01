@@ -24,6 +24,9 @@ var (
 
 // LoadRouters 加载路由
 func LoadRouters(router *gin.Engine) {
+	// 全局中间件
+	router.Use(corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware)
+
 	// 静态文件
 	router.StaticFS("/public", http.Dir(pkg.GetRootPath()+"/public"))
 
@@ -31,8 +34,8 @@ func LoadRouters(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 路由分组
-	public := router.Group("", corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware) // 无需权限
-	auth := public.Group("", jwtMiddleware)                                                            // 需要权限
+	public := router.Group("")              // 无需权限
+	auth := router.Group("", jwtMiddleware) // 需要权限
 
 	// 全局限流:rateLimitMiddleware.Handle() 用户限流:rateLimitMiddleware.UserRateLimit(1, 1) ip限流:rateLimitMiddleware.IpRateLimit(1, 1)
 	// 健康检查

@@ -75,7 +75,7 @@ cors:
     allow-methods: GET, POST, PUT, DELETE, OPTIONS # 允许的请求方法列表
     allow-credentials: "true" # 是否允许发送cookie
   whitelist:
-    - allow-origin: http://127.0.0.1:8080 # 允许访问的域名列表
+    - allow-origin: http://127.0.0.1:3000 # 允许访问的域名列表
       allow-headers: Content-Type, AccessToken, Authorization, Token # 允许的请求头列表
       expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type # 允许返回的响应头列表
       allow-methods: GET, POST, PUT, DELETE, OPTIONS # 允许的请求方法列表
