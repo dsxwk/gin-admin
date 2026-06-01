@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 28/05/2026 15:24:07
+ Date: 01/06/2026 15:04:40
 */
 
 SET NAMES utf8mb4;
@@ -114,13 +114,13 @@ CREATE TABLE `menu`  (
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
-INSERT INTO `menu` VALUES (1, 0, 'home', '/home', '', 'home/index', 2, 1, 0, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
-INSERT INTO `menu` VALUES (2, 0, 'system', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 0, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
-INSERT INTO `menu` VALUES (3, 2, 'systemMenu', '/system/menu', '', 'system/menu/index', 2, 1, 0, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
-INSERT INTO `menu` VALUES (4, 2, 'systemUser', '/system/user', '', 'system/user/index', 2, 1, 0, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
-INSERT INTO `menu` VALUES (5, 2, 'systemRole', '/system/role', '', 'system/role/index', 2, 1, 0, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
-INSERT INTO `menu` VALUES (6, 2, 'systemDic', '/system/dic', '', 'system/dic/index', 2, 1, 0, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
-INSERT INTO `menu` VALUES (10, 0, 'article', '/article', '', 'article/index', 2, 1, 0, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `menu` VALUES (1, 0, 'home', '/home', '', 'home/index', 2, 1, 1, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
+INSERT INTO `menu` VALUES (2, 0, 'system', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
+INSERT INTO `menu` VALUES (3, 2, 'systemMenu', '/system/menu', '', 'system/menu/index', 2, 1, 3, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
+INSERT INTO `menu` VALUES (4, 2, 'systemUser', '/system/user', '', 'system/user/index', 2, 1, 4, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
+INSERT INTO `menu` VALUES (5, 2, 'systemRole', '/system/role', '', 'system/role/index', 2, 1, 5, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
+INSERT INTO `menu` VALUES (6, 2, 'systemDic', '/system/dic', '', 'system/dic/index', 2, 1, 6, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
+INSERT INTO `menu` VALUES (10, 0, 'article', '/article', '', 'article/index', 2, 1, 7, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -191,7 +191,7 @@ CREATE TABLE `menu_meta`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_meta
