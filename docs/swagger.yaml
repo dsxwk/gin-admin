@@ -54,8 +54,8 @@ definitions:
         type: array
       meta:
         allOf:
-        - $ref: '#/definitions/model.Meta'
-        description: meta
+        - $ref: '#/definitions/model.MenuMeta'
+        description: 菜单元数据
       name:
         description: 路由名称
         type: string
@@ -120,33 +120,41 @@ definitions:
       updatedAt:
         type: string
     type: object
-  model.Meta:
+  model.MenuMeta:
     properties:
       authBtnList:
         description: 按钮权限列表
         items:
           $ref: '#/definitions/model.MenuActions'
         type: array
+      createdAt:
+        type: string
       icon:
         type: string
+      id:
+        type: integer
       isAffix:
-        type: boolean
+        type: integer
       isHide:
-        type: boolean
+        type: integer
       isIframe:
-        description: 是否内嵌，开启条件，`1、isIframe:true 2、isLink：链接地址不为空`
-        type: boolean
+        description: 是否内嵌,开启条件`1 isIframe:true 2 isLink:链接地址不为空`
+        type: integer
       isKeepAlive:
-        type: boolean
+        type: integer
       isLink:
-        description: '外链/内嵌时链接地址（http:xxx.com），开启外链条件，`1、isLink: 链接地址不为空`'
+        description: 外链/内嵌时链接地址(http:xxx.com),开启外链条件`1 isLink:链接地址不为空`
         type: string
+      menuId:
+        type: integer
       roles:
-        description: 权限标识，取角色管理
+        description: 权限标识,取角色管理
         items:
-          type: integer
+          $ref: '#/definitions/model.RoleMenus'
         type: array
       title:
+        type: string
+      updatedAt:
         type: string
     type: object
   model.RoleActions:
@@ -175,6 +183,21 @@ definitions:
       name:
         type: string
       roleId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  model.Roles:
+    properties:
+      createdAt:
+        type: string
+      desc:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      status:
         type: integer
       updatedAt:
         type: string
@@ -244,6 +267,16 @@ definitions:
         description: 用户id
         type: integer
     type: object
+  request.CheckCaptcha:
+    properties:
+      captchaId:
+        type: string
+      code:
+        type: string
+    required:
+    - captchaId
+    - code
+    type: object
   request.PageData:
     properties:
       list:
@@ -282,6 +315,10 @@ definitions:
     type: object
   request.UserLogin:
     properties:
+      captchaId:
+        type: string
+      code:
+        type: string
       password:
         example: "123456"
         type: string
@@ -289,6 +326,8 @@ definitions:
         example: admin
         type: string
     required:
+    - captchaId
+    - code
     - password
     - username
     type: object
@@ -310,6 +349,13 @@ definitions:
     - fullName
     - nickname
     - username
+    type: object
+  v1.CaptchaResponse:
+    properties:
+      captchaId:
+        type: string
+      captchaImage:
+        type: string
     type: object
   v1.LoginResponse:
     properties:
@@ -342,6 +388,56 @@ info:
   title: Gin Swagger API
   version: "2.0"
 paths:
+  /api/v1/captcha:
+    get:
+      consumes:
+      - application/json
+      description: 获取验证码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回" Example({"code":0,"msg":"Success","data":[]})
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.CaptchaResponse'
+              type: object
+        "500":
+          description: 系统错误" Example({"code":500,"msg":"系统错误","data":[]})
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 获取验证码
+      tags:
+      - 登录相关
+    post:
+      description: 校验验证码
+      parameters:
+      - description: 验证码校验参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CheckCaptcha'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.Token'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+      summary: 校验验证码
+      tags:
+      - 登录相关
   /api/v1/login:
     post:
       consumes:
@@ -458,6 +554,58 @@ paths:
       summary: 刷新token
       tags:
       - 登录相关
+  /api/v1/role:
+    get:
+      description: 角色列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Roles'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 角色管理
   /api/v1/role/{roleId}/menu:
     get:
       description: 角色菜单

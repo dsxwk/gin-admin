@@ -20,6 +20,91 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/captcha": {
+            "get": {
+                "description": "获取验证码",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "登录相关"
+                ],
+                "summary": "获取验证码",
+                "responses": {
+                    "200": {
+                        "description": "成功返回\" Example({\"code\":0,\"msg\":\"Success\",\"data\":[]})",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/v1.CaptchaResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误\" Example({\"code\":500,\"msg\":\"系统错误\",\"data\":[]})",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "校验验证码",
+                "tags": [
+                    "登录相关"
+                ],
+                "summary": "校验验证码",
+                "parameters": [
+                    {
+                        "description": "验证码校验参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CheckCaptcha"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/v1.Token"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/login": {
             "post": {
                 "description": "用户登录",
@@ -192,6 +277,92 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/v1.Token"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/role": {
+            "get": {
+                "description": "角色列表",
+                "tags": [
+                    "角色管理"
+                ],
+                "summary": "列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "是否不分页",
+                        "name": "notPage",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/request.PageData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/model.Roles"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     }
                                 }
@@ -688,10 +859,10 @@ const docTemplate = `{
                     }
                 },
                 "meta": {
-                    "description": "meta",
+                    "description": "菜单元数据",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Meta"
+                            "$ref": "#/definitions/model.MenuMeta"
                         }
                     ]
                 },
@@ -788,7 +959,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Meta": {
+        "model.MenuMeta": {
             "type": "object",
             "properties": {
                 "authBtnList": {
@@ -798,34 +969,46 @@ const docTemplate = `{
                         "$ref": "#/definitions/model.MenuActions"
                     }
                 },
+                "createdAt": {
+                    "type": "string"
+                },
                 "icon": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "isAffix": {
-                    "type": "boolean"
+                    "type": "integer"
                 },
                 "isHide": {
-                    "type": "boolean"
+                    "type": "integer"
                 },
                 "isIframe": {
-                    "description": "是否内嵌，开启条件，` + "`" + `1、isIframe:true 2、isLink：链接地址不为空` + "`" + `",
-                    "type": "boolean"
+                    "description": "是否内嵌,开启条件` + "`" + `1 isIframe:true 2 isLink:链接地址不为空` + "`" + `",
+                    "type": "integer"
                 },
                 "isKeepAlive": {
-                    "type": "boolean"
+                    "type": "integer"
                 },
                 "isLink": {
-                    "description": "外链/内嵌时链接地址（http:xxx.com），开启外链条件，` + "`" + `1、isLink: 链接地址不为空` + "`" + `",
+                    "description": "外链/内嵌时链接地址(http:xxx.com),开启外链条件` + "`" + `1 isLink:链接地址不为空` + "`" + `",
                     "type": "string"
                 },
+                "menuId": {
+                    "type": "integer"
+                },
                 "roles": {
-                    "description": "权限标识，取角色管理",
+                    "description": "权限标识,取角色管理",
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/model.RoleMenus"
                     }
                 },
                 "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -869,6 +1052,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "roleId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Roles": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "integer"
                 },
                 "updatedAt": {
@@ -965,6 +1171,21 @@ const docTemplate = `{
                 }
             }
         },
+        "request.CheckCaptcha": {
+            "type": "object",
+            "required": [
+                "captchaId",
+                "code"
+            ],
+            "properties": {
+                "captchaId": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
         "request.PageData": {
             "type": "object",
             "properties": {
@@ -1019,10 +1240,18 @@ const docTemplate = `{
         "request.UserLogin": {
             "type": "object",
             "required": [
+                "captchaId",
+                "code",
                 "password",
                 "username"
             ],
             "properties": {
+                "captchaId": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string",
                     "example": "123456"
@@ -1057,6 +1286,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.CaptchaResponse": {
+            "type": "object",
+            "properties": {
+                "captchaId": {
+                    "type": "string"
+                },
+                "captchaImage": {
                     "type": "string"
                 }
             }
