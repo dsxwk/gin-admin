@@ -23,6 +23,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 	)
 
 	if err = db.
+		Preload("UserRoles").
 		Where("username = ?", username).
 		First(&m).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

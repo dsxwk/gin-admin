@@ -9,13 +9,20 @@ import (
 
 // UserLogin 用户登录
 type UserLogin struct {
-	Username string `json:"username" validate:"required" example:"admin" label:"用户名"`
-	Password string `json:"password" validate:"required" example:"123456" label:"密码"`
+	CaptchaID string `json:"captchaId" validate:"required" label:"验证码ID"`
+	Code      string `json:"code" validate:"required" label:"验证码"`
+	Username  string `json:"username" validate:"required" example:"admin" label:"用户名"`
+	Password  string `json:"password" validate:"required" example:"123456" label:"密码"`
 }
 
 // RefreshToken 刷新token
 type RefreshToken struct {
 	Token string `json:"token" validate:"required" label:"刷新令牌"`
+}
+
+type CheckCaptcha struct {
+	CaptchaID string `json:"captchaId" validate:"required" label:"验证码ID"`
+	Code      string `json:"code" validate:"required" label:"验证码"`
 }
 
 // Register 用户注册
@@ -32,10 +39,6 @@ type Login struct {
 // Validate 请求验证
 func (s Login) Validate(data Login, scene string) error {
 	v := validate.Struct(data, scene)
-
-	// v.AddMessages(s.Messages())
-	// v.AddTranslates(s.Translates())
-
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())
 	}
@@ -66,8 +69,10 @@ func (s Login) Messages() map[string]string {
 // Translates 字段翻译
 func (s Login) Translates() map[string]string {
 	return validate.MS{
-		"UserLogin.Username": s.Trans(s.Ctx, "validator.login.username", nil),
-		"UserLogin.Password": s.Trans(s.Ctx, "validator.login.password", nil),
-		"RefreshToken.Token": s.Trans(s.Ctx, "validator.login.refreshToken", nil),
+		"UserLogin.Username":  s.Trans(s.Ctx, "validator.login.username", nil),
+		"UserLogin.Password":  s.Trans(s.Ctx, "validator.login.password", nil),
+		"RefreshToken.Token":  s.Trans(s.Ctx, "validator.login.refreshToken", nil),
+		"UserLogin.CaptchaID": s.Trans(s.Ctx, "login.captchaId", nil),
+		"UserLogin.Code":      s.Trans(s.Ctx, "login.code", nil),
 	}
 }

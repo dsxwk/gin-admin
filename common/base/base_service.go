@@ -39,6 +39,25 @@ func (s *BaseService) DB(model Model) *gorm.DB {
 		db = facade.DB().WithContext(s.Ctx)
 	}
 
+	// 检查连接是否有效
+	sqlDB, err := db.DB()
+	if err == nil {
+		if err = sqlDB.Ping(); err != nil {
+			// 连接无效,重新获取
+			facade.Log().Warn("数据库连接无效,重新连接")
+			if connModel, ok := model.(HasConnection); ok {
+				conn := connModel.Connection()
+				if conn != "" {
+					db = facade.DB(conn).WithContext(s.Ctx)
+				} else {
+					db = facade.DB().WithContext(s.Ctx)
+				}
+			} else {
+				db = facade.DB().WithContext(s.Ctx)
+			}
+		}
+	}
+
 	return db.Model(model)
 }
 

@@ -26,6 +26,10 @@ func (r *LoginRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 		router.POST("/refresh-token", login.RefreshToken)
 		// 测试
 		router.POST("/test", login.Test)
+		// 获取验证码
+		router.GET("/captcha", login.GetCaptcha)
+		// 校验验证码
+		router.POST("/captcha", login.CheckCaptcha)
 	}
 }
 
