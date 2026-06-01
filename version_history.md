@@ -1,3 +1,9 @@
+## v2.2.12
+> - Fix the cross domain middleware issue
+> - Add captcha package and interface
+> - Optimize menu list interface and command-line service template
+> - Add role list interface and document
+
 ## v2.2.11
 > - Service Provider package name optimization
 
