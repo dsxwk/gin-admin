@@ -233,6 +233,185 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "用户创建",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "创建菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "创建参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.MenuCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/request.MenuCreate"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/menu/{id}": {
+            "get": {
+                "description": "菜单详情",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/menu/{id}/action": {
+            "get": {
+                "description": "菜单功能",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "菜单功能",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/request.PageData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/model.MenuActions"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/refresh-token": {
@@ -911,6 +1090,10 @@
                 "btnType": {
                     "type": "string"
                 },
+                "children": {
+                    "type": "array",
+                    "items": {}
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1176,6 +1359,78 @@
                 },
                 "code": {
                     "type": "string"
+                }
+            }
+        },
+        "request.Mata": {
+            "type": "object",
+            "required": [
+                "icon",
+                "title"
+            ],
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "isAffix": {
+                    "type": "integer"
+                },
+                "isHide": {
+                    "type": "integer"
+                },
+                "isIframe": {
+                    "type": "integer"
+                },
+                "isKeepAlive": {
+                    "type": "integer"
+                },
+                "isLink": {
+                    "type": "string"
+                },
+                "menuId": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.MenuCreate": {
+            "type": "object",
+            "required": [
+                "component",
+                "menuMata",
+                "name",
+                "path",
+                "redirect"
+            ],
+            "properties": {
+                "component": {
+                    "type": "string"
+                },
+                "isLink": {
+                    "type": "integer"
+                },
+                "menuMata": {
+                    "$ref": "#/definitions/request.Mata"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "redirect": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },

@@ -107,7 +107,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 
 // Detail 详情
 func (s *UserService) Detail(id int64) (m model.User, err error) {
-	err = s.DB(&model.User{}).WithContext(s.Ctx).First(&m, id).Error
+	err = s.DB(&model.User{}).First(&m, id).Error
 	if err != nil {
 		return m, err
 	}

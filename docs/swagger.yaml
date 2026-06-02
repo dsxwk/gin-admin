@@ -93,6 +93,9 @@ definitions:
         type: string
       btnType:
         type: string
+      children:
+        items: {}
+        type: array
       createdAt:
         type: string
       id:
@@ -276,6 +279,55 @@ definitions:
     required:
     - captchaId
     - code
+    type: object
+  request.Mata:
+    properties:
+      icon:
+        type: string
+      isAffix:
+        type: integer
+      isHide:
+        type: integer
+      isIframe:
+        type: integer
+      isKeepAlive:
+        type: integer
+      isLink:
+        type: string
+      menuId:
+        type: integer
+      title:
+        type: string
+    required:
+    - icon
+    - title
+    type: object
+  request.MenuCreate:
+    properties:
+      component:
+        type: string
+      isLink:
+        type: integer
+      menuMata:
+        $ref: '#/definitions/request.Mata'
+      name:
+        type: string
+      path:
+        type: string
+      pid:
+        type: integer
+      redirect:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - component
+    - menuMata
+    - name
+    - path
+    - redirect
     type: object
   request.PageData:
     properties:
@@ -518,6 +570,113 @@ paths:
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
+      tags:
+      - 菜单管理
+    post:
+      description: 用户创建
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.MenuCreate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/request.MenuCreate'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 创建菜单
+      tags:
+      - 菜单管理
+  /api/v1/menu/{id}:
+    get:
+      description: 菜单详情
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 详情
+      tags:
+      - 菜单管理
+  /api/v1/menu/{id}/action:
+    get:
+      description: 菜单功能
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.MenuActions'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 菜单功能
       tags:
       - 菜单管理
   /api/v1/refresh-token:

@@ -10,7 +10,67 @@ import (
 type Menu struct {
 	base.BaseRequest
 	PageListValidate
-	RoleId string `json:"roleId" form:"roleId" validate:"required" label:"角色id"`
+	Id        int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
+	RoleId    string `json:"roleId" form:"roleId" validate:"required" label:"角色id"`
+	MenuId    int64  `json:"menuId" form:"menuId" validate:"required|int|gt:0" label:"菜单id"`
+	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name      string `json:"name" form:"name" validate:"required" label:"路由名称"`
+	Path      string `json:"path" form:"path" validate:"required" label:"路由路径"`
+	Redirect  string `json:"redirect" form:"redirect" validate:"required" label:"重定向"`
+	Component string `json:"component" form:"component" validate:"required" label:"组件路径"`
+	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
+	Status    int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort      int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Mata      Mata   `json:"mata" form:"mata" validate:"required" label:"菜单元数据"`
+}
+
+// MenuCreate 菜单创建
+type MenuCreate struct {
+	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name      string `json:"name" form:"name" validate:"required" label:"路由名称"`
+	Path      string `json:"path" form:"path" validate:"required" label:"路由路径"`
+	Redirect  string `json:"redirect" form:"redirect" validate:"required" label:"重定向"`
+	Component string `json:"component" form:"component" validate:"required" label:"组件路径"`
+	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
+	Status    int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort      int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Mata      Mata   `json:"menuMata" form:"menuMata" validate:"required" label:"菜单元数据"`
+}
+
+// MenuUpdate 菜单更新
+type MenuUpdate struct {
+	Id        int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
+	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name      string `json:"name" form:"name" validate:"required" label:"路由名称"`
+	Path      string `json:"path" form:"path" validate:"required" label:"路由路径"`
+	Redirect  string `json:"redirect" form:"redirect" validate:"required" label:"重定向"`
+	Component string `json:"component" form:"component" validate:"required" label:"组件路径"`
+	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
+	Status    int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort      int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Mata      Mata   `json:"menuMata" form:"menuMata" validate:"required" label:"菜单元数据"`
+}
+
+// Mata 菜单元数据
+type Mata struct {
+	MenuId      int64  `json:"menuId" form:"menuId" validate:"required|int|gt:0" label:"菜单id"`
+	Title       string `json:"title" form:"title" validate:"required" label:"菜单名称"`
+	Icon        string `json:"icon" form:"icon" validate:"required" label:"菜单图标"`
+	IsHide      int64  `json:"isHide" form:"isHide" validate:"required|int" label:"是否隐藏 1=是 2=否"`
+	IsKeepAlive int64  `json:"isKeepAlive" form:"isKeepAlive" validate:"required|int" label:"是否缓存 1=是 2=否"`
+	IsAffix     int64  `json:"isAffix" form:"isAffix" validate:"required|int" label:"是否固定 1=是 2=否"`
+	IsLink      string `json:"isLink" form:"isLink" validate:"required|int" label:"外链/内嵌时链接地址(http:xxx.com),开启外链条件1 isLink:链接地址不为空"`
+	IsIframe    int64  `json:"isIframe" form:"isIframe" validate:"required|int" label:"是否内嵌 1=是 2=否 开启条件1 isIframe:true 2 isLink:链接地址不为空"`
+}
+
+// MenuDetail 菜单详情
+type MenuDetail struct {
+	Id int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
+}
+
+// MenuDelete 菜单删除
+type MenuDelete struct {
+	Id int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
 }
 
 // Validate 请求验证
@@ -28,12 +88,57 @@ func (s Menu) Validate(data Menu, scene string) error {
 // - 也可以添加验证设置
 func (s Menu) ConfigValidation(v *validate.Validation) {
 	v.WithScenes(validate.SValues{
-		"List":     []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"RoleMenu": []string{"RoleId"},
-		"Create":   []string{},
-		"Update":   []string{"ID"},
-		"Detail":   []string{"ID"},
-		"Delete":   []string{"ID"},
+		"List": []string{
+			"PageListValidate.Page",
+			"PageListValidate.PageSize",
+		},
+		"RoleMenu": []string{
+			"RoleId",
+		},
+		"Create": []string{
+			"Pid",
+			"Name",
+			"Path",
+			"Redirect",
+			"IsLink",
+			"Status",
+			"Sort",
+			"Mata",
+			"Mata.MenuId",
+			"Mata.Title",
+			"Mata.Icon",
+			"Mata.IsHide",
+			"Mata.IsAffix",
+			"Mata.IsLink",
+			"Mata.IsIframe",
+		},
+		"Update": []string{
+			"Id",
+			"Pid",
+			"Name",
+			"Path",
+			"Redirect",
+			"IsLink",
+			"Status",
+			"Sort",
+			"Mata",
+			"Mata.MenuId",
+			"Mata.Title",
+			"Mata.Icon",
+			"Mata.IsHide",
+			"Mata.IsAffix",
+			"Mata.IsLink",
+			"Mata.IsIframe",
+		},
+		"Detail": []string{
+			"Id",
+		},
+		"Delete": []string{
+			"Id",
+		},
+		"Action": []string{
+			"Id",
+		},
 	})
 }
 

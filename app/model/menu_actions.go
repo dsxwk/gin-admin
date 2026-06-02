@@ -1,5 +1,7 @@
 package model
 
+import "gin/pkg"
+
 const TableNameMenuActions = "menu_actions"
 
 // MenuActions 菜单功能表
@@ -18,6 +20,7 @@ type MenuActions struct {
 	Sort        int64          `gorm:"column:sort;not null;default:0;type:int(10) unsigned;comment:排序" json:"sort" form:"sort"`
 	RoleActions []*RoleActions `gorm:"foreignKey:action_id;references:id;comment:角色功能" json:"roleActions"`
 	Parent      *MenuActions   `gorm:"foreignKey:pid;references:id;comment:父级功能" json:"parent"`
+	Children    []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`
 	CreatedAt   *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`
 	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt" form:"updatedAt"`
 	DeletedAt   *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" form:"deletedAt" swaggerignore:"true"`
@@ -30,4 +33,25 @@ func (*MenuActions) TableName() string {
 // Connection 数据库连接名称
 func (m *MenuActions) Connection() string {
 	return "mysql"
+}
+
+// GetId 实现TreeNode接口
+func (m *MenuActions) GetId() int64 {
+	return m.Id
+}
+
+func (m *MenuActions) GetPid() int64 {
+	return m.Pid
+}
+
+func (m *MenuActions) GetChildren() *[]pkg.TreeNode {
+	return &m.Children
+}
+
+func (m *MenuActions) GetTree(data []MenuActions) []pkg.TreeNode {
+	items := make([]*MenuActions, 0, len(data))
+	for i := range data {
+		items = append(items, &data[i])
+	}
+	return pkg.BuildTree[*MenuActions](items)
 }
