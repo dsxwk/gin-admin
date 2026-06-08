@@ -16,7 +16,7 @@ type Menu struct {
 	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name      string `json:"name" form:"name" validate:"required" label:"路由名称"`
 	Path      string `json:"path" form:"path" validate:"required" label:"路由路径"`
-	Redirect  string `json:"redirect" form:"redirect" validate:"required" label:"重定向"`
+	Redirect  string `json:"redirect" form:"redirect" validate:"" label:"重定向"`
 	Component string `json:"component" form:"component" validate:"required" label:"组件路径"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
 	Status    int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
@@ -29,7 +29,7 @@ type MenuCreate struct {
 	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name      string `json:"name" form:"name" validate:"required" label:"路由名称"`
 	Path      string `json:"path" form:"path" validate:"required" label:"路由路径"`
-	Redirect  string `json:"redirect" form:"redirect" validate:"required" label:"重定向"`
+	Redirect  string `json:"redirect" form:"redirect" validate:"" label:"重定向"`
 	Component string `json:"component" form:"component" validate:"required" label:"组件路径"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
 	Status    int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
@@ -43,10 +43,10 @@ type MenuUpdate struct {
 	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name      string `json:"name" form:"name" validate:"required" label:"路由名称"`
 	Path      string `json:"path" form:"path" validate:"required" label:"路由路径"`
-	Redirect  string `json:"redirect" form:"redirect" validate:"required" label:"重定向"`
+	Redirect  string `json:"redirect" form:"redirect" validate:"" label:"重定向"`
 	Component string `json:"component" form:"component" validate:"required" label:"组件路径"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
-	Status    int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Status    int64  `json:"status" form:"status" validate:"int" label:"状态 1=启用 2=停用"`
 	Sort      int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
 	Mata      Mata   `json:"menuMata" form:"menuMata" validate:"required" label:"菜单元数据"`
 }
@@ -137,7 +137,7 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 			"Id",
 		},
 		"Action": []string{
-			"Id",
+			"MenuId",
 		},
 	})
 }

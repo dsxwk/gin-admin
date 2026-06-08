@@ -172,7 +172,7 @@ func (s *MenuController) Action(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.Id = facade.Request[int64]().Path(c, "id", 0)
+	req.MenuId = facade.Request[int64]().Path(c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Action")

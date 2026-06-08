@@ -29,6 +29,9 @@ func (r *MenuRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 		// 详情
 		router.GET("/menu/:id", menu.Detail)
 
+		// 创建
+		router.POST("/menu", menu.Create)
+
 		// 菜单功能
 		router.GET("/menu/:id/action", menu.Action)
 	}
