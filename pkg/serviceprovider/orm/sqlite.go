@@ -10,6 +10,8 @@ import (
 
 func openSqlite() (*gorm.DB, error) {
 	db, err := gorm.Open(sqlite.Open(conf.Databases.Sqlite.Path), &gorm.Config{
+		// 禁用默认的软删除拦截器
+		SkipDefaultTransaction: conf.Databases.DisableSoftDelete,
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},

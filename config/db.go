@@ -5,6 +5,7 @@ import "time"
 // Databases 数据库
 type Databases struct {
 	Driver            string        `mapstructure:"driver" yaml:"driver"`                           // 默认数据库
+	DisableSoftDelete bool          `mapstructure:"disable-soft-delete" yaml:"disable-soft-delete"` // 禁用软删除
 	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间,超过这个时间会记录到日志中
 	Mysql             Mysql         `mapstructure:"mysql" yaml:"mysql"`                             // mysql
 	Sqlite            Sqlite        `mapstructure:"sqlite" yaml:"sqlite"`                           // sqlite
