@@ -8,10 +8,8 @@ import (
 
 func openPgsql() (*gorm.DB, error) {
 	return gorm.Open(postgres.Open(getPgsqlDsn()), &gorm.Config{
-		// 禁用默认的软删除拦截器
-		SkipDefaultTransaction: conf.Databases.DisableSoftDelete,
-		NamingStrategy:         configNaming(),
-		Logger:                 gormLogger(),
+		NamingStrategy: configNaming(),
+		Logger:         gormLogger(),
 	})
 }
 

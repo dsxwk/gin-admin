@@ -10,10 +10,8 @@ const startTimeKey = "gorm_start_time"
 
 func openMysql() (db *gorm.DB, err error) {
 	db, err = gorm.Open(mysql.Open(getMysqlDsn()), &gorm.Config{
-		// 禁用默认的软删除拦截器
-		SkipDefaultTransaction: conf.Databases.DisableSoftDelete,
-		NamingStrategy:         configNaming(),
-		Logger:                 gormLogger(),
+		NamingStrategy: configNaming(),
+		Logger:         gormLogger(),
 	})
 
 	return db, err

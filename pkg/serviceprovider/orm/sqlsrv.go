@@ -8,10 +8,8 @@ import (
 
 func openSqlsrv() (*gorm.DB, error) {
 	return gorm.Open(sqlserver.Open(getSqlsrvDsn()), &gorm.Config{
-		// 禁用默认的软删除拦截器
-		SkipDefaultTransaction: conf.Databases.DisableSoftDelete,
-		NamingStrategy:         configNaming(),
-		Logger:                 gormLogger(),
+		NamingStrategy: configNaming(),
+		Logger:         gormLogger(),
 	})
 }
 
