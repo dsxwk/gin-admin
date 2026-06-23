@@ -242,7 +242,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "用户创建",
+                "description": "创建菜单",
                 "tags": [
                     "菜单管理"
                 ],
@@ -316,7 +316,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "用户ID",
+                        "description": "菜单ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -354,6 +354,113 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "更新菜单",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "创建菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.MenuUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/request.MenuUpdate"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "菜单删除",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "菜单删除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/menu/{id}/action": {
@@ -369,6 +476,13 @@ const docTemplate = `{
                         "description": "认证Token",
                         "name": "token",
                         "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -1369,7 +1483,98 @@ const docTemplate = `{
                 }
             }
         },
-        "request.Mata": {
+        "request.MenuCreate": {
+            "type": "object",
+            "required": [
+                "component",
+                "meta",
+                "name",
+                "path"
+            ],
+            "properties": {
+                "component": {
+                    "type": "string"
+                },
+                "isLink": {
+                    "type": "integer"
+                },
+                "meta": {
+                    "$ref": "#/definitions/request.Meta"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "redirect": {
+                    "type": "string"
+                },
+                "roleMenus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RoleMenu"
+                    }
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.MenuUpdate": {
+            "type": "object",
+            "required": [
+                "component",
+                "meta",
+                "name",
+                "path"
+            ],
+            "properties": {
+                "component": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isLink": {
+                    "type": "integer"
+                },
+                "meta": {
+                    "$ref": "#/definitions/request.Meta"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "redirect": {
+                    "type": "string"
+                },
+                "roleMenus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RoleMenu"
+                    }
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.Meta": {
             "type": "object",
             "required": [
                 "icon",
@@ -1402,45 +1607,6 @@ const docTemplate = `{
                 }
             }
         },
-        "request.MenuCreate": {
-            "type": "object",
-            "required": [
-                "component",
-                "menuMata",
-                "name",
-                "path",
-                "redirect"
-            ],
-            "properties": {
-                "component": {
-                    "type": "string"
-                },
-                "isLink": {
-                    "type": "integer"
-                },
-                "menuMata": {
-                    "$ref": "#/definitions/request.Mata"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "pid": {
-                    "type": "integer"
-                },
-                "redirect": {
-                    "type": "string"
-                },
-                "sort": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
         "request.PageData": {
             "type": "object",
             "properties": {
@@ -1462,6 +1628,17 @@ const docTemplate = `{
                 },
                 "total": {
                     "description": "总条数",
+                    "type": "integer"
+                }
+            }
+        },
+        "request.RoleMenu": {
+            "type": "object",
+            "properties": {
+                "menuId": {
+                    "type": "integer"
+                },
+                "roleId": {
                     "type": "integer"
                 }
             }

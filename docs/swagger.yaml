@@ -280,7 +280,69 @@ definitions:
     - captchaId
     - code
     type: object
-  request.Mata:
+  request.MenuCreate:
+    properties:
+      component:
+        type: string
+      isLink:
+        type: integer
+      meta:
+        $ref: '#/definitions/request.Meta'
+      name:
+        type: string
+      path:
+        type: string
+      pid:
+        type: integer
+      redirect:
+        type: string
+      roleMenus:
+        items:
+          $ref: '#/definitions/request.RoleMenu'
+        type: array
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - component
+    - meta
+    - name
+    - path
+    type: object
+  request.MenuUpdate:
+    properties:
+      component:
+        type: string
+      id:
+        type: integer
+      isLink:
+        type: integer
+      meta:
+        $ref: '#/definitions/request.Meta'
+      name:
+        type: string
+      path:
+        type: string
+      pid:
+        type: integer
+      redirect:
+        type: string
+      roleMenus:
+        items:
+          $ref: '#/definitions/request.RoleMenu'
+        type: array
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - component
+    - meta
+    - name
+    - path
+    type: object
+  request.Meta:
     properties:
       icon:
         type: string
@@ -302,33 +364,6 @@ definitions:
     - icon
     - title
     type: object
-  request.MenuCreate:
-    properties:
-      component:
-        type: string
-      isLink:
-        type: integer
-      menuMata:
-        $ref: '#/definitions/request.Mata'
-      name:
-        type: string
-      path:
-        type: string
-      pid:
-        type: integer
-      redirect:
-        type: string
-      sort:
-        type: integer
-      status:
-        type: integer
-    required:
-    - component
-    - menuMata
-    - name
-    - path
-    - redirect
-    type: object
   request.PageData:
     properties:
       list:
@@ -345,6 +380,13 @@ definitions:
         type: integer
       total:
         description: 总条数
+        type: integer
+    type: object
+  request.RoleMenu:
+    properties:
+      menuId:
+        type: integer
+      roleId:
         type: integer
     type: object
   request.UserCreate:
@@ -573,7 +615,7 @@ paths:
       tags:
       - 菜单管理
     post:
-      description: 用户创建
+      description: 创建菜单
       parameters:
       - description: 认证Token
         in: header
@@ -608,6 +650,35 @@ paths:
       tags:
       - 菜单管理
   /api/v1/menu/{id}:
+    delete:
+      description: 菜单删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 菜单删除
+      tags:
+      - 菜单管理
     get:
       description: 菜单详情
       parameters:
@@ -616,7 +687,7 @@ paths:
         name: token
         required: true
         type: string
-      - description: 用户ID
+      - description: 菜单ID
         in: path
         name: id
         required: true
@@ -642,6 +713,46 @@ paths:
       summary: 详情
       tags:
       - 菜单管理
+    put:
+      description: 更新菜单
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.MenuUpdate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/request.MenuUpdate'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 创建菜单
+      tags:
+      - 菜单管理
   /api/v1/menu/{id}/action:
     get:
       description: 菜单功能
@@ -651,6 +762,11 @@ paths:
         name: token
         required: true
         type: string
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
