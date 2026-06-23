@@ -32,6 +32,12 @@ func (r *MenuRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 		// 创建
 		router.POST("/menu", menu.Create)
 
+		// 更新
+		router.PUT("/menu/:id", menu.Update)
+
+		// 删除
+		router.DELETE("/menu/:id", menu.Delete)
+
 		// 菜单功能
 		router.GET("/menu/:id/action", menu.Action)
 	}

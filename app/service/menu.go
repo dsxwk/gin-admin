@@ -1,11 +1,13 @@
 package service
 
 import (
+	"errors"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
 	"strings"
+	"time"
 )
 
 type MenuService struct {
@@ -100,9 +102,10 @@ func (s *MenuService) Detail(menuId int64) (m model.Menu, err error) {
 // Create 新增菜单
 func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 	var (
-		m    model.Menu
-		meta model.MenuMeta
-		db   = s.DB(&model.Menu{})
+		m         model.Menu
+		meta      model.MenuMeta
+		roleMenus []model.RoleMenus
+		db        = s.DB(&model.Menu{})
 	)
 
 	m = model.Menu{
@@ -116,22 +119,22 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		Sort:      req.Sort,
 	}
 
-	meta = model.MenuMeta{
-		MenuId:      req.Mata.MenuId,
-		Title:       req.Mata.Title,
-		Icon:        req.Mata.Icon,
-		IsHide:      req.Mata.IsHide,
-		IsKeepAlive: req.Mata.IsKeepAlive,
-		IsAffix:     req.Mata.IsAffix,
-		IsLink:      req.Mata.IsLink,
-		IsIframe:    req.Mata.IsIframe,
-	}
-
 	db = db.Begin()
 	err := db.Model(&model.Menu{}).Create(&m).Error
 	if err != nil {
 		db.Rollback()
 		return req, err
+	}
+
+	meta = model.MenuMeta{
+		MenuId:      m.ID,
+		Title:       req.Meta.Title,
+		Icon:        req.Meta.Icon,
+		IsHide:      req.Meta.IsHide,
+		IsKeepAlive: req.Meta.IsKeepAlive,
+		IsAffix:     req.Meta.IsAffix,
+		IsLink:      req.Meta.IsLink,
+		IsIframe:    req.Meta.IsIframe,
 	}
 
 	err = db.Model(&model.MenuMeta{}).Create(&meta).Error
@@ -140,9 +143,176 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		return req, err
 	}
 
+	if req.RoleMenus != nil {
+		for _, v := range req.RoleMenus {
+			roleMenus = append(roleMenus, model.RoleMenus{
+				RoleId: v.RoleId,
+				MenuId: m.ID,
+			})
+		}
+		err = db.Model(&model.RoleMenus{}).Create(&roleMenus).Error
+		if err != nil {
+			db.Rollback()
+			return req, err
+		}
+	}
+
 	db.Commit()
 
 	return req, nil
+}
+
+// Update 更新
+func (s *MenuService) Update(id int64, data map[string]interface{}) error {
+	var (
+		err error
+		db  = s.DB(&model.Menu{})
+	)
+
+	meta, ok := data["meta"].(map[string]interface{})
+	if !ok {
+		return errors.New("meta数据格式错误")
+	}
+	delete(meta, "roles")
+	roleMenusData, ok := data["roleMenus"].([]interface{})
+	if !ok {
+		roleMenusData = []interface{}{}
+	}
+	delete(data, "meta")
+	delete(data, "roleMenus")
+	delete(data, "menuSuperior")
+	delete(meta, "roles")
+	delete(meta, "authBtnList")
+
+	tx := db.Begin()
+
+	rows := model.FilterFields(db, model.Menu{}, data)
+	rows["updated_at"] = time.DateTime
+
+	err = tx.Model(&model.Menu{}).Where("id = ?", id).Updates(rows).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	metaRows := model.FilterFields(db, model.MenuMeta{}, meta)
+	metaRows["updated_at"] = time.DateTime
+	err = tx.Model(&model.MenuMeta{}).
+		Where("id = ?", meta["id"]).
+		Updates(metaRows).Error
+
+	// 更新角色菜单关联
+	if len(roleMenusData) > 0 {
+		// 删除旧关联
+		err = tx.Model(&model.RoleMenus{}).
+			Where("menu_id = ?", id).
+			Delete(&model.RoleMenus{}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// 创建新关联
+		var newRoleMenus []model.RoleMenus
+		for _, item := range roleMenusData {
+			roleMap, _ok := item.(map[string]interface{})
+			if !_ok {
+				continue
+			}
+
+			newRoleMenus = append(newRoleMenus, model.RoleMenus{
+				MenuId: id,
+				RoleId: int64(roleMap["roleId"].(float64)),
+			})
+		}
+
+		if len(newRoleMenus) > 0 {
+			err = tx.Model(&model.RoleMenus{}).Create(&newRoleMenus).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+// Delete 删除
+func (s *MenuService) Delete(menuId int64) error {
+	var (
+		err           error
+		menuActionIds []int64
+		db            = s.DB(&model.Menu{})
+		roleMenu      model.RoleMenus
+		menuMeta      model.MenuMeta
+		menuAction    model.MenuActions
+		roleAction    model.RoleActions
+	)
+
+	tx := db.Begin()
+
+	err = tx.Delete(&model.Menu{}, menuId).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.RoleMenus{}).
+		Where("menu_id = ?", menuId).
+		Delete(&roleMenu).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.MenuMeta{}).
+		Where("menu_id = ?", menuId).
+		Delete(&menuMeta).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.MenuActions{}).
+		Where("menu_id = ?", menuId).
+		Pluck("id", &menuActionIds).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.MenuActions{}).
+		Where("menu_id = ?", menuId).
+		Delete(&model.MenuActions{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if len(menuActionIds) > 0 {
+		err = tx.Model(&model.MenuActions{}).
+			Where("id IN (?)", menuActionIds).
+			Delete(&menuAction).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		err = tx.Model(&model.RoleActions{}).
+			Where("action_id IN (?)", menuActionIds).
+			Delete(&roleAction).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	tx.Commit()
+
+	return nil
 }
 
 // Action 菜单功能
