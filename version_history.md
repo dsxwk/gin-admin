@@ -1,3 +1,7 @@
+## v2.2.14
+> - Add global soft delete configuration and use
+> - Add and improve menu related interfaces
+
 ## v2.2.13
 > - Add menu related interfaces
 
