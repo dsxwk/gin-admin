@@ -7,7 +7,7 @@ bin = "tmp/main"                  # Binary file where your main.go compiled to
   cmd = "go build -o tmp/main ."
   bin = "tmp/main"
   include_ext = ["go", "tmp" "tmpl"]    # Files to watch
-  exclude_dir = ["cmd", "vendor", "common\\extend\\i18n\\locales", "storage"] # Excluded directories
+  exclude_dir = ["cmd", "vendor", "common\\extend\\i18n\\locales", "storage", "tests"] # Excluded directories
   exclude_regex = ["_test.go"] # Excluded files
   exclude_file = ["cmd/cli.go"]
 
