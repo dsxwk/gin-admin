@@ -57,10 +57,11 @@ func (s *MenuController) List(c *gin.Context) {
 // @Summary 角色菜单
 // @Description 角色菜单
 // @Param token header string true "认证Token"
+// @Param id path int true "角色ID"
 // @Success 200 {object} errcode.SuccessResponse{data=[]pkg.TreeNode} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
-// @Router /api/v1/role/{roleId}/menu [get]
+// @Router /api/v1/role/{id}/menu [get]
 func (s *MenuController) RoleMenu(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
@@ -69,7 +70,7 @@ func (s *MenuController) RoleMenu(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.RoleId = facade.Request[string]().Path(c, "roleId", "0")
+	req.RoleId = facade.Request[string]().Path(c, "id", "0")
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "RoleMenu")
@@ -187,10 +188,9 @@ func (s *MenuController) Update(c *gin.Context) {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
-	req.Id = facade.Request[int64]().Path(c, "id", 0)
 
-	// 绑定参数并验证
-	err = facade.Request[any]().Validate(req, "Update")
+	req.Id = facade.Request[int64]().Path(c, "id", 0)
+	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -262,7 +262,7 @@ func (s *MenuController) Action(c *gin.Context) {
 	req.MenuId = facade.Request[int64]().Path(c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Action")
+	err := facade.Request[any]().BindValidate(c, &req, "ActionList")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -275,4 +275,87 @@ func (s *MenuController) Action(c *gin.Context) {
 	}
 
 	s.Response.Success(c, errcode.Success().WithData(res))
+}
+
+// ActionDetail 菜单功能详情
+// @Tags 菜单管理
+// @Summary 菜单功能详情
+// @Description 菜单功能详情
+// @Param token header string true "认证Token"
+// @Param id path int true "菜单ID"
+// @Param actionId path int true "菜单功能ID"
+// @Success 200 {object} errcode.SuccessResponse{data=model.MenuActions} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/menu/{id}/action/{actionId} [get]
+func (s *MenuController) ActionDetail(c *gin.Context) {
+	var (
+		ctx = c.Request.Context()
+		req request.Menu
+	)
+
+	s.service.WithContext(ctx)
+
+	req.Id = facade.Request[int64]().Path(c, "actionId", 0)
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "Detail")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	m, err := s.service.ActionDetail(req.Id)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(m))
+}
+
+// CreateAction 创建菜单功能
+// @Tags 菜单管理
+// @Summary 创建菜单功能
+// @Description 创建菜单功能
+// @Param token header string true "认证Token"
+// @Param id path int true "菜单ID"
+// @Param data body request.ActionCreate true "创建参数"
+// @Success 200 {object} errcode.SuccessResponse{data=request.ActionCreate} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/menu/{id}/action [post]
+func (s *MenuController) CreateAction(c *gin.Context) {
+	s.Response.Success(c, errcode.Success())
+}
+
+// UpdateAction 更新菜单功能
+// @Tags 菜单管理
+// @Summary 更新菜单功能
+// @Description 更新菜单功能
+// @Param token header string true "认证Token"
+// @Param id path int true "菜单ID"
+// @Param actionId path int true "菜单功能ID"
+// @Param data body request.ActionUpdate true "更新参数"
+// @Success 200 {object} errcode.SuccessResponse{data=request.ActionUpdate} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/menu/{id}/action/{actionId} [put]
+func (s *MenuController) UpdateAction(c *gin.Context) {
+	s.Response.Success(c, errcode.Success())
+}
+
+// DeleteAction 删除菜单功能
+// @Tags 菜单管理
+// @Summary 创建菜单功能
+// @Description 创建菜单功能
+// @Param token header string true "认证Token"
+// @Param id path int true "菜单ID"
+// @Param actionId path int true "菜单功能ID"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/menu/{id}/{actionId} [delete]
+func (s *MenuController) DeleteAction(c *gin.Context) {
+	s.Response.Success(c, errcode.Success())
 }

@@ -9,6 +9,7 @@ import (
 	"gin/pkg/serviceprovider/lang"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/go-viper/mapstructure/v2"
 )
 
 type UserController struct {
@@ -111,10 +112,14 @@ func (s *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	err = mapstructure.Decode(data, &req)
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
 
-	// 绑定参数并验证
-	err = facade.Request[any]().BindValidate(c, &req, "Update")
+	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -192,11 +197,11 @@ func (s *UserController) Delete(c *gin.Context) {
 		return
 	}
 
-	m, err := s.service.Delete(req.ID)
+	err = s.service.Delete(req.ID)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
 	}
 
-	s.Response.Success(c, errcode.Success().WithData(m))
+	s.Response.Success(c, errcode.Success())
 }

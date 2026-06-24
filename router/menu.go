@@ -24,7 +24,7 @@ func (r *MenuRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 		router.GET("/menu", menu.List)
 
 		// 角色菜单
-		router.GET("/role/:roleId/menu", menu.RoleMenu)
+		router.GET("/role/:id/menu", menu.RoleMenu)
 
 		// 详情
 		router.GET("/menu/:id", menu.Detail)
@@ -40,6 +40,18 @@ func (r *MenuRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 
 		// 菜单功能
 		router.GET("/menu/:id/action", menu.Action)
+
+		// 菜单功能详情
+		router.GET("/menu/:id/action/:actionId", menu.ActionDetail)
+
+		// 新增菜单功能
+		router.POST("/menu/:id/action", menu.CreateAction)
+
+		// 更新菜单功能
+		router.PUT("/menu/:id/action/:actionId", menu.UpdateAction)
+
+		// 删除菜单功能
+		router.DELETE("/menu/:id/action/:actionId", menu.DeleteAction)
 	}
 }
 

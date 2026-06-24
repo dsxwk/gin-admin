@@ -9,7 +9,7 @@ import (
 // RoleMenus 请求验证
 type RoleMenus struct {
 	base.BaseRequest
-	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+	ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	RoleId int64  `json:"role_id" form:"role_id" validate:"required|int" label:"角色id"`
 	MenuId int64  `json:"menu_id" form:"menu_id" validate:"required|int" label:"菜单id"`
 	Name   string `json:"name" form:"name" validate:"required|max:255" label:"角色名称"`

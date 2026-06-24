@@ -72,14 +72,17 @@ type RoleMenu struct {
 	MenuId int64 `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 }
 
-// MenuDetail 菜单详情
-type MenuDetail struct {
-	Id int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
+// ActionList 功能列表
+type ActionList struct {
+	MenuId int64 `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 }
 
-// MenuDelete 菜单删除
-type MenuDelete struct {
-	Id int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
+// ActionCreate 功能创建
+type ActionCreate struct {
+}
+
+// ActionUpdate 功能更新
+type ActionUpdate struct {
 }
 
 // Validate 请求验证
@@ -145,8 +148,11 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 		"Delete": []string{
 			"Id",
 		},
-		"Action": []string{
+		"ActionList": []string{
 			"MenuId",
+		},
+		"ActionDetail": []string{
+			"Id",
 		},
 	})
 }

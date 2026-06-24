@@ -1,6 +1,8 @@
 ## English | [中文](readme_zh.md)
 
 - [Project Introduction](#Project-Introduction)
+  - [Project Address](#Project-Address)
+  - [Web Address](#Web-Address)
 - [License](#License)
 - [Version History](#Version-History)
 - [Installation Instructions](#Installation-Instructions)
@@ -126,6 +128,10 @@
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
 
+## Web Address
+- Github: https://github.com/dsxwk/gin-web.git
+- Gitee: https://gitee.com/dsxwk/gin-web.git
+
 ## Introduction to the Gin Framework
 > Gin is a web framework written in Go language. It has the characteristics of simplicity, speed, and efficiency, and is widely used in Go language web development.
 
@@ -140,11 +146,12 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.2.14
+> - Latest Version: v2.2.15
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
-> The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
+> - On June 24, 2026, the Golang project was updated to version 1.26.4. There may be version differences in lower versions, and it is recommended to have a version>=1.26.4. 
+> - The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
 
 ## Clone Project
 ```bash

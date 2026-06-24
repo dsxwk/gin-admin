@@ -85,7 +85,7 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 
 // Detail 详情
 func (s *MenuService) Detail(menuId int64) (m model.Menu, err error) {
-	err = s.DB(&model.Menu{}).
+	err = s.DB(&m).
 		Preload("Meta").
 		Preload("Meta.AuthBtnList").
 		Preload("MenuActions").
@@ -173,16 +173,11 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) error {
 	if !ok {
 		return errors.New("meta数据格式错误")
 	}
-	delete(meta, "roles")
+
 	roleMenusData, ok := data["roleMenus"].([]interface{})
 	if !ok {
 		roleMenusData = []interface{}{}
 	}
-	delete(data, "meta")
-	delete(data, "roleMenus")
-	delete(data, "menuSuperior")
-	delete(meta, "roles")
-	delete(meta, "authBtnList")
 
 	tx := db.Begin()
 
@@ -333,4 +328,17 @@ func (s *MenuService) Action(menuId int64) (pageData request.PageData, err error
 	pageData.List = action.GetTree(m)
 
 	return pageData, nil
+}
+
+// ActionDetail 菜单功能详情
+func (s *MenuService) ActionDetail(id int64) (m model.MenuActions, err error) {
+	err = s.DB(&model.MenuActions{}).
+		Preload("Parent").
+		Preload("RoleActions").
+		First(&m, id).Error
+	if err != nil {
+		return m, err
+	}
+
+	return m, nil
 }

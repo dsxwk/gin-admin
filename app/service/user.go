@@ -45,12 +45,13 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 // Create 创建
 func (s *UserService) Create(req request.User) (m model.User, err error) {
 	var (
-		count int64
-		db    = s.DB(&model.User{})
+		count     int64
+		userRoles []model.UserRoles
+		db        = s.DB(&model.User{})
 	)
 
 	// 校验用户名是否重复
-	err = db.Where("username = ?", req.Username).Count(&count).Error
+	err = s.DB(&model.User{}).Where("username = ?", req.Username).Count(&count).Error
 	if err != nil {
 		return m, err
 	}
@@ -68,10 +69,31 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 
 	// 处理密码
 	m.Password = pkg.BcryptHash(req.Password)
-	err = db.Create(&m).Error
+
+	tx := db.Begin()
+
+	err = tx.Create(&m).Error
 	if err != nil {
+		tx.Rollback()
 		return m, err
 	}
+
+	if req.UserRoles != nil {
+		for _, v := range req.UserRoles {
+			userRoles = append(userRoles, model.UserRoles{
+				UserID: m.ID,
+				RoleID: v.RoleId,
+				Name:   v.Name,
+			})
+		}
+		err = tx.Model(&model.UserRoles{}).Create(&userRoles).Error
+		if err != nil {
+			tx.Rollback()
+			return m, err
+		}
+	}
+
+	tx.Commit()
 
 	return m, nil
 }
@@ -80,11 +102,15 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	var (
 		count int64
-		db    = s.DB(&model.User{})
 	)
 
+	userRolesData, ok := data["userRoles"].([]interface{})
+	if !ok {
+		userRolesData = []interface{}{}
+	}
+
 	// 校验用户名是否重复
-	err := db.Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
+	err := s.DB(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -94,20 +120,62 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	if lo.HasKey(data, "password") && data["password"] != "" {
 		data["password"] = pkg.BcryptHash(data["password"].(string))
 	}
-	rows := model.FilterFields(db, model.User{}, data)
+	rows := model.FilterFields(s.DB(&model.User{}), model.User{}, data)
 	rows["updated_at"] = time.DateTime
 
-	err = db.Model(&model.User{}).Where("id = ?", id).Updates(rows).Error
+	tx := s.DB(&model.User{}).Begin()
+
+	err = tx.Model(&model.User{}).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	// 更新用户角色关联
+	if len(userRolesData) > 0 {
+		// 删除旧关联
+		err = tx.Model(&model.UserRoles{}).
+			Where("user_id = ?", id).
+			Delete(&model.UserRoles{}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// 创建新关联
+		var newUserRoles []model.UserRoles
+		for _, item := range userRolesData {
+			roleMap, _ok := item.(map[string]interface{})
+			if !_ok {
+				continue
+			}
+
+			newUserRoles = append(newUserRoles, model.UserRoles{
+				UserID: id,
+				RoleID: int64(roleMap["roleId"].(float64)),
+				Name:   roleMap["name"].(string),
+			})
+		}
+
+		if len(newUserRoles) > 0 {
+			err = tx.Model(&model.UserRoles{}).Create(&newUserRoles).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	tx.Commit()
 
 	return nil
 }
 
 // Detail 详情
 func (s *UserService) Detail(id int64) (m model.User, err error) {
-	err = s.DB(&model.User{}).First(&m, id).Error
+	err = s.DB(&model.User{}).
+		Preload("UserRoles").
+		First(&m, id).Error
 	if err != nil {
 		return m, err
 	}
@@ -116,11 +184,17 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 }
 
 // Delete 删除
-func (s *UserService) Delete(id int64) (m model.User, err error) {
-	err = s.DB(&model.User{}).Delete(&m, id).Error
+func (s *UserService) Delete(id int64) error {
+	var (
+		err  error
+		user model.User
+		db   = s.DB(&user)
+	)
+
+	err = db.Delete(&user, id).Error
 	if err != nil {
-		return m, err
+		return err
 	}
 
-	return m, nil
+	return nil
 }

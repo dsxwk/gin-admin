@@ -1,6 +1,8 @@
 ## 中文 | [English](readme.md)
 
 - [项目简介](#项目简介)
+  - [项目地址](#项目地址) 
+  - [前端地址](#前端地址) 
 - [许可证](#许可证)
 - [版本记录](#版本记录)
 - [安装说明](#安装说明)
@@ -126,6 +128,10 @@
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
 
+## 前端地址
+- Github: https://github.com/dsxwk/gin-web.git
+- Gitee: https://gitee.com/dsxwk/gin-web.git
+
 ## Gin框架介绍
 > Gin是一个用Go语言编写的Web框架。它具有简单、快速、高效等特点, 被广泛应用于Go语言的Web开发中。
 
@@ -140,11 +146,12 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.2.14
+> - 最新版本: v2.2.15
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
-> 项目基于Golang 1.25.2版本开发, 低版本可能存在版本差异, 建议版本 >= 1.25.2。
+> - 2026-06-24项目更新Golang版本为1.26.4,低版本可能存在版本差异,建议版本 >= 1.26.4。
+> - 项目基于Golang 1.25.2版本开发,低版本可能存在版本差异,建议版本 >= 1.25.2。
 
 ## 克隆项目
 ```bash

@@ -1,3 +1,7 @@
+## v2.2.15
+> - Add and improve user and role related interfaces, optimize menu related interfaces
+> - Add related documentation, add front-end github and gitee address
+
 ## v2.2.14
 > - Add global soft delete configuration and use
 > - Add and improve menu related interfaces

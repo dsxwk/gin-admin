@@ -17,7 +17,7 @@ type UserCreate struct {
 
 // UserUpdate 用户更新验证
 type UserUpdate struct {
-	ID       int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
+	ID       int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
 	Username string `json:"username" validate:"required" label:"用户名"`
 	FullName string `json:"fullName" validate:"required" label:"姓名"`
 	Nickname string `json:"nickname" validate:"required" label:"昵称"`
@@ -25,27 +25,25 @@ type UserUpdate struct {
 	Age      int    `json:"age" validate:"int" label:"年龄"`
 }
 
-// UserDetail 用户详情验证
-type UserDetail struct {
-	ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
-}
-
-// UserDelete 用户删除验证
-type UserDelete struct {
-	ID int64 `json:"id" validate:"required|int|gt:0" label:"ID"`
-}
-
 // User 用户请求验证
 type User struct {
 	base.BaseRequest
-	ID       int64  `json:"id" validate:"required|int|gt:0" label:"ID"`
-	Username string `json:"username" form:"username" validate:"required" label:"用户名"`
-	FullName string `json:"fullName" validate:"required" label:"姓名"`
-	Nickname string `json:"nickname" validate:"required" label:"昵称"`
-	Gender   int64  `json:"gender" validate:"required|int" label:"性别"`
-	Password string `json:"password" validate:"required" label:"密码"`
-	Age      int64  `json:"age" validate:"int" label:"年龄"`
+	ID        int64      `uri:"id" validate:"required|int|gt:0" label:"ID"`
+	Username  string     `json:"username" form:"username" validate:"required" label:"用户名"`
+	FullName  string     `json:"fullName" validate:"required" label:"姓名"`
+	Nickname  string     `json:"nickname" validate:"required" label:"昵称"`
+	Gender    int64      `json:"gender" validate:"required|int" label:"性别"`
+	Password  string     `json:"password" validate:"required" label:"密码"`
+	Age       int64      `json:"age" validate:"int" label:"年龄"`
+	UserRoles []UserRole `json:"userRoles" validate:"" label:"用户角色"`
 	PageListValidate
+}
+
+// UserRole 用户角色
+type UserRole struct {
+	UserId int64  `json:"userId" validate:"int" label:"用户id"`
+	RoleId int64  `json:"roleId" validate:"int" label:"角色id"`
+	Name   string `json:"name" validate:"" label:"角色名称"`
 }
 
 // Validate 请求验证

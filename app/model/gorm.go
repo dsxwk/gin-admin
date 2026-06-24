@@ -151,13 +151,20 @@ func (j *ArrayInt64) Scan(value interface{}) error {
 // FilterFields 过滤非模型字段
 func FilterFields(db *gorm.DB, model any, raw map[string]interface{}) map[string]interface{} {
 	stmt := &gorm.Statement{DB: db}
-	_ = stmt.Parse(model)
+	if err := stmt.Parse(model); err != nil {
+		return raw
+	}
 
 	filtered := make(map[string]interface{})
 
 	for k, v := range raw {
-		if _, ok := stmt.Schema.FieldsByDBName[lo.SnakeCase(k)]; ok {
-			filtered[lo.SnakeCase(k)] = v
+		snakeKey := lo.SnakeCase(k)
+		if field, ok := stmt.Schema.FieldsByDBName[snakeKey]; ok {
+			// 检查是否为关联字段,通过字段名在Relationships中查找
+			if _, ok = stmt.Schema.Relationships.Relations[field.Name]; ok {
+				continue
+			}
+			filtered[snakeKey] = v
 		}
 	}
 
