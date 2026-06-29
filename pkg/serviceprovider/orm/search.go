@@ -79,7 +79,6 @@ SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created
 // filters: map[string]interface{}格式参考示例
 // db: 必须已经通过Model()或Table()设置了模型
 func BuildCondition(db *gorm.DB, filters map[string]interface{}) (string, []interface{}, error) {
-	// 从 db.Statement 获取模型
 	if db.Statement == nil || db.Statement.Model == nil {
 		return "", nil, fmt.Errorf("db must have a model, please use db.Model() first")
 	}
@@ -89,7 +88,7 @@ func BuildCondition(db *gorm.DB, filters map[string]interface{}) (string, []inte
 		return "", nil, err
 	}
 
-	sql, args, err := parseLogic(filters, stmt.Schema, db)
+	sql, args, err := parseLogic(filters, stmt.Schema, db, stmt.Schema)
 	if err != nil {
 		return "", nil, err
 	}
@@ -100,7 +99,7 @@ func BuildCondition(db *gorm.DB, filters map[string]interface{}) (string, []inte
 }
 
 // parseLogic 递归处理解析and/or/exist/not exist逻辑
-func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB) (string, []interface{}, error) {
+func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB, rootSchema *schema.Schema) (string, []interface{}, error) {
 	var parts []string
 	var args []interface{}
 
@@ -116,7 +115,7 @@ func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB) (
 			var subArgs []interface{}
 			for _, it := range items {
 				if m, _ok := it.(map[string]interface{}); _ok {
-					sql, a, err := parseLogic(m, s, db)
+					sql, a, err := parseLogic(m, s, db, rootSchema)
 					if err != nil {
 						return "", nil, err
 					}
@@ -136,7 +135,7 @@ func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB) (
 				continue
 			}
 			for relPath, cond := range m {
-				sql, a, err := buildExistCondition(s, db, relPath, cond, key == "exist")
+				sql, a, err := buildExistCondition(s, db, relPath, cond, key == "exist", rootSchema)
 				if err != nil {
 					return "", nil, err
 				}
@@ -146,7 +145,7 @@ func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB) (
 				}
 			}
 		default:
-			sql, a := buildFieldSQL(db, s, k, v)
+			sql, a := buildFieldSQL(db, s, k, v, rootSchema)
 			if sql != "" {
 				parts = append(parts, sql)
 				args = append(args, a...)
@@ -158,7 +157,7 @@ func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB) (
 }
 
 // buildExistCondition 构建exists/not exists子查询
-func buildExistCondition(parent *schema.Schema, db *gorm.DB, path string, cond interface{}, positive bool) (string, []interface{}, error) {
+func buildExistCondition(parent *schema.Schema, db *gorm.DB, path string, cond interface{}, positive bool, rootSchema *schema.Schema) (string, []interface{}, error) {
 	parts := strings.Split(path, ".")
 	if len(parts) < 2 {
 		return "", nil, fmt.Errorf("exist must be relation.field")
@@ -204,7 +203,7 @@ func buildExistCondition(parent *schema.Schema, db *gorm.DB, path string, cond i
 	if m, ok := cond.(map[string]interface{}); ok {
 		for k, v := range m {
 			if sub, _ok := v.(map[string]interface{}); _ok {
-				sql, a, err := buildExistCondition(curSchema, db, k, sub, true)
+				sql, a, err := buildExistCondition(curSchema, db, k, sub, true, rootSchema)
 				if err != nil {
 					return "", nil, err
 				}
@@ -233,7 +232,7 @@ func buildExistCondition(parent *schema.Schema, db *gorm.DB, path string, cond i
 }
 
 // buildFieldSQL 构建普通字段sql,支持json、关联字段、各种操作符
-func buildFieldSQL(db *gorm.DB, s *schema.Schema, field string, value interface{}) (string, []interface{}) {
+func buildFieldSQL(db *gorm.DB, s *schema.Schema, field string, value interface{}, rootSchema *schema.Schema) (string, []interface{}) {
 	op := "="
 	val := value
 
@@ -249,7 +248,7 @@ func buildFieldSQL(db *gorm.DB, s *schema.Schema, field string, value interface{
 
 	// 关联字段a.b→exist子查询
 	if strings.Contains(field, ".") {
-		return buildRelationFieldSql(db, field, op, val)
+		return buildRelationFieldSql(field, op, val, rootSchema)
 	}
 
 	// 普通字段
@@ -307,13 +306,17 @@ func buildFieldSQL(db *gorm.DB, s *schema.Schema, field string, value interface{
 }
 
 // buildRelationFieldSql 将关联字段a.b转化为exists子查询
-func buildRelationFieldSql(db *gorm.DB, field string, op string, val interface{}) (string, []interface{}) {
+func buildRelationFieldSql(field string, op string, val interface{}, rootSchema *schema.Schema) (string, []interface{}) {
 	parts := strings.Split(field, ".")
 	if len(parts) < 2 {
 		return "", nil
 	}
 
-	rootSchema := db.Statement.Schema
+	// 防御性检查
+	if rootSchema == nil {
+		return "", nil
+	}
+
 	curSchema := rootSchema
 	var rel *schema.Relationship
 
@@ -327,7 +330,7 @@ func buildRelationFieldSql(db *gorm.DB, field string, op string, val interface{}
 		curSchema = r.FieldSchema
 	}
 
-	if rel == nil {
+	if rel == nil || curSchema == nil {
 		return "", nil
 	}
 
@@ -341,9 +344,29 @@ func buildRelationFieldSql(db *gorm.DB, field string, op string, val interface{}
 		joins = append(joins, left+" = "+right)
 	}
 
-	sub := fmt.Sprintf("SELECT 1 FROM %s WHERE %s AND %s %s ?", subTable, strings.Join(joins, " AND "), subColumn, op)
+	// 处理操作符
+	op = strings.ToLower(op)
+	var operator string
+	switch op {
+	case "=", "eq":
+		operator = "="
+	case "!=", "<>", "ne":
+		operator = "<>"
+	case ">", "gt":
+		operator = ">"
+	case ">=", "gte":
+		operator = ">="
+	case "<", "lt":
+		operator = "<"
+	case "<=", "lte":
+		operator = "<="
+	default:
+		operator = "="
+	}
 
-	if op != "=" && (op == "!=" || op == "<>") {
+	sub := fmt.Sprintf("SELECT 1 FROM %s WHERE %s AND %s %s ?", subTable, strings.Join(joins, " AND "), subColumn, operator)
+
+	if op == "!=" || op == "<>" || op == "ne" {
 		return "NOT EXISTS (" + sub + ")", []interface{}{val}
 	}
 	return "EXISTS (" + sub + ")", []interface{}{val}

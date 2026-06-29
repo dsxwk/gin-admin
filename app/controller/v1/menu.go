@@ -254,21 +254,21 @@ func (s *MenuController) Delete(c *gin.Context) {
 func (s *MenuController) Action(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
-		req request.Menu
+		req request.MenuActions
 	)
 
 	s.service.WithContext(ctx)
 
-	req.MenuId = facade.Request[int64]().Path(c, "id", 0)
+	req.Id = facade.Request[int64]().Path(c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "ActionList")
+	err := facade.Request[any]().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	res, err := s.service.Action(req.MenuId)
+	res, err := s.service.Action(req)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
@@ -291,7 +291,7 @@ func (s *MenuController) Action(c *gin.Context) {
 func (s *MenuController) ActionDetail(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
-		req request.Menu
+		req request.MenuActions
 	)
 
 	s.service.WithContext(ctx)
@@ -326,7 +326,27 @@ func (s *MenuController) ActionDetail(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/menu/{id}/action [post]
 func (s *MenuController) CreateAction(c *gin.Context) {
-	s.Response.Success(c, errcode.Success())
+	var (
+		ctx = c.Request.Context()
+		req request.MenuActions
+	)
+
+	s.service.WithContext(ctx)
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "Create")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	err = s.service.CreateAction(req)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(req))
 }
 
 // UpdateAction 更新菜单功能
@@ -342,7 +362,39 @@ func (s *MenuController) CreateAction(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/menu/{id}/action/{actionId} [put]
 func (s *MenuController) UpdateAction(c *gin.Context) {
-	s.Response.Success(c, errcode.Success())
+	var (
+		ctx  = c.Request.Context()
+		data map[string]interface{}
+		req  request.MenuActions
+	)
+
+	s.service.WithContext(ctx)
+
+	err := c.ShouldBindBodyWith(&data, binding.JSON)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+	err = mapstructure.Decode(data, &req)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	req.Id = facade.Request[int64]().Path(c, "actionId", 0)
+	err = req.Validate(req, "Update")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	err = s.service.UpdateAction(req.Id, data)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(data))
 }
 
 // DeleteAction 删除菜单功能
@@ -357,5 +409,27 @@ func (s *MenuController) UpdateAction(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/menu/{id}/{actionId} [delete]
 func (s *MenuController) DeleteAction(c *gin.Context) {
+	var (
+		ctx = c.Request.Context()
+		req request.MenuActions
+	)
+
+	s.service.WithContext(ctx)
+
+	req.Id = facade.Request[int64]().Path(c, "actionId", 0)
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "Delete")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	err = s.service.DeleteAction(req.Id)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
 	s.Response.Success(c, errcode.Success())
 }

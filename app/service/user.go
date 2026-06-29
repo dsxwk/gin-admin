@@ -99,7 +99,7 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 }
 
 // Update 更新
-func (s *UserService) Update(id int64, data map[string]interface{}) error {
+func (s *UserService) Update(id int64, data map[string]interface{}) (err error) {
 	var (
 		count int64
 	)
@@ -110,7 +110,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) error {
 	}
 
 	// 校验用户名是否重复
-	err := s.DB(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
+	err = s.DB(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -184,9 +184,8 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 }
 
 // Delete 删除
-func (s *UserService) Delete(id int64) error {
+func (s *UserService) Delete(id int64) (err error) {
 	var (
-		err  error
 		user model.User
 		db   = s.DB(&user)
 	)

@@ -311,16 +311,19 @@ func (s *MenuService) Delete(menuId int64) error {
 }
 
 // Action 菜单功能
-func (s *MenuService) Action(menuId int64) (pageData request.PageData, err error) {
+func (s *MenuService) Action(req request.MenuActions) (pageData request.PageData, err error) {
 	var (
 		m      []model.MenuActions
 		action model.MenuActions
 		db     = s.DB(&action)
 	)
 
+	// 搜索
+	db = s.Search(db, req.Search)
+
 	err = db.Preload("Parent").
 		Preload("RoleActions").
-		Where("menu_id = ?", menuId).
+		Where("menu_id = ?", req.Id).
 		Order("sort asc").
 		Find(&m).
 		Error
@@ -341,4 +344,140 @@ func (s *MenuService) ActionDetail(id int64) (m model.MenuActions, err error) {
 	}
 
 	return m, nil
+}
+
+// CreateAction 菜单功能创建
+func (s *MenuService) CreateAction(req request.MenuActions) (err error) {
+	var (
+		menuAction  model.MenuActions
+		roleActions []model.RoleActions
+		db          = s.DB(&model.MenuActions{})
+	)
+
+	menuAction = model.MenuActions{
+		Pid:       req.Pid,
+		MenuId:    req.MenuId,
+		Type:      req.Type,
+		BtnType:   req.BtnType,
+		BtnStyle:  req.BtnStyle,
+		BtnSize:   req.BtnSize,
+		IsConfirm: req.IsConfirm,
+		Label:     req.Label,
+		AuthValue: req.AuthValue,
+		IsLink:    req.IsLink,
+		Sort:      req.Sort,
+	}
+
+	tx := db.Begin()
+
+	err = tx.Create(&menuAction).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for _, v := range req.RoleActions {
+		roleActions = append(
+			roleActions,
+			model.RoleActions{
+				RoleId:   v.RoleId,
+				Name:     v.Name,
+				ActionId: menuAction.Id,
+			},
+		)
+	}
+
+	err = tx.Model(&model.RoleActions{}).Create(&roleActions).Error
+
+	tx.Commit()
+
+	return nil
+}
+
+// UpdateAction 菜单功能更新
+func (s *MenuService) UpdateAction(actionId int64, data map[string]interface{}) (err error) {
+	var (
+		db = s.DB(&model.MenuActions{})
+	)
+
+	rows := model.FilterFields(db, model.MenuActions{}, data)
+	roleActionData, ok := data["roleActions"].([]interface{})
+	if !ok {
+		roleActionData = []interface{}{}
+	}
+
+	tx := db.Begin()
+
+	err = tx.Where("id = ?", actionId).Updates(rows).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 删除旧关联
+	err = tx.Model(&model.RoleActions{}).
+		Where("action_id = ?", actionId).
+		Delete(&model.RoleMenus{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 更新角色功能关联
+	if len(roleActionData) > 0 {
+		// 创建新关联
+		var newRoleActions []model.RoleActions
+		for _, item := range roleActionData {
+			roleMap, _ok := item.(map[string]interface{})
+			if !_ok {
+				continue
+			}
+
+			name, _ := roleMap["name"].(string)
+
+			newRoleActions = append(newRoleActions, model.RoleActions{
+				RoleId:   int64(roleMap["roleId"].(float64)),
+				Name:     name,
+				ActionId: actionId,
+			})
+		}
+
+		if len(newRoleActions) > 0 {
+			err = tx.Model(&model.RoleActions{}).Create(&newRoleActions).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+// DeleteAction 菜单功能删除
+func (s *MenuService) DeleteAction(id int64) (err error) {
+	var (
+		roleAction model.RoleActions
+		db         = s.DB(&model.MenuActions{})
+	)
+
+	tx := db.Begin()
+
+	err = tx.Delete(&model.MenuActions{}, id).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.RoleActions{}).Where("action_id = ?", id).Delete(&roleAction).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }

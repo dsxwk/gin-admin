@@ -72,19 +72,6 @@ type RoleMenu struct {
 	MenuId int64 `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 }
 
-// ActionList 功能列表
-type ActionList struct {
-	MenuId int64 `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
-}
-
-// ActionCreate 功能创建
-type ActionCreate struct {
-}
-
-// ActionUpdate 功能更新
-type ActionUpdate struct {
-}
-
 // Validate 请求验证
 func (s Menu) Validate(data Menu, scene string) error {
 	v := validate.Struct(data, scene)
@@ -146,12 +133,6 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 			"Id",
 		},
 		"Delete": []string{
-			"Id",
-		},
-		"ActionList": []string{
-			"MenuId",
-		},
-		"ActionDetail": []string{
 			"Id",
 		},
 	})

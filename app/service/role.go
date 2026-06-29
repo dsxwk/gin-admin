@@ -89,13 +89,13 @@ func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
 }
 
 // Update 更新
-func (s *RoleService) Update(id int64, data map[string]interface{}) error {
+func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) {
 	var (
 		count int64
 	)
 
 	// 校验角色名是否重复
-	err := s.DB(&model.Roles{}).Where("name = ? AND id <> ?", data["name"], id).Count(&count).Error
+	err = s.DB(&model.Roles{}).Where("name = ? AND id <> ?", data["name"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -115,9 +115,8 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) error {
 }
 
 // Delete 删除
-func (s *RoleService) Delete(id int64) error {
+func (s *RoleService) Delete(id int64) (err error) {
 	var (
-		err  error
 		role model.Roles
 		db   = s.DB(&role)
 	)
