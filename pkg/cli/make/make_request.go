@@ -96,7 +96,8 @@ func (m *MakeRequest) Execute(args []string) {
 	// table模式
 	if values["table"] != "" {
 		structName = lo.PascalCase(values["table"])
-		fields = m.loadTableFields(values["connection"], values["table"], values["camel"] == "true")
+		camel := m.StringToBool(values["camel"])
+		fields = m.loadTableFields(values["connection"], values["table"], camel)
 	} else {
 		// 默认ID模式
 		fields = []Field{
@@ -115,6 +116,14 @@ func (m *MakeRequest) Execute(args []string) {
 	m.formatFields(fields)
 
 	m.generateFile(templateName, file, structName, fields, values["desc"])
+}
+
+func (m *MakeRequest) toJsonName(name string, camel bool) string {
+	if !camel {
+		return name
+	}
+
+	return lo.CamelCase(name)
 }
 
 // formatFields 预处理字段对齐
@@ -136,8 +145,15 @@ func (m *MakeRequest) formatFields(fields []Field) {
 		f := &fields[i]
 		paddedName := fmt.Sprintf("%-*s", maxNameLen, f.Name)
 		paddedType := fmt.Sprintf("%-*s", maxTypeLen, f.Type)
-		f.FormattedField = fmt.Sprintf("\t%s %s `json:\"%s\" form:\"%s\" validate:\"%s\" label:\"%s\"`",
-			paddedName, paddedType, f.JSON, f.JSON, f.Validate, f.Label)
+		f.FormattedField = fmt.Sprintf(
+			"\t%s %s `json:\"%s\" form:\"%s\" validate:\"%s\" label:\"%s\"`",
+			paddedName,
+			paddedType,
+			f.JSON,
+			f.JSON,
+			f.Validate,
+			f.Label,
+		)
 	}
 }
 
@@ -274,7 +290,7 @@ func (m *MakeRequest) loadTableFields(conn, table string, camel bool) []Field {
 		// 构建字段
 		field := Field{
 			Name:  m.toGoName(col.Name, camel),
-			JSON:  col.Name,
+			JSON:  m.toJsonName(col.Name, camel),
 			Label: m.parseComment(col.Comment, col.Name),
 			Type:  m.getGoType(col.DataType),
 		}
