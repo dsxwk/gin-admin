@@ -165,7 +165,7 @@ func (s *MenuController) Create(c *gin.Context) {
 // @Param token header string true "认证Token"
 // @Param id path int true "菜单ID"
 // @Param data body request.MenuUpdate true "更新参数"
-// @Success 200 {object} errcode.SuccessResponse{data=request.MenuUpdate} "成功"
+// @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/menu/{id} [put]
@@ -357,7 +357,7 @@ func (s *MenuController) CreateAction(c *gin.Context) {
 // @Param id path int true "菜单ID"
 // @Param actionId path int true "菜单功能ID"
 // @Param data body request.ActionUpdate true "更新参数"
-// @Success 200 {object} errcode.SuccessResponse{data=request.ActionUpdate} "成功"
+// @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/menu/{id}/action/{actionId} [put]

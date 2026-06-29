@@ -7,6 +7,7 @@ import (
 	"github.com/samber/lo"
 	"html/template"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -35,38 +36,11 @@ func (m *MakeController) Help() []base.CommandOption {
 		},
 		{
 			base.Flag{
-				Short:   "F",
-				Long:    "function",
-				Default: "FuncName",
-			},
-			"方法名称, 如: list",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "m",
-				Long:    "method",
-				Default: "get",
-			},
-			"请求方式, 如: get",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "r",
-				Long:    "router",
-				Default: "/your/router",
-			},
-			"路由地址, 如: /user",
-			false,
-		},
-		{
-			base.Flag{
 				Short:   "d",
 				Long:    "desc",
-				Default: "func-desc",
+				Default: "用户",
 			},
-			"描述, 如: 列表",
+			"描述, 如: 用户",
 			false,
 		},
 	}
@@ -76,44 +50,70 @@ func (m *MakeController) Execute(args []string) {
 	values := m.ParseFlags(m.Name(), args, m.Help())
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
-	m.generateFile(_make, f, values["function"], values["method"], values["router"], values["desc"])
+	m.generateFile(_make, f, values["desc"])
 }
 
 func init() {
 	cli.Register(&MakeController{})
 }
 
-func (m *MakeController) generateFile(_make, file, function, method, router, desc string) {
+func (m *MakeController) generateFile(_make, file, desc string) {
 	templateFile := m.GetTemplate(_make)
-	tmpl, err := template.ParseFiles(templateFile)
+
+	// 注册lower函数
+	//funcMap := template.FuncMap{
+	//	"lower": strings.ToLower,
+	//	"upper": strings.ToUpper,
+	//}
+
+	// 使用Funcs注册函数
+	tmpl, err := template.New(filepath.Base(templateFile)). /*Funcs(funcMap).*/ ParseFiles(templateFile)
 	if err != nil {
 		flag.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	// 提取包名 (文件路径中的最后一个目录作为包名)
-	packageName := filepath.Base(filepath.Dir(file))
+	filePath := filepath.ToSlash(file)
 
-	// 创建文件
+	// 去掉/
+	filePath = strings.TrimPrefix(filePath, "/")
+
+	// 去掉.go
+	filePath = strings.TrimSuffix(filePath, ".go")
+
+	// 文件名
+	baseName := path.Base(filePath)
+
+	// 包名
+	dir := path.Dir(filePath)
+
+	packageName := path.Base(dir)
+
+	if packageName == "." {
+		packageName = ""
+	}
+
+	// 路由路径
+	routePath := filePath
+
+	// 去掉控制器目录前缀
+	routePath = strings.TrimPrefix(routePath, "app/controller/")
+
+	data := struct {
+		Package     string
+		Name        string
+		Description string
+		RoutePath   string
+	}{
+		Package:     packageName,
+		Name:        lo.PascalCase(baseName),
+		Description: desc,
+		RoutePath:   "/api/" + routePath,
+	}
+
 	f := m.CheckDirAndFile(file)
 	if f == nil {
 		return
-	}
-
-	data := struct {
-		Package     string // 提取的包名
-		Name        string // 模块名称(首字母大写)
-		Function    string // 如果为空,使用默认值
-		Router      string // 如果为空,使用默认值
-		Method      string // 如果为空,使用默认值
-		Description string // 如果为空,使用默认值
-	}{
-		Package:     packageName,
-		Name:        lo.PascalCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
-		Function:    lo.Capitalize(function),
-		Router:      router,
-		Method:      method,
-		Description: desc,
 	}
 
 	err = tmpl.Execute(f, data)
@@ -122,5 +122,5 @@ func (m *MakeController) generateFile(_make, file, function, method, router, des
 		os.Exit(1)
 	}
 
-	flag.Successf("控制器文件: " + file + " 生成成功!")
+	flag.Successf("控制器文件: %s 生成成功!", file)
 }

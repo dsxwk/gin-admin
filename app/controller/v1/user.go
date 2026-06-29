@@ -93,7 +93,7 @@ func (s *UserController) Create(c *gin.Context) {
 // @Param token header string true "认证Token"
 // @Param id path int true "用户ID"
 // @Param data body request.UserUpdate true "更新参数"
-// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user/{id} [put]
@@ -176,7 +176,7 @@ func (s *UserController) Detail(c *gin.Context) {
 // @Description 用户删除
 // @Param token header string true "认证Token"
 // @Param id path int true "用户ID"
-// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user/{id} [delete]

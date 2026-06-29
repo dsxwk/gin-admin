@@ -130,7 +130,7 @@ func (s *RoleController) Create(c *gin.Context) {
 // @Param token header string true "认证Token"
 // @Param id path int true "角色ID"
 // @Param data body request.RoleUpdate true "更新参数"
-// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/role/{id} [put]
@@ -177,7 +177,7 @@ func (s *RoleController) Update(c *gin.Context) {
 // @Description 角色删除
 // @Param token header string true "认证Token"
 // @Param id path int true "角色ID"
-// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/role/{id} [delete]
