@@ -41,12 +41,13 @@ func (s {{.StructName}}) ConfigValidation(v *validate.Validation) {
 // Messages 验证器错误消息
 func (s {{.StructName}}) Messages() map[string]string {
     return validate.MS{
-        "required":    "字段 {field} 必填",
-        "int":         "字段 {field} 必须为整数",
-        "gt":          "字段 {field} 必须大于 0",
-        "max":         "字段 {field} 长度不能超过 255",
-        "Page.gt":     "页码必须大于 0",
-        "PageSize.gt": "每页数量必须大于 0",
+        "required":                     "字段 {field} 必填",
+        "int":                          "字段 {field} 必须为整数",
+        "gt":                           "字段 {field} 必须大于 0",
+        "minLen":                       "{field} 长度不能少于 {min} 个字符",
+        "maxLen":                       "字段 {field} 长度不能超过 255",
+        "PageListValidate.Page.gt":     "页码必须大于 0",
+        "PageListValidate.PageSize.gt": "每页数量必须大于 0",
     }
 }
 

@@ -42,23 +42,24 @@ func (s RoleMenus) ConfigValidation(v *validate.Validation) {
 // Messages 验证器错误消息
 func (s RoleMenus) Messages() map[string]string {
 	return validate.MS{
-		"required":    "字段 {field} 必填",
-		"int":         "字段 {field} 必须为整数",
-		"gt":          "字段 {field} 必须大于 0",
-		"max":         "字段 {field} 长度不能超过 255",
-		"Page.gt":     "页码必须大于 0",
-		"PageSize.gt": "每页数量必须大于 0",
+		"required":                     "字段 {field} 必填",
+		"int":                          "字段 {field} 必须为整数",
+		"gt":                           "字段 {field} 必须大于 0",
+		"minLen":                       "{field} 长度不能少于 {min} 个字符",
+		"maxLen":                       "{field} 长度不能超过 {max} 个字符",
+		"PageListValidate.Page.gt":     "页码必须大于 0",
+		"PageListValidate.PageSize.gt": "每页数量必须大于 0",
 	}
 }
 
 // Translates 字段翻译
 func (s RoleMenus) Translates() map[string]string {
 	return validate.MS{
-		"ID":       "ID",
-		"RoleId":   "角色id",
-		"MenuId":   "菜单id",
-		"Name":     "角色名称",
-		"Page":     "页码",
-		"PageSize": "每页数量",
+		"ID":                        "ID",
+		"RoleId":                    "角色id",
+		"MenuId":                    "菜单id",
+		"Name":                      "角色名称",
+		"PageListValidate.Page":     "页码",
+		"PageListValidate.PageSize": "每页数量",
 	}
 }

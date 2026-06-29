@@ -125,29 +125,29 @@ func (s MenuActions) ConfigValidation(v *validate.Validation) {
 // Messages 验证器错误消息
 func (s MenuActions) Messages() map[string]string {
 	return validate.MS{
-		"required":    "字段 {field} 必填",
-		"int":         "字段 {field} 必须为整数",
-		"Page.gt":     "字段 {field} 需大于 0",
-		"PageSize.gt": "字段 {field} 需大于 0",
+		"required":                     "字段 {field} 必填",
+		"int":                          "字段 {field} 必须为整数",
+		"PageListValidate.Page.gt":     "字段 {field} 需大于 0",
+		"PageListValidate.PageSize.gt": "字段 {field} 需大于 0",
 	}
 }
 
 // Translates 字段翻译
 func (s MenuActions) Translates() map[string]string {
 	return validate.MS{
-		"Page":      "页码",
-		"PageSize":  "每页数量",
-		"Id":        "ID",
-		"Pid":       "父级ID",
-		"MenuId":    "菜单ID",
-		"Type":      "类型",
-		"BtnType":   "按钮类型",
-		"BtnStyle":  "按钮样式",
-		"BtnSize":   "按钮尺寸",
-		"IsConfirm": "是否确认",
-		"Label":     "功能名称",
-		"AuthValue": "权限标识",
-		"IsLink":    "是否为链接",
-		"Sort":      "排序",
+		"PageListValidate.Page":     "页码",
+		"PageListValidate.PageSize": "每页数量",
+		"Id":                        "ID",
+		"Pid":                       "父级ID",
+		"MenuId":                    "菜单ID",
+		"Type":                      "类型",
+		"BtnType":                   "按钮类型",
+		"BtnStyle":                  "按钮样式",
+		"BtnSize":                   "按钮尺寸",
+		"IsConfirm":                 "是否确认",
+		"Label":                     "功能名称",
+		"AuthValue":                 "权限标识",
+		"IsLink":                    "是否为链接",
+		"Sort":                      "排序",
 	}
 }

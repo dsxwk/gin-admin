@@ -119,7 +119,7 @@ func (m *MakeRequest) Execute(args []string) {
 
 // formatFields 预处理字段对齐
 func (m *MakeRequest) formatFields(fields []Field) {
-	// 1. 计算最大宽度
+	// 计算最大宽度
 	maxNameLen := 0
 	maxTypeLen := 0
 	for _, f := range fields {
@@ -131,7 +131,7 @@ func (m *MakeRequest) formatFields(fields []Field) {
 		}
 	}
 
-	// 2. 生成格式化后的字段行
+	// 生成格式化后的字段行
 	for i := range fields {
 		f := &fields[i]
 		paddedName := fmt.Sprintf("%-*s", maxNameLen, f.Name)
@@ -168,8 +168,8 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 
 	// 添加Page和PageSize到翻译字段列表计算最大宽度
 	allTranslateFields := append([]TranslateField{}, translateFields...)
-	allTranslateFields = append(allTranslateFields, TranslateField{Name: "Page", Label: "页码"})
-	allTranslateFields = append(allTranslateFields, TranslateField{Name: "PageSize", Label: "每页数量"})
+	allTranslateFields = append(allTranslateFields, TranslateField{Name: "PageListValidate.Page", Label: "页码"})
+	allTranslateFields = append(allTranslateFields, TranslateField{Name: "PageListValidate.PageSize", Label: "每页数量"})
 
 	// 计算最大字段名长度用于对齐
 	maxNameLen := 0
@@ -192,14 +192,14 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 	}
 
 	// 添加Page
-	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"Page\":%s%q,",
-		strings.Repeat(" ", maxNameLen-len("Page")+1),
+	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"PageListValidate.Page\":%s%q,",
+		strings.Repeat(" ", maxNameLen-len("PageListValidate.Page")+1),
 		"页码",
 	))
 
 	// 添加PageSize
-	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"PageSize\":%s%q,",
-		strings.Repeat(" ", maxNameLen-len("PageSize")+1),
+	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"PageListValidate.PageSize\":%s%q,",
+		strings.Repeat(" ", maxNameLen-len("PageListValidate.PageSize")+1),
 		"每页数量",
 	))
 
@@ -345,9 +345,9 @@ func (m *MakeRequest) getValidateRules(dbType string) []string {
 	}
 
 	// 字符串类型添加max验证
-	if strings.Contains(t, "char") || strings.Contains(t, "text") {
-		rules = append(rules, "max:255")
-	}
+	//if strings.Contains(t, "char") || strings.Contains(t, "text") {
+	//	rules = append(rules, "maxLen:255")
+	//}
 
 	return rules
 }

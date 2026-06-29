@@ -141,18 +141,18 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 // Messages 验证器错误消息
 func (s Menu) Messages() map[string]string {
 	return validate.MS{
-		"required":    "字段 {field} 必填",
-		"int":         "字段 {field} 必须为整数",
-		"Page.gt":     "字段 {field} 需大于 0",
-		"PageSize.gt": "字段 {field} 需大于 0",
+		"required":                     "字段 {field} 必填",
+		"int":                          "字段 {field} 必须为整数",
+		"PageListValidate.Page.gt":     "字段 {field} 需大于 0",
+		"PageListValidate.PageSize.gt": "字段 {field} 需大于 0",
 	}
 }
 
 // Translates 字段翻译
 func (s Menu) Translates() map[string]string {
 	return validate.MS{
-		"Page":     "页码",
-		"PageSize": "每页数量",
-		"ID":       "ID",
+		"PageListValidate.Page":     "页码",
+		"PageListValidate.PageSize": "每页数量",
+		"ID":                        "ID",
 	}
 }

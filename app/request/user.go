@@ -106,13 +106,13 @@ func (s User) Messages() map[string]string {
 // Translates 字段翻译
 func (s User) Translates() map[string]string {
 	return validate.MS{
-		"Page":     "页码",
-		"PageSize": "每页数量",
-		"ID":       "ID",
-		"Username": "用户名",
-		"FullName": "姓名",
-		"Nickname": "昵称",
-		"Gender":   "性别",
-		"Password": "密码",
+		"PageListValidate.Page":     "页码",
+		"PageListValidate.PageSize": "每页数量",
+		"ID":                        "ID",
+		"Username":                  "用户名",
+		"FullName":                  "姓名",
+		"Nickname":                  "昵称",
+		"Gender":                    "性别",
+		"Password":                  "密码",
 	}
 }
