@@ -224,8 +224,8 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 		StructName          string
 		Description         string
 		Fields              []Field
-		CreateScene         string
-		UpdateScene         string
+		CreateScene         []string
+		UpdateScene         []string
 		FormattedTranslates []string
 	}{
 		Package:             packageName,
@@ -369,7 +369,7 @@ func (m *MakeRequest) getValidateRules(dbType string) []string {
 }
 
 // buildScene 生成字符串数组
-func (m *MakeRequest) buildScene(fields []Field, update bool) string {
+func (m *MakeRequest) buildScene(fields []Field, update bool) []string {
 	var arr []string
 
 	for _, f := range fields {
@@ -383,7 +383,7 @@ func (m *MakeRequest) buildScene(fields []Field, update bool) string {
 		arr = append(arr, `"`+f.Name+`"`)
 	}
 
-	return strings.Join(arr, ", ")
+	return arr
 }
 
 func (m *MakeRequest) parseComment(comment, fallback string) string {

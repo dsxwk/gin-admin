@@ -29,11 +29,19 @@ func (s {{.StructName}}) Validate(data {{.StructName}}, scene string) error {
 // - 也可以添加验证设置
 func (s {{.StructName}}) ConfigValidation(v *validate.Validation) {
     scenes := validate.SValues{
-        "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-        "create": []string{ {{.CreateScene}} },
-        "update": []string{ {{.UpdateScene}} },
-        "detail": []string{"ID"},
-        "delete": []string{"ID"},
+        "List": []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+        "Create": []string{
+{{- range .CreateScene }}
+            {{ . }},
+{{- end }}
+        },
+        "Update": []string{
+{{- range .UpdateScene }}
+            {{ . }},
+{{- end }}
+        },
+        "Detail": []string{"ID"},
+        "Delete": []string{"ID"},
     }
     v.WithScenes(scenes)
 }
