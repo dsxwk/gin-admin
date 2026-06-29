@@ -45,7 +45,7 @@ func (s {{.StructName}}) Messages() map[string]string {
         "int":                          "字段 {field} 必须为整数",
         "gt":                           "字段 {field} 必须大于 0",
         "minLen":                       "{field} 长度不能少于 {min} 个字符",
-        "maxLen":                       "字段 {field} 长度不能超过 255",
+        "maxLen":                       "{field} 长度不能超过 {max} 个字符",
         "PageListValidate.Page.gt":     "页码必须大于 0",
         "PageListValidate.PageSize.gt": "每页数量必须大于 0",
     }
