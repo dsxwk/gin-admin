@@ -6,7 +6,7 @@ const TableNameMenuActions = "menu_actions"
 
 // MenuActions 菜单功能表
 type MenuActions struct {
-	Id          int64          `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
+	ID          int64          `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
 	Pid         int64          `gorm:"column:pid;not null;default:0;type:int(10) unsigned;comment:父级id" json:"pid" form:"pid"`
 	MenuId      int64          `gorm:"column:menu_id;not null;default:0;type:int(10) unsigned;comment:菜单id" json:"menuId" form:"menuId"`
 	Type        int64          `gorm:"column:type;not null;default:1;type:tinyint(3) unsigned;comment:类型 1=header 2=operation" json:"type" form:"type"`
@@ -37,7 +37,7 @@ func (m *MenuActions) Connection() string {
 
 // GetId 实现TreeNode接口
 func (m *MenuActions) GetId() int64 {
-	return m.Id
+	return m.ID
 }
 
 func (m *MenuActions) GetPid() int64 {

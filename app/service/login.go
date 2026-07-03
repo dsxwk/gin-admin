@@ -40,8 +40,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 		return errors.New("login.accountDisabled"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
-	jwt := middleware.Jwt{}
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = jwt.WithRefresh(m.ID, conf.Jwt.Exp, conf.Jwt.RefreshExp)
+	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = middleware.Jwt{}.WithRefresh(m.ID, conf.Jwt.Exp, conf.Jwt.RefreshExp)
 	if err != nil {
 		return errors.New(err.Error()), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}

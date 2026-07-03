@@ -20,9 +20,6 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 		db   = s.DB(&role)
 	)
 
-	pageData.Page = req.Page
-	pageData.PageSize = req.PageSize
-	offset, limit := request.Pagination(req.Page, req.PageSize)
 	// 搜索
 	db = s.Search(db, req.Search)
 
@@ -38,6 +35,10 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 		}
 		pageData.List = m
 	} else {
+		pageData.Page = req.Page
+		pageData.PageSize = req.PageSize
+		offset, limit := request.Pagination(req.Page, req.PageSize)
+
 		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
 		if err != nil {
 			return pageData, err
@@ -49,13 +50,13 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 }
 
 // Detail 详情
-func (s *RoleService) Detail(id int64) (role model.Roles, err error) {
-	err = s.DB(&model.Roles{}).First(&role, id).Error
+func (s *RoleService) Detail(id int64) (m model.Roles, err error) {
+	err = s.DB(&model.Roles{}).First(&m, id).Error
 	if err != nil {
-		return role, err
+		return m, err
 	}
 
-	return role, nil
+	return m, nil
 }
 
 // Create 创建
@@ -117,11 +118,11 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 // Delete 删除
 func (s *RoleService) Delete(id int64) (err error) {
 	var (
-		role model.Roles
-		db   = s.DB(&role)
+		m  model.Roles
+		db = s.DB(&m)
 	)
 
-	err = db.Delete(&role, id).Error
+	err = db.Delete(&m, id).Error
 	if err != nil {
 		return err
 	}

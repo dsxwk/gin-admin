@@ -4,7 +4,7 @@ const TableNameRoles = "roles"
 
 // Roles 角色表
 type Roles struct {
-	Id        int64      `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
+	ID        int64      `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
 	Name      string     `gorm:"column:name;not null;type:varchar(20);comment:角色名称" json:"name" form:"name"`
 	Desc      string     `gorm:"column:desc;not null;type:varchar(100);comment:角色描述" json:"desc" form:"desc"`
 	Status    int64      `gorm:"column:status;not null;default:1;type:tinyint(1) unsigned;comment:状态 1=启用 2=停用" json:"status" form:"status"`

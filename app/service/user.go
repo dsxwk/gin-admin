@@ -21,23 +21,31 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 		db = s.DB(&model.User{})
 	)
 
-	pageData.Page = req.Page
-	pageData.PageSize = req.PageSize
-	offset, limit := request.Pagination(req.Page, req.PageSize)
 	// 搜索
 	db = s.Search(db, req.Search)
 
-	db = db.Preload("UserRoles")
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
 		return pageData, err
 	}
 
-	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-	if err != nil {
-		return pageData, err
+	if req.NotPage {
+		err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	} else {
+		pageData.Page = req.Page
+		pageData.PageSize = req.PageSize
+		offset, limit := request.Pagination(req.Page, req.PageSize)
+
+		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
 	}
-	pageData.List = m
 
 	return pageData, nil
 }
@@ -186,11 +194,11 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 // Delete 删除
 func (s *UserService) Delete(id int64) (err error) {
 	var (
-		user model.User
-		db   = s.DB(&user)
+		m  model.User
+		db = s.DB(&m)
 	)
 
-	err = db.Delete(&user, id).Error
+	err = db.Delete(&m, id).Error
 	if err != nil {
 		return err
 	}

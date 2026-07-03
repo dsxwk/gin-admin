@@ -4,7 +4,7 @@ const TableNameMenuMeta = "menu_meta"
 
 // MenuMeta 菜单元数据表
 type MenuMeta struct {
-	Id          int64          `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`
+	ID          int64          `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`
 	MenuId      int64          `gorm:"column:menu_id;type:int(10) unsigned;comment:菜单ID" json:"menuId"`
 	Title       string         `gorm:"column:title;type:json;comment:菜单名称" json:"title"`
 	Icon        string         `gorm:"column:icon;type:json;comment:菜单图标" json:"icon"`

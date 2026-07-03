@@ -10,7 +10,7 @@ import (
 type Menu struct {
 	base.BaseRequest
 	PageListValidate
-	Id        int64      `json:"id" validate:"required|int|gt:0" label:"ID"`
+	ID        int64      `json:"id" validate:"required|int|gt:0" label:"ID"`
 	RoleId    string     `json:"roleId" form:"roleId" validate:"required" label:"角色id"`
 	MenuId    int64      `json:"menuId" form:"menuId" validate:"required|int|gt:0" label:"菜单id"`
 	Pid       int64      `json:"pid" form:"pid" validate:"int" label:"父级id"`
@@ -41,7 +41,7 @@ type MenuCreate struct {
 
 // MenuUpdate 菜单更新
 type MenuUpdate struct {
-	Id        int64      `json:"id" validate:"required|int|gt:0" label:"ID"`
+	ID        int64      `json:"id" validate:"required|int|gt:0" label:"ID"`
 	Pid       int64      `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name      string     `json:"name" form:"name" validate:"required" label:"路由名称"`
 	Path      string     `json:"path" form:"path" validate:"required" label:"路由路径"`
@@ -112,7 +112,7 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 			"Meta.IsIframe",
 		},
 		"Update": []string{
-			"Id",
+			"ID",
 			"Pid",
 			"Name",
 			"Path",
@@ -130,10 +130,10 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 			"Meta.IsIframe",
 		},
 		"Detail": []string{
-			"Id",
+			"ID",
 		},
 		"Delete": []string{
-			"Id",
+			"ID",
 		},
 	})
 }

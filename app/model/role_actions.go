@@ -4,7 +4,7 @@ const TableNameRoleActions = "role_actions"
 
 // RoleActions 角色功能表
 type RoleActions struct {
-	Id        int64      `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
+	ID        int64      `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
 	RoleId    int64      `gorm:"column:role_id;not null;default:0;type:int(10) unsigned;comment:角色id" json:"roleId" form:"roleId"`
 	ActionId  int64      `gorm:"column:action_id;not null;default:0;type:int(10) unsigned;comment:功能id" json:"actionId" form:"actionId"`
 	Name      string     `gorm:"column:name;not null;type:varchar(30);comment:角色名称" json:"name" form:"name"`

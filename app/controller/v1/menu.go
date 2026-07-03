@@ -106,7 +106,7 @@ func (s *MenuController) Detail(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.Id = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request[int64]().Path(c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Detail")
@@ -115,7 +115,7 @@ func (s *MenuController) Detail(c *gin.Context) {
 		return
 	}
 
-	m, err := s.service.Detail(req.Id)
+	m, err := s.service.Detail(req.ID)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -189,14 +189,14 @@ func (s *MenuController) Update(c *gin.Context) {
 		return
 	}
 
-	req.Id = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request[int64]().Path(c, "id", 0)
 	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err = s.service.Update(req.Id, data)
+	err = s.service.Update(req.ID, data)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -223,7 +223,7 @@ func (s *MenuController) Delete(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.Id = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request[int64]().Path(c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Delete")
@@ -232,7 +232,7 @@ func (s *MenuController) Delete(c *gin.Context) {
 		return
 	}
 
-	err = s.service.Delete(req.Id)
+	err = s.service.Delete(req.ID)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -259,7 +259,7 @@ func (s *MenuController) Action(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.Id = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request[int64]().Path(c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "List")
@@ -296,7 +296,7 @@ func (s *MenuController) ActionDetail(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.Id = facade.Request[int64]().Path(c, "actionId", 0)
+	req.ID = facade.Request[int64]().Path(c, "actionId", 0)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Detail")
@@ -305,7 +305,7 @@ func (s *MenuController) ActionDetail(c *gin.Context) {
 		return
 	}
 
-	m, err := s.service.ActionDetail(req.Id)
+	m, err := s.service.ActionDetail(req.ID)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -381,14 +381,14 @@ func (s *MenuController) UpdateAction(c *gin.Context) {
 		return
 	}
 
-	req.Id = facade.Request[int64]().Path(c, "actionId", 0)
+	req.ID = facade.Request[int64]().Path(c, "actionId", 0)
 	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
 
-	err = s.service.UpdateAction(req.Id, data)
+	err = s.service.UpdateAction(req.ID, data)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -416,7 +416,7 @@ func (s *MenuController) DeleteAction(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.Id = facade.Request[int64]().Path(c, "actionId", 0)
+	req.ID = facade.Request[int64]().Path(c, "actionId", 0)
 
 	// 绑定参数并验证
 	err := facade.Request[any]().BindValidate(c, &req, "Delete")
@@ -425,7 +425,7 @@ func (s *MenuController) DeleteAction(c *gin.Context) {
 		return
 	}
 
-	err = s.service.DeleteAction(req.Id)
+	err = s.service.DeleteAction(req.ID)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return

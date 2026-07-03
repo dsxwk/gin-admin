@@ -22,9 +22,6 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 		db   = s.DB(&menu)
 	)
 
-	pageData.Page = req.Page
-	pageData.PageSize = req.PageSize
-	offset, limit := request.Pagination(req.Page, req.PageSize)
 	// 搜索
 	db = s.Search(db, req.Search)
 
@@ -32,6 +29,7 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 	if err != nil {
 		return pageData, err
 	}
+
 	db = db.Preload("Meta").
 		Preload("Meta.AuthBtnList").
 		Preload("MenuActions").
@@ -44,6 +42,10 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 		}
 		pageData.List = menu.GetTree(m)
 	} else {
+		pageData.Page = req.Page
+		pageData.PageSize = req.PageSize
+		offset, limit := request.Pagination(req.Page, req.PageSize)
+
 		err = db.Offset(offset).Limit(limit).Order("sort Asc").Find(&m).Error
 		if err != nil {
 			return pageData, err
@@ -163,10 +165,9 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 }
 
 // Update 更新
-func (s *MenuService) Update(id int64, data map[string]interface{}) error {
+func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) {
 	var (
-		err error
-		db  = s.DB(&model.Menu{})
+		db = s.DB(&model.Menu{})
 	)
 
 	meta, ok := data["meta"].(map[string]interface{})
@@ -236,9 +237,8 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) error {
 }
 
 // Delete 删除
-func (s *MenuService) Delete(menuId int64) error {
+func (s *MenuService) Delete(menuId int64) (err error) {
 	var (
-		err           error
 		menuActionIds []int64
 		db            = s.DB(&model.Menu{})
 		roleMenu      model.RoleMenus
@@ -323,7 +323,7 @@ func (s *MenuService) Action(req request.MenuActions) (pageData request.PageData
 
 	err = db.Preload("Parent").
 		Preload("RoleActions").
-		Where("menu_id = ?", req.Id).
+		Where("menu_id = ?", req.ID).
 		Order("sort asc").
 		Find(&m).
 		Error
@@ -382,7 +382,7 @@ func (s *MenuService) CreateAction(req request.MenuActions) (err error) {
 			model.RoleActions{
 				RoleId:   v.RoleId,
 				Name:     v.Name,
-				ActionId: menuAction.Id,
+				ActionId: menuAction.ID,
 			},
 		)
 	}
@@ -459,8 +459,8 @@ func (s *MenuService) UpdateAction(actionId int64, data map[string]interface{}) 
 // DeleteAction 菜单功能删除
 func (s *MenuService) DeleteAction(id int64) (err error) {
 	var (
-		roleAction model.RoleActions
-		db         = s.DB(&model.MenuActions{})
+		m  model.RoleActions
+		db = s.DB(&model.MenuActions{})
 	)
 
 	tx := db.Begin()
@@ -471,7 +471,7 @@ func (s *MenuService) DeleteAction(id int64) (err error) {
 		return err
 	}
 
-	err = tx.Model(&model.RoleActions{}).Where("action_id = ?", id).Delete(&roleAction).Error
+	err = tx.Model(&model.RoleActions{}).Where("action_id = ?", id).Delete(&m).Error
 	if err != nil {
 		tx.Rollback()
 		return err

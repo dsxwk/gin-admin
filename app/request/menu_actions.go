@@ -9,7 +9,7 @@ import (
 // MenuActions Validator
 type MenuActions struct {
 	base.BaseRequest
-	Id          int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
+	ID          int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
 	MenuId      int64        `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 	Pid         int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Type        int64        `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
@@ -54,7 +54,7 @@ type ActionCreate struct {
 
 // ActionUpdate 功能更新
 type ActionUpdate struct {
-	Id        int64  `json:"id" form:"id" validate:"required|int" label:"功能id"`
+	ID        int64  `json:"id" form:"id" validate:"required|int" label:"功能id"`
 	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
@@ -84,7 +84,7 @@ func (s MenuActions) Validate(data MenuActions, scene string) error {
 func (s MenuActions) ConfigValidation(v *validate.Validation) {
 	v.WithScenes(validate.SValues{
 		"List": []string{
-			"Id",
+			"ID",
 		},
 		"Create": []string{
 			"Pid",
@@ -100,7 +100,7 @@ func (s MenuActions) ConfigValidation(v *validate.Validation) {
 			"Sort",
 		},
 		"Update": []string{
-			"Id",
+			"ID",
 			"Pid",
 			"MenuId",
 			"Type",
@@ -114,10 +114,10 @@ func (s MenuActions) ConfigValidation(v *validate.Validation) {
 			"Sort",
 		},
 		"Detail": []string{
-			"Id",
+			"ID",
 		},
 		"Delete": []string{
-			"Id",
+			"ID",
 		},
 	})
 }
@@ -137,7 +137,7 @@ func (s MenuActions) Translates() map[string]string {
 	return validate.MS{
 		"PageListValidate.Page":     "页码",
 		"PageListValidate.PageSize": "每页数量",
-		"Id":                        "ID",
+		"ID":                        "ID",
 		"Pid":                       "父级ID",
 		"MenuId":                    "菜单ID",
 		"Type":                      "类型",
