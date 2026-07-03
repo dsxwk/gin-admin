@@ -2585,7 +2585,7 @@ func (s *TestController) Test(c *gin.Context)  {
 ## Enum Creation
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
-## 枚举示例
+## Enum Example
 ```go
 package enum
 
