@@ -74,28 +74,22 @@ func (m *MakeController) generateFile(_make, file, desc string) {
 	}
 
 	filePath := filepath.ToSlash(file)
-
 	// 去掉/
 	filePath = strings.TrimPrefix(filePath, "/")
-
 	// 去掉.go
 	filePath = strings.TrimSuffix(filePath, ".go")
-
 	// 文件名
 	baseName := path.Base(filePath)
-
 	// 包名
 	dir := path.Dir(filePath)
 
 	packageName := path.Base(dir)
-
 	if packageName == "." {
 		packageName = ""
 	}
 
 	// 路由路径
 	routePath := filePath
-
 	// 去掉控制器目录前缀
 	routePath = strings.TrimPrefix(routePath, "app/controller/")
 

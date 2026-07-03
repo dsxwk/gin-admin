@@ -1,13 +1,20 @@
 package {{.Package}}
 
 import (
+    "gin/app/facade"
+    "gin/app/request"
+    "gin/app/service"
     "gin/common/base"
     "gin/common/errcode"
+    "gin/pkg/serviceprovider/lang"
     "github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin/binding"
+    "github.com/go-viper/mapstructure/v2"
 )
 
 type {{.Name}}Controller struct {
     base.BaseController
+    service service.{{.Name}}Service
 }
 
 // List 列表
@@ -23,8 +30,27 @@ type {{.Name}}Controller struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router {{.RoutePath}} [get]
 func (s *{{.Name}}Controller) List(c *gin.Context) {
-	// todo
-	s.Response.Success(c, errcode.Success())
+	var (
+        ctx = c.Request.Context()
+        req request.{{.Name}}
+    )
+
+    s.service.WithContext(ctx)
+
+    // 绑定参数并验证
+    err := facade.Request[any]().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 
 // Detail 详情
@@ -38,8 +64,29 @@ func (s *{{.Name}}Controller) List(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router {{.RoutePath}}/{id} [get]
 func (s *{{.Name}}Controller) Detail(c *gin.Context) {
-	// todo
-	s.Response.Success(c, errcode.Success())
+	var (
+        ctx = c.Request.Context()
+        req request.{{.Name}}
+    )
+
+    s.service.WithContext(ctx)
+
+    req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+    // 绑定参数并验证
+    err := facade.Request[any]().BindValidate(c, &req, "Detail")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    m, err := s.service.Detail(req.ID)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success().WithData(m))
 }
 
 // Create 创建
@@ -53,8 +100,27 @@ func (s *{{.Name}}Controller) Detail(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router {{.RoutePath}} [post]
 func (s *{{.Name}}Controller) Create(c *gin.Context) {
-	// todo
-	s.Response.Success(c, errcode.Success())
+	var (
+        ctx = c.Request.Context()
+        req request.{{.Name}}
+    )
+
+    s.service.WithContext(ctx)
+
+    // 绑定参数并验证
+    err := facade.Request[any]().BindValidate(c, &req, "Create")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    m, err := s.service.Create(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success().WithData(m))
 }
 
 // Update 更新
@@ -69,8 +135,39 @@ func (s *{{.Name}}Controller) Create(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router {{.RoutePath}}/{id} [put]
 func (s *{{.Name}}Controller) Update(c *gin.Context) {
-	// todo
-	s.Response.Success(c, errcode.Success())
+	var (
+        ctx  = c.Request.Context()
+        data map[string]interface{}
+        req  request.{{.Name}}
+    )
+
+    s.service.WithContext(ctx)
+
+    err := c.ShouldBindBodyWith(&data, binding.JSON)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+    err = mapstructure.Decode(data, &req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    req.ID = facade.Request[int64]().Path(c, "id", 0)
+    err = req.Validate(req, "Update")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    err = s.service.Update(req.ID, data)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success().WithData(data))
 }
 
 // Delete 删除
@@ -84,6 +181,27 @@ func (s *{{.Name}}Controller) Update(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router {{.RoutePath}}/{id} [delete]
 func (s *{{.Name}}Controller) Delete(c *gin.Context) {
-	// todo
-	s.Response.Success(c, errcode.Success())
+	var (
+        ctx = c.Request.Context()
+        req request.{{.Name}}
+    )
+
+    s.service.WithContext(ctx)
+
+    req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+    // 绑定参数并验证
+    err := facade.Request[any]().BindValidate(c, &req, "Delete")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    err = s.service.Delete(req.ID)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success())
 }

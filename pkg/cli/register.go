@@ -207,7 +207,7 @@ func printText() {
 
 // 打印单个命令帮助
 func printCommandHelp(cmd base.Command) {
-	fmt.Println("Gin Cli", getVersion())
+	printVersion()
 	color.Yellow("\nUsage:")
 	fmt.Println("  cli [command] [options]")
 	color.Yellow("\nCommand:")

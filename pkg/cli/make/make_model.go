@@ -144,8 +144,8 @@ func init() {
 	cli.Register(&MakeModel{})
 }
 
-// getColumnInfo 获取完整字段信息
-func getColumnInfo(db *gorm.DB, tableName string) ([]Column, error) {
+// GetColumnInfo 获取完整字段信息
+func GetColumnInfo(db *gorm.DB, tableName string) ([]Column, error) {
 	var columns []Column
 
 	// 使用raw SQL获取详细信息
@@ -212,7 +212,7 @@ func getColumnInfo(db *gorm.DB, tableName string) ([]Column, error) {
 // generateModel 根据表结构生成Model文件
 func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDir, conn string, camel bool) {
 	// 获取完整字段信息
-	columns, err := getColumnInfo(db, table)
+	columns, err := GetColumnInfo(db, table)
 	if err != nil {
 		flag.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
@@ -250,7 +250,13 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	var fieldLines []string
 
 	for _, c := range columns {
-		fieldName := lo.PascalCase(c.Name)
+		var fieldName string
+		if c.Name == "id" {
+			fieldName = "ID"
+		} else {
+			fieldName = lo.PascalCase(c.Name)
+		}
+
 		fieldType := goType(c, im, pkgName)
 
 		var jsonName string

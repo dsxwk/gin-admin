@@ -4,6 +4,7 @@ import (
     {{- if ne .Package "router" }}
     "gin/router"
     {{- end }}
+    "gin/app/controller/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,17 +21,23 @@ func init() {
 
 // RegisterRoutes 注册路由
 func (r *{{.Name}}Router) RegisterRoutes(routerGroup *gin.RouterGroup) {
-	// var (
-    //	 login v1.LoginController
-    // )
-    //
-    // router := routerGroup.Group("api/v1")
-    // {
-    //	 // 登录
-    //	 router.POST("/login", login.Login)
-    //   // ... 其他路由
-    // }
-	// todo Define your route here ...
+	var (
+   	    {{.NameLower}} v1.{{.Name}}Controller
+    )
+
+    router := routerGroup.Group("/api/v1/{{.NameLower}}")
+    {
+        // 列表
+        router.GET("", {{.NameLower}}.List)
+        // 创建
+        router.POST("", {{.NameLower}}.Create)
+        // 更新
+        router.PUT("/:id", {{.NameLower}}.Update)
+        // 删除
+        router.DELETE("/:id", {{.NameLower}}.Delete)
+        // 详情
+        router.GET("/:id", {{.NameLower}}.Detail)
+    }
 }
 
 // IsAuth 是否需要鉴权

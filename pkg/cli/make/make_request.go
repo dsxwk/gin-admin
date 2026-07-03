@@ -344,7 +344,7 @@ func (m *MakeRequest) getGoType(dbType string) string {
 		return "[]byte"
 	// json
 	case t == "json", t == "jsonb":
-		return "string"
+		return "interface{}"
 	}
 
 	return "string"

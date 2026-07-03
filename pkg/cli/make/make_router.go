@@ -37,7 +37,7 @@ func (m *MakeRouter) Help() []base.CommandOption {
 			base.Flag{
 				Short:   "d",
 				Long:    "desc",
-				Default: "router-desc",
+				Default: "",
 			},
 			"路由描述, 如: 用户路由",
 			false,
@@ -73,13 +73,21 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 		return
 	}
 
+	name := strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))
+
+	if desc == "" {
+		desc = lo.PascalCase(name)
+	}
+
 	data := struct {
 		Package     string // 提取的包名
 		Name        string // 模块名称(首字母大写)
+		NameLower   string // 名称(首字母小写)
 		Description string // 如果为空,使用默认值
 	}{
 		Package:     packageName,
-		Name:        lo.PascalCase(strings.TrimSuffix(filepath.Base(file), filepath.Ext(filepath.Base(file)))),
+		Name:        lo.PascalCase(name),
+		NameLower:   lo.CamelCase(name),
 		Description: desc,
 	}
 
