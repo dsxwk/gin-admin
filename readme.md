@@ -22,17 +22,17 @@
 - [Configuration File](#Configuration-File)
   - [Project Configuration](#Project-Configuration)
   - [Hot Update Configuration](#Hot-Update-Configuration)
-- [Middleware](#Middleware)
-  - [Middleware Creation Help](#Middleware-Creation-Help)
-  - [Middleware Creation](#Middleware-Creation)
-  - [Rate Limit Middleware](#Rate-Limit-Middleware)
-- [Route](#Route)
-  - [Route Creation Help](#Route-Creation-Help)
-  - [Route Creation](#Route-Creation)
-  - [Route List](#Route-List)
-- [Controller](#Controller)
-  - [Controller Creation Help](#Controller-Creation-Help)
-  - [Controller Creation](#Controller-Creation)
+- [Command](#Command)
+  - [Get Version](#Get-Version)
+  - [Command Help](#Command-Help)
+  - [Command List](#Command-List)
+  - [Command Creation Help](#Command-Creation-Help)
+  - [Command Creation](#Command-Creation)
+  - [Command Structure](#Command-Structure)
+  - [Command Registration](#Command-Registration)
+  - [Help Options](#Help-Options)
+  - [Execute Command](#Execute-Command)
+  - [Compile And Execute Commands](#Compile-And-Execute-Commands)
 - [Model](#Model)
   - [Model Creation Help](#Model-Creation-Help)
   - [Model Creation](#Model-Creation)
@@ -58,17 +58,17 @@
 - [Service](#Service)
   - [Service Creation Help](#Service-Creation-Help)
   - [Service Creation](#Service-Creation)
-- [Command](#Command)
-  - [Get Version](#Get-Version)
-  - [Command Help](#Command-Help)
-  - [Command List](#Command-List)
-  - [Command Creation Help](#Command-Creation-Help)
-  - [Command Creation](#Command-Creation)
-  - [Command Structure](#Command-Structure)
-  - [Command Registration](#Command-Registration)
-  - [Help Options](#Help-Options)
-  - [Execute Command](#Execute-Command)
-  - [Compile And Execute Commands](#Compile-And-Execute-Commands)
+- [Controller](#Controller)
+  - [Controller Creation Help](#Controller-Creation-Help)
+  - [Controller Creation](#Controller-Creation)
+- [Route](#Route)
+  - [Route Creation Help](#Route-Creation-Help)
+  - [Route Creation](#Route-Creation)
+  - [Route List](#Route-List)
+- [Middleware](#Middleware)
+  - [Middleware Creation Help](#Middleware-Creation-Help)
+  - [Middleware Creation](#Middleware-Creation)
+  - [Rate Limit Middleware](#Rate-Limit-Middleware)
 - [Cache](#Cache)
   - [Global Cache](#Global-Cache)
   - [Redis Cache](#Redis-Cache)
@@ -146,7 +146,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.2.15
+> - Latest Version: v2.3.0
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -322,713 +322,6 @@ Database:              gin
 
 ## Hot Update Configuration
 > `.air.toml` is the default configuration file in Windows environment, and `.air.Linux.toml` is the default configuration file in Linux environment. You can modify it according to the overall needs of the project.
-
-# Middleware
-> `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
-## Middleware Creation Help
-```bash
-$ go run ./cmd/cli.go make:middleware -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:middleware  Middleware Creation
-
-Options:
-  -f, --file  File Path, Expample: auth                        required:true
-  -d, --desc  Description, Expample: Authorization-Middleware  required:false
-```
-
-## Middleware Creation
-```bash
-$ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middleware
-```
-
-## Rate Limit Middleware
-> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow limiting, IP interface flow limiting, and global flow limiting.
-```go
-package router
-
-import (
-    "gin/app/middleware"
-    "github.com/gin-gonic/gin"
-)
-
-var rateLimitMiddleware middleware.RateLimit
-
-// LoadRouters Load Routers
-func LoadRouters(router *gin.Engine) {
-    // Global Rate Limit
-    group := router.Group("", rateLimitMiddleware.Handle())
-    r := group.Group("")
-    {
-        r.GET("/global-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
-        })
-
-        r.GET("/global-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
-        })
-    }
-
-	// Specify interface current limit
-    // User Rate Limit
-    // r How many tokens are generated per second
-    // burst Bucket capacity
-    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
-	r1 := userGroup.Group("")
-	{
-		r1.GET("/test1", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "user test1"))
-		})
-
-		r1.GET("/test2", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "user test2"))
-		})
-    }
-
-    // Specify interface current limit
-    // Ip Rate Limit
-    // r How many tokens are generated per second
-    // burst Bucket capacity
-    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
-	r2 := ipGroup.Group("")
-	{
-		r2.GET("/test1", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
-		})
-
-		r2.GET("/test2", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
-		})
-    }
-}
-```
-
-# Route
-> The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need to be defaulted.
-## Route Creation Help
-```bash
-$ go run ./cmd/cli.go make:router -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:router  Route Creation
-
-Options:
-  -f, --file  File Path, Expample: user                   required:true
-  -d, --desc  Route Description, Expample: User-Routing   required:false
-```
-
-## Route Creation
-```bash
-$ go run ./cmd/cli.go make:router --file=user --desc=User-Routing
-```
-```go
-package router
-
-import (
-	"gin/app/controller/v1"
-	"github.com/gin-gonic/gin"
-)
-
-// UserRouter User-Routing
-type UserRouter struct{}
-
-func init() {
-	Register(&UserRouter{})
-}
-
-// RegisterRoutes Register-Route
-func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
-	var (
-		user v1.UserController
-	)
-
-	router := routerGroup.Group("api/v1")
-	{
-		// List
-		router.GET("/user", user.List)
-		// Create
-		router.POST("/user", user.Create)
-		// Update
-		router.PUT("/user/:id", user.Update)
-		// Delete
-		router.DELETE("/user/:id", user.Delete)
-		// Detail
-		router.GET("/user/:id", user.Detail)
-	}
-}
-
-// IsAuth Do you need authentication
-func (r *UserRouter) IsAuth() bool {
-	return true
-}
-
-```
-
-## Route List
-```bash
-$ go run ./cmd/cli.go route:list
-
----------------------------------------------------------
-Method   Path                                Handler
----------------------------------------------------------
-POST     /api/v1/login                       gin/app/controller/v1.(*LoginController).Login
-GET      /api/v1/user                        gin/app/controller/v1.(*UserController).List
-POST     /api/v1/user                        gin/app/controller/v1.(*UserController).Create
-GET      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Detail
-PUT      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Update
-DELETE   /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Delete
-GET      /ping                               gin/router.LoadRouters
-GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
-HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
-GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
----------------------------------------------------------
-A total of 10 routes
-```
-
-# Controller
-## Controller Creation Help
-```bash
-$ go run ./cmd/cli.go make:controller -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:controller  Controller Creation
-
-Options:
-  -f, --file      File Path, Example: v1/user       required:true
-  -F, --function  Function Name, Example: list      required:false
-  -m, --method    Request Method, Example: get      required:false
-  -r, --router    Route Adress, Example: /user      required:false
-  -d, --desc      Description, Example: Test-List   required:false
-```
-
-## Controller Creation
-```bash
-$ go run ./cmd/cli.go make:controller --file=v1/test --router=/test --method=get --desc=Test-List --function=list
-```
-```go
-package v1
-
-import (
-    "gin/common/base"
-    "gin/common/errcode"
-    "github.com/gin-gonic/gin"
-)
-
-type TestController struct {
-    base.BaseController
-}
-
-// List Test-List
-// @Router /test [get]
-func (s *TestController) List(c *gin.Context) {
-    // Define your function here
-    s.Response.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
-}
-```
-# Model
-## Model Creation Help
-```bash
-$ go run ./cmd/cli.go make:model -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:model  Model Creation
-
-Options:
-  -t, --table       Table Name, Example: user or user,menu     required:true
-  -p, --path        Output Directory, Example: api/user        required:false
-  -c, --camel       Is it a camel hump field, Example: true    required:false
-  -C, --connection  Database Connection                        required:false
-```
-
-## Model Creation
-> Support the creation of multiple model files simultaneously. If multiple model files need to be created, please separate the table name parameters of the descendants with commas, such as: user, menu
-```bash
-$ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
-# go run ./cmd/cli.go make:model --table=user --path=api/user --camel=true --connection=sqlsrv
-```
-```go
-// Code generated by gorm.io/gen. DO NOT EDIT.
-// Code generated by gorm.io/gen. DO NOT EDIT.
-// Code generated by gorm.io/gen. DO NOT EDIT.
-
-package user
-
-import "gin/app/model"
-
-const TableNameUser = "user"
-
-// User User-Table
-type User struct {
-	ID        int64            `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`                       // ID
-	Avatar    string           `gorm:"column:avatar;type:varchar(255);not null;comment:avatar" json:"avatar"`                                    // avatar
-	Username  string           `gorm:"column:username;type:varchar(10);not null;comment:username" json:"username"`                               // username
-	FullName  string           `gorm:"column:full_name;type:varchar(20);not null;comment:fullname" json:"fullName"`                              // fullName
-	Email     string           `gorm:"column:email;type:varchar(50);not null;comment:email" json:"email"`                                        // email
-	Password  string           `gorm:"column:password;type:varchar(255);not null;comment:password" json:"password"`                              // password
-	Nickname  string           `gorm:"column:nickname;type:varchar(50);not null;comment:nickname" json:"nickname"`                               // nickname
-	Gender    int64            `gorm:"column:gender;type:tinyint(1) unsigned;not null;comment:gender 1=male 2=female" json:"gender"`             // gender 1=male 2=female
-	Age       int64            `gorm:"column:age;type:int(10) unsigned;not null;comment:age" json:"age"`                                         // age
-	Status    int64            `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:state 1=enable 2=disable" json:"status"` // state 1=enable 2=disable
-	CreatedAt *model.DateTime  `gorm:"column:created_at;type:datetime;comment:Creation Time" json:"createdAt"`                                   // Creation Time
-	UpdatedAt *model.DateTime  `gorm:"column:updated_at;type:datetime;comment:Update Time" json:"updatedAt"`                                     // Update Time
-	DeletedAt *model.DeletedAt `gorm:"column:deleted_at;type:datetime;comment:Delete Time" json:"deletedAt" swaggerignore:"true"`                // Delete Time
-}
-
-// TableName User's table name
-func (*User) TableName() string {
-	return TableNameUser
-}
-
-// Connection Database connection name
-func (*User) Connection() string {
-  return "mysql"
-}
-```
-
-## ORM Dynamic Filtering
-> By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria based on the list fields. The `__search` type is `map[string]interface{}`, for example:__ search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}.  support or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes: `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where' condition, SQL statements will be automatically constructed based on the condition
-### OR Condition Query
-```http
-GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"username":["=", "test"]},{"age":["=", 18]}]}
-```
-```sql
-SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
-```
-
-### AND Condition Query
-```http
-GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"username":["=", "test"]},{"age":["=", 18]}]}
-```
-```sql
-SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
-```
-
-### JSON Field Query
-```http
-GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"name":""},{"$.meta.icon":["=","ele-Collection"]}]}]}
-```
-```sql
- SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
-```
-
-### Complex Condition Query
-```http
-GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"not exist":{"userRoles.name":"admin"}}]},{"username":"admin"}]}
-```
-```sql
- SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
-```
-
-### Query Example
-```go
-package service
-
-import (
-	"errors"
-	"gin/app/model"
-	"gin/app/request"
-	"gin/common/base"
-	"gin/pkg"
-	"github.com/samber/lo"
-	"time"
-)
-
-type UserService struct {
-	base.BaseService
-}
-
-// List
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
-	var (
-		m  []model.User
-		db = s.DB(&model.User{})
-	)
-
-	pageData.Page = req.Page
-	pageData.PageSize = req.PageSize
-	offset, limit := request.Pagination(req.Page, req.PageSize)
-	// Search
-	db = s.Search(db, req.Search)
-
-	db = db.Preload("UserRoles")
-	err = db.Count(&pageData.Total).Error
-	if err != nil {
-		return pageData, err
-	}
-
-	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-	if err != nil {
-		return pageData, err
-	}
-	pageData.List = m
-
-	return pageData, nil
-}
-```
-
-# Form Validation
-## Validator Creation Help
-```bash
-$ go run ./cmd/cli.go make:request -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:request  Validator Creation
-
-Options:
-  -f, --file  File Path, Example: user                         required:true
-  -d, --desc  Description, Example: user-request-validation    required:false
-  -t, --table       Table, Example: roles                      required:false
-  -c, --camel       Column is use camel                        required:false
-  -C, --connection  Database connection                        required:false
-```
-
-## Validator Creation
-```bash
-$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-request-validation
-```
-```go
-package request
-
-import (
-  "errors"
-  "gin/common/base"
-  "github.com/gookit/validate"
-)
-
-// Roles role-request-validation
-type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
-  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
-  PageListValidate
-}
-
-func (s Roles) Validate(data Roles, scene string) error {
-  v := validate.Struct(data, scene)
-  if !v.Validate(scene) {
-    return errors.New(v.Errors.One())
-  }
-  return nil
-}
-
-// ConfigValidation Configuration-Validation
-// - Define validation scenes
-// - You can also add verification settings
-func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "create": []string{"Name", "Desc", "Status"},
-    "update": []string{"ID", "Name", "Desc", "Status"},
-    "detail": []string{"ID"},
-    "delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
-}
-
-// Messages
-func (s Roles) Messages() map[string]string {
-  return validate.MS{
-    "required":    "Field {field} Required",
-    "int":         "Field {field} Must be an integer",
-    "Page.gt":     "Field {field} Must be greater than 0",
-    "PageSize.gt": "Field {field} Must be greater than 0",
-  }
-}
-
-// Translates
-func (s Roles) Translates() map[string]string {
-  return validate.MS{
-    "ID":       "ID",
-    "Name":     "Role Name",
-    "Desc":     "Role Description",
-    "Status":   "Status 1=Enable 2=Disable",
-    "Page":     "Page",
-    "PageSize": "Page Size",
-  }
-}
-```
-
-### Validator Rules
-> For more rules, please refer to [gookit/validate](https://github.com/gookit/validate)
-```go
-package request
-
-// Roles role-request-validation
-type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
-  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
-  PageListValidate
-}
-```
-
-## Validator Scenes
-```go
-package request
-
-// ConfigValidation Configuration-Validation
-// - Define validation scenes
-// - You can also add verification settings
-func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "create": []string{"Name", "Desc", "Status"},
-    "update": []string{"ID", "Name", "Desc", "Status"},
-    "detail": []string{"ID"},
-    "delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
-}
-```
-
-## Prompt Message
-```go
-package request
-
-// Messages Validator-Error-Message
-func (s Roles) Messages() map[string]string {
-    return validate.MS{
-        "required":                     "Field {field} Required",
-        "int":                          "Field {field} Must be an integer",
-        "PageListValidate.Page.gt":     "Field {field} Must be greater than 0",
-        "PageListValidate.PageSize.gt": "Field {field} Must be greater than 0",
-    }
-}
-```
-
-## Field Translation
-```go
-package request
-
-// Translates Field-Translation
-func (s Roles) Translates() map[string]string {
-	return validate.MS{
-      "ID":       "ID",
-      "Name":     "Role Name",
-      "Desc":     "Role Description",
-      "Status":   "Status 1=Enable 2=Disable",
-      "Page":     "Page",
-      "PageSize": "Page Size",
-	}
-}
-```
-
-## Custom Validation
-### Global Rules
-> Global rules only need to be defined in the entry file `main.go`,applicable to all validators, without the need for repeated definitions.
-```go
-package main
-
-import (
-  "github.com/gookit/validate"
-)
-
-// Register during initialization
-func init() {
-  validate.AddValidator("is_even", func(val any, rule string) bool {
-    num, ok := val.(int)
-    if !ok {
-      return false
-    }
-    return num%2 == 0
-  })
-}
-```
-
-### Local Rules
-```go
-package request
-
-// ValidateIsEven Define local rule methods (naming convention: Validate<rule name>)
-func (s User) ValidateIsEven(val any) bool {
-    num := val.(int)
-    return num%2 == 0
-}
-```
-
-### Temporary Rules
-```go
-package request
-
-// Validate Request-Validation
-func (s User) Validate(data User, scene string) error {
-    v := validate.Struct(data, scene)
-    v.AddValidator("is_even", func(val any, rule string) bool {
-        num, ok := val.(int)
-        if !ok {
-            return false
-        }
-        return num%2 == 0
-    })
-	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
-	}
-
-    return nil
-}
-```
-
-### Validator Usage
-```go
-package request
-
-type User struct {
-    Age int `json:"gender" validate:"required|is_even" label:"age"`
-}
-```
-
-### Used In The Controller
-```go
-package v1
-
-import (
-  "gin/app/facade"
-  "gin/app/model"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
-)
-
-type UserController struct {
-  base.BaseController
-  service service.UserService
-}
-
-// List User-List
-// @Tags User
-// @Summary List
-// @Description User-List
-// @Param token header string true "Authentication Token"
-// @Param page query string true "Page"
-// @Param pageSize query string true "Page Size"
-// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "Login Successful"
-// @Failure 400 {object} errcode.ArgsErrorResponse "Argument Error"
-// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
-// @Router /api/v1/user [get]
-func (s *UserController) List(c *gin.Context) {
-    var (
-        ctx = c.Request.Context()
-        req request.User
-    )
-
-    s.service.WithContext(ctx)
-
-    // Method One
-    /*err := c.ShouldBind(&req)
-    if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-        return
-    }
-
-    // Validator
-    err = req.Validate(req, "List")
-    if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-        return
-    }*/
-    // Method Two
-    // Bind And Validate
-    err := facade.Request[any]().BindValidate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-        return
-    }
-
-    res, err := s.service.List(req)
-    if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
-        return
-    }
-
-    s.Response.Success(c, errcode.Success().WithData(res))
-}
-```
-
-# Service
-## Service Creation Help
-```bash
-$ go run ./cmd/cli.go make:service -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:service  Service Creation
-
-Options:
-  -f, --file      File Path, Example: v1/user      required:true
-  -F, --function  Function Name, Example: list     required:false
-  -d, --desc      Description, Example: list       required:false
-exit status 3
-```
-
-## Service Creation
-```bash
-$ go run ./cmd/cli.go make:service -f=user --function=list --desc="list"
-```
 
 # Command
 ## Get Version
@@ -1281,18 +574,22 @@ func init() {
 ## Command Registration
 > `cli. go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the command you registered is not `command` package, you can add the path to import the package in `./cmd/imports/import.go`.
 ```go
+//go:build cli
+
 package main
 
 import (
-    _ "gin/cmd/imports"
-    "gin/config"
-    "gin/pkg/cli"
+  "gin/app/facade"
+  _ "gin/cmd/import"
+  "gin/pkg/cli"
 )
 
 func main() {
-    _ = config.NewConfig()
-    cli.Execute()
+  _ = facade.Config()
+
+  cli.Execute()
 }
+
 ```
 
 ## Help Options
@@ -1341,6 +638,908 @@ $ go run ./cmd/cli.go demo:command --args=arg1
 ```bash
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=arg1
+```
+
+# Model
+## Model Creation Help
+```bash
+$ go run ./cmd/cli.go make:model -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:model  Model Creation
+
+Options:
+  -t, --table       Table Name, Example: user or user,menu     required:true
+  -p, --path        Output Directory, Example: api/user        required:false
+  -c, --camel       Is it a camel hump field, Example: true    required:false
+  -C, --connection  Database Connection                        required:false
+```
+
+## Model Creation
+> Support the creation of multiple model files simultaneously. If multiple model files need to be created, please separate the table name parameters of the descendants with commas, such as: user, menu
+```bash
+$ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
+# go run ./cmd/cli.go make:model --table=user --path=api/user --camel=true --connection=sqlsrv
+```
+```go
+// Code generated by gorm.io/gen. DO NOT EDIT.
+// Code generated by gorm.io/gen. DO NOT EDIT.
+// Code generated by gorm.io/gen. DO NOT EDIT.
+
+package user
+
+import "gin/app/model"
+
+const TableNameUser = "user"
+
+// User User-Table
+type User struct {
+	ID        int64            `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`                       // ID
+	Avatar    string           `gorm:"column:avatar;type:varchar(255);not null;comment:avatar" json:"avatar"`                                    // avatar
+	Username  string           `gorm:"column:username;type:varchar(10);not null;comment:username" json:"username"`                               // username
+	FullName  string           `gorm:"column:full_name;type:varchar(20);not null;comment:fullname" json:"fullName"`                              // fullName
+	Email     string           `gorm:"column:email;type:varchar(50);not null;comment:email" json:"email"`                                        // email
+	Password  string           `gorm:"column:password;type:varchar(255);not null;comment:password" json:"password"`                              // password
+	Nickname  string           `gorm:"column:nickname;type:varchar(50);not null;comment:nickname" json:"nickname"`                               // nickname
+	Gender    int64            `gorm:"column:gender;type:tinyint(1) unsigned;not null;comment:gender 1=male 2=female" json:"gender"`             // gender 1=male 2=female
+	Age       int64            `gorm:"column:age;type:int(10) unsigned;not null;comment:age" json:"age"`                                         // age
+	Status    int64            `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:state 1=enable 2=disable" json:"status"` // state 1=enable 2=disable
+	CreatedAt *model.DateTime  `gorm:"column:created_at;type:datetime;comment:Creation Time" json:"createdAt"`                                   // Creation Time
+	UpdatedAt *model.DateTime  `gorm:"column:updated_at;type:datetime;comment:Update Time" json:"updatedAt"`                                     // Update Time
+	DeletedAt *model.DeletedAt `gorm:"column:deleted_at;type:datetime;comment:Delete Time" json:"deletedAt" swaggerignore:"true"`                // Delete Time
+}
+
+// TableName User's table name
+func (*User) TableName() string {
+	return TableNameUser
+}
+
+// Connection Database connection name
+func (*User) Connection() string {
+  return "mysql"
+}
+```
+
+## ORM Dynamic Filtering
+> By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria based on the list fields. The `__search` type is `map[string]interface{}`, for example:__ search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}.  support or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes: `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where' condition, SQL statements will be automatically constructed based on the condition
+### OR Condition Query
+```http
+GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"username":["=", "test"]},{"age":["=", 18]}]}
+```
+```sql
+SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
+```
+
+### AND Condition Query
+```http
+GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"username":["=", "test"]},{"age":["=", 18]}]}
+```
+```sql
+SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
+```
+
+### JSON Field Query
+```http
+GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"name":""},{"$.meta.icon":["=","ele-Collection"]}]}]}
+```
+```sql
+ SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
+```
+
+### Complex Condition Query
+```http
+GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"not exist":{"userRoles.name":"admin"}}]},{"username":"admin"}]}
+```
+```sql
+ SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
+```
+
+### Query Example
+```go
+package service
+
+import (
+  "errors"
+  "gin/app/model"
+  "gin/app/request"
+  "gin/common/base"
+  "gin/pkg"
+  "github.com/samber/lo"
+  "time"
+)
+
+type UserService struct {
+  base.BaseService
+}
+
+// List user-list
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+  var (
+    m  []model.User
+    db = s.DB(&model.User{})
+  )
+
+  // Search
+  db = s.Search(db, req.Search)
+
+  err = db.Count(&pageData.Total).Error
+  if err != nil {
+    return pageData, err
+  }
+
+  if req.NotPage {
+    err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
+    if err != nil {
+      return pageData, err
+    }
+    pageData.List = m
+  } else {
+    pageData.Page = req.Page
+    pageData.PageSize = req.PageSize
+    offset, limit := request.Pagination(req.Page, req.PageSize)
+
+    err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+    if err != nil {
+      return pageData, err
+    }
+    pageData.List = m
+  }
+
+  return pageData, nil
+}
+```
+
+# Form Validation
+## Validator Creation Help
+```bash
+$ go run ./cmd/cli.go make:request -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:request  Validator Creation
+
+Options:
+  -f, --file  File Path, Example: role                         required:true
+  -d, --desc  Description, Example: role-request-validation    required:false
+  -t, --table       Table, Example: roles                      required:false
+  -c, --camel       Column is use camel                        required:false
+  -C, --connection  Database connection                        required:false
+```
+
+## Validator Creation
+```bash
+$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-request-validation
+```
+```go
+package request
+
+import (
+  "errors"
+  "gin/common/base"
+  "github.com/gookit/validate"
+)
+
+// Roles role-request-validation
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
+  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+  PageListValidate
+}
+
+func (s Roles) Validate(data Roles, scene string) error {
+  v := validate.Struct(data, scene)
+  if !v.Validate(scene) {
+    return errors.New(v.Errors.One())
+  }
+  return nil
+}
+
+// ConfigValidation Configuration-Validation
+// - Define validation scenes
+// - You can also add verification settings
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "Create": []string{"Name", "Desc", "Status"},
+    "Update": []string{"ID", "Name", "Desc", "Status"},
+    "Detail": []string{"ID"},
+    "Delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
+}
+
+// Messages messages
+func (s Roles) Messages() map[string]string {
+  return validate.MS{
+    "required":    "Field {field} Required",
+    "int":         "Field {field} Must be an integer",
+    "Page.gt":     "Field {field} Must be greater than 0",
+    "PageSize.gt": "Field {field} Must be greater than 0",
+  }
+}
+
+// Translates translate
+func (s Roles) Translates() map[string]string {
+  return validate.MS{
+    "ID":       "ID",
+    "Name":     "Role Name",
+    "Desc":     "Role Description",
+    "Status":   "Status 1=Enable 2=Disable",
+    "Page":     "Page",
+    "PageSize": "Page Size",
+  }
+}
+```
+
+### Validator Rules
+> For more rules, please refer to [gookit/validate](https://github.com/gookit/validate)
+```go
+package request
+
+// Roles role-request-validation
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"Role Name"`
+  Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"Role Description"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+  PageListValidate
+}
+```
+
+## Validator Scenes
+```go
+package request
+
+// ConfigValidation Configuration-Validation
+// - Define validation scenes
+// - You can also add verification settings
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "Create": []string{"Name", "Desc", "Status"},
+    "Update": []string{"ID", "Name", "Desc", "Status"},
+    "Detail": []string{"ID"},
+    "Delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
+}
+```
+
+## Prompt Message
+```go
+package request
+
+// Messages Validator-Error-Message
+func (s Roles) Messages() map[string]string {
+    return validate.MS{
+        "required":                     "Field {field} Required",
+        "int":                          "Field {field} Must be an integer",
+        "PageListValidate.Page.gt":     "Field {field} Must be greater than 0",
+        "PageListValidate.PageSize.gt": "Field {field} Must be greater than 0",
+    }
+}
+```
+
+## Field Translation
+```go
+package request
+
+// Translates Field-Translation
+func (s Roles) Translates() map[string]string {
+	return validate.MS{
+      "ID":       "ID",
+      "Name":     "Role Name",
+      "Desc":     "Role Description",
+      "Status":   "Status 1=Enable 2=Disable",
+      "Page":     "Page",
+      "PageSize": "Page Size",
+	}
+}
+```
+
+## Custom Validation
+### Global Rules
+> Global rules only need to be defined in the entry file `main.go`,applicable to all validators, without the need for repeated definitions.
+```go
+package main
+
+import (
+  "github.com/gookit/validate"
+)
+
+// Register during initialization
+func init() {
+  validate.AddValidator("is_even", func(val any, rule string) bool {
+    num, ok := val.(int)
+    if !ok {
+      return false
+    }
+    return num%2 == 0
+  })
+}
+```
+
+### Local Rules
+```go
+package request
+
+// ValidateIsEven Define local rule methods (naming convention: Validate<rule name>)
+func (s User) ValidateIsEven(val any) bool {
+    num := val.(int)
+    return num%2 == 0
+}
+```
+
+### Temporary Rules
+```go
+package request
+
+// Validate Request-Validation
+func (s User) Validate(data User, scene string) error {
+    v := validate.Struct(data, scene)
+    v.AddValidator("is_even", func(val any, rule string) bool {
+        num, ok := val.(int)
+        if !ok {
+            return false
+        }
+        return num%2 == 0
+    })
+	if !v.Validate(scene) {
+		return errors.New(v.Errors.One())
+	}
+
+    return nil
+}
+```
+
+### Validator Usage
+```go
+package request
+
+type User struct {
+    Age int `json:"gender" validate:"required|is_even" label:"age"`
+}
+```
+
+### Used In The Controller
+```go
+package v1
+
+import (
+  "gin/app/facade"
+  "gin/app/model"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "github.com/gin-gonic/gin"
+)
+
+type UserController struct {
+  base.BaseController
+  service service.UserService
+}
+
+// List User-List
+// @Tags User
+// @Summary List
+// @Description User-List
+// @Param token header string true "Authentication Token"
+// @Param page query string true "Page"
+// @Param pageSize query string true "Page Size"
+// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "Login Successful"
+// @Failure 400 {object} errcode.ArgsErrorResponse "Argument Error"
+// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
+// @Router /api/v1/user [get]
+func (s *UserController) List(c *gin.Context) {
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
+
+    s.service.WithContext(ctx)
+
+    // Method One
+    /*err := c.ShouldBind(&req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    // Validator
+    err = req.Validate(req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }*/
+    // Method Two
+    // Bind And Validate
+    err := facade.Request[any]().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success().WithData(res))
+}
+```
+
+# Service
+## Service Creation Help
+```bash
+$ go run ./cmd/cli.go make:service -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:service  Service Creation
+
+Options:
+  -f, --file        File Path, Example: v1/user                 required:true
+  -t, --table       Table Name, Used to generate model fields   required:false
+  -c, --connection  Database Connection                         required:false
+```
+
+## Service Creation
+```bash
+$ go run ./cmd/cli.go make:service -f=user --table=user -c=mysql
+```
+
+# Controller
+## Controller Creation Help
+```bash
+$ go run ./cmd/cli.go make:controller -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:controller  Controller Creation
+
+Options:
+  -f, --file      File Path,   Example: v1/user       required:true
+  -d, --desc      Description, Example: user          required:false
+```
+
+## Controller Creation
+```bash
+$ go run ./cmd/cli.go make:controller --file=v1/user --desc=user
+```
+```go
+package v1
+
+import (
+  "gin/app/facade"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "gin/pkg/serviceprovider/lang"
+  "github.com/gin-gonic/gin"
+  "github.com/gin-gonic/gin/binding"
+  "github.com/go-viper/mapstructure/v2"
+)
+
+type UserController struct {
+  base.BaseController
+  service service.UserService
+}
+
+// List 列表
+// @Tags 用户管理
+// @Summary 列表
+// @Description 用户列表
+// @Param token header string true "认证Token"
+// @Param page query string true "页码"
+// @Param pageSize query string true "分页大小"
+// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user [get]
+func (s *UserController) List(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "List")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  res, err := s.service.List(req)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(res))
+}
+
+// Create 创建
+// @Tags 用户管理
+// @Summary 创建
+// @Description 用户创建
+// @Param token header string true "认证Token"
+// @Param data body request.UserCreate true "创建参数"
+// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user [post]
+func (s *UserController) Create(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Create")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  user, err := s.service.Create(req)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(user))
+}
+
+// Update 更新
+// @Tags 用户管理
+// @Summary 更新
+// @Description 用户更新
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Param data body request.UserUpdate true "更新参数"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id} [put]
+func (s *UserController) Update(c *gin.Context) {
+  var (
+    ctx  = c.Request.Context()
+    data map[string]interface{}
+    req  request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  err := c.ShouldBindBodyWith(&data, binding.JSON)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  err = mapstructure.Decode(data, &req)
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  req.ID = facade.Request[int64]().Path(c, "id", 0)
+  err = req.Validate(req, "Update")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  err = s.service.Update(req.ID, data)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(data))
+}
+
+// Detail 详情
+// @Tags 用户管理
+// @Summary 详情
+// @Description 用户详情
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id} [get]
+func (s *UserController) Detail(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Detail")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  m, err := s.service.Detail(req.ID)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(m))
+}
+
+// Delete 删除
+// @Tags 用户管理
+// @Summary 删除
+// @Description 用户删除
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id} [delete]
+func (s *UserController) Delete(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Delete")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  err = s.service.Delete(req.ID)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success())
+}
+
+```
+
+# Route
+> The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need to be defaulted.
+## Route Creation Help
+```bash
+$ go run ./cmd/cli.go make:router -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:router  Route Creation
+
+Options:
+  -f, --file  File Path, Expample: user                   required:true
+  -d, --desc  Route Description, Expample: User-Routing   required:false
+```
+
+## Route Creation
+```bash
+$ go run ./cmd/cli.go make:router --file=user --desc=User-Routing
+```
+```go
+package router
+
+import (
+  "gin/app/controller/v1"
+  "github.com/gin-gonic/gin"
+)
+
+// UserRouter User Router
+type UserRouter struct{}
+
+func init() {
+  Register(&UserRouter{})
+}
+
+// RegisterRoutes Register Routes
+func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+  var (
+    user v1.UserController
+  )
+
+  router := routerGroup.Group("api/v1")
+  {
+    // List
+    router.GET("/user", user.List)
+    // Create
+    router.POST("/user", user.Create)
+    // Update
+    router.PUT("/user/:id", user.Update)
+    // Delete
+    router.DELETE("/user/:id", user.Delete)
+    // Detail
+    router.GET("/user/:id", user.Detail)
+  }
+}
+
+// IsAuth Is need auth
+func (r *UserRouter) IsAuth() bool {
+  return true
+}
+
+```
+
+## Route List
+```bash
+$ go run ./cmd/cli.go route:list
+
+---------------------------------------------------------
+Method   Path                                Handler
+---------------------------------------------------------
+POST     /api/v1/login                       gin/app/controller/v1.(*LoginController).Login
+GET      /api/v1/user                        gin/app/controller/v1.(*UserController).List
+POST     /api/v1/user                        gin/app/controller/v1.(*UserController).Create
+GET      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Detail
+PUT      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Update
+DELETE   /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Delete
+GET      /ping                               gin/router.LoadRouters
+GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
+HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
+GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
+---------------------------------------------------------
+A total of 10 routes
+```
+
+# Middleware
+> `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
+## Middleware Creation Help
+```bash
+$ go run ./cmd/cli.go make:middleware -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:middleware  Middleware Creation
+
+Options:
+  -f, --file  File Path, Expample: auth                        required:true
+  -d, --desc  Description, Expample: Authorization-Middleware  required:false
+```
+
+## Middleware Creation
+```bash
+$ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middleware
+```
+
+## Rate Limit Middleware
+> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow limiting, IP interface flow limiting, and global flow limiting.
+```go
+package router
+
+import (
+    "gin/app/middleware"
+    "github.com/gin-gonic/gin"
+)
+
+var rateLimitMiddleware middleware.RateLimit
+
+// LoadRouters Load Routers
+func LoadRouters(router *gin.Engine) {
+    // Global Rate Limit
+    group := router.Group("", rateLimitMiddleware.Handle())
+    r := group.Group("")
+    {
+        r.GET("/global-test1", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
+        })
+
+        r.GET("/global-test2", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
+        })
+    }
+
+	// Specify interface current limit
+    // User Rate Limit
+    // r How many tokens are generated per second
+    // burst Bucket capacity
+    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
+	r1 := userGroup.Group("")
+	{
+		r1.GET("/test1", func(c *gin.Context) {
+			response.Response{}.Success(c, errcode.NewError(0, "user test1"))
+		})
+
+		r1.GET("/test2", func(c *gin.Context) {
+			response.Response{}.Success(c, errcode.NewError(0, "user test2"))
+		})
+    }
+
+    // Specify interface current limit
+    // Ip Rate Limit
+    // r How many tokens are generated per second
+    // burst Bucket capacity
+    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
+	r2 := ipGroup.Group("")
+	{
+		r2.GET("/test1", func(c *gin.Context) {
+			response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
+		})
+
+		r2.GET("/test2", func(c *gin.Context) {
+			response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
+		})
+    }
+}
 ```
 
 # Cache

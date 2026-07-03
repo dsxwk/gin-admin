@@ -22,17 +22,17 @@
 - [配置文件](#配置文件)
   - [项目配置](#项目配置)
   - [热更新配置](#热更新配置)
-- [中间件](#中间件)
-  - [中间件创建帮助](#中间件创建帮助)
-  - [中间件创建](#中间件创建)
-  - [限流中间件](#限流中间件)
-- [路由](#路由)
-  - [路由创建帮助](#路由创建帮助)
-  - [路由创建](#路由创建)
-  - [路由列表](#路由列表)
-- [控制器](#控制器)
-  - [控制器创建帮助](#控制器创建帮助)
-  - [控制器创建](#控制器创建)
+- [命令行](#命令行)
+  - [获取版本](#获取版本)
+  - [命令帮助](#命令帮助)
+  - [命令列表](#命令列表)
+  - [命令创建帮助](#命令创建帮助)
+  - [命令创建](#命令创建)
+  - [命令结构](#命令结构)
+  - [命令注册](#命令注册)
+  - [帮助选项](#帮助选项)
+  - [执行命令](#执行命令)
+  - [编译执行](#编译执行)
 - [模型](#模型)
   - [模型创建帮助](#模型创建帮助)
   - [模型创建](#模型创建)
@@ -58,17 +58,17 @@
 - [服务](#服务)
   - [服务创建帮助](#服务创建帮助)
   - [服务创建](#服务创建)
-- [命令行](#命令行)
-  - [获取版本](#获取版本)
-  - [命令帮助](#命令帮助)
-  - [命令列表](#命令列表)
-  - [命令创建帮助](#命令创建帮助)
-  - [命令创建](#命令创建)
-  - [命令结构](#命令结构)
-  - [命令注册](#命令注册)
-  - [帮助选项](#帮助选项)
-  - [执行命令](#执行命令)
-  - [编译执行](#编译执行)
+- [控制器](#控制器)
+  - [控制器创建帮助](#控制器创建帮助)
+  - [控制器创建](#控制器创建)
+- [路由](#路由)
+  - [路由创建帮助](#路由创建帮助)
+  - [路由创建](#路由创建)
+  - [路由列表](#路由列表)
+- [中间件](#中间件)
+  - [中间件创建帮助](#中间件创建帮助)
+  - [中间件创建](#中间件创建)
+  - [限流中间件](#限流中间件)
 - [缓存](#缓存)
   - [全局缓存](#全局缓存)
   - [Redis缓存](#Redis缓存)
@@ -146,7 +146,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本: v2.2.15
+> - 最新版本: v2.3.0
 > - [版本更新详细记录](version_history_zh.md)
 
 # 安装说明
@@ -324,715 +324,6 @@ watching app\controller
 
 ## 热更新配置
 > `.air.toml`为Windows环境下默认配置文件, `.air.linux.toml`为Linux环境下默认配置文件。可自行根据项目整体需要自行修改。
-
-# 中间件
-> `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
-## 中间件创建帮助
-```bash
-$ go run ./cmd/cli.go make:middleware -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:middleware  中间件创建
-
-Options:
-  -f, --file  文件路径, 如: auth    required:true
-  -d, --desc  描述, 如: 权限中间件  required:false
-```
-
-## 中间件创建
-```bash
-$ go run ./cmd/cli.go make:middleware --file=auth --desc=授权中间件
-```
-
-## 限流中间件
-> `middleware/rate_limit.go`文件中定义了全局限流中间件, 支持全局用户接口限流、ip接口限流以及全局限流。
-```go
-package router
-
-import (
-    "gin/app/middleware"
-    "github.com/gin-gonic/gin"
-)
-
-var rateLimitMiddleware middleware.RateLimit
-
-// LoadRouters 加载路由
-func LoadRouters(router *gin.Engine) {
-    // 全局限流
-    group := router.Group("", rateLimitMiddleware.Handle())
-	r := group.Group("") 
-	{
-        r.GET("/global-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
-        })
-
-        r.GET("/global-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
-        })
-    }
-
-	// 指定接口限流
-    // 用户限流
-    // r 每秒产生多少token
-    // burst 桶容量
-    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
-	r1 := userGroup.Group("")
-	{
-		r1.GET("/user-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "user test1"))
-        })
-
-        r1.GET("/user-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "user test2"))
-        })
-    }
-
-    // 指定接口限流
-    // ip限流
-    // r 每秒产生多少token
-    // burst 桶容量
-    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
-	r2 := ipGroup.Group("")
-	{
-		r2.GET("/ip-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
-        })
-
-        r2.GET("/ip-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
-		})
-    }
-}
-```
-
-# 路由
-> `router/root.go` 文件中定义了全局路由规则可自行修改,  一般情况只需要默认即可。
-## 路由创建帮助
-```bash
-$ go run ./cmd/cli.go make:router -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:router  路由创建
-
-Options:
-  -f, --file  文件路径, 如: user      required:true
-  -d, --desc  路由描述, 如: 用户路由   required:false
-```
-
-## 路由创建
-```bash
-$ go run ./cmd/cli.go make:router --file=user --desc=用户路由
-```
-```go
-package router
-
-import (
-	"gin/app/controller/v1"
-	"github.com/gin-gonic/gin"
-)
-
-// UserRouter 用户路由
-type UserRouter struct{}
-
-func init() {
-	Register(&UserRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
-	var (
-		user v1.UserController
-	)
-
-	router := routerGroup.Group("api/v1")
-	{
-		// 列表
-		router.GET("/user", user.List)
-		// 创建
-		router.POST("/user", user.Create)
-		// 更新
-		router.PUT("/user/:id", user.Update)
-		// 删除
-		router.DELETE("/user/:id", user.Delete)
-		// 详情
-		router.GET("/user/:id", user.Detail)
-	}
-}
-
-// IsAuth 是否需要鉴权
-func (r *UserRouter) IsAuth() bool {
-	return true
-}
-
-```
-
-## 路由列表
-```bash
-$ go run ./cmd/cli.go route:list
-
----------------------------------------------------------
-Method   Path                                Handler
----------------------------------------------------------
-POST     /api/v1/login                       gin/app/controller/v1.(*LoginController).Login
-GET      /api/v1/user                        gin/app/controller/v1.(*UserController).List
-POST     /api/v1/user                        gin/app/controller/v1.(*UserController).Create
-GET      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Detail
-PUT      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Update
-DELETE   /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Delete
-GET      /ping                               gin/router.LoadRouters
-GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
-HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
-GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
----------------------------------------------------------
-总计 10 条路由
-```
-
-# 控制器
-## 控制器创建帮助
-```bash
-$ go run ./cmd/cli.go make:controller -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:controller  控制器创建
-
-Options:
-  -f, --file      文件路径, 如: v1/user  required:true
-  -F, --function  方法名称, 如: list     required:false
-  -m, --method    请求方式, 如: get      required:false
-```
-
-## 控制器创建
-```bash
-$ go run ./cmd/cli.go make:controller --file=v1/test --router=/test --method=get --desc=列表 --function=list
-```
-```go
-package v1
-
-import (
-    "gin/common/base"
-    "gin/common/errcode"
-    "github.com/gin-gonic/gin"
-)
-
-type TestController struct {
-    base.BaseController
-}
-
-// List 列表
-// @Router /test [get]
-func (s *TestController) List(c *gin.Context) {
-    // Define your function here
-    s.Response.Success(c, errcode.Success().WithMsg("Test Msg").WithData([]string{}))
-}
-```
-
-# 模型
-## 模型创建帮助
-```bash
-$ go run ./cmd/cli.go make:model -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:model  模型创建
-
-Options:
-  -t, --table       表名, 如: user 或 user,menu  required:true
-  -p, --path        输出目录, 如: api/user       required:false
-  -c, --camel       json字段是否使用驼峰          required:false
-  -C, --connection  数据库连接                   required:false
-```
-
-## 模型创建
-> 支持创建同时多个模型文件, 如需创建多个模型文件, 传人的表名参数请使用逗号分隔, 如: user,menu
-```bash
-$ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
-# go run ./cmd/cli.go make:model-old --table=user --path=api/user --camel=true --connection=sqlsrv
-```
-```go
-// Code generated by gorm.io/gen. DO NOT EDIT.
-// Code generated by gorm.io/gen. DO NOT EDIT.
-// Code generated by gorm.io/gen. DO NOT EDIT.
-
-package user
-
-import "gin/app/model"
-
-const TableNameUser = "user"
-
-// User 用户表
-type User struct {
-	ID        int64            `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`           // ID
-	Avatar    string           `gorm:"column:avatar;type:varchar(255);not null;comment:头像" json:"avatar"`                            // 头像
-	Username  string           `gorm:"column:username;type:varchar(10);not null;comment:用户名" json:"username"`                        // 用户名
-	FullName  string           `gorm:"column:full_name;type:varchar(20);not null;comment:姓名" json:"fullName"`                        // 姓名
-	Email     string           `gorm:"column:email;type:varchar(50);not null;comment:邮箱" json:"email"`                               // 邮箱
-	Password  string           `gorm:"column:password;type:varchar(255);not null;comment:密码" json:"password"`                        // 密码
-	Nickname  string           `gorm:"column:nickname;type:varchar(50);not null;comment:昵称" json:"nickname"`                         // 昵称
-	Gender    int64            `gorm:"column:gender;type:tinyint(1) unsigned;not null;comment:性别 1=男 2=女" json:"gender"`             // 性别 1=男 2=女
-	Age       int64            `gorm:"column:age;type:int(10) unsigned;not null;comment:年龄" json:"age"`                              // 年龄
-	Status    int64            `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"` // 状态 1=启用 2=停用
-	CreatedAt *model.DateTime  `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                // 创建时间
-	UpdatedAt *model.DateTime  `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                // 更新时间
-	DeletedAt *model.DeletedAt `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`                                // 删除时间
-}
-
-// TableName User's table name
-func (*User) TableName() string {
-	return TableNameUser
-}
-
-// Connection 数据库连接名称
-func (*User) Connection() string {
-  return "mysql"
-}
-```
-
-## ORM动态筛选
-> 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]interface{}` 如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username":"admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
-### OR条件查询
-```http
-GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"username":["=", "test"]},{"age":["=", 18]}]}
-```
-```sql
-SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
-```
-
-### AND条件查询
-```http
-GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"username":["=", "test"]},{"age":["=", 18]}]}
-```
-```sql
-SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
-```
-
-### json字段查询
-```http
-GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"name":""},{"$.meta.icon":["=","ele-Collection"]}]}]}
-```
-```sql
- SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
-```
-
-### 复杂查询
-```http
-GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"not exist":{"userRoles.name":"admin"}}]},{"username":"admin"}]}
-```
-```sql
- SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
-```
-
-### 查询示例
-```go
-package service
-
-import (
-	"errors"
-	"gin/app/model"
-	"gin/app/request"
-	"gin/common/base"
-	"gin/pkg"
-	"github.com/samber/lo"
-	"time"
-)
-
-type UserService struct {
-	base.BaseService
-}
-
-// List 列表
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
-	var (
-		m  []model.User
-		db = s.DB(&model.User{})
-	)
-
-	pageData.Page = req.Page
-	pageData.PageSize = req.PageSize
-	offset, limit := request.Pagination(req.Page, req.PageSize)
-	// 搜索
-	db = s.Search(db, req.Search)
-
-	db = db.Preload("UserRoles")
-	err = db.Count(&pageData.Total).Error
-	if err != nil {
-		return pageData, err
-	}
-
-	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-	if err != nil {
-		return pageData, err
-	}
-	pageData.List = m
-
-	return pageData, nil
-}
-```
-
-# 表单验证
-## 验证创建帮助
-```bash
-$ go run ./cmd/cli.go make:request -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:request  验证请求创建
-
-Options:
-  -f, --file        文件路径, 如: user  required:true
-  -t, --table       表名, 如: roles    required:false
-  -d, --desc        描述               required:false
-  -c, --camel       字段是否使用驼峰     required:false
-  -C, --connection  数据库连接          required:false
-```
-
-## 验证创建
-```bash
-$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=用户请求验证
-```
-```go
-package request
-
-import (
-  "errors"
-  "gin/common/base"
-  "github.com/gookit/validate"
-)
-
-// Roles 角色请求验证
-type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|max:255" label:"角色名称"`
-  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"角色描述"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-  PageListValidate
-}
-
-// Validate 请求验证
-func (s Roles) Validate(data Roles, scene string) error {
-  v := validate.Struct(data, scene)
-  if !v.Validate(scene) {
-    return errors.New(v.Errors.One())
-  }
-  return nil
-}
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "create": []string{"Name", "Desc", "Status"},
-    "update": []string{"ID", "Name", "Desc", "Status"},
-    "detail": []string{"ID"},
-    "delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
-}
-
-// Messages 验证器错误消息
-func (s Roles) Messages() map[string]string {
-  return validate.MS{
-    "required":    "字段 {field} 必填",
-    "int":         "字段 {field} 必须为整数",
-    "gt":          "字段 {field} 必须大于 0",
-    "max":         "字段 {field} 长度不能超过 255",
-    "Page.gt":     "页码必须大于 0",
-    "PageSize.gt": "每页数量必须大于 0",
-  }
-}
-
-// Translates 字段翻译
-func (s Roles) Translates() map[string]string {
-  return validate.MS{
-    "ID":       "ID",
-    "Name":     "角色名称",
-    "Desc":     "角色描述",
-    "Status":   "状态 1=启用 2=停用",
-    "Page":     "页码",
-    "PageSize": "每页数量",
-  }
-}
-```
-
-## 验证规则
-> 更多规则请查看 [gookit/validate](https://github.com/gookit/validate)
-```go
-package request
-
-// Roles 角色请求验证
-type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|max:255" label:"角色名称"`
-  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"角色描述"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-  PageListValidate
-}
-```
-
-## 验证场景
-```go
-package request
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "list":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "create": []string{"Name", "Desc", "Status"},
-    "update": []string{"ID", "Name", "Desc", "Status"},
-    "detail": []string{"ID"},
-    "delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
-}
-```
-
-## 提示信息
-```go
-package request
-
-// Messages 验证器错误消息
-func (s Roles) Messages() map[string]string {
-	return validate.MS{
-        "required":                     "字段 {field} 必填",
-        "int":                          "字段 {field} 必须为整数",
-        "PageListValidate.Page.gt":     "字段 {field} 需大于 0",
-        "PageListValidate.PageSize.gt": "字段 {field} 需大于 0",
-	}
-}
-```
-
-## 字段翻译
-```go
-package request
-
-// Translates 字段翻译
-func (s Roles) Translates() map[string]string {
-  return validate.MS{
-    "ID":       "ID",
-    "Name":     "角色名称",
-    "Desc":     "角色描述",
-    "Status":   "状态 1=启用 2=停用",
-    "Page":     "页码",
-    "PageSize": "每页数量",
-  }
-}
-```
-
-## 自定义验证
-### 全局规则
-> 全局规则只需要在入口文件`main.go`中定义, 适用于所有验证器, 无需重复定义。
-```go
-package main
-
-import (
-	"github.com/gookit/validate"
-)
-
-// 初始化时注册
-func init() {
-	validate.AddValidator("is_even", func(val any, rule string) bool {
-		num, ok := val.(int)
-		if !ok {
-			return false
-		}
-		return num%2 == 0
-	})
-}
-```
-
-### 局部规则
-```go
-package request
-
-// ValidateIsEven 定义局部规则方法(命名规则：Validate<规则名>)
-func (s User) ValidateIsEven(val any) bool {
-	num := val.(int)
-	return num%2 == 0
-}
-```
-
-### 临时规则
-```go
-package request
-
-// Validate 请求验证
-func (s User) Validate(data User, scene string) error {
-	v := validate.Struct(data, scene)
-	v.AddValidator("is_even", func(val any, rule string) bool {
-        num, ok := val.(int)
-        if !ok {
-            return false
-        }
-        return num%2 == 0
-    })
-	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
-	}
-
-	return nil
-}
-```
-
-### 验证使用
-```go
-package request
-
-type User struct {
-    Age int `json:"gender" validate:"required|is_even" label:"年龄"`
-}
-```
-
-### 在控制器中使用
-```go
-package v1
-
-import (
-  "gin/app/facade"
-  "gin/app/model"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
-)
-
-type UserController struct {
-  base.BaseController
-  service service.UserService
-}
-
-// List 列表
-// @Tags 用户管理
-// @Summary 列表
-// @Description 用户列表
-// @Param token header string true "认证Token"
-// @Param page query string true "页码"
-// @Param pageSize query string true "分页大小"
-// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "登录成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
-// @Router /api/v1/user [get]
-func (s *UserController) List(c *gin.Context) {
-    var (
-        ctx = c.Request.Context()
-        req request.User
-    )
-
-    s.service.WithContext(ctx)
-
-    // 方式1
-    /*err := c.ShouldBind(&req)
-    if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
-        return
-    }
-
-    // 验证
-    err = req.Validate(req, "List")
-    if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-        return
-    }*/
-    // 方式2
-    // 绑定参数并验证
-    err := facade.Request[any]().BindValidate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-        return
-    }
-
-    res, err := s.service.List(req)
-    if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
-        return
-    }
-
-    s.Response.Success(c, errcode.Success().WithData(res))
-}
-```
-
-# 服务
-## 服务创建帮助
-```bash
-$ go run ./cmd/cli.go make:service -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v2.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:service  服务创建
-
-Options:
-  -f, --file      文件路径, 如: v1/user  required:true
-  -F, --function  方法名称, 如: list     required:false
-  -d, --desc      描述, 如: 列表         required:false
-exit status 3
-```
-
-## 服务创建
-```bash
-$ go run ./cmd/cli.go make:service -f=user --function=list --desc="列表"
-```
 
 # 命令行
 ## 获取版本
@@ -1285,18 +576,22 @@ func init() {
 ## 命令注册
 > `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在 `./cmd/imports/import.go` 中添加导入包的路径。
 ```go
+//go:build cli
+
 package main
 
 import (
-    _ "gin/cmd/imports"
-    "gin/config"
-    "gin/pkg/cli"
+  "gin/app/facade"
+  _ "gin/cmd/import"
+  "gin/pkg/cli"
 )
 
 func main() {
-    _ = config.NewConfig()
-	cli.Execute()
+  _ = facade.Config()
+
+  cli.Execute()
 }
+
 ```
 
 ## 帮助选项
@@ -1345,6 +640,928 @@ $ go run ./cmd/cli.go demo:command --args=arg1
 ```bash
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=arg1
+```
+
+# 模型
+## 模型创建帮助
+```bash
+$ go run ./cmd/cli.go make:model -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:model  模型创建
+
+Options:
+  -t, --table       表名, 如: user 或 user,menu  required:true
+  -p, --path        输出目录, 如: api/user       required:false
+  -c, --camel       json字段是否使用驼峰          required:false
+  -C, --connection  数据库连接                   required:false
+```
+
+## 模型创建
+> 支持创建同时多个模型文件, 如需创建多个模型文件, 传人的表名参数请使用逗号分隔, 如: user,menu
+```bash
+$ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
+# go run ./cmd/cli.go make:model-old --table=user --path=api/user --camel=true --connection=sqlsrv
+```
+```go
+// Code generated by gorm.io/gen. DO NOT EDIT.
+// Code generated by gorm.io/gen. DO NOT EDIT.
+// Code generated by gorm.io/gen. DO NOT EDIT.
+
+package user
+
+import "gin/app/model"
+
+const TableNameUser = "user"
+
+// User 用户表
+type User struct {
+	ID        int64            `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`           // ID
+	Avatar    string           `gorm:"column:avatar;type:varchar(255);not null;comment:头像" json:"avatar"`                            // 头像
+	Username  string           `gorm:"column:username;type:varchar(10);not null;comment:用户名" json:"username"`                        // 用户名
+	FullName  string           `gorm:"column:full_name;type:varchar(20);not null;comment:姓名" json:"fullName"`                        // 姓名
+	Email     string           `gorm:"column:email;type:varchar(50);not null;comment:邮箱" json:"email"`                               // 邮箱
+	Password  string           `gorm:"column:password;type:varchar(255);not null;comment:密码" json:"password"`                        // 密码
+	Nickname  string           `gorm:"column:nickname;type:varchar(50);not null;comment:昵称" json:"nickname"`                         // 昵称
+	Gender    int64            `gorm:"column:gender;type:tinyint(1) unsigned;not null;comment:性别 1=男 2=女" json:"gender"`             // 性别 1=男 2=女
+	Age       int64            `gorm:"column:age;type:int(10) unsigned;not null;comment:年龄" json:"age"`                              // 年龄
+	Status    int64            `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"` // 状态 1=启用 2=停用
+	CreatedAt *model.DateTime  `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                // 创建时间
+	UpdatedAt *model.DateTime  `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                // 更新时间
+	DeletedAt *model.DeletedAt `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`                                // 删除时间
+}
+
+// TableName User's table name
+func (*User) TableName() string {
+	return TableNameUser
+}
+
+// Connection 数据库连接名称
+func (*User) Connection() string {
+  return "mysql"
+}
+```
+
+## ORM动态筛选
+> 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]interface{}` 如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username":"admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
+### OR条件查询
+```http
+GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"username":["=", "test"]},{"age":["=", 18]}]}
+```
+```sql
+SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
+```
+
+### AND条件查询
+```http
+GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"username":["=", "test"]},{"age":["=", 18]}]}
+```
+```sql
+SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
+```
+
+### json字段查询
+```http
+GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"name":""},{"$.meta.icon":["=","ele-Collection"]}]}]}
+```
+```sql
+ SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
+```
+
+### 复杂查询
+```http
+GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"not exist":{"userRoles.name":"admin"}}]},{"username":"admin"}]}
+```
+```sql
+ SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
+```
+
+### 查询示例
+```go
+package service
+
+import (
+    "errors"
+    "gin/app/model"
+    "gin/app/request"
+    "gin/common/base"
+    "gin/pkg"
+    "github.com/samber/lo"
+    "time"
+)
+
+type UserService struct {
+	base.BaseService
+}
+
+// List 列表
+func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+    var (
+        m  []model.User
+        db = s.DB(&model.User{})
+    )
+  
+    // 搜索
+    db = s.Search(db, req.Search)
+  
+    err = db.Count(&pageData.Total).Error
+    if err != nil {
+        return pageData, err
+    }
+  
+    if req.NotPage {
+        err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
+        if err != nil {
+            return pageData, err
+        }
+        pageData.List = m
+    } else {
+      pageData.Page = req.Page
+      pageData.PageSize = req.PageSize
+      offset, limit := request.Pagination(req.Page, req.PageSize)
+  
+      err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+      if err != nil {
+          return pageData, err
+      }
+      pageData.List = m
+    }
+  
+    return pageData, nil
+}
+```
+
+# 表单验证
+## 验证创建帮助
+```bash
+$ go run ./cmd/cli.go make:request -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:request  验证请求创建
+
+Options:
+  -f, --file        文件路径, 如: role  required:true
+  -t, --table       表名, 如: roles    required:false
+  -d, --desc        描述               required:false
+  -c, --camel       字段是否使用驼峰     required:false
+  -C, --connection  数据库连接          required:false
+```
+
+## 验证创建
+```bash
+$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=角色请求验证
+```
+```go
+package request
+
+import (
+  "errors"
+  "gin/common/base"
+  "github.com/gookit/validate"
+)
+
+// Roles 请求验证
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+  Desc   string `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+  PageListValidate
+}
+
+// RoleCreate 角色创建验证
+type RoleCreate struct {
+  Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+  Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
+  Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+}
+
+// RoleUpdate 角色更新验证
+type RoleUpdate struct {
+  ID     int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+  Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
+  Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+}
+
+// Validate 请求验证
+func (s Roles) Validate(data Roles, scene string) error {
+  v := validate.Struct(data, scene)
+  if !v.Validate(scene) {
+    return errors.New(v.Errors.One())
+  }
+  return nil
+}
+
+// ConfigValidation 配置验证
+// - 定义验证场景
+// - 也可以添加验证设置
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "Create": []string{"Name", "Desc", "Status"},
+    "Update": []string{"ID", "Name", "Desc", "Status"},
+    "Detail": []string{"ID"},
+    "Delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
+}
+
+// Messages 验证器错误消息
+func (s Roles) Messages() map[string]string {
+  return validate.MS{
+    "required":                     "字段 {field} 必填",
+    "int":                          "字段 {field} 必须为整数",
+    "gt":                           "字段 {field} 必须大于 0",
+    "minLen":                       "{field} 长度不能少于 {min} 个字符",
+    "maxLen":                       "{field} 长度不能超过 {max} 个字符",
+    "PageListValidate.Page.gt":     "页码必须大于 0",
+    "PageListValidate.PageSize.gt": "每页数量必须大于 0",
+  }
+}
+
+// Translates 字段翻译
+func (s Roles) Translates() map[string]string {
+  return validate.MS{
+    "ID":                        "ID",
+    "Name":                      "角色名称",
+    "Desc":                      "角色描述",
+    "Status":                    "状态 1=启用 2=停用",
+    "PageListValidate.Page":     "页码",
+    "PageListValidate.PageSize": "每页数量",
+  }
+}
+
+```
+
+## 验证规则
+> 更多规则请查看 [gookit/validate](https://github.com/gookit/validate)
+```go
+package request
+
+// Roles 角色请求验证
+type Roles struct {
+  base.BaseRequest
+  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+  Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"角色名称"`
+  Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"角色描述"`
+  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+  PageListValidate
+}
+```
+
+## 验证场景
+```go
+package request
+
+// ConfigValidation 配置验证
+// - 定义验证场景
+// - 也可以添加验证设置
+func (s Roles) ConfigValidation(v *validate.Validation) {
+  scenes := validate.SValues{
+    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+    "Create": []string{"Name", "Desc", "Status"},
+    "Update": []string{"ID", "Name", "Desc", "Status"},
+    "Detail": []string{"ID"},
+    "Delete": []string{"ID"},
+  }
+  v.WithScenes(scenes)
+}
+```
+
+## 提示信息
+```go
+package request
+
+// Messages 验证器错误消息
+func (s Roles) Messages() map[string]string {
+	return validate.MS{
+        "required":                     "字段 {field} 必填",
+        "int":                          "字段 {field} 必须为整数",
+        "PageListValidate.Page.gt":     "字段 {field} 需大于 0",
+        "PageListValidate.PageSize.gt": "字段 {field} 需大于 0",
+	}
+}
+```
+
+## 字段翻译
+```go
+package request
+
+// Translates 字段翻译
+func (s Roles) Translates() map[string]string {
+  return validate.MS{
+    "ID":       "ID",
+    "Name":     "角色名称",
+    "Desc":     "角色描述",
+    "Status":   "状态 1=启用 2=停用",
+    "Page":     "页码",
+    "PageSize": "每页数量",
+  }
+}
+```
+
+## 自定义验证
+### 全局规则
+> 全局规则只需要在入口文件`main.go`中定义, 适用于所有验证器, 无需重复定义。
+```go
+package main
+
+import (
+	"github.com/gookit/validate"
+)
+
+// 初始化时注册
+func init() {
+	validate.AddValidator("is_even", func(val any, rule string) bool {
+		num, ok := val.(int)
+		if !ok {
+			return false
+		}
+		return num%2 == 0
+	})
+}
+```
+
+### 局部规则
+```go
+package request
+
+// ValidateIsEven 定义局部规则方法(命名规则：Validate<规则名>)
+func (s User) ValidateIsEven(val any) bool {
+	num := val.(int)
+	return num%2 == 0
+}
+```
+
+### 临时规则
+```go
+package request
+
+// Validate 请求验证
+func (s User) Validate(data User, scene string) error {
+	v := validate.Struct(data, scene)
+	v.AddValidator("is_even", func(val any, rule string) bool {
+        num, ok := val.(int)
+        if !ok {
+            return false
+        }
+        return num%2 == 0
+    })
+	if !v.Validate(scene) {
+		return errors.New(v.Errors.One())
+	}
+
+	return nil
+}
+```
+
+### 验证使用
+```go
+package request
+
+type User struct {
+    Age int `json:"gender" validate:"required|is_even" label:"年龄"`
+}
+```
+
+### 在控制器中使用
+```go
+package v1
+
+import (
+  "gin/app/facade"
+  "gin/app/model"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "github.com/gin-gonic/gin"
+)
+
+type UserController struct {
+  base.BaseController
+  service service.UserService
+}
+
+// List 列表
+// @Tags 用户管理
+// @Summary 列表
+// @Description 用户列表
+// @Param token header string true "认证Token"
+// @Param page query string true "页码"
+// @Param pageSize query string true "分页大小"
+// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "登录成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user [get]
+func (s *UserController) List(c *gin.Context) {
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
+
+    s.service.WithContext(ctx)
+
+    // 方式1
+    /*err := c.ShouldBind(&req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        return
+    }
+
+    // 验证
+    err = req.Validate(req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }*/
+    // 方式2
+    // 绑定参数并验证
+    err := facade.Request[any]().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        return
+    }
+
+    res, err := s.service.List(req)
+    if err != nil {
+        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
+        return
+    }
+
+    s.Response.Success(c, errcode.Success().WithData(res))
+}
+```
+
+# 服务
+## 服务创建帮助
+```bash
+$ go run ./cmd/cli.go make:service -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:service  服务创建
+
+Options:
+  -f, --file        文件路径, 如: v1/user   required:true
+  -t, --table       表名, 用于生成模型字段    required:false
+  -c, --connection  数据库连接              required:false
+```
+
+## 服务创建
+```bash
+$ go run ./cmd/cli.go make:service -f=user --table=user -c=mysql
+```
+
+# 控制器
+## 控制器创建帮助
+```bash
+$ go run ./cmd/cli.go make:controller -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:controller  控制器创建
+
+Options:
+  -f, --file      文件路径, 如: v1/user  required:true
+  -d, --desc      描述, 如: 用户         required:false
+```
+
+## 控制器创建
+```bash
+$ go run ./cmd/cli.go make:controller --file=v1/user --desc=用户
+```
+```go
+package v1
+
+import (
+  "gin/app/facade"
+  "gin/app/request"
+  "gin/app/service"
+  "gin/common/base"
+  "gin/common/errcode"
+  "gin/pkg/serviceprovider/lang"
+  "github.com/gin-gonic/gin"
+  "github.com/gin-gonic/gin/binding"
+  "github.com/go-viper/mapstructure/v2"
+)
+
+type UserController struct {
+  base.BaseController
+  service service.UserService
+}
+
+// List 列表
+// @Tags 用户管理
+// @Summary 列表
+// @Description 用户列表
+// @Param token header string true "认证Token"
+// @Param page query string true "页码"
+// @Param pageSize query string true "分页大小"
+// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user [get]
+func (s *UserController) List(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "List")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  res, err := s.service.List(req)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(res))
+}
+
+// Create 创建
+// @Tags 用户管理
+// @Summary 创建
+// @Description 用户创建
+// @Param token header string true "认证Token"
+// @Param data body request.UserCreate true "创建参数"
+// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user [post]
+func (s *UserController) Create(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Create")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  user, err := s.service.Create(req)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(user))
+}
+
+// Update 更新
+// @Tags 用户管理
+// @Summary 更新
+// @Description 用户更新
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Param data body request.UserUpdate true "更新参数"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id} [put]
+func (s *UserController) Update(c *gin.Context) {
+  var (
+    ctx  = c.Request.Context()
+    data map[string]interface{}
+    req  request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  err := c.ShouldBindBodyWith(&data, binding.JSON)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  err = mapstructure.Decode(data, &req)
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  req.ID = facade.Request[int64]().Path(c, "id", 0)
+  err = req.Validate(req, "Update")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  err = s.service.Update(req.ID, data)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(data))
+}
+
+// Detail 详情
+// @Tags 用户管理
+// @Summary 详情
+// @Description 用户详情
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id} [get]
+func (s *UserController) Detail(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Detail")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  m, err := s.service.Detail(req.ID)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success().WithData(m))
+}
+
+// Delete 删除
+// @Tags 用户管理
+// @Summary 删除
+// @Description 用户删除
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id} [delete]
+func (s *UserController) Delete(c *gin.Context) {
+  var (
+    ctx = c.Request.Context()
+    req request.User
+  )
+
+  s.service.WithContext(ctx)
+
+  req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+  // 绑定参数并验证
+  err := facade.Request[any]().BindValidate(c, &req, "Delete")
+  if err != nil {
+    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    return
+  }
+
+  err = s.service.Delete(req.ID)
+  if err != nil {
+    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    return
+  }
+
+  s.Response.Success(c, errcode.Success())
+}
+
+```
+
+# 路由
+> `router/root.go` 文件中定义了全局路由规则可自行修改,  一般情况只需要默认即可。
+## 路由创建帮助
+```bash
+$ go run ./cmd/cli.go make:router -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:router  路由创建
+
+Options:
+  -f, --file  文件路径, 如: user      required:true
+  -d, --desc  路由描述, 如: 用户路由   required:false
+```
+
+## 路由创建
+```bash
+$ go run ./cmd/cli.go make:router --file=user --desc=用户路由
+```
+```go
+package router
+
+import (
+  "gin/app/controller/v1"
+  "github.com/gin-gonic/gin"
+)
+
+// UserRouter 用户路由
+type UserRouter struct{}
+
+func init() {
+  Register(&UserRouter{})
+}
+
+// RegisterRoutes 注册路由
+func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+  var (
+    user v1.UserController
+  )
+
+  router := routerGroup.Group("api/v1")
+  {
+    // 列表
+    router.GET("/user", user.List)
+    // 创建
+    router.POST("/user", user.Create)
+    // 更新
+    router.PUT("/user/:id", user.Update)
+    // 删除
+    router.DELETE("/user/:id", user.Delete)
+    // 详情
+    router.GET("/user/:id", user.Detail)
+  }
+}
+
+// IsAuth 是否需要鉴权
+func (r *UserRouter) IsAuth() bool {
+  return true
+}
+
+```
+
+## 路由列表
+```bash
+$ go run ./cmd/cli.go route:list
+
+---------------------------------------------------------
+Method   Path                                Handler
+---------------------------------------------------------
+POST     /api/v1/login                       gin/app/controller/v1.(*LoginController).Login
+GET      /api/v1/user                        gin/app/controller/v1.(*UserController).List
+POST     /api/v1/user                        gin/app/controller/v1.(*UserController).Create
+GET      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Detail
+PUT      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Update
+DELETE   /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Delete
+GET      /ping                               gin/router.LoadRouters
+GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
+HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
+GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
+---------------------------------------------------------
+总计 10 条路由
+```
+
+# 中间件
+> `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
+## 中间件创建帮助
+```bash
+$ go run ./cmd/cli.go make:middleware -h # --help
+  ██████  ██████ ██   ██
+  ██   ██ ██      ██ ██
+  ██   ██ ██████   ███
+  ██   ██     ██  ██ ██
+  ██████  ██████ ██   ██
+
+Gin Cli v2.0.0, built with Go go1.25.2
+
+Usage:
+  cli [command] [options]
+
+Command:
+  make:middleware  中间件创建
+
+Options:
+  -f, --file  文件路径, 如: auth    required:true
+  -d, --desc  描述, 如: 权限中间件  required:false
+```
+
+## 中间件创建
+```bash
+$ go run ./cmd/cli.go make:middleware --file=auth --desc=授权中间件
+```
+
+## 限流中间件
+> `middleware/rate_limit.go`文件中定义了全局限流中间件, 支持全局用户接口限流、ip接口限流以及全局限流。
+```go
+package router
+
+import (
+    "gin/app/middleware"
+    "github.com/gin-gonic/gin"
+)
+
+var rateLimitMiddleware middleware.RateLimit
+
+// LoadRouters 加载路由
+func LoadRouters(router *gin.Engine) {
+    // 全局限流
+    group := router.Group("", rateLimitMiddleware.Handle())
+	r := group.Group("") 
+	{
+        r.GET("/global-test1", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
+        })
+
+        r.GET("/global-test2", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
+        })
+    }
+
+	// 指定接口限流
+    // 用户限流
+    // r 每秒产生多少token
+    // burst 桶容量
+    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
+	r1 := userGroup.Group("")
+	{
+		r1.GET("/user-test1", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "user test1"))
+        })
+
+        r1.GET("/user-test2", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "user test2"))
+        })
+    }
+
+    // 指定接口限流
+    // ip限流
+    // r 每秒产生多少token
+    // burst 桶容量
+    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
+	r2 := ipGroup.Group("")
+	{
+		r2.GET("/ip-test1", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
+        })
+
+        r2.GET("/ip-test2", func(c *gin.Context) {
+            response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
+		})
+    }
+}
 ```
 
 # 缓存
