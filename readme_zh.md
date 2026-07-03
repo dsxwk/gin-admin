@@ -123,7 +123,8 @@
 - [swagger文档](#swagger文档)
 
 # 项目简介
-> 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
+> - 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
+> - 命令行按照模型、请求验证、服务层、控制器、路由的顺序正确创建可生成可运行带swagger文档的CURD完整代码。
 ## 项目地址
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git

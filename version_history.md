@@ -1,3 +1,8 @@
+## v2.3.0
+> - Add and improve part of the interface
+> - Improve the document
+> - Optimize the command line code generation tool
+
 ## v2.2.15
 > - Add and improve user and role related interfaces, optimize menu related interfaces
 > - Add related documentation, add front-end github and gitee address
