@@ -15,13 +15,13 @@ type ArticleService struct {
 // List 列表
 func (s *ArticleService) List(req request.Article) (pageData request.PageData, err error) {
 	var (
-		models []model.Article
 		m      model.Article
+		models []model.Article
 		db     = s.DB(&m)
 	)
 
 	// 搜索
-	db = s.Search(db, req.Search)
+	db = s.Search(db, m, req.Search).Model(&m).Preload("User")
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -52,7 +52,8 @@ func (s *ArticleService) List(req request.Article) (pageData request.PageData, e
 // Create 创建
 func (s *ArticleService) Create(req request.Article) (request.Article, error) {
 	var (
-		m model.Article
+		m  model.Article
+		db = s.DB(&m)
 	)
 
 	m = model.Article{
@@ -65,7 +66,7 @@ func (s *ArticleService) Create(req request.Article) (request.Article, error) {
 		Tag:        &model.JsonValue{Data: req.Tag},
 	}
 
-	err := s.DB(&model.Article{}).Create(&m).Error
+	err := db.Model(&m).Create(&m).Error
 	if err != nil {
 		return req, err
 	}
@@ -75,13 +76,18 @@ func (s *ArticleService) Create(req request.Article) (request.Article, error) {
 
 // Update 更新
 func (s *ArticleService) Update(id int64, data map[string]interface{}) (err error) {
+	var (
+		m  model.Article
+		db = s.DB(&m)
+	)
+
 	if pkg.HasKey(data, "tag") {
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}
-	rows := model.FilterFields(s.DB(&model.Article{}), model.Article{}, data)
+	rows := model.FilterFields(db, m, data)
 	rows["updated_at"] = time.DateTime
 
-	err = s.DB(&model.Article{}).Where("id = ?", id).Updates(rows).Error
+	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
 		return err
 	}
@@ -91,7 +97,11 @@ func (s *ArticleService) Update(id int64, data map[string]interface{}) (err erro
 
 // Detail 详情
 func (s *ArticleService) Detail(id int64) (m model.Article, err error) {
-	err = s.DB(&model.Article{}).First(&m, id).Error
+	var (
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).First(&m, id).Error
 	if err != nil {
 		return m, err
 	}
@@ -106,7 +116,7 @@ func (s *ArticleService) Delete(id int64) (err error) {
 		db = s.DB(&m)
 	)
 
-	err = db.Delete(&m, id).Error
+	err = db.Model(&m).Delete(&m, id).Error
 	if err != nil {
 		return err
 	}

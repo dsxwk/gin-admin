@@ -75,16 +75,15 @@ SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created
 `
 */
 
-// BuildCondition 构建动态sql条件
+// BuildCondition1 构建动态sql条件
 // filters: map[string]interface{}格式参考示例
 // db: 必须已经通过Model()或Table()设置了模型
-func BuildCondition(db *gorm.DB, filters map[string]interface{}) (string, []interface{}, error) {
-	if db.Statement == nil || db.Statement.Model == nil {
-		return "", nil, fmt.Errorf("db must have a model, please use db.Model() first")
+func BuildCondition1(db *gorm.DB, model any, filters map[string]interface{}) (string, []interface{}, error) {
+	stmt := &gorm.Statement{
+		DB: db,
 	}
 
-	stmt := &gorm.Statement{DB: db}
-	if err := stmt.Parse(db.Statement.Model); err != nil {
+	if err := stmt.Parse(model); err != nil {
 		return "", nil, err
 	}
 
@@ -145,7 +144,7 @@ func parseLogic(filters map[string]interface{}, s *schema.Schema, db *gorm.DB, r
 				}
 			}
 		default:
-			sql, a := buildFieldSQL(db, s, k, v, rootSchema)
+			sql, a := buildFieldSQL(s, k, v, rootSchema)
 			if sql != "" {
 				parts = append(parts, sql)
 				args = append(args, a...)
@@ -232,7 +231,7 @@ func buildExistCondition(parent *schema.Schema, db *gorm.DB, path string, cond i
 }
 
 // buildFieldSQL 构建普通字段sql,支持json、关联字段、各种操作符
-func buildFieldSQL(db *gorm.DB, s *schema.Schema, field string, value interface{}, rootSchema *schema.Schema) (string, []interface{}) {
+func buildFieldSQL(s *schema.Schema, field string, value interface{}, rootSchema *schema.Schema) (string, []interface{}) {
 	op := "="
 	val := value
 

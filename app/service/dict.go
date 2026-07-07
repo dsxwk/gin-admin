@@ -15,13 +15,13 @@ type DictService struct {
 // List 列表
 func (s *DictService) List(req request.Dict) (pageData request.PageData, err error) {
 	var (
-		models []model.Dict
 		m      model.Dict
+		models []model.Dict
 		db     = s.DB(&m)
 	)
 
 	// 搜索
-	db = s.Search(db, req.Search)
+	db = s.Search(db, m, req.Search).Model(&m)
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -51,7 +51,12 @@ func (s *DictService) List(req request.Dict) (pageData request.PageData, err err
 
 // Create 创建
 func (s *DictService) Create(req request.Dict) (request.Dict, error) {
-	m := model.Dict{
+	var (
+		m  model.Dict
+		db = s.DB(&m)
+	)
+
+	m = model.Dict{
 		Pid:    req.Pid,
 		Name:   req.Name,
 		Title:  req.Title,
@@ -62,7 +67,7 @@ func (s *DictService) Create(req request.Dict) (request.Dict, error) {
 		Desc:   req.Desc,
 	}
 
-	err := s.DB(&model.Dict{}).Create(&m).Error
+	err := db.Model(&m).Create(&m).Error
 	if err != nil {
 		return req, err
 	}
@@ -72,13 +77,18 @@ func (s *DictService) Create(req request.Dict) (request.Dict, error) {
 
 // Update 更新
 func (s *DictService) Update(id int64, data map[string]interface{}) (err error) {
+	var (
+		m  model.Dict
+		db = s.DB(&m)
+	)
+
 	if pkg.HasKey(data, "extend") {
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}
-	rows := model.FilterFields(s.DB(&model.Dict{}), model.Dict{}, data)
+	rows := model.FilterFields(db, m, data)
 	rows["updated_at"] = time.DateTime
 
-	err = s.DB(&model.Dict{}).Where("id = ?", id).Updates(rows).Error
+	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
 		return err
 	}
@@ -88,7 +98,11 @@ func (s *DictService) Update(id int64, data map[string]interface{}) (err error) 
 
 // Detail 详情
 func (s *DictService) Detail(id int64) (m model.Dict, err error) {
-	err = s.DB(&model.Dict{}).First(&m, id).Error
+	var (
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).First(&m, id).Error
 	if err != nil {
 		return m, err
 	}
@@ -103,7 +117,7 @@ func (s *DictService) Delete(id int64) (err error) {
 		db = s.DB(&m)
 	)
 
-	err = db.Delete(&m, id).Error
+	err = db.Model(&m).Delete(&m, id).Error
 	if err != nil {
 		return err
 	}

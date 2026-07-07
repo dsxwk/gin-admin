@@ -9,26 +9,29 @@ import (
 // Roles 请求验证
 type Roles struct {
 	base.BaseRequest
-	ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Name   string `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-	Desc   string `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
-	Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	ID        int64      `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+	Name      string     `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+	Desc      string     `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
+	Status    int64      `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	RoleMenus []RoleMenu `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
 	PageListValidate
 }
 
 // RoleCreate 角色创建验证
 type RoleCreate struct {
-	Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-	Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
-	Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Name      string     `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+	Desc      string     `json:"desc" validate:"maxLen:100" label:"角色描述"`
+	Status    int64      `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	RoleMenus []RoleMenu `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
 }
 
 // RoleUpdate 角色更新验证
 type RoleUpdate struct {
-	ID     int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
-	Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-	Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
-	Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	ID        int64      `uri:"id" validate:"required|int|gt:0" label:"ID"`
+	Name      string     `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+	Desc      string     `json:"desc" validate:"maxLen:100" label:"角色描述"`
+	Status    int64      `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	RoleMenus []RoleMenu `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
 }
 
 // Validate 请求验证

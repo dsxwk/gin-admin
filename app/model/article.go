@@ -12,6 +12,7 @@ type Article struct {
 	DataSource int64      `gorm:"column:data_source;not null;default:2;type:tinyint(3) unsigned;comment:数据来源 1=文章库 2=自建" json:"dataSource" form:"dataSource"`
 	IsPublish  int64      `gorm:"column:is_publish;not null;default:1;type:tinyint(3) unsigned;comment:是否发布 0=待发布 1=已发布 2=已下架" json:"isPublish" form:"isPublish"`
 	Tag        *JsonValue `gorm:"column:tag;type:json;comment:标签" json:"tag" form:"tag"`
+	User       *User      `gorm:"foreignKey:uid;references:id" json:"user"`
 	CreatedAt  *DateTime  `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`
 	UpdatedAt  *DateTime  `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt" form:"updatedAt"`
 	DeletedAt  *DeletedAt `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" form:"deletedAt" swaggerignore:"true"`

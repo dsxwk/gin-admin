@@ -10,7 +10,7 @@ import (
 type Dict struct {
 	base.BaseRequest
 	ID     int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Pid    int64       `json:"pid" form:"pid" validate:"required|int" label:"父级id"`
+	Pid    int64       `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name   string      `json:"name" form:"name" validate:"required" label:"标识"`
 	Title  string      `json:"title" form:"title" validate:"required" label:"名称"`
 	Value  string      `json:"value" form:"value" validate:"required" label:"映射值"`

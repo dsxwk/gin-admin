@@ -2463,6 +2463,13 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "roleMenus": {
+                    "description": "角色菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.RoleMenus"
+                    }
+                },
                 "status": {
                     "type": "integer"
                 },
@@ -2812,6 +2819,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "roleMenus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RoleMenu"
+                    }
+                },
                 "status": {
                     "type": "integer"
                 }
@@ -2839,6 +2852,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "roleMenus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RoleMenu"
+                    }
                 },
                 "status": {
                     "type": "integer"

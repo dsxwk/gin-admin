@@ -255,6 +255,11 @@ definitions:
         type: integer
       name:
         type: string
+      roleMenus:
+        description: 角色菜单
+        items:
+          $ref: '#/definitions/model.RoleMenus'
+        type: array
       status:
         type: integer
       updatedAt:
@@ -495,6 +500,10 @@ definitions:
         type: string
       name:
         type: string
+      roleMenus:
+        items:
+          $ref: '#/definitions/request.RoleMenu'
+        type: array
       status:
         type: integer
     type: object
@@ -513,6 +522,10 @@ definitions:
         type: integer
       name:
         type: string
+      roleMenus:
+        items:
+          $ref: '#/definitions/request.RoleMenu'
+        type: array
       status:
         type: integer
     type: object

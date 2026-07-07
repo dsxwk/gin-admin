@@ -18,11 +18,11 @@ type LoginService struct {
 // Login 登录
 func (s *LoginService) Login(username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
 	var (
-		db   = s.DB(&model.User{})
+		db   = s.DB(&m)
 		conf = facade.Config()
 	)
 
-	if err = db.
+	if err = db.Model(&m).
 		Preload("UserRoles").
 		Where("username = ?", username).
 		First(&m).Error; err != nil {

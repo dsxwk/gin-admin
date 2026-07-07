@@ -1,3 +1,6 @@
+## v2.3.1
+> - Gorm dynamic search adjustment and document completion
+
 ## v2.3.0
 > - Add and improve part of the interface
 > - Improve the document

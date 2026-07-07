@@ -147,7 +147,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.3.0
+> - Latest Version: v2.3.1
 > - [Version update detailed record](version_history.md)
 
 # Installation Instructions
@@ -2829,30 +2829,40 @@ type UserService struct {
 
 // List
 func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
-	var (
-		m  []model.User
-		db = s.DB(&model.User{})
-	)
-
-	pageData.Page = req.Page
-	pageData.PageSize = req.PageSize
-	offset, limit := request.Pagination(req.Page, req.PageSize)
-	// search
-	db = s.Search(db, req.Search)
-
-	db = db.Preload("UserRoles")
-	err = db.Count(&pageData.Total).Error
-	if err != nil {
-		return pageData, err
-	}
-
-	err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-	if err != nil {
-		return pageData, err
-	}
-	pageData.List = m
-
-	return pageData, nil
+    var (
+        m  []model.User
+        db = s.DB(&model.User{})
+    )
+  
+    // Search 
+    db = s.Search(db, m, req.Search)
+  
+    err = db.Model(&m).Count(&pageData.Total).Error
+    if err != nil {
+        return pageData, err
+    }
+  
+    db = db.Model(&m).Preload("UserRoles")
+  
+    if req.NotPage {
+        err = db.Order("id DESC").Find(&m).Error
+        if err != nil {
+            return pageData, err
+        }
+        pageData.List = m
+    } else {
+      pageData.Page = req.Page
+      pageData.PageSize = req.PageSize
+      offset, limit := request.Pagination(req.Page, req.PageSize)
+  
+      err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+      if err != nil {
+            return pageData, err
+      }
+      pageData.List = m
+    }
+  
+    return pageData, nil
 }
 ```
 

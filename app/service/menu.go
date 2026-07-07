@@ -17,36 +17,36 @@ type MenuService struct {
 // List 列表
 func (s *MenuService) List(req request.Menu) (pageData request.PageData, err error) {
 	var (
-		m    []model.Menu
-		menu model.Menu
-		db   = s.DB(&menu)
+		m      model.Menu
+		models []model.Menu
+		db     = s.DB(&m)
 	)
 
 	// 搜索
-	db = s.Search(db, req.Search)
+	db = s.Search(db, m, req.Search)
+	db = db.Model(&m).
+		Preload("Meta").
+		Preload("Meta.AuthBtnList").
+		Preload("MenuActions").
+		Preload("RoleMenus")
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
 		return pageData, err
 	}
 
-	db = db.Preload("Meta").
-		Preload("Meta.AuthBtnList").
-		Preload("MenuActions").
-		Preload("RoleMenus")
-
 	if req.NotPage {
-		err = db.Order("sort Asc").Find(&m).Error
+		err = db.Order("sort Asc").Find(&models).Error
 		if err != nil {
 			return pageData, err
 		}
-		pageData.List = menu.GetTree(m)
+		pageData.List = m.GetTree(models)
 	} else {
 		pageData.Page = req.Page
 		pageData.PageSize = req.PageSize
 		offset, limit := request.Pagination(req.Page, req.PageSize)
 
-		err = db.Offset(offset).Limit(limit).Order("sort Asc").Find(&m).Error
+		err = db.Offset(offset).Limit(limit).Order("sort Asc").Find(&models).Error
 		if err != nil {
 			return pageData, err
 		}
@@ -59,14 +59,14 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 // RoleMenu 角色菜单
 func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error) {
 	var (
-		m    []model.Menu
-		menu model.Menu
-		db   = s.DB(&menu)
+		m      model.Menu
+		models []model.Menu
+		db     = s.DB(&m)
 	)
 
 	roleIds := strings.Split(req.RoleId, ",")
 
-	err = db.
+	err = db.Model(&m).
 		Preload("Meta").
 		Preload("Meta.AuthBtnList").
 		Preload("RoleMenus").
@@ -77,17 +77,21 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 		Where("role_menus.role_id IN ?", roleIds).
 		Order("sort ASC").
 		Group("menu.id").
-		Find(&m).Error
+		Find(&models).Error
 	if err != nil {
 		return tree, err
 	}
 
-	return menu.GetTree(m), nil
+	return m.GetTree(models), nil
 }
 
 // Detail 详情
 func (s *MenuService) Detail(menuId int64) (m model.Menu, err error) {
-	err = s.DB(&m).
+	var (
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).
 		Preload("Meta").
 		Preload("Meta.AuthBtnList").
 		Preload("MenuActions").
@@ -107,7 +111,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		m         model.Menu
 		meta      model.MenuMeta
 		roleMenus []model.RoleMenus
-		db        = s.DB(&model.Menu{})
+		db        = s.DB(&m)
 	)
 
 	m = model.Menu{
@@ -122,7 +126,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 	}
 
 	db = db.Begin()
-	err := db.Model(&model.Menu{}).Create(&m).Error
+	err := db.Model(&m).Create(&m).Error
 	if err != nil {
 		db.Rollback()
 		return req, err
@@ -139,7 +143,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		IsIframe:    req.Meta.IsIframe,
 	}
 
-	err = db.Model(&model.MenuMeta{}).Create(&meta).Error
+	err = db.Model(&meta).Create(&meta).Error
 	if err != nil {
 		db.Rollback()
 		return req, err
@@ -152,7 +156,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 				MenuId: m.ID,
 			})
 		}
-		err = db.Model(&model.RoleMenus{}).Create(&roleMenus).Error
+		err = db.Model(&roleMenus).Create(&roleMenus).Error
 		if err != nil {
 			db.Rollback()
 			return req, err
@@ -167,7 +171,8 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 // Update 更新
 func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) {
 	var (
-		db = s.DB(&model.Menu{})
+		m  model.Menu
+		db = s.DB(&m)
 	)
 
 	meta, ok := data["meta"].(map[string]interface{})
@@ -182,10 +187,10 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 
 	tx := db.Begin()
 
-	rows := model.FilterFields(db, model.Menu{}, data)
+	rows := model.FilterFields(db, m, data)
 	rows["updated_at"] = time.DateTime
 
-	err = tx.Model(&model.Menu{}).Where("id = ?", id).Updates(rows).Error
+	err = tx.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -249,7 +254,7 @@ func (s *MenuService) Delete(menuId int64) (err error) {
 
 	tx := db.Begin()
 
-	err = tx.Delete(&model.Menu{}, menuId).Error
+	err = tx.Model(&model.Menu{}).Delete(&model.Menu{}, menuId).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -313,29 +318,32 @@ func (s *MenuService) Delete(menuId int64) (err error) {
 // Action 菜单功能
 func (s *MenuService) Action(req request.MenuActions) (pageData request.PageData, err error) {
 	var (
-		m      []model.MenuActions
-		action model.MenuActions
-		db     = s.DB(&action)
+		m      model.MenuActions
+		models []model.MenuActions
+		db     = s.DB(&m)
 	)
 
 	// 搜索
-	db = s.Search(db, req.Search)
+	db = s.Search(db, m, req.Search).Model(&m)
 
 	err = db.Preload("Parent").
 		Preload("RoleActions").
 		Where("menu_id = ?", req.ID).
 		Order("sort asc").
-		Find(&m).
-		Error
+		Find(&models).Error
 
-	pageData.List = action.GetTree(m)
+	pageData.List = m.GetTree(models)
 
 	return pageData, nil
 }
 
 // ActionDetail 菜单功能详情
 func (s *MenuService) ActionDetail(id int64) (m model.MenuActions, err error) {
-	err = s.DB(&model.MenuActions{}).
+	var (
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).
 		Preload("Parent").
 		Preload("RoleActions").
 		First(&m, id).Error
@@ -351,7 +359,7 @@ func (s *MenuService) CreateAction(req request.MenuActions) (err error) {
 	var (
 		menuAction  model.MenuActions
 		roleActions []model.RoleActions
-		db          = s.DB(&model.MenuActions{})
+		db          = s.DB(&menuAction)
 	)
 
 	menuAction = model.MenuActions{
@@ -370,7 +378,7 @@ func (s *MenuService) CreateAction(req request.MenuActions) (err error) {
 
 	tx := db.Begin()
 
-	err = tx.Create(&menuAction).Error
+	err = tx.Model(&menuAction).Create(&menuAction).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -397,10 +405,11 @@ func (s *MenuService) CreateAction(req request.MenuActions) (err error) {
 // UpdateAction 菜单功能更新
 func (s *MenuService) UpdateAction(actionId int64, data map[string]interface{}) (err error) {
 	var (
-		db = s.DB(&model.MenuActions{})
+		m  model.MenuActions
+		db = s.DB(&m)
 	)
 
-	rows := model.FilterFields(db, model.MenuActions{}, data)
+	rows := model.FilterFields(db, m, data)
 	roleActionData, ok := data["roleActions"].([]interface{})
 	if !ok {
 		roleActionData = []interface{}{}
@@ -408,7 +417,7 @@ func (s *MenuService) UpdateAction(actionId int64, data map[string]interface{}) 
 
 	tx := db.Begin()
 
-	err = tx.Where("id = ?", actionId).Updates(rows).Error
+	err = tx.Model(&m).Where("id = ?", actionId).Updates(rows).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -459,19 +468,20 @@ func (s *MenuService) UpdateAction(actionId int64, data map[string]interface{}) 
 // DeleteAction 菜单功能删除
 func (s *MenuService) DeleteAction(id int64) (err error) {
 	var (
-		m  model.RoleActions
-		db = s.DB(&model.MenuActions{})
+		m          model.MenuActions
+		roleAction model.RoleActions
+		db         = s.DB(&m)
 	)
 
 	tx := db.Begin()
 
-	err = tx.Delete(&model.MenuActions{}, id).Error
+	err = tx.Model(&m).Delete(&m, id).Error
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	err = tx.Model(&model.RoleActions{}).Where("action_id = ?", id).Delete(&m).Error
+	err = tx.Model(&roleAction).Where("action_id = ?", id).Delete(&m).Error
 	if err != nil {
 		tx.Rollback()
 		return err

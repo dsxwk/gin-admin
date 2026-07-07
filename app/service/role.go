@@ -15,13 +15,13 @@ type RoleService struct {
 // List 列表
 func (s *RoleService) List(req request.Roles) (pageData request.PageData, err error) {
 	var (
-		m    []model.Roles
-		role model.Roles
-		db   = s.DB(&role)
+		m      model.Roles
+		models []model.Roles
+		db     = s.DB(&m)
 	)
 
 	// 搜索
-	db = s.Search(db, req.Search)
+	db = s.Search(db, m, req.Search).Model(&m).Preload("RoleMenus")
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -29,7 +29,7 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 	}
 
 	if req.NotPage {
-		err = db.Order("id DESC").Find(&m).Error
+		err = db.Order("id DESC").Find(&models).Error
 		if err != nil {
 			return pageData, err
 		}
@@ -39,7 +39,7 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 		pageData.PageSize = req.PageSize
 		offset, limit := request.Pagination(req.Page, req.PageSize)
 
-		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&models).Error
 		if err != nil {
 			return pageData, err
 		}
@@ -51,7 +51,13 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 
 // Detail 详情
 func (s *RoleService) Detail(id int64) (m model.Roles, err error) {
-	err = s.DB(&model.Roles{}).First(&m, id).Error
+	var (
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).
+		Preload("RoleMenus").
+		First(&m, id).Error
 	if err != nil {
 		return m, err
 	}
@@ -62,12 +68,13 @@ func (s *RoleService) Detail(id int64) (m model.Roles, err error) {
 // Create 创建
 func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
 	var (
-		count int64
-		db    = s.DB(&model.Roles{})
+		count     int64
+		db        = s.DB(&m)
+		roleMenus []model.RoleMenus
 	)
 
 	// 校验角色名是否重复
-	err = db.Where("name = ?", req.Name).Count(&count).Error
+	err = db.Model(&m).Where("name = ?", req.Name).Count(&count).Error
 	if err != nil {
 		return m, err
 	}
@@ -81,10 +88,30 @@ func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
 		Status: req.Status,
 	}
 
-	err = db.Create(&m).Error
+	tx := db.Begin()
+
+	err = tx.Model(&m).Create(&m).Error
 	if err != nil {
+		tx.Rollback()
 		return m, err
 	}
+
+	if req.RoleMenus != nil {
+		for _, v := range req.RoleMenus {
+			roleMenus = append(roleMenus, model.RoleMenus{
+				RoleId: m.ID,
+				MenuId: v.MenuId,
+				Name:   m.Name,
+			})
+		}
+		err = tx.Model(&model.RoleMenus{}).Create(&roleMenus).Error
+		if err != nil {
+			tx.Rollback()
+			return m, err
+		}
+	}
+
+	tx.Commit()
 
 	return m, nil
 }
@@ -93,10 +120,11 @@ func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
 func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) {
 	var (
 		count int64
+		db    = s.DB(&model.Roles{})
 	)
 
 	// 校验角色名是否重复
-	err = s.DB(&model.Roles{}).Where("name = ? AND id <> ?", data["name"], id).Count(&count).Error
+	err = db.Model(&model.Roles{}).Where("name = ? AND id <> ?", data["name"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -104,13 +132,57 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 		return errors.New("角色名已存在")
 	}
 
+	roleMenusData, ok := data["roleMenus"].([]interface{})
+	if !ok {
+		roleMenusData = []interface{}{}
+	}
+
+	tx := db.Begin()
+
 	rows := model.FilterFields(s.DB(&model.Roles{}), model.Roles{}, data)
 	rows["updated_at"] = time.DateTime
 
-	err = s.DB(&model.Roles{}).Where("id = ?", id).Updates(rows).Error
+	err = tx.Model(&model.Roles{}).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	// 更新角色菜单关联
+	if len(roleMenusData) > 0 {
+		// 删除旧关联
+		err = tx.Model(&model.RoleMenus{}).
+			Where("role_id = ?", id).
+			Delete(&model.RoleMenus{}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// 创建新关联
+		var newRoleMenus []model.RoleMenus
+		for _, item := range roleMenusData {
+			roleMap, _ok := item.(map[string]interface{})
+			if !_ok {
+				continue
+			}
+
+			newRoleMenus = append(newRoleMenus, model.RoleMenus{
+				MenuId: int64(roleMap["menuId"].(float64)),
+				RoleId: id,
+			})
+		}
+
+		if len(newRoleMenus) > 0 {
+			err = tx.Model(&model.RoleMenus{}).Create(&newRoleMenus).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	tx.Commit()
 
 	return nil
 }
@@ -122,8 +194,19 @@ func (s *RoleService) Delete(id int64) (err error) {
 		db = s.DB(&m)
 	)
 
-	err = db.Delete(&m, id).Error
+	tx := db.Begin()
+
+	err = tx.Model(&m).Delete(&m, id).Error
 	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.RoleMenus{}).
+		Where("role_id = ?", id).
+		Delete(&model.RoleMenus{}).Error
+	if err != nil {
+		tx.Rollback()
 		return err
 	}
 

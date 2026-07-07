@@ -58,16 +58,16 @@ func (s *BaseService) DB(model Model) *gorm.DB {
 		}
 	}
 
-	return db.Model(model)
+	return db
 }
 
 // Search 搜索扩展方法
-func (s *BaseService) Search(db *gorm.DB, conditions map[string]interface{}) *gorm.DB {
+func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]interface{}) *gorm.DB {
 	if conditions == nil || len(conditions) == 0 {
 		return db
 	}
 
-	whereSql, args, err := orm.BuildCondition(db, conditions)
+	whereSql, args, err := orm.BuildCondition(db, model, conditions)
 	if err != nil {
 		return db
 	}

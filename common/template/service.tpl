@@ -14,8 +14,8 @@ type {{.Name}}Service struct {
 // List 列表
 func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageData, err error) {
     var (
-        models []model.{{.Name}}
         m      model.{{.Name}}
+        models []model.{{.Name}}
         db     = s.DB(&m)
     )
 
@@ -23,7 +23,7 @@ func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageDat
     pageData.PageSize = req.PageSize
     offset, limit := request.Pagination(req.Page, req.PageSize)
     // 搜索
-    db = s.Search(db, req.Search)
+    db = s.Search(db, m, req.Search).Model(&m)
 
     err = db.Count(&pageData.Total).Error
     if err != nil {
@@ -50,7 +50,8 @@ func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageDat
 // Create 创建
 func (s *{{.Name}}Service) Create(req request.{{.Name}}) (request.{{.Name}}, error) {
     var (
-        m model.{{.Name}}
+        m  model.{{.Name}}
+        db = s.DB(&m)
     )
     {{if .HasFields}}
     m = model.{{.Name}}{
@@ -59,7 +60,7 @@ func (s *{{.Name}}Service) Create(req request.{{.Name}}) (request.{{.Name}}, err
     {{else}}
     // todo
     {{end}}
-    err := s.DB(&model.{{.Name}}{}).Create(&m).Error
+    err := db.Model(&m).Create(&m).Error
     if err != nil {
         return req, err
     }
@@ -69,10 +70,15 @@ func (s *{{.Name}}Service) Create(req request.{{.Name}}) (request.{{.Name}}, err
 
 // Update 更新
 func (s *{{.Name}}Service) Update(id int64, data map[string]interface{}) (err error) {
-    rows := model.FilterFields(s.DB(&model.{{.Name}}{}), model.{{.Name}}{}, data)
+    var (
+        m  model.{{.Name}}
+        db = s.DB(&m)
+    )
+
+    rows := model.FilterFields(db, m, data)
     rows["updated_at"] = time.DateTime
 
-    err = s.DB(&model.{{.Name}}{}).Where("id = ?", id).Updates(rows).Error
+    err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
     if err != nil {
         return err
     }
@@ -82,7 +88,12 @@ func (s *{{.Name}}Service) Update(id int64, data map[string]interface{}) (err er
 
 // Detail 详情
 func (s *{{.Name}}Service) Detail(id int64) (m model.{{.Name}}, err error) {
-    err = s.DB(&model.{{.Name}}{}).First(&m, id).Error
+    var (
+        m  model.{{.Name}}
+        db = s.DB(&m)
+    )
+
+    err = db.Model(&m).First(&m, id).Error
     if err != nil {
         return m, err
     }
@@ -97,7 +108,7 @@ func (s *{{.Name}}Service) Delete(id int64) (err error) {
         db = s.DB(&m)
     )
 
-    err = db.Delete(&m, id).Error
+    err = db.Model(&m).Delete(&m, id).Error
     if err != nil {
         return err
     }

@@ -22,15 +22,17 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 	)
 
 	// 搜索
-	db = s.Search(db, req.Search)
+	db = s.Search(db, m, req.Search)
 
-	err = db.Count(&pageData.Total).Error
+	err = db.Model(&m).Count(&pageData.Total).Error
 	if err != nil {
 		return pageData, err
 	}
 
+	db = db.Model(&m).Preload("UserRoles")
+
 	if req.NotPage {
-		err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
+		err = db.Order("id DESC").Find(&m).Error
 		if err != nil {
 			return pageData, err
 		}
@@ -59,7 +61,7 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 	)
 
 	// 校验用户名是否重复
-	err = s.DB(&model.User{}).Where("username = ?", req.Username).Count(&count).Error
+	err = db.Model(&model.User{}).Where("username = ?", req.Username).Count(&count).Error
 	if err != nil {
 		return m, err
 	}
@@ -80,7 +82,7 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 
 	tx := db.Begin()
 
-	err = tx.Create(&m).Error
+	err = tx.Model(&model.User{}).Create(&m).Error
 	if err != nil {
 		tx.Rollback()
 		return m, err
@@ -110,6 +112,7 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 func (s *UserService) Update(id int64, data map[string]interface{}) (err error) {
 	var (
 		count int64
+		db    = s.DB(&model.User{})
 	)
 
 	userRolesData, ok := data["userRoles"].([]interface{})
@@ -118,7 +121,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 	}
 
 	// 校验用户名是否重复
-	err = s.DB(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
+	err = db.Model(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -128,7 +131,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 	if lo.HasKey(data, "password") && data["password"] != "" {
 		data["password"] = pkg.BcryptHash(data["password"].(string))
 	}
-	rows := model.FilterFields(s.DB(&model.User{}), model.User{}, data)
+	rows := model.FilterFields(db, model.User{}, data)
 	rows["updated_at"] = time.DateTime
 
 	tx := s.DB(&model.User{}).Begin()
@@ -181,7 +184,11 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 
 // Detail 详情
 func (s *UserService) Detail(id int64) (m model.User, err error) {
-	err = s.DB(&model.User{}).
+	var (
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).
 		Preload("UserRoles").
 		First(&m, id).Error
 	if err != nil {
@@ -198,7 +205,7 @@ func (s *UserService) Delete(id int64) (err error) {
 		db = s.DB(&m)
 	)
 
-	err = db.Delete(&m, id).Error
+	err = db.Model(&m).Delete(&m, id).Error
 	if err != nil {
 		return err
 	}
