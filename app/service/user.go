@@ -22,14 +22,12 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 	)
 
 	// 搜索
-	db = s.Search(db, m, req.Search)
+	db = s.Search(db, m, req.Search).Model(&m).Preload("UserRoles")
 
-	err = db.Model(&m).Count(&pageData.Total).Error
+	err = db.Count(&pageData.Total).Error
 	if err != nil {
 		return pageData, err
 	}
-
-	db = db.Model(&m).Preload("UserRoles")
 
 	if req.NotPage {
 		err = db.Order("id DESC").Find(&m).Error

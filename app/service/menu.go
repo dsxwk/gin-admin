@@ -23,8 +23,8 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 	)
 
 	// 搜索
-	db = s.Search(db, m, req.Search)
-	db = db.Model(&m).
+	db = s.Search(db, m, req.Search).
+		Model(&m).
 		Preload("Meta").
 		Preload("Meta.AuthBtnList").
 		Preload("MenuActions").
