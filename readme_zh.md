@@ -156,8 +156,8 @@
 
 ## 克隆项目
 ```bash
-$ git clone https://github.com/dsxwk/gin.git
-$ cd gin
+$ git clone https://github.com/dsxwk/gin-admin.git
+$ cd gin-admin
 $ copy dev.config.yaml.example dev.config.yaml
 ```
 
@@ -204,7 +204,7 @@ $ ./main
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=11
 
-执行命令: demo:command, 参数: 11
+ SUCCESS  执行命令: demo:command --args=11
 ```
 
 # 目录结构

@@ -156,8 +156,8 @@
 
 ## Clone Project
 ```bash
-$ git clone https://github.com/dsxwk/gin.git
-$ cd gin
+$ git clone https://github.com/dsxwk/gin-admin.git
+$ cd gin-admin
 $ copy dev.config.yaml.example dev.config.yaml
 ```
 
@@ -204,7 +204,7 @@ $ ./main
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=11
 
-Excute Command: demo:command, Argument: 11
+ SUCCESS  Excute Command: demo:command, Argument: 11
 ```
 
 # Directory Structure
