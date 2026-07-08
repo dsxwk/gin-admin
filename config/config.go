@@ -29,6 +29,7 @@ var (
 	Conf     *Config
 	vp       *viper.Viper
 	confOnce sync.Once
+	mu       sync.RWMutex // 添加读写锁保证并发安全
 )
 
 func NewConfig() *Config {
@@ -66,7 +67,9 @@ func NewConfig() *Config {
 			}
 			flag.Infof("已加载环境配置文件: %s", configFile)
 		} else {
-			flag.Warningf("未找到环境配置文件: %s，使用默认配置\n", configFile)
+			defaultConfigFile := filepath.Join(configDir, fmt.Sprintf("config.yaml"))
+			v.SetConfigFile(defaultConfigFile)
+			flag.Warningf("未找到环境配置文件 %s,使用默认配置 %s\n", configFile, defaultConfigFile)
 		}
 
 		// 自动映射到结构体
@@ -92,7 +95,7 @@ func NewConfig() *Config {
 			}
 			lastEventTime = now
 
-			flag.Infof("配置文件修改: %s\n", e.Name)
+			flag.Infof("配置文件修改: %s", e.Name)
 			if err := v.Unmarshal(cfg); err != nil {
 				flag.Errorf("配置热更新失败: %v", err)
 				os.Exit(1)
@@ -141,4 +144,51 @@ func (c *Config) GetInt(key string) int {
 // GetBool 获取布尔值
 func (c *Config) GetBool(key string) bool {
 	return vp.GetBool(key)
+}
+
+// Set 更新配置项(通用方法)
+func (c *Config) Set(key string, value interface{}) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if vp == nil {
+		return fmt.Errorf("viper 未初始化")
+	}
+
+	// 获取当前配置文件路径
+	configFile := vp.ConfigFileUsed()
+	if configFile == "" {
+		return fmt.Errorf("未找到配置文件")
+	}
+
+	// 设置新值
+	vp.Set(key, value)
+
+	// 写回文件
+	if err := vp.WriteConfig(); err != nil {
+		return fmt.Errorf("写入配置文件失败: %w", err)
+	}
+
+	// 重新加载配置到结构体
+	if err := vp.Unmarshal(Conf); err != nil {
+		return fmt.Errorf("重新加载配置失败: %w", err)
+	}
+
+	flag.Infof("配置已更新: %s = %v", key, value)
+	return nil
+}
+
+// SetString 更新字符串配置
+func (c *Config) SetString(key, value string) error {
+	return c.Set(key, value)
+}
+
+// SetInt 更新整数配置
+func (c *Config) SetInt(key string, value int) error {
+	return c.Set(key, value)
+}
+
+// SetBool 更新布尔配置
+func (c *Config) SetBool(key string, value bool) error {
+	return c.Set(key, value)
 }
