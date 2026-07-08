@@ -89,7 +89,6 @@ func (s *{{.Name}}Service) Update(id int64, data map[string]interface{}) (err er
 // Detail 详情
 func (s *{{.Name}}Service) Detail(id int64) (m model.{{.Name}}, err error) {
     var (
-        m  model.{{.Name}}
         db = s.DB(&m)
     )
 
