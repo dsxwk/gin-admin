@@ -9,6 +9,7 @@ import (
 	_ "gin/app/queue/rabbitmq/producer"
 	_ "gin/pkg/cli/db"
 	_ "gin/pkg/cli/event"
+	_ "gin/pkg/cli/jwt"
 	_ "gin/pkg/cli/make"
 	_ "gin/pkg/cli/queue"
 	_ "gin/pkg/cli/route"
