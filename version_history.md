@@ -1,3 +1,7 @@
+## v2.3.2
+> - Add JWT key generation command
+> - Optimize the configuration not found to use the default configuration
+
 ## v2.3.1
 > - Gorm dynamic search adjustment and document completion
 
