@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 23/06/2026 17:21:09
+ Date: 09/07/2026 11:23:25
 */
 
 SET NAMES utf8mb4;
@@ -28,20 +28,20 @@ CREATE TABLE `article`  (
   `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '内容',
   `category_id` int(11) NOT NULL DEFAULT 0 COMMENT '分类id',
   `data_source` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '数据来源 1=文章库 2=自建',
-  `is_publish` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '是否发布 1=已发布 2=未发布',
+  `is_publish` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '是否发布 0=待发布 1=已发布 2=已下架',
   `tag` json NULL COMMENT '标签',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of article
 -- ----------------------------
-INSERT INTO `article` VALUES (1, 1, '标题1', '<p>测试1</p>', 1, 2, 1, '[\"测试标签1\", \"测试标签2\"]', '2023-09-19 11:43:58', '2025-07-14 15:10:18', NULL);
+INSERT INTO `article` VALUES (1, 1, '标题1', '<p>测试1</p>', 1, 2, 1, '[\"测试标签1\", \"测试标签2\", \"cs3\"]', '2023-09-19 11:43:58', '2006-01-02 15:04:05', NULL);
 INSERT INTO `article` VALUES (13, 1, '标题1', '<p>内容13</p>', 0, 2, 1, '[\"测试标签11\", \"测试标签22\"]', '2024-07-22 11:21:18', '2025-06-17 10:27:27', NULL);
-INSERT INTO `article` VALUES (14, 1, 'Go语言', '内容', 0, 0, 0, 'null', '2025-07-03 17:32:08', '2025-07-03 17:32:08', NULL);
+INSERT INTO `article` VALUES (14, 1, 'Go语言', '内容', 0, 0, 2, 'null', '2025-07-03 17:32:08', '2025-07-03 17:32:08', NULL);
 
 -- ----------------------------
 -- Table structure for category
@@ -49,17 +49,38 @@ INSERT INTO `article` VALUES (14, 1, 'Go语言', '内容', 0, 0, 0, 'null', '202
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `pid` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '父级id',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '分类名称',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
 -- ----------------------------
-INSERT INTO `category` VALUES (1, '分类名称', '2023-09-19 11:43:43', '2023-09-19 11:43:43', NULL);
+INSERT INTO `category` VALUES (1, 0, '分类名称', '2023-09-19 11:43:43', '2023-09-19 11:43:43', NULL);
+
+-- ----------------------------
+-- Table structure for config_category
+-- ----------------------------
+DROP TABLE IF EXISTS `config_category`;
+CREATE TABLE `config_category`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '分类名称',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '配置分类表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of config_category
+-- ----------------------------
+INSERT INTO `config_category` VALUES (1, '基本信息', '2026-07-08 13:42:00', '2006-01-02 15:04:05', NULL);
+INSERT INTO `config_category` VALUES (2, '邮箱配置', '2026-07-08 13:42:00', '2006-01-02 15:04:05', NULL);
+INSERT INTO `config_category` VALUES (3, 'seo设置 ', '2026-07-08 13:42:00', '2026-07-08 13:42:00', NULL);
 
 -- ----------------------------
 -- Table structure for dict
@@ -68,8 +89,8 @@ DROP TABLE IF EXISTS `dict`;
 CREATE TABLE `dict`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `pid` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '父级id',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '字段名称(英文)',
-  `title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '字段名称(中文)',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '标识',
+  `title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '名称',
   `value` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '映射值',
   `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态 1=启用 2=停用',
   `sort` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '排序',
@@ -81,14 +102,15 @@ CREATE TABLE `dict`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE,
   INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of dict
 -- ----------------------------
 INSERT INTO `dict` VALUES (1, 0, 'gender', '性别', '', 1, 0, '{\"test\": 111, \"test2\": \"test222\"}', '', '2025-06-06 21:48:17', '2025-06-06 21:48:17', NULL);
-INSERT INTO `dict` VALUES (2, 1, 'gender', '男', '1', 1, 0, '{\"a\": 11, \"b\": 22}', '测试', '2025-06-06 21:49:00', '2025-06-08 16:05:39', NULL);
+INSERT INTO `dict` VALUES (2, 1, 'gender', '男', '1', 1, 0, '{\"a\": \"111\", \"b\": \"222\"}', '测试', '2025-06-06 21:49:00', '2006-01-02 15:04:05', NULL);
 INSERT INTO `dict` VALUES (3, 1, 'gender', '女', '2', 1, 0, '{\"test\": 111, \"test2\": \"test222\"}', '性别女', '2025-06-06 21:49:10', '2025-06-08 20:39:03', NULL);
+INSERT INTO `dict` VALUES (4, 1, 'gender', '保密', '0', 1, 0, '{}', '保密', '2026-07-03 13:43:30', '2006-01-02 15:04:05', NULL);
 
 -- ----------------------------
 -- Table structure for menu
@@ -109,7 +131,7 @@ CREATE TABLE `menu`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
@@ -121,6 +143,10 @@ INSERT INTO `menu` VALUES (4, 2, 'systemUser', '/system/user', '', 'system/user/
 INSERT INTO `menu` VALUES (5, 2, 'systemRole', '/system/role', '', 'system/role/index', 2, 1, 5, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
 INSERT INTO `menu` VALUES (6, 2, 'systemDic', '/system/dic', '', 'system/dic/index', 2, 1, 6, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
 INSERT INTO `menu` VALUES (10, 0, 'article', '/article', '', 'article/index', 2, 1, 7, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `menu` VALUES (20, 2, 'systemConfig', '/system/config', '', 'layouts/routerView/parent', 2, 1, 7, '2026-07-08 15:04:29', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (21, 20, 'systemConfigList', '/system/config/index', '', 'system/config/index', 2, 1, 7, '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
+INSERT INTO `menu` VALUES (22, 20, 'systemConfigSetting', '/system/config/setting', '', 'system/config/setting', 2, 1, 8, '2026-07-08 15:54:52', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (23, 20, 'systemConfigCategory', '/system/config-category/index', '', 'system/config/category/index', 2, 1, 1, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -144,7 +170,7 @@ CREATE TABLE `menu_actions`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_actions
@@ -170,6 +196,12 @@ INSERT INTO `menu_actions` VALUES (19, 0, 6, 2, 'btn', 'danger', 'small', 2, '�
 INSERT INTO `menu_actions` VALUES (20, 0, 10, 1, 'btn', 'primary', 'small', 2, '新增文章', 'article.add', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
 INSERT INTO `menu_actions` VALUES (21, 0, 10, 2, 'btn', 'primary', 'small', 2, '编辑', 'article.edit', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
 INSERT INTO `menu_actions` VALUES (22, 0, 10, 2, 'btn', 'danger', 'small', 2, '删除', 'article.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (25, 0, 21, 1, 'btn', 'primary', 'small', 2, '新增配置', 'sys.config.add', 2, 1, '2026-07-08 16:00:42', '2026-07-08 16:02:30', NULL);
+INSERT INTO `menu_actions` VALUES (26, 0, 21, 2, 'btn', 'primary', 'small', 2, '编辑配置', 'sys.config.edit', 2, 2, '2026-07-08 16:01:29', '2026-07-08 16:02:37', NULL);
+INSERT INTO `menu_actions` VALUES (27, 0, 21, 2, 'btn', 'danger', 'small', 2, '删除配置', 'sys.config.del', 2, 3, '2026-07-08 16:03:15', '2026-07-08 16:03:15', NULL);
+INSERT INTO `menu_actions` VALUES (28, 0, 23, 1, 'btn', 'primary', 'default', 2, '新增配置分类', 'sys.configCategory.add', 2, 1, '2026-07-09 11:11:01', '2026-07-09 11:13:11', NULL);
+INSERT INTO `menu_actions` VALUES (29, 0, 23, 2, 'btn', 'primary', 'small', 2, '编辑配置分类', 'sys.configCategory.edit', 2, 2, '2026-07-09 11:11:36', '2026-07-09 11:13:17', NULL);
+INSERT INTO `menu_actions` VALUES (30, 0, 23, 2, 'btn', 'primary', 'small', 2, '删除配置分类', 'sys.configCategory.del', 2, 3, '2026-07-09 11:12:04', '2026-07-09 11:13:25', NULL);
 
 -- ----------------------------
 -- Table structure for menu_meta
@@ -190,7 +222,7 @@ CREATE TABLE `menu_meta`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_meta
@@ -202,6 +234,10 @@ INSERT INTO `menu_meta` VALUES (4, 4, 'message.router.systemUser', 'iconfont ico
 INSERT INTO `menu_meta` VALUES (5, 5, 'message.router.systemRole', 'fa fa-user-circle-o', 2, 1, 2, '', 2, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
 INSERT INTO `menu_meta` VALUES (6, 6, 'message.router.systemDic', 'ele-Collection', 2, 1, 2, '', 2, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
 INSERT INTO `menu_meta` VALUES (7, 10, 'message.article.title', 'ele-Collection', 2, 1, 2, '', 2, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `menu_meta` VALUES (17, 20, '配置管理', 'iconfont icon-ico', 2, 1, 2, '', 2, '2026-07-08 15:04:29', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_meta` VALUES (18, 21, '配置列表', 'iconfont icon-quanjushezhi_o', 2, 1, 2, '', 2, '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
+INSERT INTO `menu_meta` VALUES (19, 22, '系统配置', 'iconfont icon--chaifenhang', 2, 1, 2, '', 2, '2026-07-08 15:54:52', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_meta` VALUES (20, 23, '配置分类', 'iconfont icon--chaifenlie', 2, 1, 2, '', 2, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
 
 -- ----------------------------
 -- Table structure for migrations
@@ -233,7 +269,7 @@ CREATE TABLE `role_actions`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 51 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色功能表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 58 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色功能表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_actions
@@ -259,6 +295,12 @@ INSERT INTO `role_actions` VALUES (47, 1, 19, 'admin', '2025-06-16 08:53:37', '2
 INSERT INTO `role_actions` VALUES (48, 1, 20, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
 INSERT INTO `role_actions` VALUES (49, 1, 21, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
 INSERT INTO `role_actions` VALUES (50, 1, 22, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_actions` VALUES (60, 1, 25, 'admin', '2026-07-08 16:02:30', '2026-07-08 16:02:30', NULL);
+INSERT INTO `role_actions` VALUES (61, 1, 26, 'admin', '2026-07-08 16:02:37', '2026-07-08 16:02:37', NULL);
+INSERT INTO `role_actions` VALUES (62, 1, 27, 'admin', '2026-07-08 16:03:15', '2026-07-08 16:03:15', NULL);
+INSERT INTO `role_actions` VALUES (66, 1, 28, 'admin', '2026-07-09 11:13:11', '2026-07-09 11:13:11', NULL);
+INSERT INTO `role_actions` VALUES (67, 1, 29, 'admin', '2026-07-09 11:13:17', '2026-07-09 11:13:17', NULL);
+INSERT INTO `role_actions` VALUES (68, 1, 30, 'admin', '2026-07-09 11:13:25', '2026-07-09 11:13:25', NULL);
 
 -- ----------------------------
 -- Table structure for role_menus
@@ -274,18 +316,22 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
 -- ----------------------------
-INSERT INTO `role_menus` VALUES (26, 1, 3, 'admin', '2025-06-11 17:17:14', '2025-06-11 17:17:14', NULL);
-INSERT INTO `role_menus` VALUES (28, 1, 4, 'admin', '2025-06-11 17:17:29', '2025-06-11 17:17:29', NULL);
-INSERT INTO `role_menus` VALUES (30, 1, 5, 'admin', '2025-06-11 17:17:36', '2025-06-11 17:17:36', NULL);
-INSERT INTO `role_menus` VALUES (32, 1, 6, 'admin', '2025-06-11 17:17:42', '2025-06-11 17:17:42', NULL);
-INSERT INTO `role_menus` VALUES (34, 1, 1, 'admin', '2025-06-13 11:10:18', '2025-06-13 11:10:18', NULL);
-INSERT INTO `role_menus` VALUES (35, 1, 10, 'admin', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
-INSERT INTO `role_menus` VALUES (36, 1, 10, 'admin', '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `role_menus` VALUES (69, 1, 1, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (70, 1, 2, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (71, 1, 3, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (72, 1, 4, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (73, 1, 5, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (74, 1, 6, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (75, 1, 10, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (108, 1, 21, '', '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
+INSERT INTO `role_menus` VALUES (109, 1, 20, '', '2026-07-08 15:51:29', '2026-07-08 15:51:29', NULL);
+INSERT INTO `role_menus` VALUES (112, 1, 22, '', '2026-07-08 15:57:35', '2026-07-08 15:57:35', NULL);
+INSERT INTO `role_menus` VALUES (113, 1, 23, '', '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
 
 -- ----------------------------
 -- Table structure for roles
@@ -300,13 +346,13 @@ CREATE TABLE `roles`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of roles
 -- ----------------------------
-INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2025-05-26 16:52:50', NULL);
-INSERT INTO `roles` VALUES (2, 'test', '测试', 1, '2025-05-28 10:47:22', '2025-05-28 10:47:22', NULL);
+INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2006-01-02 15:04:05', NULL);
+INSERT INTO `roles` VALUES (2, 'test', '测试', 1, '2025-05-28 10:47:22', '2006-01-02 15:04:05', NULL);
 
 -- ----------------------------
 -- Table structure for system_config
@@ -314,38 +360,38 @@ INSERT INTO `roles` VALUES (2, 'test', '测试', 1, '2025-05-28 10:47:22', '2025
 DROP TABLE IF EXISTS `system_config`;
 CREATE TABLE `system_config`  (
   `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `cn_name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '中文名称',
-  `en_name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '英文名称',
+  `key` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '标识',
+  `name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '名称',
   `default_value` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '默认值',
   `option_value` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '可选值',
-  `type` tinyint(1) NOT NULL DEFAULT 1 COMMENT '配置类型 1=输入框 2=单选 3=复选 4=下拉菜单 5=文本域 6=附件',
-  `category` tinyint(1) NOT NULL DEFAULT 1 COMMENT '配置分类 1=基本信息 2=联系方式 3=seo设置 ',
+  `type` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT '配置类型 1=输入框 2=单选 3=复选 4=下拉菜单 5=文本域 6=附件',
+  `config_category_id` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '配置分类Id',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uni_en_name`(`en_name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
+  UNIQUE INDEX `unq_key`(`name`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of system_config
 -- ----------------------------
-INSERT INTO `system_config` VALUES (1, '网站域名', 'web_domain', 'www.a.com', '', 1, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (2, '关闭站点', 'is_open_site', '开启', '关闭,开启', 2, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (3, '网站Logo', 'site_logo', '', '', 6, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (4, '邮件端口', 'email_port', '465', '', 1, 2, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (5, '邮件标题', 'email_title', '【xxx】验证码', '', 1, 2, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (6, '发件人信息', 'send_user_info', '【管理员】', '', 1, 2, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (7, '发送内容', 'email_content', '【xxx】你的验证码是：', '', 5, 2, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (8, '关键词', 'web_keyword', '关键词...', '', 5, 3, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (9, '邮箱账号', 'email', 'xxx@email.com', '', 1, 2, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (10, '备案编号', 'record_number', 'Copyright© 2014-2019 | Powered by ***1.1 | 粤ICP备****号', '', 1, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (11, '网站描述', 'web_description', 'web', '', 1, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (12, '下拉选项', 'select', '下拉3', '下拉1,下拉2,下拉3', 4, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (13, '复选框', 'checkbox', 'HTML,CSS', 'AJAX,HTML,JS,CSS', 3, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (14, '文本域', 'textarea', '文本域', '0', 5, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (15, '默认头像', 'default_head_img', '', '', 6, 1, NULL, NULL, NULL);
-INSERT INTO `system_config` VALUES (16, '描述', 'seo_description', '', '', 5, 3, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (1, 'web_domain', '网站域名', 'www.a.com', '', 1, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (2, 'is_open_site', '关闭站点', '开启', '关闭,开启', 2, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (3, 'site_logo', '网站Logo', '', '', 6, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (4, 'email_port', '邮件端口', '465', '', 1, 2, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (5, 'email_title', '邮件标题', '【xxx】验证码', '', 1, 2, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (6, 'send_user_info', '发件人信息', '【管理员】', '', 1, 2, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (7, 'email_content', '发送内容', '【xxx】你的验证码是：', '', 5, 2, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (8, 'web_keyword', '关键词', '关键词...', '', 5, 3, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (9, 'email', '邮箱账号', 'xxx@email.com', '', 1, 2, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (10, 'record_number', '备案编号', 'Copyright© 2014-2019 | Powered by ***1.1 | 粤ICP备****号', '', 1, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (11, 'web_description', '网站描述', 'web', '', 1, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (12, 'select', '下拉选项', '下拉3', '下拉1,下拉2,下拉3', 4, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (13, 'checkbox', '复选框', 'HTML,CSS', 'AJAX,HTML,JS,CSS', 3, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (14, 'textarea', '文本域', '文本域', '0', 5, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (15, 'default_head_img', '默认头像', '', '', 6, 1, NULL, NULL, NULL);
+INSERT INTO `system_config` VALUES (16, 'seo_description', '描述', '11', '', 5, 3, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for user
@@ -366,13 +412,13 @@ CREATE TABLE `user`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 47 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 56 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 INSERT INTO `user` VALUES (1, 'https://cdn.qitx.net/local/myblog/user_header_image/20230517/577a53d123bc4c4f19db0cb2c6c980a8.jpg', 'admin', '超级管理员', 'dsx.emil@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', '大师兄', 1, 31, 1, '2023-09-05 17:29:36', '2023-09-12 14:47:48', NULL);
-INSERT INTO `user` VALUES (2, '', 'test2', '李四1', 'ls@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2025-06-16 14:32:14', NULL);
+INSERT INTO `user` VALUES (2, '', 'test2', '李四1', 'ls@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2006-01-02 15:04:05', NULL);
 INSERT INTO `user` VALUES (10, '', 'dsx', '大师兄111', 'dsx@qq.com', '$2a$10$Y2FUvgUMpMlJ5h/oooH7OOdInCZgheFQaiVkKu0Wx6YcXhiylAT3a', '大师兄', 1, 0, 1, '2024-07-22 17:34:36', '2006-01-02 15:04:05', NULL);
 INSERT INTO `user` VALUES (11, '', 'admin1', '张三1', 'zs1@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', 'dsx', 1, 28, 1, '2023-09-05 17:29:36', '2023-09-12 14:47:48', NULL);
 INSERT INTO `user` VALUES (12, '', 'test3', '李四1', 'ls3@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2023-09-13 09:29:27', NULL);
@@ -391,7 +437,8 @@ INSERT INTO `user` VALUES (29, '', 'dsx4', '大师兄4', 'dsx4@qq.com', '$2a$10$
 INSERT INTO `user` VALUES (30, '', 'admin6', '张三6', 'zs6@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', 'dsx', 1, 28, 1, '2023-09-05 17:29:36', '2023-09-12 14:47:48', NULL);
 INSERT INTO `user` VALUES (31, '', 'test13', '李四13', 'ls13@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2023-09-13 09:29:27', NULL);
 INSERT INTO `user` VALUES (33, '', 'dsx5', '大师兄5', 'dsx5@qq.com', '$2a$10$Y2FUvgUMpMlJ5h/oooH7OOdInCZgheFQaiVkKu0Wx6YcXhiylAT3a', '大师兄1', 1, 0, 1, '2024-07-22 17:34:36', '2024-07-22 17:34:36', NULL);
-INSERT INTO `user` VALUES (34, '', 'admin7', '张三34', 'zs7@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', 'dsx', 1, 28, 1, '2023-09-05 17:29:36', '2023-09-12 14:47:48', NULL);
+INSERT INTO `user` VALUES (34, '', 'admin7', '测试张三34', 'zs7@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', 'dsx', 1, 28, 1, '2023-09-05 17:29:36', '2006-01-02 15:04:05', NULL);
+INSERT INTO `user` VALUES (54, '', '测试123', '测试123', '', '$2a$10$kckcEhxk/7pppnM6XCT.cu.xQyoxlnhdY.nhdpk5CmzzCFY32l2xm', '测试123', 1, 30, 1, '2026-06-24 16:52:38', '2006-01-02 15:04:05', NULL);
 
 -- ----------------------------
 -- Table structure for user_roles
@@ -407,13 +454,15 @@ CREATE TABLE `user_roles`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 32 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_roles
 -- ----------------------------
 INSERT INTO `user_roles` VALUES (1, 1, 1, 'admin', '2025-05-26 17:53:10', '2025-05-26 17:53:10', NULL);
 INSERT INTO `user_roles` VALUES (11, 10, 2, 'test', '2025-05-29 14:37:18', '2025-05-29 14:37:18', NULL);
-INSERT INTO `user_roles` VALUES (21, 2, 2, 'test', '2025-06-16 14:32:14', '2025-06-16 14:32:14', NULL);
+INSERT INTO `user_roles` VALUES (28, 54, 1, 'admin', '2026-06-24 16:55:38', '2026-06-24 16:55:38', NULL);
+INSERT INTO `user_roles` VALUES (29, 2, 9, 'cs', '2026-07-06 16:17:28', '2026-07-06 16:17:28', NULL);
+INSERT INTO `user_roles` VALUES (31, 55, 2, 'test', '2026-07-07 14:03:56', '2026-07-07 14:03:56', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
