@@ -92,6 +92,8 @@ func (m *MakeController) generateFile(_make, file, desc string) {
 	routePath := filePath
 	// 去掉控制器目录前缀
 	routePath = strings.TrimPrefix(routePath, "app/controller/")
+	routePath = strings.TrimSuffix(routePath, baseName)
+	routePath = routePath + lo.KebabCase(baseName)
 
 	data := struct {
 		Package     string

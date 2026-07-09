@@ -25,7 +25,7 @@ func (r *{{.Name}}Router) RegisterRoutes(routerGroup *gin.RouterGroup) {
    	    {{.NameLower}} v1.{{.Name}}Controller
     )
 
-    router := routerGroup.Group("/api/v1/{{.NameLower}}")
+    router := routerGroup.Group("/api/v1/{{.NameKebabCase}}")
     {
         // 列表
         router.GET("", {{.NameLower}}.List)

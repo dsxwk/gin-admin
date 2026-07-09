@@ -50,7 +50,7 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 		if err != nil {
 			return pageData, err
 		}
-		pageData.List = m
+		pageData.List = models
 	}
 
 	return pageData, nil

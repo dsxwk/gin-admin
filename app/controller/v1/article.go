@@ -18,9 +18,9 @@ type ArticleController struct {
 }
 
 // List 列表
-// @Tags 用户管理
+// @Tags 文章管理
 // @Summary 列表
-// @Description 用户列表
+// @Description 文章列表
 // @Param token header string true "认证Token"
 // @Param page query string true "页码"
 // @Param pageSize query string true "分页大小"
@@ -54,9 +54,9 @@ func (s *ArticleController) List(c *gin.Context) {
 }
 
 // Detail 详情
-// @Tags 用户管理
+// @Tags 文章管理
 // @Summary 详情
-// @Description 用户详情
+// @Description 文章详情
 // @Param token header string true "认证Token"
 // @Param id path int true "ID"
 // @Success 200 {object} errcode.SuccessResponse{data=model.Article} "成功"
@@ -90,11 +90,11 @@ func (s *ArticleController) Detail(c *gin.Context) {
 }
 
 // Create 创建
-// @Tags 用户管理
+// @Tags 文章管理
 // @Summary 创建
-// @Description 用户创建
+// @Description 文章创建
 // @Param token header string true "认证Token"
-// @Param data body request.RoleCreate true "创建参数"
+// @Param data body request.ArticleCreate true "创建参数"
 // @Success 200 {object} errcode.SuccessResponse{data=model.Article} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
@@ -125,12 +125,12 @@ func (s *ArticleController) Create(c *gin.Context) {
 }
 
 // Update 更新
-// @Tags 用户管理
+// @Tags 文章管理
 // @Summary 更新
-// @Description 用户更新
+// @Description 文章更新
 // @Param token header string true "认证Token"
 // @Param id path int true "ID"
-// @Param data body request.RoleUpdate true "更新参数"
+// @Param data body request.ArticleUpdate true "更新参数"
 // @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
@@ -173,9 +173,9 @@ func (s *ArticleController) Update(c *gin.Context) {
 }
 
 // Delete 删除
-// @Tags 用户管理
+// @Tags 文章管理
 // @Summary 删除
-// @Description 用户删除
+// @Description 文章删除
 // @Param token header string true "认证Token"
 // @Param id path int true "ID"
 // @Success 200 {object} errcode.SuccessResponse "成功"

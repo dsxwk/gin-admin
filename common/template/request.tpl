@@ -24,6 +24,22 @@ func (s {{.StructName}}) Validate(data {{.StructName}}, scene string) error {
     return nil
 }
 
+// {{.StructName}}Create {{.StructName}}创建验证
+type {{.StructName}}Create struct {
+{{- range .Fields}}
+{{- if not .IsID}}
+{{.FormattedField}}
+{{- end}}
+{{- end}}
+}
+
+// {{.StructName}}Update {{.StructName}}更新验证
+type {{.StructName}}Update struct {
+{{- range .Fields}}
+{{.FormattedField}}
+{{- end}}
+}
+
 // ConfigValidation 配置验证
 // - 定义验证场景
 // - 也可以添加验证设置

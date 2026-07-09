@@ -43,7 +43,7 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 		if err != nil {
 			return pageData, err
 		}
-		pageData.List = m
+		pageData.List = models
 	}
 
 	return pageData, nil
@@ -209,6 +209,8 @@ func (s *RoleService) Delete(id int64) (err error) {
 		tx.Rollback()
 		return err
 	}
+
+	tx.Commit()
 
 	return nil
 }

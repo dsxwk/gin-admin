@@ -19,9 +19,6 @@ func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageDat
         db     = s.DB(&m)
     )
 
-    pageData.Page = req.Page
-    pageData.PageSize = req.PageSize
-    offset, limit := request.Pagination(req.Page, req.PageSize)
     // 搜索
     db = s.Search(db, m, req.Search).Model(&m)
 
@@ -37,6 +34,10 @@ func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageDat
         }
         pageData.List = models
     } else {
+        pageData.Page = req.Page
+        pageData.PageSize = req.PageSize
+        offset, limit := request.Pagination(req.Page, req.PageSize)
+
         err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&models).Error
         if err != nil {
             return pageData, err

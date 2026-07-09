@@ -80,15 +80,17 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 	}
 
 	data := struct {
-		Package     string // 提取的包名
-		Name        string // 模块名称(首字母大写)
-		NameLower   string // 名称(首字母小写)
-		Description string // 如果为空,使用默认值
+		Package       string // 提取的包名
+		Name          string // 模块名称(首字母大写)
+		NameLower     string // 名称(首字母小写)
+		NameKebabCase string // 名称(中划线)
+		Description   string // 如果为空,使用默认值
 	}{
-		Package:     packageName,
-		Name:        lo.PascalCase(name),
-		NameLower:   lo.CamelCase(name),
-		Description: desc,
+		Package:       packageName,
+		Name:          lo.PascalCase(name),
+		NameLower:     lo.CamelCase(name),
+		NameKebabCase: lo.KebabCase(name),
+		Description:   desc,
 	}
 
 	err = tmpl.Execute(f, data)

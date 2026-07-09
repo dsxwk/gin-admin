@@ -94,7 +94,7 @@ func (s *{{.Name}}Controller) Detail(c *gin.Context) {
 // @Summary 创建
 // @Description {{.Description}}创建
 // @Param token header string true "认证Token"
-// @Param data body request.RoleCreate true "创建参数"
+// @Param data body request.{{.Name}}Create true "创建参数"
 // @Success 200 {object} errcode.SuccessResponse{data=model.{{.Name}}} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
@@ -129,7 +129,7 @@ func (s *{{.Name}}Controller) Create(c *gin.Context) {
 // @Description {{.Description}}更新
 // @Param token header string true "认证Token"
 // @Param id path int true "ID"
-// @Param data body request.RoleUpdate true "更新参数"
+// @Param data body request.{{.Name}}Update true "更新参数"
 // @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"

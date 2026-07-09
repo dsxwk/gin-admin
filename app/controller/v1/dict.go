@@ -94,7 +94,7 @@ func (s *DictController) Detail(c *gin.Context) {
 // @Summary 创建
 // @Description 字典创建
 // @Param token header string true "认证Token"
-// @Param data body request.RoleCreate true "创建参数"
+// @Param data body request.DictCreate true "创建参数"
 // @Success 200 {object} errcode.SuccessResponse{data=model.Dict} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
@@ -129,7 +129,7 @@ func (s *DictController) Create(c *gin.Context) {
 // @Description 字典更新
 // @Param token header string true "认证Token"
 // @Param id path int true "ID"
-// @Param data body request.RoleUpdate true "更新参数"
+// @Param data body request.DictUpdate true "更新参数"
 // @Success 200 {object} errcode.SuccessResponse "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
