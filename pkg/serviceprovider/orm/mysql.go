@@ -20,7 +20,7 @@ func openMysql() (db *gorm.DB, err error) {
 // getMysqlDsn 获取数据库dns
 func getMysqlDsn() string {
 	return pkg.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai&multiStatements=true",
 		conf.Databases.Mysql.Username, conf.Databases.Mysql.Password, conf.Databases.Mysql.Host, conf.Databases.Mysql.Port, conf.Databases.Mysql.Database,
 	)
 }

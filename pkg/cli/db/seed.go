@@ -59,26 +59,30 @@ func (s *Seed) Execute(args []string) {
 			return
 		}
 
-		sqlContent := string(sqlBytes)
-
 		// 开启事务
 		tx := db.Begin()
 
-		// 分割并执行SQL语句
-		statements := parseSQLStatements(sqlContent)
-		successCount := 0
-
-		for _, stmt := range statements {
-			if strings.TrimSpace(stmt) == "" {
-				continue
-			}
-			if err = tx.Exec(stmt).Error; err != nil {
-				tx.Rollback()
-				flag.Errorf("执行SQL失败: %v\nSQL: %s", err, stmt)
-				return
-			}
-			successCount++
+		if err = tx.Exec(string(sqlBytes)).Error; err != nil {
+			tx.Rollback()
+			flag.Errorf("初始化失败: %v", err)
+			return
 		}
+
+		// 分割并执行SQL语句
+		//statements := parseSQLStatements(sqlContent)
+		//successCount := 0
+		//
+		//for _, stmt := range statements {
+		//	if strings.TrimSpace(stmt) == "" {
+		//		continue
+		//	}
+		//	if err = tx.Exec(stmt).Error; err != nil {
+		//		tx.Rollback()
+		//		flag.Errorf("执行SQL失败: %v\nSQL: %s", err, stmt)
+		//		return
+		//	}
+		//	successCount++
+		//}
 
 		// 提交事务
 		if err = tx.Commit().Error; err != nil {
@@ -86,7 +90,7 @@ func (s *Seed) Execute(args []string) {
 			return
 		}
 
-		flag.Successf("数据库初始化成功,共执行 %d 条SQL语句", successCount)
+		flag.Successf("数据库初始化成功")
 	} else {
 		id := values["id"]
 		for _, seed := range migrations.AllSeeds() {
