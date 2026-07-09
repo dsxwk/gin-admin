@@ -33,7 +33,7 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 		if err != nil {
 			return pageData, err
 		}
-		pageData.List = m
+		pageData.List = models
 	} else {
 		pageData.Page = req.Page
 		pageData.PageSize = req.PageSize
