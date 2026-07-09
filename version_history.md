@@ -1,3 +1,9 @@
+## v2.3.3
+> - Optimize code generator and adjust after optimization 
+> - Add system configuration related interfaces
+> - Update database file
+> - Update swagger document
+
 ## v2.3.2
 > - Add JWT key generation command
 > - Optimize the configuration not found to use the default configuration
