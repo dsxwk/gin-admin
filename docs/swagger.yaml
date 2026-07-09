@@ -51,6 +51,19 @@ definitions:
         type: integer
       updatedAt:
         type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+  model.ConfigCategory:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
     type: object
   model.Dict:
     properties:
@@ -265,6 +278,29 @@ definitions:
       updatedAt:
         type: string
     type: object
+  model.SystemConfig:
+    properties:
+      configCategory:
+        $ref: '#/definitions/model.ConfigCategory'
+      configCategoryId:
+        type: integer
+      createdAt:
+        type: string
+      defaultValue:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      optionValue:
+        type: string
+      type:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
   model.User:
     properties:
       age:
@@ -382,6 +418,48 @@ definitions:
       type:
         type: integer
     type: object
+  request.ArticleCreate:
+    properties:
+      categoryId:
+        type: integer
+      content:
+        type: string
+      dataSource:
+        type: integer
+      isPublish:
+        type: integer
+      tag: {}
+      title:
+        type: string
+      uid:
+        type: integer
+    required:
+    - content
+    - tag
+    - title
+    type: object
+  request.ArticleUpdate:
+    properties:
+      categoryId:
+        type: integer
+      content:
+        type: string
+      dataSource:
+        type: integer
+      id:
+        type: integer
+      isPublish:
+        type: integer
+      tag: {}
+      title:
+        type: string
+      uid:
+        type: integer
+    required:
+    - content
+    - tag
+    - title
+    type: object
   request.CheckCaptcha:
     properties:
       captchaId:
@@ -391,6 +469,68 @@ definitions:
     required:
     - captchaId
     - code
+    type: object
+  request.ConfigCategoryCreate:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  request.ConfigCategoryUpdate:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  request.DictCreate:
+    properties:
+      desc:
+        type: string
+      extend: {}
+      name:
+        type: string
+      pid:
+        type: integer
+      sort:
+        type: integer
+      status:
+        type: integer
+      title:
+        type: string
+      value:
+        type: string
+    required:
+    - name
+    - title
+    - value
+    type: object
+  request.DictUpdate:
+    properties:
+      desc:
+        type: string
+      extend: {}
+      id:
+        type: integer
+      name:
+        type: string
+      pid:
+        type: integer
+      sort:
+        type: integer
+      status:
+        type: integer
+      title:
+        type: string
+      value:
+        type: string
+    required:
+    - name
+    - title
+    - value
     type: object
   request.MenuCreate:
     properties:
@@ -529,6 +669,66 @@ definitions:
       status:
         type: integer
     type: object
+  request.SystemConfigCreate:
+    properties:
+      configCategoryId:
+        type: integer
+      defaultValue:
+        type: string
+      key:
+        type: string
+      name:
+        type: string
+      optionValue:
+        type: string
+      type:
+        type: integer
+    required:
+    - defaultValue
+    - key
+    - name
+    - optionValue
+    type: object
+  request.SystemConfigUpdate:
+    properties:
+      configCategoryId:
+        type: integer
+      defaultValue:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      optionValue:
+        type: string
+      type:
+        type: integer
+    required:
+    - defaultValue
+    - key
+    - name
+    - optionValue
+    type: object
+  request.SystemConfigUpdates:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/request.SystemConfigValueUpdate'
+        type: array
+    required:
+    - list
+    type: object
+  request.SystemConfigValueUpdate:
+    properties:
+      defaultValue:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+    type: object
   request.UserCreate:
     properties:
       fullName:
@@ -624,7 +824,7 @@ info:
 paths:
   /api/v1/article:
     get:
-      description: 用户列表
+      description: 文章列表
       parameters:
       - description: 认证Token
         in: header
@@ -673,9 +873,9 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-      - 用户管理
+      - 文章管理
     post:
-      description: 用户创建
+      description: 文章创建
       parameters:
       - description: 认证Token
         in: header
@@ -687,7 +887,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.RoleCreate'
+          $ref: '#/definitions/request.ArticleCreate'
       responses:
         "200":
           description: 成功
@@ -708,10 +908,10 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-      - 用户管理
+      - 文章管理
   /api/v1/article/{id}:
     delete:
-      description: 用户删除
+      description: 文章删除
       parameters:
       - description: 认证Token
         in: header
@@ -738,9 +938,9 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-      - 用户管理
+      - 文章管理
     get:
-      description: 用户详情
+      description: 文章详情
       parameters:
       - description: 认证Token
         in: header
@@ -772,9 +972,9 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-      - 用户管理
+      - 文章管理
     put:
-      description: 用户更新
+      description: 文章更新
       parameters:
       - description: 认证Token
         in: header
@@ -791,7 +991,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.RoleUpdate'
+          $ref: '#/definitions/request.ArticleUpdate'
       responses:
         "200":
           description: 成功
@@ -807,7 +1007,7 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-      - 用户管理
+      - 文章管理
   /api/v1/captcha:
     get:
       consumes:
@@ -858,6 +1058,192 @@ paths:
       summary: 校验验证码
       tags:
       - 登录相关
+  /api/v1/config-category:
+    get:
+      description: 配置分类列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.ConfigCategory'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 配置分类管理
+    post:
+      description: 配置分类创建
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ConfigCategoryCreate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ConfigCategory'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 创建
+      tags:
+      - 配置分类管理
+  /api/v1/config-category/{id}:
+    delete:
+      description: 配置分类删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 删除
+      tags:
+      - 配置分类管理
+    get:
+      description: 配置分类详情
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ConfigCategory'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 详情
+      tags:
+      - 配置分类管理
+    put:
+      description: 配置分类更新
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ConfigCategoryUpdate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 更新
+      tags:
+      - 配置分类管理
   /api/v1/dict:
     get:
       description: 字典列表
@@ -923,7 +1309,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.RoleCreate'
+          $ref: '#/definitions/request.DictCreate'
       responses:
         "200":
           description: 成功
@@ -1027,7 +1413,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.RoleUpdate'
+          $ref: '#/definitions/request.DictUpdate'
       responses:
         "200":
           description: 成功
@@ -1713,6 +2099,192 @@ paths:
       summary: 角色菜单
       tags:
       - 菜单管理
+  /api/v1/system-config:
+    get:
+      description: 系统配置列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.SystemConfig'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 系统配置管理
+    post:
+      description: 系统配置创建
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemConfigCreate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SystemConfig'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 创建
+      tags:
+      - 系统配置管理
+  /api/v1/system-config/{id}:
+    delete:
+      description: 系统配置删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 删除
+      tags:
+      - 系统配置管理
+    get:
+      description: 系统配置详情
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SystemConfig'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 详情
+      tags:
+      - 系统配置管理
+    put:
+      description: 系统配置更新
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemConfigUpdate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 更新
+      tags:
+      - 系统配置管理
   /api/v1/test:
     post:
       consumes:
