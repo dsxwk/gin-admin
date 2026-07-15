@@ -12,22 +12,19 @@ const TableNameMenu = "menu"
 
 // Menu 菜单表
 type Menu struct {
-	ID          int64          `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`                 // ID
-	Pid         int64          `gorm:"column:pid;type:int(10) unsigned;not null;comment:父级id" json:"pid"`                                  // 父级id
-	Name        string         `gorm:"column:name;type:varchar(50);not null;comment:路由名称" json:"name"`                                     // 路由名称
-	Path        string         `gorm:"column:path;type:varchar(50);not null;comment:路由路径" json:"path"`                                     // 路由路径
-	Redirect    string         `gorm:"column:redirect;type:varchar(50);not null;comment:重定向" json:"redirect"`                              // 重定向
-	Component   string         `gorm:"column:component;type:varchar(100);not null;comment:组件路径" json:"component"`                          // 组件路径
-	IsLink      int64          `gorm:"column:is_link;type:tinyint(3) unsigned;not null;default:2;comment:是否外链 1=是 2=否 默认=2" json:"isLink"` // 是否外链 1=是 2=否 默认=2
-	Status      int64          `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"`       // 状态 1=启用 2=停用
-	Sort        int64          `gorm:"column:sort;type:int(10) unsigned;not null;comment:排序" json:"sort"`                                  // 排序
-	MenuActions []*MenuActions `gorm:"foreignKey:menu_id;references:id;comment:菜单功能" json:"menuActions"`                                   // 菜单功能
-	RoleMenus   []*RoleMenus   `gorm:"foreignKey:menu_id;references:id;comment:角色菜单" json:"roleMenus"`                                     // 角色菜单
-	Meta        *MenuMeta      `gorm:"foreignKey:menu_id;references:id" json:"meta"`                                                       // 菜单元数据
-	Children    []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`                                                                      // 子节点
-	CreatedAt   *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                      // 创建时间
-	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                      // 更新时间
-	DeletedAt   *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`                 // 删除时间
+	ID         int64          `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`           // ID
+	Pid        int64          `gorm:"column:pid;type:int(10) unsigned;not null;comment:父级id" json:"pid"`                            // 父级id
+	Type       int64          `gorm:"column:type;type:int(10) unsigned;not null;comment:类型 1=菜单 2=功能" json:"type"`                  // 类型 1=菜单 2=功能
+	Name       string         `gorm:"column:name;type:varchar(50);not null;comment:路由名称" json:"name"`                               // 路由名称
+	Status     int64          `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"` // 状态 1=启用 2=停用
+	Sort       int64          `gorm:"column:sort;type:int(10) unsigned;not null;comment:排序" json:"sort"`                            // 排序
+	MenuAction *MenuActions   `gorm:"foreignKey:menu_id;references:id;comment:菜单功能" json:"menuAction"`                              // 菜单功能
+	RoleMenus  []*RoleMenus   `gorm:"foreignKey:menu_id;references:id;comment:角色菜单" json:"roleMenus"`                               // 角色菜单
+	Meta       *MenuMeta      `gorm:"foreignKey:menu_id;references:id" json:"meta"`                                                 // 菜单元数据
+	Children   []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`                                                                // 子节点
+	CreatedAt  *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                // 创建时间
+	UpdatedAt  *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                // 更新时间
+	DeletedAt  *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`           // 删除时间
 }
 
 // TableName Menu's table name

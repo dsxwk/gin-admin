@@ -37,21 +37,6 @@ func (r *MenuRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 
 		// 删除
 		router.DELETE("/menu/:id", menu.Delete)
-
-		// 菜单功能
-		router.GET("/menu/:id/action", menu.Action)
-
-		// 菜单功能详情
-		router.GET("/menu/:id/action/:actionId", menu.ActionDetail)
-
-		// 新增菜单功能
-		router.POST("/menu/:id/action", menu.CreateAction)
-
-		// 更新菜单功能
-		router.PUT("/menu/:id/action/:actionId", menu.UpdateAction)
-
-		// 删除菜单功能
-		router.DELETE("/menu/:id/action/:actionId", menu.DeleteAction)
 	}
 }
 

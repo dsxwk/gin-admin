@@ -6,52 +6,47 @@ import (
 	"github.com/gookit/validate"
 )
 
-// Menu Validator
+// Menu 菜单验证
 type Menu struct {
 	base.BaseRequest
 	PageListValidate
-	ID        int64      `json:"id" validate:"required|int|gt:0" label:"ID"`
-	RoleId    string     `json:"roleId" form:"roleId" validate:"required" label:"角色id"`
-	MenuId    int64      `json:"menuId" form:"menuId" validate:"required|int|gt:0" label:"菜单id"`
-	Pid       int64      `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Name      string     `json:"name" form:"name" validate:"required" label:"路由名称"`
-	Path      string     `json:"path" form:"path" validate:"required" label:"路由路径"`
-	Redirect  string     `json:"redirect" form:"redirect" validate:"" label:"重定向"`
-	Component string     `json:"component" form:"component" validate:"required" label:"组件路径"`
-	IsLink    int64      `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
-	Status    int64      `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-	Sort      int64      `json:"sort" form:"sort" validate:"int" label:"排序"`
-	Meta      Meta       `json:"meta" form:"meta" validate:"required" label:"菜单元数据"`
-	RoleMenus []RoleMenu `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
+	ID         int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
+	RoleId     string       `json:"roleId" form:"roleId" validate:"required" label:"角色id"`
+	MenuId     int64        `json:"menuId" form:"menuId" validate:"required|int|gt:0" label:"菜单id"`
+	Pid        int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name       string       `json:"name" form:"name" validate:"required" label:"路由名称|功能标识"`
+	Type       int64        `json:"type" form:"type" validate:"required|int" label:"类型 1=菜单 2=功能"`
+	Status     int64        `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort       int64        `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Meta       Meta         `json:"meta" form:"meta" validate:"" label:"菜单元数据"`
+	MenuAction ActionCreate `json:"menuAction" form:"menuAction" validate:"" label:"菜单功能"`
+	RoleMenus  []RoleMenu   `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
 }
 
 // MenuCreate 菜单创建
 type MenuCreate struct {
-	Pid       int64      `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Name      string     `json:"name" form:"name" validate:"required" label:"路由名称"`
-	Path      string     `json:"path" form:"path" validate:"required" label:"路由路径"`
-	Redirect  string     `json:"redirect" form:"redirect" validate:"" label:"重定向"`
-	Component string     `json:"component" form:"component" validate:"required" label:"组件路径"`
-	IsLink    int64      `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
-	Status    int64      `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-	Sort      int64      `json:"sort" form:"sort" validate:"int" label:"排序"`
-	Meta      Meta       `json:"meta" form:"meta" validate:"required" label:"菜单元数据"`
-	RoleMenus []RoleMenu `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
+	Pid        int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Type       int64        `json:"type" form:"type" validate:"required|int" label:"类型 1=菜单 2=功能"`
+	Name       string       `json:"name" form:"name" validate:"required" label:"路由名称|功能标识"`
+	IsLink     int64        `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
+	Status     int64        `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort       int64        `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Meta       Meta         `json:"meta" form:"meta" validate:"" label:"菜单元数据"`
+	MenuAction ActionCreate `json:"menuAction" form:"menuAction" validate:"" label:"菜单功能"`
+	RoleMenus  []RoleMenu   `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
 }
 
 // MenuUpdate 菜单更新
 type MenuUpdate struct {
-	ID        int64      `json:"id" validate:"required|int|gt:0" label:"ID"`
-	Pid       int64      `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Name      string     `json:"name" form:"name" validate:"required" label:"路由名称"`
-	Path      string     `json:"path" form:"path" validate:"required" label:"路由路径"`
-	Redirect  string     `json:"redirect" form:"redirect" validate:"" label:"重定向"`
-	Component string     `json:"component" form:"component" validate:"required" label:"组件路径"`
-	IsLink    int64      `json:"isLink" form:"isLink" validate:"required|int" label:"是否外链 1=是 2=否 默认=2"`
-	Status    int64      `json:"status" form:"status" validate:"int" label:"状态 1=启用 2=停用"`
-	Sort      int64      `json:"sort" form:"sort" validate:"int" label:"排序"`
-	Meta      Meta       `json:"meta" form:"meta" validate:"required" label:"菜单元数据"`
-	RoleMenus []RoleMenu `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
+	ID         int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
+	Pid        int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Type       int64        `json:"type" form:"type" validate:"required|int" label:"类型 1=菜单 2=功能"`
+	Name       string       `json:"name" form:"name" validate:"required" label:"路由名称|功能标识"`
+	Status     int64        `json:"status" form:"status" validate:"int" label:"状态 1=启用 2=停用"`
+	Sort       int64        `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Meta       Meta         `json:"meta" form:"meta" validate:"" label:"菜单元数据"`
+	MenuAction ActionCreate `json:"menuAction" form:"menuAction" validate:"" label:"菜单功能"`
+	RoleMenus  []RoleMenu   `json:"roleMenus" form:"roleMenus" validate:"" label:"角色菜单"`
 }
 
 // Meta 菜单元数据
@@ -59,6 +54,9 @@ type Meta struct {
 	MenuId      int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 	Title       string `json:"title" form:"title" validate:"required" label:"菜单名称"`
 	Icon        string `json:"icon" form:"icon" validate:"required" label:"菜单图标"`
+	Path        string `json:"path" form:"path" validate:"required" label:"路由路径"`
+	Redirect    string `json:"redirect" form:"redirect" validate:"" label:"重定向"`
+	Component   string `json:"component" form:"component" validate:"required" label:"组件路径"`
 	IsHide      int64  `json:"isHide" form:"isHide" validate:"required|int" label:"是否隐藏 1=是 2=否"`
 	IsKeepAlive int64  `json:"isKeepAlive" form:"isKeepAlive" validate:"required|int" label:"是否缓存 1=是 2=否"`
 	IsAffix     int64  `json:"isAffix" form:"isAffix" validate:"required|int" label:"是否固定 1=是 2=否"`
@@ -68,8 +66,9 @@ type Meta struct {
 
 // RoleMenu 角色菜单
 type RoleMenu struct {
-	RoleId int64 `json:"roleId" form:"roleId" validate:"int" label:"角色id"`
-	MenuId int64 `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
+	RoleId int64  `json:"roleId" form:"roleId" validate:"int" label:"角色id"`
+	MenuId int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
+	Name   string `json:"name" form:"name" validate:"required" label:"角色名称"`
 }
 
 // Validate 请求验证
@@ -97,37 +96,17 @@ func (s Menu) ConfigValidation(v *validate.Validation) {
 		"Create": []string{
 			"Pid",
 			"Name",
-			"Path",
-			"Redirect",
 			"IsLink",
 			"Status",
 			"Sort",
-			"Meta",
-			"Meta.MenuId",
-			"Meta.Title",
-			"Meta.Icon",
-			"Meta.IsHide",
-			"Meta.IsAffix",
-			"Meta.IsLink",
-			"Meta.IsIframe",
 		},
 		"Update": []string{
 			"ID",
 			"Pid",
 			"Name",
-			"Path",
-			"Redirect",
 			"IsLink",
 			"Status",
 			"Sort",
-			"Meta",
-			"Meta.MenuId",
-			"Meta.Title",
-			"Meta.Icon",
-			"Meta.IsHide",
-			"Meta.IsAffix",
-			"Meta.IsLink",
-			"Meta.IsIframe",
 		},
 		"Detail": []string{
 			"ID",

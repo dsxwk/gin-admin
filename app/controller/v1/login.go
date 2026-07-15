@@ -39,8 +39,8 @@ type CaptchaResponse struct {
 
 // Login 登录
 // @Tags 登录相关
-// @Summary 登录
-// @Description 用户登录
+// @Summary 账号密码登录
+// @Description 用户账号密码登录
 // @Accept json
 // @Produce json
 // @Param data body request.UserLogin true "登录参数"
@@ -62,6 +62,14 @@ func (s *LoginController) Login(c *gin.Context) {
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
+	}
+
+	if req.Code != "" {
+		ok := s.verify(req.CaptchaID, req.Code)
+		if !ok {
+			s.Response.Error(c, errcode.ArgsError().WithMsg("验证码错误"))
+			return
+		}
 	}
 
 	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)

@@ -9,27 +9,24 @@ import (
 // MenuActions Validator
 type MenuActions struct {
 	base.BaseRequest
-	ID          int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
-	MenuId      int64        `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
-	Pid         int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Type        int64        `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
-	BtnType     string       `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
-	BtnStyle    string       `json:"btnStyle" form:"btnStyle" validate:"required|string" label:"按钮样式"`
-	BtnSize     string       `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
-	IsConfirm   int64        `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
-	Label       string       `json:"label" form:"label" validate:"required|string" label:"功能名称"`
-	AuthValue   string       `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
-	IsLink      int64        `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
-	Sort        int64        `json:"sort" form:"sort" validate:"required|int" label:"排序"`
-	RoleActions []RoleAction `json:"roleActions" form:"roleActions" validate:"" label:"角色功能"`
+	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
+	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
+	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
+	BtnStyle  string `json:"btnStyle" form:"btnStyle" validate:"required|string" label:"按钮样式"`
+	BtnSize   string `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
+	IsConfirm int64  `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
+	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
+	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
+	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
+	Sort      int64  `json:"sort" form:"sort" validate:"required|int" label:"排序"`
 	PageListValidate
 }
 
 // RoleAction 角色功能
 type RoleAction struct {
 	RoleId   int64  `json:"roleId" form:"roleId" validate:"int" label:"角色id"`
-	Name     string `json:"name" form:"name" validate:"int" label:"角色名称"`
 	ActionId int64  `json:"actionId" form:"actionId" validate:"int" label:"功能id"`
+	Name     string `json:"name" form:"name" validate:"int" label:"角色名称"`
 }
 
 // ActionList 功能列表
@@ -39,7 +36,6 @@ type ActionList struct {
 
 // ActionCreate 功能创建
 type ActionCreate struct {
-	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
 	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
@@ -49,14 +45,11 @@ type ActionCreate struct {
 	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
 	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
-	Sort      int64  `json:"sort" form:"sort" validate:"required|int" label:"排序"`
 }
 
 // ActionUpdate 功能更新
 type ActionUpdate struct {
-	ID        int64  `json:"id" form:"id" validate:"required|int" label:"功能id"`
 	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
-	Pid       int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
 	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
 	BtnStyle  string `json:"btnStyle" form:"btnStyle" validate:"required|string" label:"按钮样式"`
@@ -65,7 +58,6 @@ type ActionUpdate struct {
 	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
 	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
-	Sort      int64  `json:"sort" form:"sort" validate:"required|int" label:"排序"`
 }
 
 // Validate 请求验证
@@ -84,10 +76,9 @@ func (s MenuActions) Validate(data MenuActions, scene string) error {
 func (s MenuActions) ConfigValidation(v *validate.Validation) {
 	v.WithScenes(validate.SValues{
 		"List": []string{
-			"ID",
+			"MenuId",
 		},
 		"Create": []string{
-			"Pid",
 			"MenuId",
 			"Type",
 			"BtnType",
@@ -97,11 +88,8 @@ func (s MenuActions) ConfigValidation(v *validate.Validation) {
 			"Label",
 			"AuthValue",
 			"IsLink",
-			"Sort",
 		},
 		"Update": []string{
-			"ID",
-			"Pid",
 			"MenuId",
 			"Type",
 			"BtnType",
@@ -111,7 +99,6 @@ func (s MenuActions) ConfigValidation(v *validate.Validation) {
 			"Label",
 			"AuthValue",
 			"IsLink",
-			"Sort",
 		},
 		"Detail": []string{
 			"ID",
@@ -148,6 +135,5 @@ func (s MenuActions) Translates() map[string]string {
 		"Label":                     "功能名称",
 		"AuthValue":                 "权限标识",
 		"IsLink":                    "是否为链接",
-		"Sort":                      "排序",
 	}
 }

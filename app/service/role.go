@@ -21,7 +21,9 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 	)
 
 	// 搜索
-	db = s.Search(db, m, req.Search).Model(&m).Preload("RoleMenus")
+	db = s.Search(db, m, req.Search).
+		Model(&m).
+		Preload("RoleMenus")
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -170,6 +172,7 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 			newRoleMenus = append(newRoleMenus, model.RoleMenus{
 				MenuId: int64(roleMap["menuId"].(float64)),
 				RoleId: id,
+				Name:   roleMap["name"].(string),
 			})
 		}
 
@@ -205,6 +208,14 @@ func (s *RoleService) Delete(id int64) (err error) {
 	err = tx.Model(&model.RoleMenus{}).
 		Where("role_id = ?", id).
 		Delete(&model.RoleMenus{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(&model.UserRoles{}).
+		Where("role_id = ?", id).
+		Delete(&model.UserRoles{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
