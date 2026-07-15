@@ -5,7 +5,6 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
-	"time"
 )
 
 type DictService struct {
@@ -77,23 +76,10 @@ func (s *DictService) Create(req request.Dict) (request.Dict, error) {
 
 // Update 更新
 func (s *DictService) Update(id int64, data map[string]interface{}) (err error) {
-	var (
-		m  model.Dict
-		db = s.DB(&m)
-	)
-
 	if pkg.HasKey(data, "extend") {
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}
-	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.Now()
-
-	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.Updates(&model.Dict{}, id, data)
 }
 
 // Detail 详情

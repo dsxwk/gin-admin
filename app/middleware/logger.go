@@ -56,7 +56,7 @@ func (s Logger) Handle() gin.HandlerFunc {
 			currentCtx = ctxkey.WithValue(currentCtx, ctxkey.MsKey, cost)
 			c.Request = c.Request.WithContext(currentCtx)
 
-			if conf.Log.Access {
+			if facade.Config().Log.Access {
 				log.WithDebugger(currentCtx).Info("Access Log")
 			}
 			debugger.Store.Delete(traceId)
@@ -100,7 +100,7 @@ func (s Logger) getParams(c *gin.Context) any {
 // getLang 获取语言
 func (s Logger) getLang(c *gin.Context) string {
 	// 配置支持的语言如["zh", "en"]
-	supported := strings.Split(conf.I18n.Lang, ",")
+	supported := strings.Split(facade.Config().I18n.Lang, ",")
 
 	if q := strings.ToLower(strings.TrimSpace(c.Query("lang"))); q != "" {
 		if lang := s.matchLang(q, supported); lang != "" {

@@ -4,7 +4,6 @@ import (
     "gin/app/model"
     "gin/app/request"
     "gin/common/base"
-    "time"
 )
 
 type {{.Name}}Service struct {
@@ -71,20 +70,7 @@ func (s *{{.Name}}Service) Create(req request.{{.Name}}) (request.{{.Name}}, err
 
 // Update 更新
 func (s *{{.Name}}Service) Update(id int64, data map[string]interface{}) (err error) {
-    var (
-        m  model.{{.Name}}
-        db = s.DB(&m)
-    )
-
-    rows := model.FilterFields(db, m, data)
-    rows["updated_at"] = time.DateTime
-
-    err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
-    if err != nil {
-        return err
-    }
-
-    return nil
+    return s.Updates(&model.{{.Name}}{}, id, data)
 }
 
 // Detail 详情

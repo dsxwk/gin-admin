@@ -3,8 +3,10 @@ package base
 import (
 	"context"
 	"gin/app/facade"
+	"gin/app/model"
 	"gin/pkg/serviceprovider/orm"
 	"gorm.io/gorm"
+	"time"
 )
 
 type BaseService struct {
@@ -67,4 +69,12 @@ func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]inter
 		db = db.Where(whereSql, args...)
 	}
 	return db
+}
+
+// Updates 公共更新方法
+func (s *BaseService) Updates(m Model, id int64, data map[string]interface{}) error {
+	db := s.DB(m)
+	rows := model.FilterFields(db, m, data)
+	rows["updated_at"] = time.Now()
+	return db.Model(m).Where("id = ?", id).Updates(rows).Error
 }

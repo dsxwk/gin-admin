@@ -13,7 +13,7 @@ type Dict struct {
 	Pid    int64       `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name   string      `json:"name" form:"name" validate:"required" label:"标识"`
 	Title  string      `json:"title" form:"title" validate:"required" label:"名称"`
-	Value  string      `json:"value" form:"value" validate:"required" label:"映射值"`
+	Value  string      `json:"value" form:"value" validate:"" label:"映射值"`
 	Status int64       `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
 	Sort   int64       `json:"sort" form:"sort" validate:"int" label:"排序"`
 	Extend interface{} `json:"extend" form:"extend" validate:"" label:"扩展字段"`

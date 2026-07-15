@@ -5,7 +5,6 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
-	"time"
 )
 
 type ArticleService struct {
@@ -76,23 +75,10 @@ func (s *ArticleService) Create(req request.Article) (request.Article, error) {
 
 // Update 更新
 func (s *ArticleService) Update(id int64, data map[string]interface{}) (err error) {
-	var (
-		m  model.Article
-		db = s.DB(&m)
-	)
-
 	if pkg.HasKey(data, "tag") {
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}
-	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.Now()
-
-	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.Updates(&model.Article{}, id, data)
 }
 
 // Detail 详情

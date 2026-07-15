@@ -5,7 +5,6 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"time"
 )
 
 type SystemConfigService struct {
@@ -115,20 +114,7 @@ func (s *SystemConfigService) Create(req request.SystemConfig) (request.SystemCo
 
 // Update 更新
 func (s *SystemConfigService) Update(id int64, data map[string]interface{}) (err error) {
-	var (
-		m  model.SystemConfig
-		db = s.DB(&m)
-	)
-
-	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.Now()
-
-	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.Updates(&model.SystemConfig{}, id, data)
 }
 
 // Detail 详情

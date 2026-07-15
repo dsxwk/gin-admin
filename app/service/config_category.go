@@ -4,7 +4,6 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"time"
 )
 
 type ConfigCategoryService struct {
@@ -69,20 +68,7 @@ func (s *ConfigCategoryService) Create(req request.ConfigCategory) (request.Conf
 
 // Update 更新
 func (s *ConfigCategoryService) Update(id int64, data map[string]interface{}) (err error) {
-	var (
-		m  model.ConfigCategory
-		db = s.DB(&m)
-	)
-
-	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.Now()
-
-	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.Updates(&model.ConfigCategory{}, id, data)
 }
 
 // Detail 详情
