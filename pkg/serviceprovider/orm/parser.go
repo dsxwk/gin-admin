@@ -133,10 +133,23 @@ func parseExists(s *schema.Schema, key string, value any) (string, []any, error)
 // parseField 解析字段
 func parseField(s *schema.Schema, field string, value any) (string, []any, error) {
 	name, operator := SplitOperator(field)
+
+	// 字段没有指定操作符时,尝试从value解析
+	if operator == "=" {
+		if values, ok := value.([]any); ok && len(values) == 2 {
+			if op, ok := values[0].(string); ok {
+				operator = strings.ToLower(strings.TrimSpace(op))
+				value = values[1]
+			}
+		}
+	}
+
+	// 关联字段
 	if IsRelation(name) {
 		return BuildRelation(s, name, operator, value)
 	}
 
+	// 普通字段
 	f := FindField(s, name)
 	if f == nil {
 		return "", nil, fmt.Errorf("字段[%s]不存在", name)
