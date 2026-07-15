@@ -1,3 +1,8 @@
+## v2.3.5
+> - Fix update time problem, optimize database connection, configure hot update lock
+> - Update jwt version, optimize recover middleware to determine whether to return stack information based on environment
+> - Optimize code generator to generate update public method
+
 ## v2.3.4
 > - Merge menu function into menu removal role function using role menu
 > - Add user batch deletion
