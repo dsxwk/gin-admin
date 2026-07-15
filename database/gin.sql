@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 09/07/2026 11:23:25
+ Date: 14/07/2026 17:25:25
 */
 
 SET NAMES utf8mb4;
@@ -55,7 +55,7 @@ CREATE TABLE `category`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
@@ -73,7 +73,7 @@ CREATE TABLE `config_category`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '配置分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '配置分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of config_category
@@ -119,11 +119,8 @@ DROP TABLE IF EXISTS `menu`;
 CREATE TABLE `menu`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `pid` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '父级id',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '路由名称',
-  `path` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '路由路径',
-  `redirect` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '重定向',
-  `component` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '组件路径',
-  `is_link` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否外链 1=是 2=否 默认=2',
+  `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '类型 1=菜单 2=功能',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '路由名称|功能标识',
   `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态 1=启用 2=停用',
   `sort` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '排序',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
@@ -131,22 +128,47 @@ CREATE TABLE `menu`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
-INSERT INTO `menu` VALUES (1, 0, 'home', '/home', '', 'home/index', 2, 1, 1, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
-INSERT INTO `menu` VALUES (2, 0, 'system', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
-INSERT INTO `menu` VALUES (3, 2, 'systemMenu', '/system/menu', '', 'system/menu/index', 2, 1, 3, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
-INSERT INTO `menu` VALUES (4, 2, 'systemUser', '/system/user', '', 'system/user/index', 2, 1, 4, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
-INSERT INTO `menu` VALUES (5, 2, 'systemRole', '/system/role', '', 'system/role/index', 2, 1, 5, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
-INSERT INTO `menu` VALUES (6, 2, 'systemDic', '/system/dic', '', 'system/dic/index', 2, 1, 6, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
-INSERT INTO `menu` VALUES (10, 0, 'article', '/article', '', 'article/index', 2, 1, 7, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
-INSERT INTO `menu` VALUES (20, 2, 'systemConfig', '/system/config', '', 'layouts/routerView/parent', 2, 1, 7, '2026-07-08 15:04:29', '2006-01-02 15:04:05', NULL);
-INSERT INTO `menu` VALUES (21, 20, 'systemConfigList', '/system/config/index', '', 'system/config/index', 2, 1, 7, '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
-INSERT INTO `menu` VALUES (22, 20, 'systemConfigSetting', '/system/config/setting', '', 'system/config/setting', 2, 1, 8, '2026-07-08 15:54:52', '2006-01-02 15:04:05', NULL);
-INSERT INTO `menu` VALUES (23, 20, 'systemConfigCategory', '/system/config-category/index', '', 'system/config/category/index', 2, 1, 1, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
+INSERT INTO `menu` VALUES (1, 0, 1, 'home', 1, 1, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
+INSERT INTO `menu` VALUES (2, 0, 1, 'system', 1, 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
+INSERT INTO `menu` VALUES (3, 2, 1, 'systemMenu', 1, 3, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
+INSERT INTO `menu` VALUES (4, 2, 1, 'systemUser', 1, 4, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
+INSERT INTO `menu` VALUES (5, 2, 1, 'systemRole', 1, 5, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
+INSERT INTO `menu` VALUES (6, 2, 1, 'systemDic', 1, 6, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
+INSERT INTO `menu` VALUES (10, 0, 1, 'article', 1, 7, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `menu` VALUES (20, 2, 1, 'systemConfig', 1, 7, '2026-07-08 15:04:29', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (21, 20, 1, 'systemConfigList', 1, 7, '2026-07-08 15:51:11', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (22, 20, 1, 'systemConfigSetting', 1, 8, '2026-07-08 15:54:52', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (23, 20, 1, 'systemConfigCategory', 1, 1, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
+INSERT INTO `menu` VALUES (24, 3, 2, 'sys.menu.add', 1, 0, '2025-05-21 10:24:14', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (25, 3, 2, 'sys.menu.edit', 1, 1, '2025-05-21 10:30:24', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (27, 3, 2, 'sys.menu.del', 1, 2, '2025-05-21 10:30:49', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (32, 4, 2, 'sys.user.add', 1, 0, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (33, 4, 2, 'sys.user.batchDel', 1, 0, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (34, 4, 2, 'sys.user.edit', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (35, 4, 2, 'sys.user.del', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (37, 5, 2, 'sys.role.add', 1, 0, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (38, 5, 2, 'sys.role.edit', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (39, 5, 2, 'sys.role.del', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (40, 6, 2, 'sys.dic.add', 1, 0, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (41, 6, 2, 'sys.dic.edit', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (42, 6, 2, 'sys.dic.del', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (43, 10, 2, 'article.add', 1, 0, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (44, 10, 2, 'article.edit', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (45, 10, 2, 'article.del', 1, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu` VALUES (48, 21, 2, 'sys.config.add', 1, 0, '2026-07-08 16:00:42', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (49, 21, 2, 'sys.config.edit', 1, 0, '2026-07-08 16:01:29', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (50, 21, 2, 'sys.config.del', 1, 0, '2026-07-08 16:03:15', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (51, 23, 2, 'sys.configCategory.add', 1, 0, '2026-07-09 11:11:01', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (52, 23, 2, 'sys.configCategory.edit', 1, 0, '2026-07-09 11:11:36', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (53, 23, 2, 'sys.configCategory.del', 1, 0, '2026-07-09 11:12:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu` VALUES (54, 4, 2, 'sys.user.import', 1, 0, '2026-07-10 13:34:50', '2026-07-10 13:34:50', NULL);
+INSERT INTO `menu` VALUES (56, 54, 0, 'sysUserImport', 1, 10, '2026-07-13 15:53:05', '2026-07-13 15:53:05', NULL);
+INSERT INTO `menu` VALUES (58, 3, 2, 'sys.menu.addChildren', 1, 0, '2026-07-14 09:36:51', '2026-07-14 09:36:51', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -154,7 +176,6 @@ INSERT INTO `menu` VALUES (23, 20, 'systemConfigCategory', '/system/config-categ
 DROP TABLE IF EXISTS `menu_actions`;
 CREATE TABLE `menu_actions`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `pid` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '父级id',
   `menu_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '菜单id',
   `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '类型 1=header 2=operation',
   `btn_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'btn' COMMENT '按钮类型 text|btn',
@@ -164,44 +185,40 @@ CREATE TABLE `menu_actions`  (
   `label` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '功能名称',
   `auth_value` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '权限标识',
   `is_link` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否为链接 1=是 2=否',
-  `sort` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '排序',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_actions
 -- ----------------------------
-INSERT INTO `menu_actions` VALUES (1, 0, 3, 1, 'btn', 'primary', 'small', 2, '新增菜单', 'sys.menu.add', 2, 0, '2025-05-21 10:24:14', '2025-06-13 16:26:48', NULL);
-INSERT INTO `menu_actions` VALUES (2, 0, 3, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.menu.edit', 2, 0, '2025-05-21 10:30:24', '2025-06-13 17:17:32', NULL);
-INSERT INTO `menu_actions` VALUES (3, 0, 3, 2, 'btn', 'primary', 'small', 2, '功能', 'sys.menu.action', 2, 0, '2025-05-21 10:30:37', '2025-06-13 16:27:43', NULL);
-INSERT INTO `menu_actions` VALUES (4, 0, 3, 2, 'btn', 'danger', 'small', 1, '删除', 'sys.menu.del', 2, 0, '2025-05-21 10:30:49', '2025-06-13 16:27:51', NULL);
-INSERT INTO `menu_actions` VALUES (6, 3, 3, 1, 'btn', 'primary', 'small', 2, '新增功能', 'sys.menu.action.add', 2, 0, '2025-06-11 11:46:16', '2025-06-13 16:28:07', NULL);
-INSERT INTO `menu_actions` VALUES (7, 3, 3, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.menu.action.edit', 2, 0, '2025-06-13 11:36:56', '2025-06-13 16:28:14', NULL);
-INSERT INTO `menu_actions` VALUES (8, 3, 3, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.menu.action.del', 2, 0, '2025-06-13 11:37:07', '2025-06-13 16:28:21', NULL);
-INSERT INTO `menu_actions` VALUES (9, 0, 4, 1, 'btn', 'primary', 'small', 2, '新增用户', 'sys.user.add', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (10, 0, 4, 1, 'btn', 'danger', 'small', 2, '批量删除', 'sys.user.batchDel', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (11, 0, 4, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.user.edit', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (12, 0, 4, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.user.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (13, 0, 5, 1, 'btn', 'danger', 'small', 2, '批量删除', 'sys.role.batchDel', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (14, 0, 5, 1, 'btn', 'primary', 'small', 2, '新增角色', 'sys.role.add', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (15, 0, 5, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.role.edit', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (16, 0, 5, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.role.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (17, 0, 6, 1, 'btn', 'primary', 'small', 2, '新增字典', 'sys.dic.add', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (18, 0, 6, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.dic.edit', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (19, 0, 6, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.dic.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (20, 0, 10, 1, 'btn', 'primary', 'small', 2, '新增文章', 'article.add', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (21, 0, 10, 2, 'btn', 'primary', 'small', 2, '编辑', 'article.edit', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (22, 0, 10, 2, 'btn', 'danger', 'small', 2, '删除', 'article.del', 2, 0, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
-INSERT INTO `menu_actions` VALUES (25, 0, 21, 1, 'btn', 'primary', 'small', 2, '新增配置', 'sys.config.add', 2, 1, '2026-07-08 16:00:42', '2026-07-08 16:02:30', NULL);
-INSERT INTO `menu_actions` VALUES (26, 0, 21, 2, 'btn', 'primary', 'small', 2, '编辑配置', 'sys.config.edit', 2, 2, '2026-07-08 16:01:29', '2026-07-08 16:02:37', NULL);
-INSERT INTO `menu_actions` VALUES (27, 0, 21, 2, 'btn', 'danger', 'small', 2, '删除配置', 'sys.config.del', 2, 3, '2026-07-08 16:03:15', '2026-07-08 16:03:15', NULL);
-INSERT INTO `menu_actions` VALUES (28, 0, 23, 1, 'btn', 'primary', 'default', 2, '新增配置分类', 'sys.configCategory.add', 2, 1, '2026-07-09 11:11:01', '2026-07-09 11:13:11', NULL);
-INSERT INTO `menu_actions` VALUES (29, 0, 23, 2, 'btn', 'primary', 'small', 2, '编辑配置分类', 'sys.configCategory.edit', 2, 2, '2026-07-09 11:11:36', '2026-07-09 11:13:17', NULL);
-INSERT INTO `menu_actions` VALUES (30, 0, 23, 2, 'btn', 'primary', 'small', 2, '删除配置分类', 'sys.configCategory.del', 2, 3, '2026-07-09 11:12:04', '2026-07-09 11:13:25', NULL);
+INSERT INTO `menu_actions` VALUES (1, 24, 1, 'btn', 'primary', 'default', 2, '新增菜单', 'sys.menu.add', 2, '2025-05-21 10:24:14', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (2, 25, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.menu.edit', 2, '2025-05-21 10:30:24', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (4, 27, 2, 'btn', 'danger', 'small', 1, '删除', 'sys.menu.del', 2, '2025-05-21 10:30:49', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (8, 32, 1, 'btn', 'primary', 'default', 2, '新增用户', 'sys.user.add', 2, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (9, 33, 1, 'btn', 'danger', 'default', 2, '批量删除', 'sys.user.batchDel', 2, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (10, 34, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.user.edit', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (11, 35, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.user.del', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (13, 37, 1, 'btn', 'primary', 'default', 2, '新增角色', 'sys.role.add', 2, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (14, 38, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.role.edit', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (15, 39, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.role.del', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (16, 40, 1, 'btn', 'primary', 'default', 2, '新增字典', 'sys.dic.add', 2, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (17, 41, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.dic.edit', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (18, 42, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.dic.del', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (19, 43, 1, 'btn', 'primary', 'default', 2, '新增文章', 'article.add', 2, '2025-06-16 08:57:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (20, 44, 2, 'btn', 'primary', 'small', 2, '编辑', 'article.edit', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (21, 45, 2, 'btn', 'danger', 'small', 2, '删除', 'article.del', 2, '2025-06-16 08:57:04', '2025-06-16 08:57:04', NULL);
+INSERT INTO `menu_actions` VALUES (22, 48, 1, 'btn', 'primary', 'default', 2, '新增配置', 'sys.config.add', 2, '2026-07-08 16:00:42', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (23, 49, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.config.edit', 2, '2026-07-08 16:01:29', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (24, 50, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.config.del', 2, '2026-07-08 16:03:15', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (25, 51, 1, 'btn', 'primary', 'default', 2, '新增分类', 'sys.configCategory.add', 2, '2026-07-09 11:11:01', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (26, 52, 2, 'btn', 'primary', 'small', 2, '编辑', 'sys.configCategory.edit', 2, '2026-07-09 11:11:36', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (27, 53, 2, 'btn', 'danger', 'small', 2, '删除', 'sys.configCategory.del', 2, '2026-07-09 11:12:04', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_actions` VALUES (28, 54, 1, 'btn', 'primary', 'default', 2, '用户导入', 'sys.user.import', 2, '2026-07-10 13:34:50', '2026-07-10 13:34:50', NULL);
+INSERT INTO `menu_actions` VALUES (33, 58, 2, 'btn', 'primary', 'small', 2, '新增子集', 'sys.menu.addChildren', 2, '2026-07-14 09:36:51', '2026-07-14 09:36:51', NULL);
 
 -- ----------------------------
 -- Table structure for menu_meta
@@ -212,6 +229,9 @@ CREATE TABLE `menu_meta`  (
   `menu_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '菜单id',
   `title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '菜单名称',
   `icon` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '菜单图标',
+  `path` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '路由路径',
+  `redirect` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '重定向',
+  `component` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '组件路径',
   `is_hide` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否隐藏 1=是 2=否',
   `is_keep_alive` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否缓存 1=是 2=否',
   `is_affix` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否固定 1=是 2=否',
@@ -227,17 +247,18 @@ CREATE TABLE `menu_meta`  (
 -- ----------------------------
 -- Records of menu_meta
 -- ----------------------------
-INSERT INTO `menu_meta` VALUES (1, 1, 'message.router.home', 'iconfont icon-shouye', 2, 1, 1, '', 2, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
-INSERT INTO `menu_meta` VALUES (2, 2, 'message.router.system', 'iconfont icon-xitongshezhi', 2, 1, 2, '', 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
-INSERT INTO `menu_meta` VALUES (3, 3, 'message.router.systemMenu', 'iconfont icon-caidan', 2, 1, 2, '', 2, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
-INSERT INTO `menu_meta` VALUES (4, 4, 'message.router.systemUser', 'iconfont icon-icon-', 2, 1, 2, '', 2, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
-INSERT INTO `menu_meta` VALUES (5, 5, 'message.router.systemRole', 'fa fa-user-circle-o', 2, 1, 2, '', 2, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
-INSERT INTO `menu_meta` VALUES (6, 6, 'message.router.systemDic', 'ele-Collection', 2, 1, 2, '', 2, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
-INSERT INTO `menu_meta` VALUES (7, 10, 'message.article.title', 'ele-Collection', 2, 1, 2, '', 2, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
-INSERT INTO `menu_meta` VALUES (17, 20, '配置管理', 'iconfont icon-ico', 2, 1, 2, '', 2, '2026-07-08 15:04:29', '2006-01-02 15:04:05', NULL);
-INSERT INTO `menu_meta` VALUES (18, 21, '配置列表', 'iconfont icon-quanjushezhi_o', 2, 1, 2, '', 2, '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
-INSERT INTO `menu_meta` VALUES (19, 22, '系统配置', 'iconfont icon--chaifenhang', 2, 1, 2, '', 2, '2026-07-08 15:54:52', '2006-01-02 15:04:05', NULL);
-INSERT INTO `menu_meta` VALUES (20, 23, '配置分类', 'iconfont icon--chaifenlie', 2, 1, 2, '', 2, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
+INSERT INTO `menu_meta` VALUES (1, 1, 'message.router.home', 'iconfont icon-shouye', '/home', '', 'home/index', 2, 1, 1, '', 2, '2025-05-23 15:37:03', '2025-06-13 11:10:18', NULL);
+INSERT INTO `menu_meta` VALUES (2, 2, 'message.router.system', 'iconfont icon-xitongshezhi', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 2, '', 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
+INSERT INTO `menu_meta` VALUES (3, 3, 'message.router.systemMenu', 'iconfont icon-caidan', '/system/menu', '', 'system/menu/index', 2, 1, 2, '', 2, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
+INSERT INTO `menu_meta` VALUES (4, 4, 'message.router.systemUser', 'iconfont icon-icon-', '/system/user', '', 'system/user/index', 2, 1, 2, '', 2, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
+INSERT INTO `menu_meta` VALUES (5, 5, 'message.router.systemRole', 'fa fa-user-circle-o', '/system/role', '', 'system/role/index', 2, 1, 2, '', 2, '2025-05-25 14:37:04', '2025-06-11 17:17:36', NULL);
+INSERT INTO `menu_meta` VALUES (6, 6, 'message.router.systemDic', 'ele-Collection', '/system/dic', '', 'system/dic/index', 2, 1, 2, '', 2, '2025-05-25 14:54:04', '2025-06-11 17:17:42', NULL);
+INSERT INTO `menu_meta` VALUES (7, 10, 'message.article.title', 'ele-Collection', '/article', '', 'article/index', 2, 1, 2, '', 2, '2025-06-16 15:34:11', '2025-06-16 15:34:11', NULL);
+INSERT INTO `menu_meta` VALUES (8, 20, '配置管理', 'iconfont icon-ico', '/system/config', '', 'layouts/routerView/parent', 2, 1, 2, '', 2, '2026-07-08 15:04:29', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_meta` VALUES (9, 21, '配置列表', 'iconfont icon-quanjushezhi_o', '/system/config/index', '', 'system/config/index', 2, 1, 2, '', 2, '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
+INSERT INTO `menu_meta` VALUES (10, 22, '系统配置', 'iconfont icon--chaifenhang', '/system/config/setting', '', 'system/config/setting', 2, 1, 2, '', 2, '2026-07-08 15:54:52', '2006-01-02 15:04:05', NULL);
+INSERT INTO `menu_meta` VALUES (11, 23, '配置分类', 'iconfont icon--chaifenlie', '/system/config-category/index', '', 'system/config/category/index', 2, 1, 2, '', 2, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
+INSERT INTO `menu_meta` VALUES (16, 56, '导入记录', 'iconfont icon-bolangneng', '/system/user/import', '', 'system/user/import/index', 2, 1, 2, '', 2, '2026-07-13 15:53:05', '2026-07-13 15:53:05', NULL);
 
 -- ----------------------------
 -- Table structure for migrations
@@ -257,52 +278,6 @@ CREATE TABLE `migrations`  (
 INSERT INTO `migrations` VALUES (1, '20251212_create_user_table', '2025-12-12 17:04:27.313');
 
 -- ----------------------------
--- Table structure for role_actions
--- ----------------------------
-DROP TABLE IF EXISTS `role_actions`;
-CREATE TABLE `role_actions`  (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `role_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '角色id',
-  `action_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '功能id',
-  `name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '角色名称',
-  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 58 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色功能表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of role_actions
--- ----------------------------
-INSERT INTO `role_actions` VALUES (14, 1, 1, 'admin', '2025-06-13 16:26:48', '2025-06-13 16:26:48', NULL);
-INSERT INTO `role_actions` VALUES (18, 1, 3, 'admin', '2025-06-13 16:27:43', '2025-06-13 16:27:43', NULL);
-INSERT INTO `role_actions` VALUES (20, 1, 4, 'admin', '2025-06-13 16:27:51', '2025-06-13 16:27:51', NULL);
-INSERT INTO `role_actions` VALUES (22, 1, 6, 'admin', '2025-06-13 16:28:07', '2025-06-13 16:28:07', NULL);
-INSERT INTO `role_actions` VALUES (34, 1, 2, 'admin', '2025-06-13 17:17:32', '2025-06-13 17:17:32', NULL);
-INSERT INTO `role_actions` VALUES (35, 1, 7, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (36, 1, 8, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (37, 1, 9, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (38, 1, 10, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (39, 1, 11, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (40, 1, 12, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (41, 1, 13, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (42, 1, 14, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (43, 1, 15, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (44, 1, 16, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (45, 1, 17, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (46, 1, 18, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (47, 1, 19, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (48, 1, 20, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (49, 1, 21, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (50, 1, 22, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
-INSERT INTO `role_actions` VALUES (60, 1, 25, 'admin', '2026-07-08 16:02:30', '2026-07-08 16:02:30', NULL);
-INSERT INTO `role_actions` VALUES (61, 1, 26, 'admin', '2026-07-08 16:02:37', '2026-07-08 16:02:37', NULL);
-INSERT INTO `role_actions` VALUES (62, 1, 27, 'admin', '2026-07-08 16:03:15', '2026-07-08 16:03:15', NULL);
-INSERT INTO `role_actions` VALUES (66, 1, 28, 'admin', '2026-07-09 11:13:11', '2026-07-09 11:13:11', NULL);
-INSERT INTO `role_actions` VALUES (67, 1, 29, 'admin', '2026-07-09 11:13:17', '2026-07-09 11:13:17', NULL);
-INSERT INTO `role_actions` VALUES (68, 1, 30, 'admin', '2026-07-09 11:13:25', '2026-07-09 11:13:25', NULL);
-
--- ----------------------------
 -- Table structure for role_menus
 -- ----------------------------
 DROP TABLE IF EXISTS `role_menus`;
@@ -316,22 +291,52 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 203 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
 -- ----------------------------
-INSERT INTO `role_menus` VALUES (69, 1, 1, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (70, 1, 2, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (71, 1, 3, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (72, 1, 4, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (73, 1, 5, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (74, 1, 6, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (75, 1, 10, '', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
-INSERT INTO `role_menus` VALUES (108, 1, 21, '', '2026-07-08 15:51:11', '2026-07-08 15:51:11', NULL);
-INSERT INTO `role_menus` VALUES (109, 1, 20, '', '2026-07-08 15:51:29', '2026-07-08 15:51:29', NULL);
-INSERT INTO `role_menus` VALUES (112, 1, 22, '', '2026-07-08 15:57:35', '2026-07-08 15:57:35', NULL);
-INSERT INTO `role_menus` VALUES (113, 1, 23, '', '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
+INSERT INTO `role_menus` VALUES (69, 1, 1, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (70, 1, 2, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (71, 1, 3, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (72, 1, 4, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (73, 1, 5, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (74, 1, 6, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (75, 1, 10, 'admin', '2026-07-06 15:42:29', '2026-07-06 15:42:29', NULL);
+INSERT INTO `role_menus` VALUES (109, 1, 20, 'admin', '2026-07-08 15:51:29', '2026-07-08 15:51:29', NULL);
+INSERT INTO `role_menus` VALUES (112, 1, 22, 'admin', '2026-07-08 15:57:35', '2026-07-08 15:57:35', NULL);
+INSERT INTO `role_menus` VALUES (113, 1, 23, 'admin', '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
+INSERT INTO `role_menus` VALUES (123, 1, 34, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (124, 1, 35, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (127, 1, 38, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (128, 1, 39, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (130, 1, 41, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (131, 1, 42, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (133, 1, 44, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (134, 1, 45, 'admin', '2025-06-16 08:53:37', '2025-06-16 08:53:37', NULL);
+INSERT INTO `role_menus` VALUES (141, 1, 54, 'admin', '2026-07-10 13:34:51', '2026-07-10 13:34:51', NULL);
+INSERT INTO `role_menus` VALUES (152, 1, 56, 'admin', '2026-07-13 15:53:05', '2026-07-13 15:53:05', NULL);
+INSERT INTO `role_menus` VALUES (153, 2, 1, 'test', '2026-07-13 16:17:39', '2026-07-13 16:17:39', NULL);
+INSERT INTO `role_menus` VALUES (156, 2, 2, 'test', '2026-07-13 16:17:39', '2026-07-13 16:17:39', NULL);
+INSERT INTO `role_menus` VALUES (157, 2, 3, 'test', '2026-07-13 16:17:39', '2026-07-13 16:17:39', NULL);
+INSERT INTO `role_menus` VALUES (158, 1, 21, 'admin', '2026-07-13 17:11:20', '2026-07-13 17:11:20', NULL);
+INSERT INTO `role_menus` VALUES (177, 1, 58, 'admin', '2026-07-14 09:36:51', '2026-07-14 09:36:51', NULL);
+INSERT INTO `role_menus` VALUES (178, 1, 32, 'admin', '2026-07-14 09:51:39', '2026-07-14 09:51:39', NULL);
+INSERT INTO `role_menus` VALUES (179, 1, 33, 'admin', '2026-07-14 09:51:45', '2026-07-14 09:51:45', NULL);
+INSERT INTO `role_menus` VALUES (184, 1, 24, 'admin', '2026-07-14 10:29:27', '2026-07-14 10:29:27', NULL);
+INSERT INTO `role_menus` VALUES (185, 2, 24, 'test', '2026-07-14 10:29:27', '2026-07-14 10:29:27', NULL);
+INSERT INTO `role_menus` VALUES (186, 1, 37, 'admin', '2026-07-14 10:32:42', '2026-07-14 10:32:42', NULL);
+INSERT INTO `role_menus` VALUES (188, 1, 40, 'admin', '2026-07-14 10:36:42', '2026-07-14 10:36:42', NULL);
+INSERT INTO `role_menus` VALUES (189, 1, 43, 'admin', '2026-07-14 10:37:13', '2026-07-14 10:37:13', NULL);
+INSERT INTO `role_menus` VALUES (191, 1, 52, 'admin', '2026-07-14 10:38:10', '2026-07-14 10:38:10', NULL);
+INSERT INTO `role_menus` VALUES (192, 1, 53, 'admin', '2026-07-14 10:38:23', '2026-07-14 10:38:23', NULL);
+INSERT INTO `role_menus` VALUES (193, 1, 51, 'admin', '2026-07-14 10:38:55', '2026-07-14 10:38:55', NULL);
+INSERT INTO `role_menus` VALUES (194, 1, 48, 'admin', '2026-07-14 10:40:40', '2026-07-14 10:40:40', NULL);
+INSERT INTO `role_menus` VALUES (195, 1, 49, 'admin', '2026-07-14 10:40:47', '2026-07-14 10:40:47', NULL);
+INSERT INTO `role_menus` VALUES (196, 1, 50, 'admin', '2026-07-14 10:40:52', '2026-07-14 10:40:52', NULL);
+INSERT INTO `role_menus` VALUES (200, 1, 25, 'admin', '2026-07-14 10:44:37', '2026-07-14 10:44:37', NULL);
+INSERT INTO `role_menus` VALUES (201, 1, 27, 'admin', '2026-07-14 10:44:44', '2026-07-14 10:44:44', NULL);
+INSERT INTO `role_menus` VALUES (202, 2, 27, 'test', '2026-07-14 10:44:44', '2026-07-14 10:44:44', NULL);
 
 -- ----------------------------
 -- Table structure for roles
@@ -438,7 +443,6 @@ INSERT INTO `user` VALUES (30, '', 'admin6', '张三6', 'zs6@qq.com', '$2a$10$Oc
 INSERT INTO `user` VALUES (31, '', 'test13', '李四13', 'ls13@qq.com', '$2a$10$kycb2DM8CnubeoWABNPA1O2b0MrQQDqGsEZg8EuqK4G0a63EYDr.2', '昵称', 1, 1, 1, '2023-09-06 11:38:50', '2023-09-13 09:29:27', NULL);
 INSERT INTO `user` VALUES (33, '', 'dsx5', '大师兄5', 'dsx5@qq.com', '$2a$10$Y2FUvgUMpMlJ5h/oooH7OOdInCZgheFQaiVkKu0Wx6YcXhiylAT3a', '大师兄1', 1, 0, 1, '2024-07-22 17:34:36', '2024-07-22 17:34:36', NULL);
 INSERT INTO `user` VALUES (34, '', 'admin7', '测试张三34', 'zs7@qq.com', '$2a$10$OcSkSCBe8D5tGL2ulmJhTe0Xboy/fzwS1H7AdmkJjpQZfeGUHr5S6', 'dsx', 1, 28, 1, '2023-09-05 17:29:36', '2006-01-02 15:04:05', NULL);
-INSERT INTO `user` VALUES (54, '', '测试123', '测试123', '', '$2a$10$kckcEhxk/7pppnM6XCT.cu.xQyoxlnhdY.nhdpk5CmzzCFY32l2xm', '测试123', 1, 30, 1, '2026-06-24 16:52:38', '2006-01-02 15:04:05', NULL);
 
 -- ----------------------------
 -- Table structure for user_roles
@@ -462,7 +466,6 @@ CREATE TABLE `user_roles`  (
 INSERT INTO `user_roles` VALUES (1, 1, 1, 'admin', '2025-05-26 17:53:10', '2025-05-26 17:53:10', NULL);
 INSERT INTO `user_roles` VALUES (11, 10, 2, 'test', '2025-05-29 14:37:18', '2025-05-29 14:37:18', NULL);
 INSERT INTO `user_roles` VALUES (28, 54, 1, 'admin', '2026-06-24 16:55:38', '2026-06-24 16:55:38', NULL);
-INSERT INTO `user_roles` VALUES (29, 2, 9, 'cs', '2026-07-06 16:17:28', '2026-07-06 16:17:28', NULL);
 INSERT INTO `user_roles` VALUES (31, 55, 2, 'test', '2026-07-07 14:03:56', '2026-07-07 14:03:56', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
