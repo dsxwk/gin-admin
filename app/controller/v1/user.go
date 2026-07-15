@@ -205,3 +205,37 @@ func (s *UserController) Delete(c *gin.Context) {
 
 	s.Response.Success(c, errcode.Success())
 }
+
+// BatchDelete 批量删除
+// @Tags 用户管理
+// @Summary 批量删除
+// @Description 用户批量删除
+// @Param token header string true "认证Token"
+// @Param data body request.UserBatchDelete true "批量删除参数"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/batch-delete [post]
+func (s *UserController) BatchDelete(c *gin.Context) {
+	var (
+		ctx = c.Request.Context()
+		req request.User
+	)
+
+	s.service.WithContext(ctx)
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "BatchDelete")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	err = s.service.BatchDelete(req.IDs)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success())
+}

@@ -210,3 +210,18 @@ func (s *UserService) Delete(id int64) (err error) {
 
 	return nil
 }
+
+// BatchDelete 批量删除
+func (s *UserService) BatchDelete(ids []int64) (err error) {
+	var (
+		m  model.User
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).Delete(&m, ids).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

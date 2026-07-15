@@ -28,6 +28,8 @@ func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 		router.PUT("/user/:id", user.Update)
 		// 删除
 		router.DELETE("/user/:id", user.Delete)
+		// 批量删除
+		router.POST("/user/batch-delete", user.BatchDelete)
 		// 详情
 		router.GET("/user/:id", user.Detail)
 	}

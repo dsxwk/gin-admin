@@ -6,6 +6,21 @@ import (
 	"github.com/gookit/validate"
 )
 
+// User 用户请求验证
+type User struct {
+	base.BaseRequest
+	ID        int64      `uri:"id" validate:"required|int|gt:0" label:"ID"`
+	Username  string     `json:"username" form:"username" validate:"required" label:"用户名"`
+	FullName  string     `json:"fullName" validate:"required" label:"姓名"`
+	Nickname  string     `json:"nickname" validate:"required" label:"昵称"`
+	Gender    int64      `json:"gender" validate:"required|int" label:"性别"`
+	Password  string     `json:"password" validate:"required" label:"密码"`
+	Age       int64      `json:"age" validate:"int" label:"年龄"`
+	UserRoles []UserRole `json:"userRoles" validate:"" label:"用户角色"`
+	IDs       []int64    `json:"ids" validate:"required" label:"ID列表"`
+	PageListValidate
+}
+
 // UserCreate 用户创建验证
 type UserCreate struct {
 	Username string `json:"username" validate:"required" label:"用户名"`
@@ -25,18 +40,9 @@ type UserUpdate struct {
 	Age      int    `json:"age" validate:"int" label:"年龄"`
 }
 
-// User 用户请求验证
-type User struct {
-	base.BaseRequest
-	ID        int64      `uri:"id" validate:"required|int|gt:0" label:"ID"`
-	Username  string     `json:"username" form:"username" validate:"required" label:"用户名"`
-	FullName  string     `json:"fullName" validate:"required" label:"姓名"`
-	Nickname  string     `json:"nickname" validate:"required" label:"昵称"`
-	Gender    int64      `json:"gender" validate:"required|int" label:"性别"`
-	Password  string     `json:"password" validate:"required" label:"密码"`
-	Age       int64      `json:"age" validate:"int" label:"年龄"`
-	UserRoles []UserRole `json:"userRoles" validate:"" label:"用户角色"`
-	PageListValidate
+// UserBatchDelete 用户批量删除
+type UserBatchDelete struct {
+	IDs []int64 `json:"ids" validate:"required" label:"ID列表"`
 }
 
 // UserRole 用户角色
@@ -90,6 +96,8 @@ func (s User) ConfigValidation(v *validate.Validation) {
 		"Delete": []string{
 			"ID",
 		},
+		// 批量删除
+		"BatchDelete": []string{"IDs"},
 	})
 }
 
