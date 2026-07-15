@@ -11,6 +11,7 @@ type Databases struct {
 	Sqlite            Sqlite        `mapstructure:"sqlite" yaml:"sqlite"`                           // sqlite
 	Pgsql             Pgsql         `mapstructure:"pgsql" yaml:"pgsql"`                             // pgsql
 	Sqlsrv            Sqlsrv        `mapstructure:"sqlsrv" yaml:"sqlsrv"`                           // sqlsrv
+	Oracle            Oracle        `mapstructure:"oracle" yaml:"oracle"`                           // oracle
 }
 
 // Mysql 数据库
@@ -48,4 +49,14 @@ type Sqlsrv struct {
 	Database string `mapstructure:"database" yaml:"database"`
 	Username string `mapstructure:"username" yaml:"username"`
 	Password string `mapstructure:"password" yaml:"password"`
+}
+
+// Oracle 数据库
+type Oracle struct {
+	Host        string `yaml:"host"`
+	Username    string `yaml:"username"`
+	Password    string `yaml:"password"`
+	ServiceName string `yaml:"service-name"`
+	Sid         string `yaml:"sid"` // 可选,与ServiceName二选一
+	Port        string `yaml:"port"`
 }

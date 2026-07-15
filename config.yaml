@@ -49,6 +49,14 @@ databases:
     password: Aa123456
     database: gin
 
+  # oracle数据库
+  oracle:
+    host: localhost
+    username: system
+    password: password
+    service-name: XE  # Oracle服务名或SID
+    port: 1521
+    sid: XE  # 可选，如果使用SID而不是服务名
 # 缓存
 cache:
   driver: "memory"  # memory|disk|redis # 为空默认内存缓存

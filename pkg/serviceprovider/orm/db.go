@@ -48,6 +48,8 @@ func Connection(driver string, cfg *config.Config) *gorm.DB {
 			db, err = openSqlite()
 		case "sqlsrv":
 			db, err = openSqlsrv()
+		case "oracle":
+			db, err = openOracle()
 		default:
 			flag.Errorf("不支持的数据库: %s", driver)
 			os.Exit(1)
