@@ -1,10 +1,9 @@
 module gin
 
-go 1.25.7
+go 1.21
 
 require (
 	github.com/dgraph-io/badger/v4 v4.9.4
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.19.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gin-gonic/gin v1.12.0
@@ -13,6 +12,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/goccy/go-json v0.10.6
 	github.com/godoes/gorm-oracle v1.6.19
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/gookit/validate v1.6.0
 	github.com/mattn/go-runewidth v0.0.24

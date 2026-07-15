@@ -7,8 +7,8 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/errcode"
 	"gin/pkg/serviceprovider/lang"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
 

@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
@@ -31,31 +32,35 @@ func (s Recover) Handle() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				ctx := c.Request.Context()
+				stack := getStackTrace(3)
 
-				s.Response.Error(
-					c,
-					errcode.SystemError().
-						WithMsg(fmt.Sprintf("%v", err)).
-						WithData(
-							&ErrData{
-								TraceId: getString(ctx, ctxkey.TraceIdKey),
-								Error:   err,
-								IP:      getString(ctx, ctxkey.IpKey),
-								Lang:    getString(ctx, ctxkey.LangKey),
-								Path:    getString(ctx, ctxkey.PathKey),
-								Method:  getString(ctx, ctxkey.MethodKey),
-								Params:  ctx.Value(ctxkey.ParamsKey),
-								Stack:   getStackTrace(3),
-							},
-						),
-				)
+				if facade.Config().App.Env == "production" {
+					s.Response.Error(c, errcode.SystemError().WithMsg(fmt.Sprintf("%v", err)))
+				} else {
+					s.Response.Error(
+						c,
+						errcode.SystemError().
+							WithMsg(fmt.Sprintf("%v", err)).
+							WithData(
+								&ErrData{
+									TraceId: getString(ctx, ctxkey.TraceIdKey),
+									Error:   err,
+									IP:      getString(ctx, ctxkey.IpKey),
+									Lang:    getString(ctx, ctxkey.LangKey),
+									Path:    getString(ctx, ctxkey.PathKey),
+									Method:  getString(ctx, ctxkey.MethodKey),
+									Params:  ctx.Value(ctxkey.ParamsKey),
+									Stack:   stack,
+								},
+							),
+					)
+				}
 			}
 		}()
 		c.Next()
 	}
 }
 
-// 防止panic
 func getString(c context.Context, key string) string {
 	if c == nil {
 		return "unknown"
@@ -66,7 +71,6 @@ func getString(c context.Context, key string) string {
 	return "unknown"
 }
 
-// getStackTrace 获取堆栈
 func getStackTrace(skip int) []string {
 	const maxDepth = 32
 	pc := make([]uintptr, maxDepth)
