@@ -147,8 +147,8 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version: v2.3.5
-> - [Version update detailed record](version_history.md)
+> - Latest Version [v2.3.5](version_history.md#v235)
+> - [Historical Version Records](version_history.md)
 
 # Installation Instructions
 > - On June 24, 2026, the Golang project was updated to version 1.26.4. There may be version differences in lower versions, and it is recommended to have a version>=1.26.4. 
