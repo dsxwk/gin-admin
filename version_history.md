@@ -1,3 +1,10 @@
+## v2.3.4
+> - Merge menu function into menu removal role function using role menu
+> - Add user batch deletion
+> - Menu function table structure adjustment and data synchronization after merging
+> - Add oracle database support
+> - Gorm public search optimization
+
 ## v2.3.3
 > - Optimize code generator and adjust after optimization 
 > - Add system configuration related interfaces

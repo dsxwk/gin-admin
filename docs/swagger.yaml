@@ -103,23 +103,16 @@ definitions:
         description: 子节点
         items: {}
         type: array
-      component:
-        description: 组件路径
-        type: string
       createdAt:
         description: 创建时间
         type: string
       id:
         description: ID
         type: integer
-      isLink:
-        description: 是否外链 1=是 2=否 默认=2
-        type: integer
-      menuActions:
+      menuAction:
+        allOf:
+        - $ref: '#/definitions/model.MenuActions'
         description: 菜单功能
-        items:
-          $ref: '#/definitions/model.MenuActions'
-        type: array
       meta:
         allOf:
         - $ref: '#/definitions/model.MenuMeta'
@@ -127,15 +120,9 @@ definitions:
       name:
         description: 路由名称
         type: string
-      path:
-        description: 路由路径
-        type: string
       pid:
         description: 父级id
         type: integer
-      redirect:
-        description: 重定向
-        type: string
       roleMenus:
         description: 角色菜单
         items:
@@ -146,6 +133,9 @@ definitions:
         type: integer
       status:
         description: 状态 1=启用 2=停用
+        type: integer
+      type:
+        description: 类型 1=菜单 2=功能
         type: integer
       updatedAt:
         description: 更新时间
@@ -161,9 +151,6 @@ definitions:
         type: string
       btnType:
         type: string
-      children:
-        items: {}
-        type: array
       createdAt:
         type: string
       id:
@@ -175,16 +162,6 @@ definitions:
       label:
         type: string
       menuId:
-        type: integer
-      parent:
-        $ref: '#/definitions/model.MenuActions'
-      pid:
-        type: integer
-      roleActions:
-        items:
-          $ref: '#/definitions/model.RoleActions'
-        type: array
-      sort:
         type: integer
       type:
         type: integer
@@ -198,6 +175,8 @@ definitions:
         items:
           $ref: '#/definitions/model.MenuActions'
         type: array
+      component:
+        type: string
       createdAt:
         type: string
       icon:
@@ -218,6 +197,12 @@ definitions:
         type: string
       menuId:
         type: integer
+      path:
+        description: 路由路径
+        type: string
+      redirect:
+        description: 重定向
+        type: string
       roles:
         description: 权限标识,取角色管理
         items:
@@ -225,21 +210,6 @@ definitions:
         type: array
       title:
         type: string
-      updatedAt:
-        type: string
-    type: object
-  model.RoleActions:
-    properties:
-      actionId:
-        type: integer
-      createdAt:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      roleId:
-        type: integer
       updatedAt:
         type: string
     type: object
@@ -269,7 +239,6 @@ definitions:
       name:
         type: string
       roleMenus:
-        description: 角色菜单
         items:
           $ref: '#/definitions/model.RoleMenus'
         type: array
@@ -383,37 +352,6 @@ definitions:
       label:
         type: string
       menuId:
-        type: integer
-      pid:
-        type: integer
-      sort:
-        type: integer
-      type:
-        type: integer
-    type: object
-  request.ActionUpdate:
-    properties:
-      authValue:
-        type: string
-      btnSize:
-        type: string
-      btnStyle:
-        type: string
-      btnType:
-        type: string
-      id:
-        type: integer
-      isConfirm:
-        type: integer
-      isLink:
-        type: integer
-      label:
-        type: string
-      menuId:
-        type: integer
-      pid:
-        type: integer
-      sort:
         type: integer
       type:
         type: integer
@@ -534,20 +472,16 @@ definitions:
     type: object
   request.MenuCreate:
     properties:
-      component:
-        type: string
       isLink:
         type: integer
+      menuAction:
+        $ref: '#/definitions/request.ActionCreate'
       meta:
         $ref: '#/definitions/request.Meta'
       name:
         type: string
-      path:
-        type: string
       pid:
         type: integer
-      redirect:
-        type: string
       roleMenus:
         items:
           $ref: '#/definitions/request.RoleMenu'
@@ -556,30 +490,23 @@ definitions:
         type: integer
       status:
         type: integer
+      type:
+        type: integer
     required:
-    - component
-    - meta
     - name
-    - path
     type: object
   request.MenuUpdate:
     properties:
-      component:
-        type: string
       id:
         type: integer
-      isLink:
-        type: integer
+      menuAction:
+        $ref: '#/definitions/request.ActionCreate'
       meta:
         $ref: '#/definitions/request.Meta'
       name:
         type: string
-      path:
-        type: string
       pid:
         type: integer
-      redirect:
-        type: string
       roleMenus:
         items:
           $ref: '#/definitions/request.RoleMenu'
@@ -588,14 +515,15 @@ definitions:
         type: integer
       status:
         type: integer
+      type:
+        type: integer
     required:
-    - component
-    - meta
     - name
-    - path
     type: object
   request.Meta:
     properties:
+      component:
+        type: string
       icon:
         type: string
       isAffix:
@@ -610,10 +538,16 @@ definitions:
         type: string
       menuId:
         type: integer
+      path:
+        type: string
+      redirect:
+        type: string
       title:
         type: string
     required:
+    - component
     - icon
+    - path
     - title
     type: object
   request.PageData:
@@ -651,8 +585,12 @@ definitions:
     properties:
       menuId:
         type: integer
+      name:
+        type: string
       roleId:
         type: integer
+    required:
+    - name
     type: object
   request.RoleUpdate:
     properties:
@@ -728,6 +666,15 @@ definitions:
         type: integer
       key:
         type: string
+    type: object
+  request.UserBatchDelete:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - ids
     type: object
   request.UserCreate:
     properties:
@@ -1434,7 +1381,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 用户登录
+      description: 用户账号密码登录
       parameters:
       - description: 登录参数
         in: body
@@ -1462,7 +1409,7 @@ paths:
           description: 系统错误
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
-      summary: 登录
+      summary: 账号密码登录
       tags:
       - 登录相关
   /api/v1/menu:
@@ -1644,203 +1591,6 @@ paths:
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建菜单
-      tags:
-      - 菜单管理
-  /api/v1/menu/{id}/{actionId}:
-    delete:
-      description: 创建菜单功能
-      parameters:
-      - description: 认证Token
-        in: header
-        name: token
-        required: true
-        type: string
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 菜单功能ID
-        in: path
-        name: actionId
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: 成功
-          schema:
-            $ref: '#/definitions/errcode.SuccessResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/errcode.ArgsErrorResponse'
-        "500":
-          description: 系统错误
-          schema:
-            $ref: '#/definitions/errcode.SystemErrorResponse'
-      summary: 创建菜单功能
-      tags:
-      - 菜单管理
-  /api/v1/menu/{id}/action:
-    get:
-      description: 菜单功能
-      parameters:
-      - description: 认证Token
-        in: header
-        name: token
-        required: true
-        type: string
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/errcode.SuccessResponse'
-            - properties:
-                data:
-                  allOf:
-                  - $ref: '#/definitions/request.PageData'
-                  - properties:
-                      list:
-                        items:
-                          $ref: '#/definitions/model.MenuActions'
-                        type: array
-                    type: object
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/errcode.ArgsErrorResponse'
-        "500":
-          description: 系统错误
-          schema:
-            $ref: '#/definitions/errcode.SystemErrorResponse'
-      summary: 菜单功能
-      tags:
-      - 菜单管理
-    post:
-      description: 创建菜单功能
-      parameters:
-      - description: 认证Token
-        in: header
-        name: token
-        required: true
-        type: string
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 创建参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.ActionCreate'
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/errcode.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/request.ActionCreate'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/errcode.ArgsErrorResponse'
-        "500":
-          description: 系统错误
-          schema:
-            $ref: '#/definitions/errcode.SystemErrorResponse'
-      summary: 创建菜单功能
-      tags:
-      - 菜单管理
-  /api/v1/menu/{id}/action/{actionId}:
-    get:
-      description: 菜单功能详情
-      parameters:
-      - description: 认证Token
-        in: header
-        name: token
-        required: true
-        type: string
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 菜单功能ID
-        in: path
-        name: actionId
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: 成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/errcode.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/model.MenuActions'
-              type: object
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/errcode.ArgsErrorResponse'
-        "500":
-          description: 系统错误
-          schema:
-            $ref: '#/definitions/errcode.SystemErrorResponse'
-      summary: 菜单功能详情
-      tags:
-      - 菜单管理
-    put:
-      description: 更新菜单功能
-      parameters:
-      - description: 认证Token
-        in: header
-        name: token
-        required: true
-        type: string
-      - description: 菜单ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: 菜单功能ID
-        in: path
-        name: actionId
-        required: true
-        type: integer
-      - description: 更新参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.ActionUpdate'
-      responses:
-        "200":
-          description: 成功
-          schema:
-            $ref: '#/definitions/errcode.SuccessResponse'
-        "400":
-          description: 参数错误
-          schema:
-            $ref: '#/definitions/errcode.ArgsErrorResponse'
-        "500":
-          description: 系统错误
-          schema:
-            $ref: '#/definitions/errcode.SystemErrorResponse'
-      summary: 更新菜单功能
       tags:
       - 菜单管理
   /api/v1/refresh-token:
@@ -2485,6 +2235,37 @@ paths:
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
+      tags:
+      - 用户管理
+  /api/v1/user/batch-delete:
+    post:
+      description: 用户批量删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 批量删除参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserBatchDelete'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 批量删除
       tags:
       - 用户管理
 swagger: "2.0"
