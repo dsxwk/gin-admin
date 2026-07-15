@@ -121,7 +121,7 @@ func (s *SystemConfigService) Update(id int64, data map[string]interface{}) (err
 	)
 
 	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.DateTime
+	rows["updated_at"] = time.Now()
 
 	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {

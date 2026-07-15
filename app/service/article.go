@@ -85,7 +85,7 @@ func (s *ArticleService) Update(id int64, data map[string]interface{}) (err erro
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}
 	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.DateTime
+	rows["updated_at"] = time.Now()
 
 	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {

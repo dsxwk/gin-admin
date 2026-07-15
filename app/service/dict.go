@@ -86,7 +86,7 @@ func (s *DictService) Update(id int64, data map[string]interface{}) (err error) 
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}
 	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.DateTime
+	rows["updated_at"] = time.Now()
 
 	err = db.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {

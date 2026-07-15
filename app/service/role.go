@@ -142,7 +142,7 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 	tx := db.Begin()
 
 	rows := model.FilterFields(s.DB(&model.Roles{}), model.Roles{}, data)
-	rows["updated_at"] = time.DateTime
+	rows["updated_at"] = time.Now()
 
 	err = tx.Model(&model.Roles{}).Where("id = ?", id).Updates(rows).Error
 	if err != nil {

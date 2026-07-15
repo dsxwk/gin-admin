@@ -11,11 +11,10 @@ type Cors struct {
 	base.BaseMiddleware
 }
 
-var conf = facade.Config()
-
 // Handle 跨域中间件
 func (s Cors) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		conf := facade.Config()
 		if conf.Cors.Enabled {
 			origin := c.Request.Header.Get("Origin")
 

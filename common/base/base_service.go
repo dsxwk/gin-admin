@@ -25,36 +25,27 @@ func (s *BaseService) WithContext(ctx context.Context) *BaseService {
 	return s
 }
 
-func (s *BaseService) DB(model Model) *gorm.DB {
-	var db *gorm.DB
+// getDB 获取数据库连接(带连接名判断)
+func (s *BaseService) getDB(model Model) *gorm.DB {
 	if connModel, ok := model.(HasConnection); ok {
 		conn := connModel.Connection()
 		if conn != "" {
-			db = facade.DB(conn).WithContext(s.Ctx)
-		} else {
-			db = facade.DB().WithContext(s.Ctx)
+			return facade.DB(conn).WithContext(s.Ctx)
 		}
-	} else {
-		// 默认连接
-		db = facade.DB().WithContext(s.Ctx)
 	}
+	return facade.DB().WithContext(s.Ctx)
+}
+
+// DB 获取数据库连接,连接无效时自动重连
+func (s *BaseService) DB(model Model) *gorm.DB {
+	db := s.getDB(model)
 
 	// 检查连接是否有效
 	sqlDB, err := db.DB()
 	if err == nil {
 		if err = sqlDB.Ping(); err != nil {
-			// 连接无效,重新获取
 			facade.Log().Warn("数据库连接无效,重新连接")
-			if connModel, ok := model.(HasConnection); ok {
-				conn := connModel.Connection()
-				if conn != "" {
-					db = facade.DB(conn).WithContext(s.Ctx)
-				} else {
-					db = facade.DB().WithContext(s.Ctx)
-				}
-			} else {
-				db = facade.DB().WithContext(s.Ctx)
-			}
+			db = s.getDB(model)
 		}
 	}
 

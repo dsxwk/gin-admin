@@ -57,7 +57,7 @@ func NewConfig() *Config {
 			env = "dev"
 		}
 
-		// 加载对应环境的配置文件，如 dev.config.yaml
+		// 加载对应环境的配置文件,如 dev.config.yaml
 		configFile := filepath.Join(configDir, fmt.Sprintf("%s.config.yaml", env))
 		if _, err := os.Stat(configFile); err == nil {
 			v.SetConfigFile(configFile)
@@ -84,6 +84,9 @@ func NewConfig() *Config {
 
 		var lastEventTime int64
 		v.OnConfigChange(func(e fsnotify.Event) {
+			mu.Lock()
+			defer mu.Unlock()
+
 			if e.Op&fsnotify.Write != fsnotify.Write {
 				return
 			}

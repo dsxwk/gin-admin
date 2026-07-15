@@ -130,7 +130,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 		data["password"] = pkg.BcryptHash(data["password"].(string))
 	}
 	rows := model.FilterFields(db, model.User{}, data)
-	rows["updated_at"] = time.DateTime
+	rows["updated_at"] = time.Now()
 
 	tx := s.DB(&model.User{}).Begin()
 

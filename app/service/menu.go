@@ -222,7 +222,7 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 	tx := db.Begin()
 
 	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.DateTime
+	rows["updated_at"] = time.Now()
 
 	err = tx.Model(&m).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
@@ -232,7 +232,7 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 
 	if len(meta) > 0 {
 		metaRows := model.FilterFields(db, model.MenuMeta{}, meta)
-		metaRows["updated_at"] = time.DateTime
+		metaRows["updated_at"] = time.Now()
 		err = tx.Model(&model.MenuMeta{}).
 			Where("id = ?", meta["id"]).
 			Updates(metaRows).Error
@@ -240,7 +240,7 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 
 	if len(menuAction) > 0 {
 		menuActionRows := model.FilterFields(db, model.MenuActions{}, menuAction)
-		menuActionRows["updated_at"] = time.DateTime
+		menuActionRows["updated_at"] = time.Now()
 		err = tx.Model(&model.MenuActions{}).
 			Where("menu_id = ?", menuAction["menuId"]).
 			Updates(menuActionRows).Error
