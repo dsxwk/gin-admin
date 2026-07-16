@@ -49,6 +49,7 @@
   - [Validator Scenes](#Validator-Scenes)
   - [Prompt Message](#Prompt-Message)
   - [Field Translation](#Field-Translation)
+  - [Batch Validation](#Batch-Validation)
   - [Custom Validation](#Custom-Validation)
     - [Global Rules](#Global-Rules)
     - [Local Rules](#Local-Rules)
@@ -147,7 +148,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version [v2.3.5](version_history.md#v235)
+> - Latest Version [v2.3.6](version_history.md#v236)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -958,6 +959,144 @@ func (s Roles) Translates() map[string]string {
       "Page":     "Page",
       "PageSize": "Page Size",
 	}
+}
+```
+
+## Batch Validation
+> Method One
+```go
+package request
+
+import (
+	"errors"
+	"gin/pkg"
+	"github.com/gookit/validate"
+)
+
+// UserImport User Import
+type UserImport struct {
+    Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"Import Data"`
+}
+
+// UserImportItem User Import Item
+type UserImportItem struct {
+    Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"Username"`
+    Password string `json:"password" validate:"required" label:"Password"`
+    FullName string `json:"fullName" validate:"required" label:"FullName"`
+    Nickname string `json:"nickname" validate:"required" label:"Nickname"`
+    Email    string `json:"email" validate:"required|email" label:"Email"`
+    Gender   int64  `json:"gender" validate:"required|int" label:"Gender"`
+    Age      int64  `json:"age" validate:"int" label:"Age"`
+    Status   int64  `json:"status" validate:"int" label:"Status"`
+}
+
+// Validate User Import Validate
+func (s UserImport) Validate(data UserImport, scene string) error {
+    v := validate.Struct(data, scene)
+    if !v.Validate(scene) {
+        return errors.New(v.Errors.One())
+    }
+    return nil
+}
+
+// ConfigValidation Config Validation
+func (s UserImport) ConfigValidation(v *validate.Validation) {
+    scenes := validate.SValues{
+        "Import": []string{"Data"},
+    }
+    v.WithScenes(scenes)
+}
+
+// Messages Validation Messages
+func (s UserImport) Messages() map[string]string {
+    return validate.MS{
+        "required": "{field} Required",
+        "minLen":   "{field} the length cannot be less than {min} characters",
+        "maxLen":   "{field} the length cannot exceed {max} characters",
+        "int":      "{field} Must be an integer",
+        "regex":    "{field} format error",
+        "email":    "{field} email format error",
+    }
+}
+
+// Translates Translates
+func (s UserImport) Translates() map[string]string {
+    ms := validate.MS{
+        "Data": "Import Data",
+    }
+    for i := range s.Data {
+      prefix := pkg.Sprintf("Data.%d.", i)
+      rowLabel := pkg.Sprintf("Line %d ", i+1)
+      ms[prefix+"Username"] = rowLabel + "Username"
+      ms[prefix+"Password"] = rowLabel + "Password"
+      ms[prefix+"FullName"] = rowLabel + "FullName"
+      ms[prefix+"Nickname"] = rowLabel + "Nickname"
+      ms[prefix+"Email"] = rowLabel + "Email"
+      ms[prefix+"Gender"] = rowLabel + "Gender"
+      ms[prefix+"Age"] = rowLabel + "Age"
+      ms[prefix+"Status"] = rowLabel + "Status"
+    }
+    return ms
+}
+```
+> Method Two
+```go
+package request
+
+import (
+    "errors"
+    "fmt"
+    "github.com/gookit/validate"
+)
+
+// SystemConfigValueUpdate Batch update of system configuration
+type SystemConfigValueUpdate struct {
+	ID           int64  `json:"id" validate:"required|int|gt:0"`
+	Key          string `json:"key" validate:""`
+	DefaultValue string `json:"defaultValue" validate:""`
+}
+
+// SystemConfigUpdates Batch update verification of system configuration
+type SystemConfigUpdates struct {
+	List []SystemConfigValueUpdate `json:"list" validate:"required" label:"Config List"`
+}
+
+// Validate System configuration batch update request verification
+func (s SystemConfigUpdates) Validate() error {
+    if len(s.List) == 0 {
+        return errors.New("The configuration list cannot be empty")
+    }
+
+    for i, item := range s.List {
+        v := validate.Struct(item)
+        if !v.Validate() {
+            return fmt.Errorf("list[%d]item %s", i, v.Errors.One())
+        }
+    }
+
+    return nil
+}
+
+// Translates Field translation
+func (s SystemConfigValueUpdate) Translates() map[string]string {
+    return validate.MS{
+        "ID":               "ID",
+        "Key":              "Identification",
+        "Name":             "Name",
+        "DefaultValue":     "DefaultValue",
+        "OptionValue":      "OptionValue",
+        "Type":             "Type 1=input 2=radio 3=checkbox 4=select 5=textarea 6=file",
+        "ConfigCategoryId": "ConfigCategoryId",
+    }
+}
+
+// Messages Validator error message
+func (s SystemConfigValueUpdate) Messages() map[string]string {
+    return validate.MS{
+        "required": "Field {field} is required",
+        "int":      "Field {field} must be an integer",
+        "gt":       "Field {field} must be greater than 0",
+    }
 }
 ```
 

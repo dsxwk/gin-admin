@@ -49,6 +49,7 @@
   - [验证场景](#验证场景)
   - [提示信息](#提示信息)
   - [字段翻译](#字段翻译)
+  - [批量验证](#批量验证)
   - [自定义验证](#自定义验证)
     - [全局规则](#全局规则)
     - [局部规则](#局部规则)
@@ -147,7 +148,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本 [v2.3.5](version_history_zh.md#v235)
+> - 最新版本 [v2.3.6](version_history_zh.md#v236)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -980,6 +981,144 @@ func (s Roles) Translates() map[string]string {
     "Page":     "页码",
     "PageSize": "每页数量",
   }
+}
+```
+
+## 批量验证
+> 方式1
+```go
+package request
+
+import (
+	"errors"
+	"gin/pkg"
+	"github.com/gookit/validate"
+)
+
+// UserImport 用户导入
+type UserImport struct {
+    Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"导入数据"`
+}
+
+// UserImportItem 用户导入子项
+type UserImportItem struct {
+    Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"用户名"`
+    Password string `json:"password" validate:"required" label:"密码"`
+    FullName string `json:"fullName" validate:"required" label:"姓名"`
+    Nickname string `json:"nickname" validate:"required" label:"昵称"`
+    Email    string `json:"email" validate:"required|email" label:"邮箱"`
+    Gender   int64  `json:"gender" validate:"required|int" label:"性别"`
+    Age      int64  `json:"age" validate:"int" label:"年龄"`
+    Status   int64  `json:"status" validate:"int" label:"状态"`
+}
+
+// Validate 用户导入验证
+func (s UserImport) Validate(data UserImport, scene string) error {
+    v := validate.Struct(data, scene)
+    if !v.Validate(scene) {
+        return errors.New(v.Errors.One())
+    }
+    return nil
+}
+
+// ConfigValidation 配置验证
+func (s UserImport) ConfigValidation(v *validate.Validation) {
+    scenes := validate.SValues{
+        "Import": []string{"Data"},
+    }
+    v.WithScenes(scenes)
+}
+
+// Messages 验证器错误消息
+func (s UserImport) Messages() map[string]string {
+    return validate.MS{
+        "required": "{field} 必填",
+        "minLen":   "{field} 长度不能少于 {min} 个字符",
+        "maxLen":   "{field} 长度不能超过 {max} 个字符",
+        "int":      "{field} 必须为整数",
+        "regex":    "{field} 格式错误",
+        "email":    "{field} 邮箱格式错误",
+    }
+}
+
+// Translates 字段翻译
+func (s UserImport) Translates() map[string]string {
+    ms := validate.MS{
+        "Data": "导入数据",
+    }
+    for i := range s.Data {
+      prefix := pkg.Sprintf("Data.%d.", i)
+      rowLabel := pkg.Sprintf("第 %d 行 ", i+1)
+      ms[prefix+"Username"] = rowLabel + "用户名"
+      ms[prefix+"Password"] = rowLabel + "密码"
+      ms[prefix+"FullName"] = rowLabel + "姓名"
+      ms[prefix+"Nickname"] = rowLabel + "昵称"
+      ms[prefix+"Email"] = rowLabel + "邮箱"
+      ms[prefix+"Gender"] = rowLabel + "性别"
+      ms[prefix+"Age"] = rowLabel + "年龄"
+      ms[prefix+"Status"] = rowLabel + "状态"
+    }
+    return ms
+}
+```
+> 方式2
+```go
+package request
+
+import (
+    "errors"
+    "fmt"
+    "github.com/gookit/validate"
+)
+
+// SystemConfigValueUpdate 系统配置批量更新
+type SystemConfigValueUpdate struct {
+	ID           int64  `json:"id" validate:"required|int|gt:0"`
+	Key          string `json:"key" validate:""`
+	DefaultValue string `json:"defaultValue" validate:""`
+}
+
+// SystemConfigUpdates 系统配置批量更新验证
+type SystemConfigUpdates struct {
+	List []SystemConfigValueUpdate `json:"list" validate:"required" label:"配置列表"`
+}
+
+// Validate 系统配置批量更新请求验证
+func (s SystemConfigUpdates) Validate() error {
+    if len(s.List) == 0 {
+        return errors.New("配置列表不能为空")
+    }
+
+    for i, item := range s.List {
+        v := validate.Struct(item)
+        if !v.Validate() {
+            return fmt.Errorf("list[%d]项 %s", i, v.Errors.One())
+        }
+    }
+
+    return nil
+}
+
+// Translates 字段翻译
+func (s SystemConfigValueUpdate) Translates() map[string]string {
+    return validate.MS{
+        "ID":               "id",
+        "Key":              "标识",
+        "Name":             "名称",
+        "DefaultValue":     "默认值",
+        "OptionValue":      "可选值",
+        "Type":             "配置类型 1=输入框 2=单选 3=复选 4=下拉菜单 5=文本域 6=附件",
+        "ConfigCategoryId": "配置分类Id",
+    }
+}
+
+// Messages 验证器错误消息
+func (s SystemConfigValueUpdate) Messages() map[string]string {
+    return validate.MS{
+        "required": "字段 {field} 必填",
+        "int":      "字段 {field} 必须为整数",
+        "gt":       "字段 {field} 必须大于 0",
+    }
 }
 ```
 
