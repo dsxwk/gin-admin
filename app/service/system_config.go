@@ -89,7 +89,7 @@ func (s *SystemConfigService) UpdateConfig(data map[string]interface{}) (err err
 }
 
 // Create 创建
-func (s *SystemConfigService) Create(req request.SystemConfig) (request.SystemConfig, error) {
+func (s *SystemConfigService) Create(req request.SystemConfig) (model.SystemConfig, error) {
 	var (
 		m  model.SystemConfig
 		db = s.DB(&m)
@@ -106,10 +106,10 @@ func (s *SystemConfigService) Create(req request.SystemConfig) (request.SystemCo
 
 	err := db.Model(&m).Create(&m).Error
 	if err != nil {
-		return req, err
+		return m, err
 	}
 
-	return req, nil
+	return m, nil
 }
 
 // Update 更新
