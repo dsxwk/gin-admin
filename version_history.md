@@ -1,3 +1,10 @@
+## v2.3.6
+> - Optimize command line service template and related adjustments
+> - Add user import type dictionary
+> - Add user import and update password interface
+> - Add validator batch validation document example
+> - Update swagger document
+
 ## v2.3.5
 > - Fix update time problem, optimize database connection, configure hot update lock
 > - Update jwt version, optimize recover middleware to determine whether to return stack information based on environment
