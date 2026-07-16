@@ -104,7 +104,7 @@ func (s *MenuService) Detail(menuId int64) (m model.Menu, err error) {
 }
 
 // Create 新增菜单
-func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
+func (s *MenuService) Create(req request.Menu) (model.Menu, error) {
 	var (
 		m          model.Menu
 		meta       model.MenuMeta
@@ -125,7 +125,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 	err := db.Model(&m).Create(&m).Error
 	if err != nil {
 		db.Rollback()
-		return req, err
+		return m, err
 	}
 
 	if req.Meta.Title != "" {
@@ -146,7 +146,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		err = db.Model(&meta).Create(&meta).Error
 		if err != nil {
 			db.Rollback()
-			return req, err
+			return m, err
 		}
 	}
 
@@ -166,7 +166,7 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		err = db.Model(&menuAction).Create(&menuAction).Error
 		if err != nil {
 			db.Rollback()
-			return req, err
+			return m, err
 		}
 	}
 
@@ -181,13 +181,13 @@ func (s *MenuService) Create(req request.Menu) (request.Menu, error) {
 		err = db.Model(&roleMenus).Create(&roleMenus).Error
 		if err != nil {
 			db.Rollback()
-			return req, err
+			return m, err
 		}
 	}
 
 	db.Commit()
 
-	return req, nil
+	return m, nil
 }
 
 // Update 更新

@@ -48,7 +48,7 @@ func (s *ConfigCategoryService) List(req request.ConfigCategory) (pageData reque
 }
 
 // Create 创建
-func (s *ConfigCategoryService) Create(req request.ConfigCategory) (request.ConfigCategory, error) {
+func (s *ConfigCategoryService) Create(req request.ConfigCategory) (model.ConfigCategory, error) {
 	var (
 		m  model.ConfigCategory
 		db = s.DB(&m)
@@ -60,10 +60,10 @@ func (s *ConfigCategoryService) Create(req request.ConfigCategory) (request.Conf
 
 	err := db.Model(&m).Create(&m).Error
 	if err != nil {
-		return req, err
+		return m, err
 	}
 
-	return req, nil
+	return m, nil
 }
 
 // Update 更新

@@ -49,7 +49,7 @@ func (s *DictService) List(req request.Dict) (pageData request.PageData, err err
 }
 
 // Create 创建
-func (s *DictService) Create(req request.Dict) (request.Dict, error) {
+func (s *DictService) Create(req request.Dict) (model.Dict, error) {
 	var (
 		m  model.Dict
 		db = s.DB(&m)
@@ -68,10 +68,10 @@ func (s *DictService) Create(req request.Dict) (request.Dict, error) {
 
 	err := db.Model(&m).Create(&m).Error
 	if err != nil {
-		return req, err
+		return m, err
 	}
 
-	return req, nil
+	return m, nil
 }
 
 // Update 更新

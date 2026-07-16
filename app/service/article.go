@@ -49,7 +49,7 @@ func (s *ArticleService) List(req request.Article) (pageData request.PageData, e
 }
 
 // Create 创建
-func (s *ArticleService) Create(req request.Article) (request.Article, error) {
+func (s *ArticleService) Create(req request.Article) (model.Article, error) {
 	var (
 		m  model.Article
 		db = s.DB(&m)
@@ -67,10 +67,10 @@ func (s *ArticleService) Create(req request.Article) (request.Article, error) {
 
 	err := db.Model(&m).Create(&m).Error
 	if err != nil {
-		return req, err
+		return m, err
 	}
 
-	return req, nil
+	return m, nil
 }
 
 // Update 更新
