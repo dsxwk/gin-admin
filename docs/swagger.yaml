@@ -93,6 +93,21 @@ definitions:
       value:
         type: string
     type: object
+  model.ImportRecords:
+    properties:
+      createdAt:
+        type: string
+      data:
+        $ref: '#/definitions/model.JsonValue'
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
   model.JsonValue:
     properties:
       data: {}
@@ -694,6 +709,36 @@ definitions:
     - password
     - username
     type: object
+  request.UserImport:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/request.UserImportItem'
+        type: array
+    type: object
+  request.UserImportItem:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      fullName:
+        type: string
+      gender:
+        type: integer
+      nickname:
+        type: string
+      password:
+        type: string
+      status:
+        type: integer
+      username:
+        type: string
+    required:
+    - fullName
+    - nickname
+    - password
+    type: object
   request.UserLogin:
     properties:
       captchaId:
@@ -711,6 +756,13 @@ definitions:
     - code
     - password
     - username
+    type: object
+  request.UserPassword:
+    properties:
+      password:
+        type: string
+    required:
+    - password
     type: object
   request.UserUpdate:
     properties:
@@ -1377,6 +1429,58 @@ paths:
       summary: 更新
       tags:
       - 字典管理
+  /api/v1/import-records:
+    get:
+      description: 导入记录
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.ImportRecords'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 导入管理
   /api/v1/login:
     post:
       consumes:
@@ -2237,6 +2341,42 @@ paths:
       summary: 更新
       tags:
       - 用户管理
+  /api/v1/user/{id}/password:
+    put:
+      description: 更新密码
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserPassword'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 更新密码
+      tags:
+      - 用户管理
   /api/v1/user/batch-delete:
     post:
       description: 用户批量删除
@@ -2266,6 +2406,37 @@ paths:
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 批量删除
+      tags:
+      - 用户管理
+  /api/v1/user/import:
+    post:
+      description: 批量导入用户
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 导入参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserImport'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 批量导入
       tags:
       - 用户管理
 swagger: "2.0"
