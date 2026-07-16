@@ -206,6 +206,40 @@ func (s *UserController) Delete(c *gin.Context) {
 	s.Response.Success(c, errcode.Success())
 }
 
+// Import 批量导入用户
+// @Tags 用户管理
+// @Summary 批量导入
+// @Description 批量导入用户
+// @Param token header string true "认证Token"
+// @Param data body request.UserImport true "导入参数"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/import [post]
+func (s *UserController) Import(c *gin.Context) {
+	var (
+		ctx = c.Request.Context()
+		req request.UserImport
+	)
+
+	s.service.WithContext(ctx)
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "Import")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	result, err := s.service.Import(req)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(result))
+}
+
 // BatchDelete 批量删除
 // @Tags 用户管理
 // @Summary 批量删除
@@ -234,6 +268,46 @@ func (s *UserController) BatchDelete(c *gin.Context) {
 	err = s.service.BatchDelete(req.IDs)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		return
+	}
+
+	s.Response.Success(c, errcode.Success())
+}
+
+// Password 更新密码
+// @Tags 用户管理
+// @Summary 更新密码
+// @Description 更新密码
+// @Param token header string true "认证Token"
+// @Param id path int true "用户ID"
+// @Param data body request.UserPassword true "更新参数"
+// @Success 200 {object} errcode.SuccessResponse "成功"
+// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
+// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// @Router /api/v1/user/{id}/password [put]
+func (s *UserController) Password(c *gin.Context) {
+	var (
+		ctx      = c.Request.Context()
+		req      request.User
+		userPass request.UserPassword
+	)
+
+	s.service.WithContext(ctx)
+
+	req.ID = facade.Request[int64]().Path(c, "id", 0)
+
+	// 绑定参数并验证
+	err := facade.Request[any]().BindValidate(c, &req, "Password")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		return
+	}
+
+	userPass.Password = req.Password
+
+	err = s.service.Password(req.ID, userPass)
+	if err != nil {
+		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
 		return
 	}
 

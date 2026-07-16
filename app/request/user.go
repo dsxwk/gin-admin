@@ -3,6 +3,7 @@ package request
 import (
 	"errors"
 	"gin/common/base"
+	"gin/pkg"
 	"github.com/gookit/validate"
 )
 
@@ -40,9 +41,9 @@ type UserUpdate struct {
 	Age      int    `json:"age" validate:"int" label:"年龄"`
 }
 
-// UserBatchDelete 用户批量删除
-type UserBatchDelete struct {
-	IDs []int64 `json:"ids" validate:"required" label:"ID列表"`
+// UserPassword 用户密码
+type UserPassword struct {
+	Password string `json:"password" validate:"required" label:"密码"`
 }
 
 // UserRole 用户角色
@@ -52,53 +53,49 @@ type UserRole struct {
 	Name   string `json:"name" validate:"" label:"角色名称"`
 }
 
+// UserImport 用户导入
+type UserImport struct {
+	Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"用户列表"`
+}
+
+// UserImportItem 用户导入子项
+type UserImportItem struct {
+	Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"用户名"`
+	Password string `json:"password" validate:"required" label:"密码"`
+	FullName string `json:"fullName" validate:"required" label:"姓名"`
+	Nickname string `json:"nickname" validate:"required" label:"昵称"`
+	Email    string `json:"email" validate:"required|email" label:"邮箱"`
+	Gender   int64  `json:"gender" validate:"required|int" label:"性别"`
+	Age      int64  `json:"age" validate:"int" label:"年龄"`
+	Status   int64  `json:"status" validate:"int" label:"状态"`
+}
+
+// UserBatchDelete 用户批量删除
+type UserBatchDelete struct {
+	IDs []int64 `json:"ids" validate:"required" label:"ID列表"`
+}
+
 // Validate 请求验证
 func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())
 	}
-
 	return nil
 }
 
 // ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
 func (s User) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		// 列表
-		"List": []string{
-			"PageListValidate.Page",
-			"PageListValidate.PageSize",
-		},
-		// 创建
-		"Create": []string{
-			"Username",
-			"FullName",
-			"Nickname",
-			"Gender",
-			"Password",
-		},
-		// 更新
-		"Update": []string{
-			"ID",
-			"Username",
-			"FullName",
-			"Nickname",
-			"Gender",
-		},
-		// 详情
-		"Detail": []string{
-			"ID",
-		},
-		// 删除
-		"Delete": []string{
-			"ID",
-		},
-		// 批量删除
+	scenes := validate.SValues{
+		"List":        []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+		"Create":      []string{"Username", "FullName", "Nickname", "Gender", "Password"},
+		"Update":      []string{"ID", "Username", "FullName", "Nickname", "Gender"},
+		"Detail":      []string{"ID"},
+		"Delete":      []string{"ID"},
 		"BatchDelete": []string{"IDs"},
-	})
+		"Password":    []string{"ID", "Password"},
+	}
+	v.WithScenes(scenes)
 }
 
 // Messages 验证器错误消息
@@ -123,4 +120,53 @@ func (s User) Translates() map[string]string {
 		"Gender":                    "性别",
 		"Password":                  "密码",
 	}
+}
+
+// Validate 用户导入验证
+func (s UserImport) Validate(data UserImport, scene string) error {
+	v := validate.Struct(data, scene)
+	if !v.Validate(scene) {
+		return errors.New(v.Errors.One())
+	}
+	return nil
+}
+
+// ConfigValidation 配置验证
+func (s UserImport) ConfigValidation(v *validate.Validation) {
+	scenes := validate.SValues{
+		"Import": []string{"Data"},
+	}
+	v.WithScenes(scenes)
+}
+
+// Messages 验证器错误消息
+func (s UserImport) Messages() map[string]string {
+	return validate.MS{
+		"required": "{field} 必填",
+		"minLen":   "{field} 长度不能少于 {min} 个字符",
+		"maxLen":   "{field} 长度不能超过 {max} 个字符",
+		"int":      "{field} 必须为整数",
+		"regex":    "{field} 格式错误",
+		"email":    "{field} 邮箱格式错误",
+	}
+}
+
+// Translates 字段翻译
+func (s UserImport) Translates() map[string]string {
+	ms := validate.MS{
+		"Data": "导入数据",
+	}
+	for i := range s.Data {
+		prefix := pkg.Sprintf("Data.%d.", i)
+		rowLabel := pkg.Sprintf("第 %d 行 ", i+1)
+		ms[prefix+"Username"] = rowLabel + "用户名"
+		ms[prefix+"Password"] = rowLabel + "密码"
+		ms[prefix+"FullName"] = rowLabel + "姓名"
+		ms[prefix+"Nickname"] = rowLabel + "昵称"
+		ms[prefix+"Email"] = rowLabel + "邮箱"
+		ms[prefix+"Gender"] = rowLabel + "性别"
+		ms[prefix+"Age"] = rowLabel + "年龄"
+		ms[prefix+"Status"] = rowLabel + "状态"
+	}
+	return ms
 }

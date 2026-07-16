@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"gin/app/enum"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -224,4 +225,108 @@ func (s *UserService) BatchDelete(ids []int64) (err error) {
 	}
 
 	return nil
+}
+
+// Import 批量导入用户
+func (s *UserService) Import(req request.UserImport) (request.UserImport, error) {
+	db := s.DB(&model.User{})
+
+	// 收集所有用户名和邮箱
+	usernames := make([]string, 0, len(req.Data))
+	emails := make([]string, 0, len(req.Data))
+	for _, item := range req.Data {
+		usernames = append(usernames, item.Username)
+		emails = append(emails, item.Email)
+	}
+
+	// 批量查询数据库中已存在的用户名和邮箱
+	existingUsernames := make(map[string]bool)
+	existingEmails := make(map[string]bool)
+
+	var existedUsers []model.User
+	if len(usernames) > 0 || len(emails) > 0 {
+		db.Model(&model.User{}).Where("username IN ? OR email IN ?", usernames, emails).Find(&existedUsers)
+	}
+	for _, u := range existedUsers {
+		existingUsernames[u.Username] = true
+		existingEmails[u.Email] = true
+	}
+
+	// 逐行检查并收集错误
+	seenUsername := make(map[string]int)
+	seenEmail := make(map[string]int)
+	var batchUsers []model.User
+	for i, item := range req.Data {
+		row := i + 1
+
+		// 校验导入数据内用户名重复
+		if firstRow, ok := seenUsername[item.Username]; ok {
+			return req, errors.New("第 " + pkg.IntToString(row) + " 行,用户名 " + item.Username + " 重复(与第" + pkg.IntToString(firstRow) + "行)")
+		}
+		// 校验导入数据内邮箱重复
+		if firstRow, ok := seenEmail[item.Email]; ok {
+			return req, errors.New("第 " + pkg.IntToString(row) + " 行,邮箱 " + item.Email + " 重复(与第" + pkg.IntToString(firstRow) + "行)")
+		}
+		if existingUsernames[item.Username] {
+			return req, errors.New("第 " + pkg.IntToString(row) + " 行,用户名 " + item.Username + " 已存在")
+		}
+		if existingEmails[item.Email] {
+			return req, errors.New("第 " + pkg.IntToString(row) + " 行,邮箱 " + item.Email + " 已存在")
+		}
+
+		// 记录已处理的行号,供后续行检查内部重复
+		seenUsername[item.Username] = row
+		seenEmail[item.Email] = row
+
+		batchUsers = append(batchUsers, model.User{
+			Username: item.Username,
+			Password: pkg.BcryptHash(item.Password),
+			FullName: item.FullName,
+			Nickname: item.Nickname,
+			Email:    item.Email,
+			Gender:   item.Gender,
+			Age:      item.Age,
+			Status:   item.Status,
+		})
+	}
+	tx := db.Begin()
+	if len(batchUsers) > 0 {
+		if err := db.Create(&batchUsers).Error; err != nil {
+			tx.Rollback()
+			return req, err
+		}
+
+		var (
+			importModel model.ImportRecords
+			importEnum  enum.ImportRecordsEnum
+		)
+		data := model.JsonValue{
+			Data: req.Data,
+		}
+		err := tx.Model(&importModel).Create(&model.ImportRecords{
+			Type: enum.ImportRecordsTypeUser,
+			Name: importEnum.Type().Desc(enum.ImportRecordsTypeUser),
+			Data: &data,
+		}).Error
+		if err != nil {
+			tx.Rollback()
+			return req, err
+		}
+	}
+
+	tx.Commit()
+
+	return req, nil
+}
+
+// Password 更新密码
+func (s *UserService) Password(id int64, user request.UserPassword) error {
+	var (
+		m  model.User
+		db = s.DB(&m)
+	)
+
+	user.Password = pkg.BcryptHash(user.Password)
+
+	return db.Model(&m).Where("id = ?", id).Updates(user).Error
 }
