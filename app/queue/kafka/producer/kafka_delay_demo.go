@@ -15,10 +15,7 @@ type KafkaDelayDemoProducer struct {
 // NewKafkaDelayDemoProducer 创建延迟生产者实例
 func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 	cfg := facade.Config()
-	log := facade.Log()
-	bus := facade.Message()
-
-	kfk := base.NewKafka(cfg, log, bus)
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
 		Topic:        "kafka_delay_demo",

@@ -23,12 +23,9 @@ type {{.Name}}{{if .IsDelay}}Delay{{end}}Producer struct {
 
 // New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer 创建生产者实例
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer {
-	cfg := facade.Config()
-	log := facade.Log()
-	bus := facade.Message()
-
 	{{- if eq .Type "kafka"}}
-	kfk := base.NewKafka(cfg, log, bus)
+	cfg := facade.Config()
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
 		Topic:        "{{.Topic}}",
@@ -46,7 +43,8 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 		},
 	}
 	{{- else}}
-	mq, err := base.NewRabbitMQ(cfg, log, bus)
+	log := facade.Log()
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil

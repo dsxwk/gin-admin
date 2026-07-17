@@ -16,11 +16,8 @@ type RabbitmqDelayDemoConsumer struct {
 
 // NewRabbitmqDelayDemoConsumer 创建延迟消费者实例
 func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
-	cfg := facade.Config()
 	log := facade.Log()
-	bus := facade.Message()
-
-	mq, err := base.NewRabbitMQ(cfg, log, bus)
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil

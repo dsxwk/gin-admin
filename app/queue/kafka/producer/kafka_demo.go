@@ -15,10 +15,7 @@ type KafkaDemoProducer struct {
 // NewKafkaDemoProducer 创建生产者实例
 func NewKafkaDemoProducer() *KafkaDemoProducer {
 	cfg := facade.Config()
-	log := facade.Log()
-	bus := facade.Message()
-
-	kfk := base.NewKafka(cfg, log, bus)
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
 		Topic:        "kafka_demo",

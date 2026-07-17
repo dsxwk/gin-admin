@@ -24,12 +24,9 @@ type {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer struct {
 
 // New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer 创建消费者实例
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {
-	cfg := facade.Config()
-	log := facade.Log()
-	bus := facade.Message()
-
 	{{- if eq .Type "kafka"}}
-	kfk := base.NewKafka(cfg, log, bus)
+	cfg := facade.Config()
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Kafka.Brokers,
 		Topic:          "{{.Topic}}",
@@ -51,7 +48,8 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 		},
 	}
 	{{- else}}
-	mq, err := base.NewRabbitMQ(cfg, log, bus)
+	log := facade.Log()
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil

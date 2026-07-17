@@ -19,10 +19,7 @@ type KafkaDemoConsumer struct {
 // NewKafkaDemoConsumer 创建消费者实例
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	cfg := facade.Config()
-	log := facade.Log()
-	bus := facade.Message()
-
-	kfk := base.NewKafka(cfg, log, bus)
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Kafka.Brokers,
 		Topic:          "kafka_demo",

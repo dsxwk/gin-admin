@@ -16,12 +16,9 @@ type RabbitmqDemoConsumer struct {
 
 // NewRabbitmqDemoConsumer 创建消费者实例
 func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
-	cfg := facade.Config()
 	log := facade.Log()
-	bus := facade.Message()
-
 	// 创建RabbitMQ连接
-	mq, err := base.NewRabbitMQ(cfg, log, bus)
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil

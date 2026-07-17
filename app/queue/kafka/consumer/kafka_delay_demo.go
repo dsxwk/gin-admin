@@ -19,10 +19,7 @@ type KafkaDelayDemoConsumer struct {
 // NewKafkaDelayDemoConsumer 创建延迟消费者实例
 func NewKafkaDelayDemoConsumer() *KafkaDelayDemoConsumer {
 	cfg := facade.Config()
-	log := facade.Log()
-	bus := facade.Message()
-
-	kfk := base.NewKafka(cfg, log, bus)
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Kafka.Brokers,
 		Topic:          "kafka_delay_demo",

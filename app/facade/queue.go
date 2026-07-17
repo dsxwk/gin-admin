@@ -8,23 +8,15 @@ import (
 	"sync"
 )
 
-var (
-	queueFacadeInstance *QueueFacade
-	queueOnce           sync.Once
-)
-
 // Queue 队列门面实例
 // 使用示例:
 //
 //	producer := facade.Queue().Producer("kafka_demo")
 //	consumers := facade.Queue().GetRunningConsumers()
 func Queue() *QueueFacade {
-	queueOnce.Do(func() {
-		queueFacadeInstance = &QueueFacade{
-			producers: make(map[string]queue.Producer),
-		}
-	})
-	return queueFacadeInstance
+	return &QueueFacade{
+		producers: make(map[string]queue.Producer),
+	}
 }
 
 type QueueFacade struct {
@@ -32,15 +24,12 @@ type QueueFacade struct {
 	producers map[string]queue.Producer
 	cfg       *config.Config
 	log       *logger.Logger
-	initOnce  sync.Once
 }
 
 // init 初始化门面
 func (q *QueueFacade) init() {
-	q.initOnce.Do(func() {
-		q.cfg = Config()
-		q.log = Log()
-	})
+	q.cfg = Config()
+	q.log = Log()
 }
 
 // Producer 获取指定名称的生产者
