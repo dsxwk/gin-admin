@@ -7,24 +7,21 @@ import (
 	"gin/pkg/serviceprovider/ratelimit"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
-	"sync"
 	"time"
 )
 
 var (
-	userStore                 *ratelimit.Store
-	ipStore                   *ratelimit.Store
-	rateLimitOnce             sync.Once
-	rateLimiterFacadeInstance *RateLimiterFacade
-	rateLimiterOnce           sync.Once
+	userStore *ratelimit.Store
+	ipStore   *ratelimit.Store
 )
 
 // initRateLimit 初始化限流
 func initRateLimit() {
-	rateLimitOnce.Do(func() {
-		userStore = ratelimit.NewStore(5*time.Minute, 100, 200)
-		ipStore = ratelimit.NewStore(5*time.Minute, 100, 200)
-	})
+	if userStore != nil {
+		return
+	}
+	userStore = ratelimit.NewStore(5*time.Minute, 100, 200)
+	ipStore = ratelimit.NewStore(5*time.Minute, 100, 200)
 }
 
 // shutdownRateLimit 关闭限流
@@ -93,10 +90,7 @@ func userRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 //	router.Use(facade.RateLimiter().Global())
 //	router.Use(facade.RateLimiter().IP(10, 20))
 func RateLimiter() *RateLimiterFacade {
-	rateLimiterOnce.Do(func() {
-		rateLimiterFacadeInstance = &RateLimiterFacade{}
-	})
-	return rateLimiterFacadeInstance
+	return &RateLimiterFacade{}
 }
 
 type RateLimiterFacade struct{}
