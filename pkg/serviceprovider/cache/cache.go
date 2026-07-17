@@ -8,7 +8,6 @@ import (
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
-	"sync"
 	"time"
 )
 
@@ -37,35 +36,34 @@ func NewCacheProxy(driver string, c Cache, bus *message.Event) *CacheProxy {
 
 var (
 	cacheInstance = make(map[string]*CacheProxy)
-	cacheLocks    sync.Map
 )
 
 func NewCache(driver string, conf *config.Config) *CacheProxy {
-	// 每个driver只初始化一次
-	onceAny, _ := cacheLocks.LoadOrStore(driver, &sync.Once{})
-	once := onceAny.(*sync.Once)
-	_default := "memory"
-	once.Do(func() {
-		switch driver {
-
-		case "redis", "disk":
-			_default = driver
-			cacheInstance[_default] = NewRedisCache(conf)
-
-		case "", "memory":
-			_default = "memory"
-			cacheInstance["_default"] = NewMemoryCache(conf)
-
-		default:
-			logger.NewLogger(conf).Fatal("不支持的缓存驱动: " + driver)
-		}
-
-		flag.Infof("%s缓存初始化成功", _default)
-	})
-
-	return cacheInstance[_default]
+	if cp, ok := cacheInstance[driver]; ok {
+		return cp
+	}
+	switch driver {
+	case "redis", "disk":
+		cp := NewRedisCache(conf)
+		cacheInstance[driver] = cp
+		flag.Infof("%s缓存初始化成功", driver)
+		return cp
+	case "", "memory":
+		cp := NewMemoryCache(conf)
+		cacheInstance["memory"] = cp
+		flag.Infof("memory缓存初始化成功")
+		return cp
+	default:
+		logger.NewLogger(conf).Fatal("不支持的缓存驱动: " + driver)
+		return nil
+	}
 }
 
+func ResetCache(driver string, conf *config.Config) *CacheProxy {
+	delete(cacheInstance, driver)
+	delete(cacheInstance, conf.Cache.Driver)
+	return NewCache(driver, conf)
+}
 func (p *CacheProxy) WithContext(ctx context.Context) *CacheProxy {
 	return &CacheProxy{
 		driver: p.driver,

@@ -25,5 +25,18 @@ func Cache(cacheType ...string) *cache.CacheProxy {
 	if _cache != nil {
 		return _cache
 	}
-	return cache.NewCache(name, Config())
+	cp := cache.NewCache(name, Config())
+	Register[*cache.CacheProxy](name, cp)
+	return cp
+}
+
+// ResetCache 重置缓存
+func ResetCache(cacheType ...string) *cache.CacheProxy {
+	name := Config().Cache.Driver
+	if len(cacheType) > 0 && cacheType[0] != "" {
+		name = cacheType[0]
+	}
+	cp := cache.ResetCache(name, Config())
+	Register[*cache.CacheProxy](name, cp)
+	return cp
 }

@@ -27,3 +27,23 @@ func DB(conn ...string) *gorm.DB {
 	}
 	return db
 }
+
+// ResetDB 重置数据库连接,关闭旧连接并重建
+func ResetDB(db *gorm.DB) *gorm.DB {
+	conf := Config()
+	name := conf.Databases.Driver
+
+	mgr := GetManager()
+	mgr.mu.Lock()
+	delete(mgr.instances, name)
+	mgr.mu.Unlock()
+
+	newDB := orm.ResetConnection(name)
+
+	Register[*gorm.DB](name, newDB)
+
+	if conf.Databases.DisableSoftDelete {
+		newDB = newDB.Unscoped()
+	}
+	return newDB
+}

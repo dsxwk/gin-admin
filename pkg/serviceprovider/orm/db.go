@@ -15,77 +15,87 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 	"time"
 )
 
 var (
 	conf        *config.Config
 	dbInstances = make(map[string]*gorm.DB)
-	dbLocks     sync.Map
 )
 
 // Connection 连接数据库
 func Connection(driver string, cfg *config.Config) *gorm.DB {
 	conf = cfg
-	// 每个连接只初始化一次
-	onceAny, _ := dbLocks.LoadOrStore(driver, &sync.Once{})
-	once := onceAny.(*sync.Once)
+	// 已存在直接返回
+	if db, ok := dbInstances[driver]; ok {
+		return db
+	}
 
-	once.Do(func() {
-		var (
-			db  *gorm.DB
-			err error
-		)
+	var (
+		db  *gorm.DB
+		err error
+	)
 
-		// 根据连接打开数据库
-		switch driver {
-		case "mysql":
-			db, err = openMysql()
-		case "pgsql":
-			db, err = openPgsql()
-		case "sqlite":
-			db, err = openSqlite()
-		case "sqlsrv":
-			db, err = openSqlsrv()
-		case "oracle":
-			db, err = openOracle()
-		default:
-			flag.Errorf("不支持的数据库: %s", driver)
-			os.Exit(1)
+	// 根据驱动打开数据库
+	switch driver {
+	case "mysql":
+		db, err = openMysql()
+	case "pgsql":
+		db, err = openPgsql()
+	case "sqlite":
+		db, err = openSqlite()
+	case "sqlsrv":
+		db, err = openSqlsrv()
+	case "oracle":
+		db, err = openOracle()
+	default:
+		flag.Errorf("不支持的数据库: %s", driver)
+		os.Exit(1)
+	}
+
+	if err != nil {
+		flag.Errorf("%s数据库连接失败: %v", driver, err)
+		os.Exit(1)
+	}
+
+	// 配置连接池
+	sqlDB, e := db.DB()
+	if e != nil {
+		flag.Errorf("%s数据库连接池配置失败: %v", driver, e)
+		os.Exit(1)
+	}
+
+	// 设置连接池参数
+	sqlDB.SetMaxIdleConns(20)
+	sqlDB.SetMaxOpenConns(200)
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+
+	// 测试Ping
+	if err = sqlDB.Ping(); err != nil {
+		flag.Errorf("%s数据库连接ping失败: %v", driver, err)
+		os.Exit(1)
+	}
+
+	// 注册gorm sql回调
+	SqlCallback(db)
+
+	dbInstances[driver] = db
+	return db
+}
+
+// ResetConnection 重置数据库连接,关闭旧连接并重建
+func ResetConnection(driver string) *gorm.DB {
+	if db, ok := dbInstances[driver]; ok {
+		if sqlDB, err := db.DB(); err == nil {
+			err = sqlDB.Close()
+			if err != nil {
+				return nil
+			}
 		}
-
-		if err != nil {
-			flag.Errorf("%s数据库连接失败: %v", driver, err)
-			os.Exit(1)
-		}
-
-		// 配置连接池
-		sqlDB, e := db.DB()
-		if e != nil {
-			flag.Errorf("%s数据库连接池配置失败: %v", driver, e)
-			os.Exit(1)
-		}
-
-		// 设置连接池参数
-		sqlDB.SetMaxIdleConns(20)
-		sqlDB.SetMaxOpenConns(200)
-		sqlDB.SetConnMaxLifetime(1 * time.Hour)
-		sqlDB.SetConnMaxIdleTime(30 * time.Minute)
-
-		// 测试Ping
-		if err = sqlDB.Ping(); err != nil {
-			flag.Errorf("%s数据库连接ping失败: %v", driver, err)
-			os.Exit(1)
-		}
-
-		// 注册gorm sql回调
-		SqlCallback(db)
-
-		dbInstances[driver] = db
-	})
-
-	return dbInstances[driver]
+		delete(dbInstances, driver)
+	}
+	return Connection(driver, conf)
 }
 
 // configNaming 全局表名策略

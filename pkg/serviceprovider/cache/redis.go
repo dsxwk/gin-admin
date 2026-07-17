@@ -8,7 +8,6 @@ import (
 	"gin/pkg/serviceprovider/message"
 	"github.com/go-redis/redis/v8"
 	"github.com/goccy/go-json"
-	"sync"
 	"time"
 )
 
@@ -78,34 +77,38 @@ type RedisCache struct {
 
 var (
 	redisCache *CacheProxy
-	redisOnce  sync.Once
 )
 
 func NewRedisCache(conf *config.Config) *CacheProxy {
-	redisOnce.Do(func() {
-		var (
-			bus = message.NewEvent()
-		)
+	if redisCache != nil {
+		return redisCache
+	}
 
-		client := redis.NewClient(&redis.Options{
-			Addr:     conf.Cache.Redis.Address,
-			Password: conf.Cache.Redis.Password,
-			DB:       conf.Cache.Redis.DB,
-		})
-
-		// 添加Hook
-		client.AddHook(&RedisHook{bus: bus})
-
-		r := &RedisCache{
-			client:  client,
-			ctx:     context.Background(),
-			pubsubs: make(map[string]*redis.PubSub),
-			bus:     bus,
-		}
-
-		redisCache = NewCacheProxy("redis", r, bus)
+	bus := message.NewEvent()
+	client := redis.NewClient(&redis.Options{
+		Addr:     conf.Cache.Redis.Address,
+		Password: conf.Cache.Redis.Password,
+		DB:       conf.Cache.Redis.DB,
 	})
+
+	// 添加Hook
+	client.AddHook(&RedisHook{bus: bus})
+
+	r := &RedisCache{
+		client:  client,
+		ctx:     context.Background(),
+		pubsubs: make(map[string]*redis.PubSub),
+		bus:     bus,
+	}
+
+	redisCache = NewCacheProxy("redis", r, bus)
 	return redisCache
+}
+
+// ResetRedisCache 重置Redis缓存连接
+func ResetRedisCache(conf *config.Config) *CacheProxy {
+	redisCache = nil
+	return NewRedisCache(conf)
 }
 
 func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {
