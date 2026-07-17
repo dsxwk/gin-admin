@@ -25,39 +25,12 @@ func (s ImportRecords) Validate(data ImportRecords, scene string) error {
 	return nil
 }
 
-// ImportRecordsCreate ImportRecords创建验证
-type ImportRecordsCreate struct {
-	Type int64       `json:"type" form:"type" validate:"required|int" label:"导入类型"`
-	Name string      `json:"name" form:"name" validate:"required" label:"类型名称"`
-	Data interface{} `json:"data" form:"data" validate:"required" label:"导入数据"`
-}
-
-// ImportRecordsUpdate ImportRecords更新验证
-type ImportRecordsUpdate struct {
-	ID   int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Type int64       `json:"type" form:"type" validate:"required|int" label:"导入类型"`
-	Name string      `json:"name" form:"name" validate:"required" label:"类型名称"`
-	Data interface{} `json:"data" form:"data" validate:"required" label:"导入数据"`
-}
-
 // ConfigValidation 配置验证
 // - 定义验证场景
 // - 也可以添加验证设置
 func (s ImportRecords) ConfigValidation(v *validate.Validation) {
 	scenes := validate.SValues{
-		"List": []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"Create": []string{
-			"Type",
-			"Name",
-			"Data",
-		},
-		"Update": []string{
-			"ID",
-			"Type",
-			"Name",
-			"Data",
-		},
-		"Detail": []string{"ID"},
+		"List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
 		"Delete": []string{"ID"},
 	}
 	v.WithScenes(scenes)

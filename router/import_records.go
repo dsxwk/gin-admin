@@ -22,6 +22,8 @@ func (r *ImportRecordsRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
 	{
 		// 列表
 		router.GET("", importRecords.List)
+		// 删除
+		router.DELETE("/:id", importRecords.Delete)
 	}
 }
 

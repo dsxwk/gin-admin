@@ -19,7 +19,7 @@ func (s *ImportRecordsService) List(req request.ImportRecords) (pageData request
 	)
 
 	// 搜索
-	db = s.Search(db, m, req.Search).Model(&m)
+	db = s.Search(db, m, req.Search).Model(&m).Preload("User")
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -45,4 +45,19 @@ func (s *ImportRecordsService) List(req request.ImportRecords) (pageData request
 	}
 
 	return pageData, nil
+}
+
+// Delete 删除
+func (s *ImportRecordsService) Delete(id int64) (err error) {
+	var (
+		m  model.ImportRecords
+		db = s.DB(&m)
+	)
+
+	err = db.Model(&m).Delete(&m, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
