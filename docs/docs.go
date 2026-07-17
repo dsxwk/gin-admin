@@ -1076,6 +1076,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/import-records/{id}": {
+            "delete": {
+                "description": "导入记录删除",
+                "tags": [
+                    "导入记录管理"
+                ],
+                "summary": "删除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/login": {
             "post": {
                 "description": "用户账号密码登录",
@@ -2745,6 +2790,9 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "createdUser": {
+                    "type": "integer"
+                },
                 "data": {
                     "$ref": "#/definitions/model.JsonValue"
                 },
@@ -2759,6 +2807,9 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
                 }
             }
         },
@@ -3170,9 +3221,6 @@ const docTemplate = `{
                 "tag": {},
                 "title": {
                     "type": "string"
-                },
-                "uid": {
-                    "type": "integer"
                 }
             }
         },
@@ -3202,9 +3250,6 @@ const docTemplate = `{
                 "tag": {},
                 "title": {
                     "type": "string"
-                },
-                "uid": {
-                    "type": "integer"
                 }
             }
         },

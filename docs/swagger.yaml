@@ -97,6 +97,8 @@ definitions:
     properties:
       createdAt:
         type: string
+      createdUser:
+        type: integer
       data:
         $ref: '#/definitions/model.JsonValue'
       id:
@@ -107,6 +109,8 @@ definitions:
         type: integer
       updatedAt:
         type: string
+      user:
+        $ref: '#/definitions/model.User'
     type: object
   model.JsonValue:
     properties:
@@ -384,8 +388,6 @@ definitions:
       tag: {}
       title:
         type: string
-      uid:
-        type: integer
     required:
     - content
     - tag
@@ -406,8 +408,6 @@ definitions:
       tag: {}
       title:
         type: string
-      uid:
-        type: integer
     required:
     - content
     - tag
@@ -1481,6 +1481,36 @@ paths:
       summary: 列表
       tags:
       - 导入管理
+  /api/v1/import-records/{id}:
+    delete:
+      description: 导入记录删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 删除
+      tags:
+      - 导入记录管理
   /api/v1/login:
     post:
       consumes:
