@@ -221,60 +221,68 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 
 	tx := db.Begin()
 
+	// 更新菜单主表
 	rows := model.FilterFields(db, m, data)
 	rows["updated_at"] = time.Now()
-
-	err = tx.Model(&m).Where("id = ?", id).Updates(rows).Error
-	if err != nil {
+	if err = tx.Model(&m).Where("id = ?", id).Updates(rows).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
+	// 删除旧关联数据
+	if err = tx.Where("menu_id = ?", id).Delete(&model.MenuMeta{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err = tx.Where("menu_id = ?", id).Delete(&model.MenuActions{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err = tx.Where("menu_id = ?", id).Delete(&model.RoleMenus{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 创建Meta
 	if len(meta) > 0 {
 		metaRows := model.FilterFields(db, model.MenuMeta{}, meta)
+		metaRows["menu_id"] = id
+		metaRows["created_at"] = time.Now()
 		metaRows["updated_at"] = time.Now()
-		err = tx.Model(&model.MenuMeta{}).
-			Where("id = ?", meta["id"]).
-			Updates(metaRows).Error
-	}
-
-	if len(menuAction) > 0 {
-		menuActionRows := model.FilterFields(db, model.MenuActions{}, menuAction)
-		menuActionRows["updated_at"] = time.Now()
-		err = tx.Model(&model.MenuActions{}).
-			Where("menu_id = ?", menuAction["menuId"]).
-			Updates(menuActionRows).Error
-	}
-
-	// 更新角色菜单关联
-	if len(roleMenusData) > 0 {
-		// 删除旧关联
-		err = tx.Model(&model.RoleMenus{}).
-			Where("menu_id = ?", id).
-			Delete(&model.RoleMenus{}).Error
-		if err != nil {
+		if err = tx.Model(&model.MenuMeta{}).Create(metaRows).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
+	}
 
-		// 创建新关联
+	// 创建MenuAction
+	if len(menuAction) > 0 {
+		menuActionRows := model.FilterFields(db, model.MenuActions{}, menuAction)
+		menuActionRows["menu_id"] = id
+		menuActionRows["created_at"] = time.Now()
+		menuActionRows["updated_at"] = time.Now()
+		if err = tx.Model(&model.MenuActions{}).Create(menuActionRows).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// 创建角色菜单关联
+	if len(roleMenusData) > 0 {
 		var newRoleMenus []model.RoleMenus
 		for _, item := range roleMenusData {
 			roleMap, _ok := item.(map[string]interface{})
 			if !_ok {
 				continue
 			}
-
 			newRoleMenus = append(newRoleMenus, model.RoleMenus{
 				MenuId: id,
 				RoleId: int64(roleMap["roleId"].(float64)),
 				Name:   roleMap["name"].(string),
 			})
 		}
-
 		if len(newRoleMenus) > 0 {
-			err = tx.Model(&model.RoleMenus{}).Create(&newRoleMenus).Error
-			if err != nil {
+			if err = tx.Model(&model.RoleMenus{}).Create(&newRoleMenus).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
