@@ -1,3 +1,9 @@
+## v2.3.7
+> - Optimize command line service template and related adjustments
+> - Update menu interface problem repair and add delete import record interface
+> - Article and import creator problem repair, database data change backup
+> - Database and cache and facade method optimization, swagger document update
+
 ## v2.3.6
 > - Optimize command line service template and related adjustments
 > - Add user import type dictionary
