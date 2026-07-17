@@ -228,7 +228,7 @@ func (s *UserService) BatchDelete(ids []int64) (err error) {
 }
 
 // Import 批量导入用户
-func (s *UserService) Import(req request.UserImport) (request.UserImport, error) {
+func (s *UserService) Import(createdUser int64, req request.UserImport) (request.UserImport, error) {
 	db := s.DB(&model.User{})
 
 	// 收集所有用户名和邮箱
@@ -304,9 +304,10 @@ func (s *UserService) Import(req request.UserImport) (request.UserImport, error)
 			Data: req.Data,
 		}
 		err := tx.Model(&importModel).Create(&model.ImportRecords{
-			Type: enum.ImportRecordsTypeUser,
-			Name: importEnum.Type().Desc(enum.ImportRecordsTypeUser),
-			Data: &data,
+			Type:        enum.ImportRecordsTypeUser,
+			Name:        importEnum.Type().Desc(enum.ImportRecordsTypeUser),
+			Data:        &data,
+			CreatedUser: createdUser,
 		}).Error
 		if err != nil {
 			tx.Rollback()

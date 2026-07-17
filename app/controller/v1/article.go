@@ -114,8 +114,7 @@ func (s *ArticleController) Create(c *gin.Context) {
 		return
 	}
 
-	req.Uid = s.GetUserId(c)
-	m, err := s.service.Create(req)
+	m, err := s.service.Create(s.GetUserId(c), req)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -156,7 +155,6 @@ func (s *ArticleController) Update(c *gin.Context) {
 	}
 
 	req.ID = facade.Request[int64]().Path(c, "id", 0)
-	req.Uid = s.GetUserId(c)
 	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))

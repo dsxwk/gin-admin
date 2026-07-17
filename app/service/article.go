@@ -49,14 +49,14 @@ func (s *ArticleService) List(req request.Article) (pageData request.PageData, e
 }
 
 // Create 创建
-func (s *ArticleService) Create(req request.Article) (model.Article, error) {
+func (s *ArticleService) Create(createdUser int64, req request.Article) (model.Article, error) {
 	var (
 		m  model.Article
 		db = s.DB(&m)
 	)
 
 	m = model.Article{
-		Uid:        req.Uid,
+		Uid:        createdUser,
 		Title:      req.Title,
 		Content:    req.Content,
 		CategoryId: req.CategoryId,

@@ -10,7 +10,6 @@ import (
 type Article struct {
 	base.BaseRequest
 	ID         int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Uid        int64       `json:"uid" form:"uid" validate:"int" label:"用户id"`
 	Title      string      `json:"title" form:"title" validate:"required" label:"标题"`
 	Content    string      `json:"content" form:"content" validate:"required" label:"内容"`
 	CategoryId int64       `json:"categoryId" form:"categoryId" validate:"int" label:"分类id"`
@@ -22,7 +21,6 @@ type Article struct {
 
 // ArticleCreate 文章创建验证
 type ArticleCreate struct {
-	Uid        int64       `json:"uid" form:"uid" validate:"int" label:"用户id"`
 	Title      string      `json:"title" form:"title" validate:"required" label:"标题"`
 	Content    string      `json:"content" form:"content" validate:"required" label:"内容"`
 	CategoryId int64       `json:"categoryId" form:"categoryId" validate:"int" label:"分类id"`
@@ -34,7 +32,6 @@ type ArticleCreate struct {
 // ArticleUpdate 文章更新验证
 type ArticleUpdate struct {
 	ID         int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Uid        int64       `json:"uid" form:"uid" validate:"int" label:"用户id"`
 	Title      string      `json:"title" form:"title" validate:"required" label:"标题"`
 	Content    string      `json:"content" form:"content" validate:"required" label:"内容"`
 	CategoryId int64       `json:"categoryId" form:"categoryId" validate:"int" label:"分类id"`
@@ -59,7 +56,6 @@ func (s Article) ConfigValidation(v *validate.Validation) {
 	scenes := validate.SValues{
 		"List": []string{"PageListValidate.Page", "PageListValidate.PageSize"},
 		"Create": []string{
-			"Uid",
 			"Title",
 			"Content",
 			"CategoryId",
@@ -69,7 +65,6 @@ func (s Article) ConfigValidation(v *validate.Validation) {
 		},
 		"Update": []string{
 			"ID",
-			"Uid",
 			"Title",
 			"Content",
 			"CategoryId",
@@ -100,7 +95,6 @@ func (s Article) Messages() map[string]string {
 func (s Article) Translates() map[string]string {
 	return validate.MS{
 		"ID":                        "ID",
-		"Uid":                       "用户id",
 		"Title":                     "标题",
 		"Content":                   "内容",
 		"CategoryId":                "分类id",

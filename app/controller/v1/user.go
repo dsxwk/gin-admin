@@ -231,7 +231,7 @@ func (s *UserController) Import(c *gin.Context) {
 		return
 	}
 
-	result, err := s.service.Import(req)
+	result, err := s.service.Import(s.GetUserId(c), req)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
