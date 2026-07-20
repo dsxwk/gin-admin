@@ -3007,7 +3007,10 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 # Swagger Documents
 ```bash
 $ go install github.com/swaggo/swag/cmd/swag@latest
+# Use
 $ swag init -g main.go # --exclude cli,app/service
+# Or Use
+$ go run ./cmd/cli.go make:docs
 2025/10/23 16:26:42 Generate swagger docs....
 2025/10/23 16:26:42 Generate general API Info, search dir:./
 2025/10/23 16:26:43 Generating request.UserLogin
