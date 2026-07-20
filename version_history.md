@@ -2,6 +2,7 @@
 > - Optimize command line, debugger, queue, database, cache, http
 > - Update dependency package version
 > - Add user role return and add and modify
+> - Add swagger document generation command line and swagger document update
 
 ## v2.3.7
 > - Optimize command line service template and related adjustments
