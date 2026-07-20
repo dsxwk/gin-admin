@@ -102,14 +102,17 @@ func (app *Application) Stop() error {
 		app.runnerCancel()
 	}
 
-	var lastErr error
+	var errs []error
 	for _, runner := range app.runners {
 		if err := runner.Stop(); err != nil {
-			lastErr = err
+			errs = append(errs, fmt.Errorf("%s: %w", runner.Name(), err))
 		}
 	}
 
-	return lastErr
+	if len(errs) > 0 {
+		return fmt.Errorf("stop errors: %v", errs)
+	}
+	return nil
 }
 
 // startRunners 启动所有后台运行任务

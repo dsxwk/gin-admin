@@ -17,31 +17,31 @@ type TraceData struct {
 // TraceStore 追踪存储
 type TraceStore struct {
 	mu    sync.RWMutex
-	store map[string]*TraceData // 关键：存储指针
+	store map[string]*TraceData
 }
 
 var Store = &TraceStore{
 	store: make(map[string]*TraceData),
 }
 
-// Get 获取追踪数据
+// Get 获取追踪数据,不存在时创建并存储
 func (ts *TraceStore) Get(traceId string) *TraceData {
-	ts.mu.RLock()
-	defer ts.mu.RUnlock()
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
 
 	if data, ok := ts.store[traceId]; ok {
 		return data
 	}
 
-	// 如果不存在,返回一个新的TraceData(但不会自动存入store)
-	// 注意：这里返回的是新对象,不会自动存储到map中
-	return &TraceData{
+	data := &TraceData{
 		Sql:           make([]map[string]any, 0),
 		Cache:         make([]map[string]any, 0),
 		Http:          make([]map[string]any, 0),
 		Mq:            make([]map[string]any, 0),
 		ListenerEvent: make([]map[string]any, 0),
 	}
+	ts.store[traceId] = data
+	return data
 }
 
 // Set 设置追踪数据
@@ -58,16 +58,13 @@ func (ts *TraceStore) Delete(traceId string) {
 	delete(ts.store, traceId)
 }
 
-// AddSql 记录sql调试信息
-func AddSql(traceId string, data map[string]any) {
+// addTraceField 通用方法:获取或创建TraceData,并对指定字段追加数据
+func addTraceField(traceId string, data map[string]any, fieldFn func(d *TraceData) *[]map[string]any) {
 	if traceId == "" {
 		return
 	}
 
 	Store.mu.Lock()
-	defer Store.mu.Unlock()
-
-	// 获取或创建TraceData
 	d, ok := Store.store[traceId]
 	if !ok {
 		d = &TraceData{
@@ -79,113 +76,34 @@ func AddSql(traceId string, data map[string]any) {
 		}
 		Store.store[traceId] = d
 	}
+	Store.mu.Unlock()
 
-	// 直接操作d(指针)
 	d.mu.Lock()
-	d.Sql = append(d.Sql, data)
+	*fieldFn(d) = append(*fieldFn(d), data)
 	d.mu.Unlock()
+}
+
+// AddSql 记录sql调试信息
+func AddSql(traceId string, data map[string]any) {
+	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Sql })
 }
 
 // AddCache 记录缓存调试信息
 func AddCache(traceId string, data map[string]any) {
-	if traceId == "" {
-		return
-	}
-
-	Store.mu.Lock()
-	defer Store.mu.Unlock()
-
-	d, ok := Store.store[traceId]
-	if !ok {
-		d = &TraceData{
-			Sql:           make([]map[string]any, 0),
-			Cache:         make([]map[string]any, 0),
-			Http:          make([]map[string]any, 0),
-			Mq:            make([]map[string]any, 0),
-			ListenerEvent: make([]map[string]any, 0),
-		}
-		Store.store[traceId] = d
-	}
-
-	d.mu.Lock()
-	d.Cache = append(d.Cache, data)
-	d.mu.Unlock()
+	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Cache })
 }
 
 // AddHttp 记录http调试信息
 func AddHttp(traceId string, data map[string]any) {
-	if traceId == "" {
-		return
-	}
-
-	Store.mu.Lock()
-	defer Store.mu.Unlock()
-
-	d, ok := Store.store[traceId]
-	if !ok {
-		d = &TraceData{
-			Sql:           make([]map[string]any, 0),
-			Cache:         make([]map[string]any, 0),
-			Http:          make([]map[string]any, 0),
-			Mq:            make([]map[string]any, 0),
-			ListenerEvent: make([]map[string]any, 0),
-		}
-		Store.store[traceId] = d
-	}
-
-	d.mu.Lock()
-	d.Http = append(d.Http, data)
-	d.mu.Unlock()
+	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Http })
 }
 
 // AddMq 记录mq调试信息
 func AddMq(traceId string, data map[string]any) {
-	if traceId == "" {
-		return
-	}
-
-	Store.mu.Lock()
-	defer Store.mu.Unlock()
-
-	d, ok := Store.store[traceId]
-	if !ok {
-		d = &TraceData{
-			Sql:           make([]map[string]any, 0),
-			Cache:         make([]map[string]any, 0),
-			Http:          make([]map[string]any, 0),
-			Mq:            make([]map[string]any, 0),
-			ListenerEvent: make([]map[string]any, 0),
-		}
-		Store.store[traceId] = d
-	}
-
-	d.mu.Lock()
-	d.Mq = append(d.Mq, data)
-	d.mu.Unlock()
+	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Mq })
 }
 
 // AddListener 记录监听调试信息
 func AddListener(traceId string, data map[string]any) {
-	if traceId == "" {
-		return
-	}
-
-	Store.mu.Lock()
-	defer Store.mu.Unlock()
-
-	d, ok := Store.store[traceId]
-	if !ok {
-		d = &TraceData{
-			Sql:           make([]map[string]any, 0),
-			Cache:         make([]map[string]any, 0),
-			Http:          make([]map[string]any, 0),
-			Mq:            make([]map[string]any, 0),
-			ListenerEvent: make([]map[string]any, 0),
-		}
-		Store.store[traceId] = d
-	}
-
-	d.mu.Lock()
-	d.ListenerEvent = append(d.ListenerEvent, data)
-	d.mu.Unlock()
+	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.ListenerEvent })
 }
