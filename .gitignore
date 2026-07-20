@@ -1,6 +1,7 @@
 /.git
 /.idea
 /.vscode
+/.gocache
 /vendor
 /storage/cache
 /storage/logs
