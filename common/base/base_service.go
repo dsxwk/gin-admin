@@ -4,6 +4,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/app/model"
+	"gin/pkg/serviceprovider/cache"
 	"gin/pkg/serviceprovider/orm"
 	"gorm.io/gorm"
 	"time"
@@ -47,7 +48,6 @@ func (s *BaseService) DB(model Model) *gorm.DB {
 	if err == nil {
 		if err = sqlDB.Ping(); err != nil {
 			facade.Log().Warn("数据库连接无效,关闭旧连接并重建")
-			sqlDB.Close()
 			db = facade.ResetDB(db).WithContext(s.Ctx)
 		}
 	}
@@ -70,6 +70,15 @@ func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]inter
 		db = db.Where(whereSql, args...)
 	}
 	return db
+}
+
+// Cache 获取缓存实例,自动注入请求上下文
+// 使用示例:
+//
+//	s.Cache().Set("key", value, 5*time.Minute)
+//	s.Cache("redis").Get("key")
+func (s *BaseService) Cache(cacheType ...string) *cache.CacheProxy {
+	return facade.Cache(cacheType...).WithContext(s.Ctx)
 }
 
 // Updates 公共更新方法

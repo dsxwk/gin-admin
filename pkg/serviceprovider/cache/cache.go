@@ -8,6 +8,7 @@ import (
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
+	"sync"
 	"time"
 )
 
@@ -35,22 +36,30 @@ func NewCacheProxy(driver string, c Cache, bus *message.Event) *CacheProxy {
 }
 
 var (
-	cacheInstance = make(map[string]*CacheProxy)
+	cacheInstance   = make(map[string]*CacheProxy)
+	cacheInstanceMu sync.RWMutex
 )
 
 func NewCache(driver string, conf *config.Config) *CacheProxy {
-	if cp, ok := cacheInstance[driver]; ok {
+	cacheInstanceMu.RLock()
+	cp, ok := cacheInstance[driver]
+	cacheInstanceMu.RUnlock()
+	if ok {
 		return cp
 	}
 	switch driver {
 	case "redis", "disk":
-		cp := NewRedisCache(conf)
+		cp = NewRedisCache(conf)
+		cacheInstanceMu.Lock()
 		cacheInstance[driver] = cp
+		cacheInstanceMu.Unlock()
 		flag.Infof("%s缓存初始化成功", driver)
 		return cp
 	case "", "memory":
-		cp := NewMemoryCache(conf)
+		cp = NewMemoryCache(conf)
+		cacheInstanceMu.Lock()
 		cacheInstance["memory"] = cp
+		cacheInstanceMu.Unlock()
 		flag.Infof("memory缓存初始化成功")
 		return cp
 	default:
@@ -60,8 +69,10 @@ func NewCache(driver string, conf *config.Config) *CacheProxy {
 }
 
 func ResetCache(driver string, conf *config.Config) *CacheProxy {
+	cacheInstanceMu.Lock()
 	delete(cacheInstance, driver)
 	delete(cacheInstance, conf.Cache.Driver)
+	cacheInstanceMu.Unlock()
 	return NewCache(driver, conf)
 }
 func (p *CacheProxy) WithContext(ctx context.Context) *CacheProxy {

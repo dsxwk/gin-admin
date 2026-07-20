@@ -15,20 +15,25 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
 var (
-	conf        *config.Config
-	dbInstances = make(map[string]*gorm.DB)
+	conf          *config.Config
+	dbInstances   = make(map[string]*gorm.DB)
+	dbInstancesMu sync.RWMutex
 )
 
 // Connection 连接数据库
 func Connection(driver string, cfg *config.Config) *gorm.DB {
 	conf = cfg
 	// 已存在直接返回
-	if db, ok := dbInstances[driver]; ok {
-		return db
+	dbInstancesMu.RLock()
+	existsDB, existsOK := dbInstances[driver]
+	dbInstancesMu.RUnlock()
+	if existsOK {
+		return existsDB
 	}
 
 	var (
@@ -80,21 +85,22 @@ func Connection(driver string, cfg *config.Config) *gorm.DB {
 	// 注册gorm sql回调
 	SqlCallback(db)
 
+	dbInstancesMu.Lock()
 	dbInstances[driver] = db
+	dbInstancesMu.Unlock()
 	return db
 }
 
 // ResetConnection 重置数据库连接,关闭旧连接并重建
 func ResetConnection(driver string) *gorm.DB {
+	dbInstancesMu.Lock()
 	if db, ok := dbInstances[driver]; ok {
 		if sqlDB, err := db.DB(); err == nil {
-			err = sqlDB.Close()
-			if err != nil {
-				return nil
-			}
+			_ = sqlDB.Close()
 		}
 		delete(dbInstances, driver)
 	}
+	dbInstancesMu.Unlock()
 	return Connection(driver, conf)
 }
 
