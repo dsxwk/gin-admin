@@ -52,8 +52,7 @@ func (m *MakeEvent) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeEvent) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeEvent) Execute(values map[string]string) {
 	_make := "event"
 	file := m.GetMakeFile(values["file"], _make)
 	name := values["name"]

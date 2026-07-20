@@ -120,8 +120,7 @@ func (m *MakeModel) Help() []base.CommandOption {
 }
 
 // Execute cli命令执行入口
-func (m *MakeModel) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeModel) Execute(values map[string]string) {
 	// 输出目录
 	path := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
 	// 表名支持多个

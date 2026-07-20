@@ -92,8 +92,7 @@ func (m *MakeQueue) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeQueue) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeQueue) Execute(values map[string]string) {
 
 	queueType := values["type"]
 	name := values["name"]

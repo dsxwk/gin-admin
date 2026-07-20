@@ -83,8 +83,7 @@ type TranslateField struct {
 	Label string
 }
 
-func (m *MakeRequest) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeRequest) Execute(values map[string]string) {
 
 	file := m.GetMakeFile(values["file"], "request")
 	templateName := "request"

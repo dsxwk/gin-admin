@@ -25,7 +25,7 @@ func (s *ProducerList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *ProducerList) Execute(args []string) {
+func (s *ProducerList) Execute(values map[string]string) {
 	producers := queue.GetProducerRegistry().GetAll()
 	if len(producers) == 0 {
 		color.Yellow("暂无注册的生产者")

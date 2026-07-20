@@ -26,7 +26,7 @@ func (s *EventList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *EventList) Execute(args []string) {
+func (s *EventList) Execute(values map[string]string) {
 	list := facade.Event[eventbus.Event]().List()
 	if len(list) == 0 {
 		color.Yellow("暂无注册的事件")

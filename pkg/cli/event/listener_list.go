@@ -21,7 +21,7 @@ func (s *EventListenerList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *EventListenerList) Execute(args []string) {
+func (s *EventListenerList) Execute(values map[string]string) {
 	facade.Event[eventbus.Event]().Debug()
 }
 

@@ -62,8 +62,7 @@ func (m *MakeProvider) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeProvider) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeProvider) Execute(values map[string]string) {
 
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	fileName := values["file"]

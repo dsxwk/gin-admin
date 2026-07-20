@@ -46,8 +46,7 @@ func (m *MakeController) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeController) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeController) Execute(values map[string]string) {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, f, values["desc"])

@@ -33,8 +33,7 @@ func (s *MakeSeed) Help() []base.CommandOption {
 	}
 }
 
-func (s *MakeSeed) Execute(args []string) {
-	values := s.ParseFlags(s.Name(), args, s.Help())
+func (s *MakeSeed) Execute(values map[string]string) {
 	table := values["table"]
 
 	timestamp := time.Now().Format("20060102")

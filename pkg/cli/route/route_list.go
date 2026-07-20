@@ -26,7 +26,7 @@ func (s *RouteList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *RouteList) Execute(args []string) {
+func (s *RouteList) Execute(values map[string]string) {
 	// 初始化Gin引擎(不要Run)
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()

@@ -67,8 +67,7 @@ func (m *MakeModelOld) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeModelOld) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeModelOld) Execute(values map[string]string) {
 	// 去除前斜杠
 	p := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
 	tables := strings.Split(values["table"], ",")

@@ -38,8 +38,7 @@ func (s *Seed) Help() []base.CommandOption {
 	}
 }
 
-func (s *Seed) Execute(args []string) {
-	values := s.ParseFlags(s.Name(), args, s.Help())
+func (s *Seed) Execute(values map[string]string) {
 	flag.Infof("开始执行数据填充...")
 
 	db := facade.DB()

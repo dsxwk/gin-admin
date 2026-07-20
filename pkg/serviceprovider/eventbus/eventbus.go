@@ -55,10 +55,23 @@ func Register[T Event](listener Listener[T], event T) {
 	}
 }
 
+// getTraceId 安全获取traceId
+func getTraceId(ctx context.Context) string {
+	if ctx == nil {
+		return "unknown"
+	}
+	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+		if s, ok := id.(string); ok && s != "" {
+			return s
+		}
+	}
+	return "unknown"
+}
+
 // Publish 发布事件
 func Publish[T Event](ctx context.Context, e T) {
 	message.NewEvent().Publish(debugger.TopicListener, debugger.ListenerEvent{
-		TraceId:     ctx.Value(ctxkey.TraceIdKey).(string),
+		TraceId:     getTraceId(ctx),
 		Name:        e.Name(),
 		Description: e.Description(),
 		Data:        e,

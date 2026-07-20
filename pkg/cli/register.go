@@ -19,6 +19,11 @@ var (
 	commands = make(map[string]base.Command)
 )
 
+// flagParser flag解析器
+type flagParser interface {
+	ParseFlags(name string, args []string, opts []base.CommandOption) map[string]string
+}
+
 func Register(cmd base.Command) {
 	name := cmd.Name()
 	if _, exists := commands[name]; exists {
@@ -88,8 +93,13 @@ func Execute() {
 		}
 	}
 
-	// 交给命令自己解析参数
-	cmd.Execute(cmdArgs)
+	// 统一解析flag后执行命令
+	if fp, ok := cmd.(flagParser); ok {
+		values := fp.ParseFlags(cmd.Name(), cmdArgs, cmd.Help())
+		cmd.Execute(values)
+	} else {
+		cmd.Execute(nil)
+	}
 }
 
 // printVersion 打印版本信息
@@ -198,11 +208,11 @@ func printText() {
 			items = append(items, []string{name, cmd.Description()})
 		}
 
-		printAlign(items, 2, lo.Ternary(true, maxWidth, optMax))
+		printAlign(items, 2, lo.Ternary(maxWidth > optMax, maxWidth, optMax))
 	}
 
 	color.Yellow("\nOptions:")
-	printAlign(options, 2, lo.Ternary(true, maxWidth, optMax))
+	printAlign(options, 2, lo.Ternary(maxWidth > optMax, maxWidth, optMax))
 }
 
 // 打印单个命令帮助

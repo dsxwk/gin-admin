@@ -44,8 +44,7 @@ func (m *MakeListener) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeListener) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeListener) Execute(values map[string]string) {
 	_make := "listener"
 	file := m.GetMakeFile(values["file"], _make)
 	eventName := values["event"]

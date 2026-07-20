@@ -35,8 +35,7 @@ func (s *Rollback) Help() []base.CommandOption {
 	}
 }
 
-func (s *Rollback) Execute(args []string) {
-	values := s.ParseFlags(s.Name(), args, s.Help())
+func (s *Rollback) Execute(values map[string]string) {
 	flag.Infof("开始执行数据回滚...")
 
 	db := facade.DB()

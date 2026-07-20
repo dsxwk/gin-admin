@@ -30,10 +30,10 @@ type CommandOption struct {
 }
 
 type Command interface {
-	Name() string          // 命令名称，如 "make:controller"
-	Description() string   // 命令描述
-	Execute(args []string) // 执行逻辑
-	Help() []CommandOption // 获取命令帮助信息
+	Name() string                     // 命令名称，如 "make:controller"
+	Description() string              // 命令描述
+	Execute(values map[string]string) // 执行逻辑
+	Help() []CommandOption            // 获取命令帮助信息
 }
 
 // Help 默认返回nil
@@ -70,7 +70,7 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 	// 构建结果map
 	values := make(map[string]string)
 	for key, ref := range flagRefs {
-		values[key] = *ref
+		values[key] = strings.TrimPrefix(*ref, "=")
 	}
 
 	// 检查必填参数

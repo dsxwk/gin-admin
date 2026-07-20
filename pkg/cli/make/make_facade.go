@@ -45,8 +45,7 @@ func (m *MakeFacade) Help() []base.CommandOption {
 	}
 }
 
-func (m *MakeFacade) Execute(args []string) {
-	values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *MakeFacade) Execute(values map[string]string) {
 
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	fileName := values["file"]

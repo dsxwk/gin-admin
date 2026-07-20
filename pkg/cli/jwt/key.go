@@ -36,8 +36,7 @@ func (s *Jwt) Help() []base.CommandOption {
 	}
 }
 
-func (s *Jwt) Execute(args []string) {
-	values := s.ParseFlags(s.Name(), args, s.Help())
+func (s *Jwt) Execute(values map[string]string) {
 	length := values["length"]
 	// 字符串转int
 	l, err := strconv.Atoi(length)
