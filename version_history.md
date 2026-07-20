@@ -1,3 +1,8 @@
+## v2.3.8
+> - Optimize command line, debugger, queue, database, cache, http
+> - Update dependency package version
+> - Add user role return and add and modify
+
 ## v2.3.7
 > - Optimize command line service template and related adjustments
 > - Update menu interface problem repair and add delete import record interface

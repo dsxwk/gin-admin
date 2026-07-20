@@ -148,7 +148,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本 [v2.3.7](version_history_zh.md#v237)
+> - 最新版本 [v2.3.8](version_history_zh.md#v238)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -564,9 +564,8 @@ func (m *DemoCommand) Help() []base.CommandOption {
     }
 }
 
-func (m *DemoCommand) Execute(args []string) {
-    values := m.ParseFlags(m.Name(), args, m.Help())
-    color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
+func (m *DemoCommand) Execute(values map[string]string) {
+  // todo
 }
 
 func init() {

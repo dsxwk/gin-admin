@@ -148,7 +148,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version [v2.3.7](version_history.md#v237)
+> - Latest Version [v2.3.8](version_history.md#v238)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -562,9 +562,8 @@ func (m *DemoCommand) Help() []base.CommandOption {
     }
 }
 
-func (m *DemoCommand) Execute(args []string) {
-    values := m.ParseFlags(m.Name(), args, m.Help())
-    color.Green("Execute Command: %s %s", m.Name(), m.FormatArgs(values))
+func (m *DemoCommand) Execute(values map[string]string) {
+    // todo
 }
 
 func init() {
