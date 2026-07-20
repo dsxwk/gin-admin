@@ -3032,6 +3032,12 @@
                 },
                 "updatedAt": {
                     "type": "string"
+                },
+                "userRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.UserRoles"
+                    }
                 }
             }
         },
@@ -3152,6 +3158,9 @@
                 "updatedAt": {
                     "description": "更新时间",
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
                 },
                 "userId": {
                     "description": "用户id",
@@ -3501,6 +3510,12 @@
         "request.RoleCreate": {
             "type": "object",
             "properties": {
+                "UserRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.UserRoles"
+                    }
+                },
                 "desc": {
                     "type": "string"
                 },
@@ -3555,6 +3570,12 @@
                 },
                 "status": {
                     "type": "integer"
+                },
+                "userRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.UserRoles"
+                    }
                 }
             }
         },
@@ -3765,6 +3786,20 @@
             "properties": {
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "request.UserRoles": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "roleId": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },

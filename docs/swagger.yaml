@@ -265,6 +265,10 @@ definitions:
         type: integer
       updatedAt:
         type: string
+      userRoles:
+        items:
+          $ref: '#/definitions/model.UserRoles'
+        type: array
     type: object
   model.SystemConfig:
     properties:
@@ -350,6 +354,8 @@ definitions:
       updatedAt:
         description: 更新时间
         type: string
+      user:
+        $ref: '#/definitions/model.User'
       userId:
         description: 用户id
         type: integer
@@ -585,6 +591,10 @@ definitions:
     type: object
   request.RoleCreate:
     properties:
+      UserRoles:
+        items:
+          $ref: '#/definitions/request.UserRoles'
+        type: array
       desc:
         type: string
       name:
@@ -621,6 +631,10 @@ definitions:
         type: array
       status:
         type: integer
+      userRoles:
+        items:
+          $ref: '#/definitions/request.UserRoles'
+        type: array
     type: object
   request.SystemConfigCreate:
     properties:
@@ -763,6 +777,15 @@ definitions:
         type: string
     required:
     - password
+    type: object
+  request.UserRoles:
+    properties:
+      name:
+        type: string
+      roleId:
+        type: integer
+      userId:
+        type: integer
     type: object
   request.UserUpdate:
     properties:

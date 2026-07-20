@@ -3039,6 +3039,12 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
+                },
+                "userRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.UserRoles"
+                    }
                 }
             }
         },
@@ -3159,6 +3165,9 @@ const docTemplate = `{
                 "updatedAt": {
                     "description": "更新时间",
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
                 },
                 "userId": {
                     "description": "用户id",
@@ -3508,6 +3517,12 @@ const docTemplate = `{
         "request.RoleCreate": {
             "type": "object",
             "properties": {
+                "UserRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.UserRoles"
+                    }
+                },
                 "desc": {
                     "type": "string"
                 },
@@ -3562,6 +3577,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                },
+                "userRoles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.UserRoles"
+                    }
                 }
             }
         },
@@ -3772,6 +3793,20 @@ const docTemplate = `{
             "properties": {
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "request.UserRoles": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "roleId": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },
