@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"gin/common/ctxkey"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/message"
@@ -27,14 +28,23 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	}
 	costMs := float64(time.Since(start).Nanoseconds()) / 1e6
 
+	// 提取traceId
+	traceId := "unknown"
+	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+		if s, ok := id.(string); ok && s != "" {
+			traceId = s
+		}
+	}
+
 	// 发布事件
 	if h.bus != nil {
 		h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
-			Driver: "redis",
-			Name:   cmd.Name(),
-			Cmd:    cmd.FullName(),
-			Args:   cmd.Args(),
-			Ms:     costMs,
+			TraceId: traceId,
+			Driver:  "redis",
+			Name:    cmd.Name(),
+			Cmd:     cmd.FullName(),
+			Args:    cmd.Args(),
+			Ms:      costMs,
 		})
 	}
 
@@ -52,14 +62,23 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 	}
 	costMs := float64(time.Since(start).Nanoseconds()) / 1e6
 
+	// 提取traceId
+	traceId := "unknown"
+	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+		if s, ok := id.(string); ok && s != "" {
+			traceId = s
+		}
+	}
+
 	for _, cmd := range cmds {
 		if h.bus != nil {
 			h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
-				Driver: "redis",
-				Name:   cmd.Name(),
-				Cmd:    cmd.FullName(),
-				Args:   cmd.Args(),
-				Ms:     costMs,
+				TraceId: traceId,
+				Driver:  "redis",
+				Name:    cmd.Name(),
+				Cmd:     cmd.FullName(),
+				Args:    cmd.Args(),
+				Ms:      costMs,
 			})
 		}
 	}

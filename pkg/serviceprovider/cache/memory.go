@@ -6,7 +6,6 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/message"
 	"github.com/patrickmn/go-cache"
-	"sync"
 	"time"
 )
 
@@ -16,18 +15,16 @@ type MemoryCache struct {
 	ctx   context.Context
 }
 
-var (
-	memoryCache *CacheProxy
-	memoryOnce  sync.Once
-)
+var memoryCache *CacheProxy
 
 func NewMemoryCache(conf *config.Config) *CacheProxy {
-	memoryOnce.Do(func() {
-		m := &MemoryCache{
-			cache: cache.New(conf.Cache.Memory.DefaultExpire, conf.Cache.Memory.CleanupInterval),
-		}
-		memoryCache = NewCacheProxy("memory", m, message.NewEvent())
-	})
+	if memoryCache != nil {
+		return memoryCache
+	}
+	m := &MemoryCache{
+		cache: cache.New(conf.Cache.Memory.DefaultExpire, conf.Cache.Memory.CleanupInterval),
+	}
+	memoryCache = NewCacheProxy("memory", m, message.NewEvent())
 	return memoryCache
 }
 

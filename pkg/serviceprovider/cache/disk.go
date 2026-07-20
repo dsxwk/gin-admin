@@ -8,7 +8,6 @@ import (
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
 	"github.com/dgraph-io/badger/v4"
-	"sync"
 	"time"
 )
 
@@ -18,22 +17,20 @@ type DiskCache struct {
 	ctx context.Context
 }
 
-var (
-	diskCache *CacheProxy
-	diskOnce  sync.Once
-)
+var diskCache *CacheProxy
 
 func NewDiskCache(conf *config.Config) *CacheProxy {
-	diskOnce.Do(func() {
-		opts := badger.DefaultOptions(conf.Cache.Disk.Path)
-		db, err := badger.Open(opts)
-		if err != nil {
-			logger.NewLogger(conf).Error(fmt.Sprintf("init disk cache failed: %s", err.Error()))
-		}
-		disk := &DiskCache{db: db}
+	if diskCache != nil {
+		return diskCache
+	}
+	opts := badger.DefaultOptions(conf.Cache.Disk.Path)
+	db, err := badger.Open(opts)
+	if err != nil {
+		logger.NewLogger(conf).Error(fmt.Sprintf("init disk cache failed: %s", err.Error()))
+	}
+	disk := &DiskCache{db: db}
 
-		diskCache = NewCacheProxy("disk", disk, message.NewEvent())
-	})
+	diskCache = NewCacheProxy("disk", disk, message.NewEvent())
 	return diskCache
 }
 
