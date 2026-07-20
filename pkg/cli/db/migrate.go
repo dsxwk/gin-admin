@@ -35,8 +35,7 @@ func (s *Migrate) Help() []base.CommandOption {
 	}
 }
 
-func (s *Migrate) Execute(args []string) {
-	values := s.ParseFlags(s.Name(), args, s.Help())
+func (s *Migrate) Execute(values map[string]string) {
 	flag.Infof("开始执行数据迁移...")
 
 	db := facade.DB()
