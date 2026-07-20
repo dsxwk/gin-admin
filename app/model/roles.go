@@ -9,6 +9,7 @@ type Roles struct {
 	Desc      string       `gorm:"column:desc;not null;type:varchar(100);comment:角色描述" json:"desc" form:"desc"`
 	Status    int64        `gorm:"column:status;not null;default:1;type:tinyint(1) unsigned;comment:状态 1=启用 2=停用" json:"status" form:"status"`
 	RoleMenus []*RoleMenus `gorm:"foreignKey:role_id;references:id;comment:角色菜单" json:"roleMenus"`
+	UserRoles []*UserRoles `gorm:"foreignKey:role_id;references:id;comment:角色用户" json:"userRoles"`
 	CreatedAt *DateTime    `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`
 	UpdatedAt *DateTime    `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt" form:"updatedAt"`
 	DeletedAt *DeletedAt   `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" form:"deletedAt" swaggerignore:"true"`

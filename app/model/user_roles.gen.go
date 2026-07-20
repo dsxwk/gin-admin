@@ -12,6 +12,7 @@ type UserRoles struct {
 	UserID    int64      `gorm:"column:user_id;type:int(10) unsigned;not null;comment:用户id" json:"userId"`           // 用户id
 	RoleID    int64      `gorm:"column:role_id;type:int(10) unsigned;not null;comment:角色id" json:"roleId"`           // 角色id
 	Name      string     `gorm:"column:name;type:varchar(20);not null;comment:角色名称" json:"name"`                     // 角色名称
+	User      *User      `gorm:"foreignKey:user_id;references:id;comment:用户" json:"user"`
 	CreatedAt *DateTime  `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                      // 创建时间
 	UpdatedAt *DateTime  `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                      // 更新时间
 	DeletedAt *DeletedAt `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"` // 删除时间
