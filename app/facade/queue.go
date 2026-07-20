@@ -1,61 +1,47 @@
 package facade
 
 import (
-	"gin/config"
-	"gin/pkg"
-	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 	"sync"
 )
 
-// Queue 队列门面实例
+var (
+	queueOnce   sync.Once
+	queueFacade *QueueFacade
+)
+
+// Queue 队列门面实例(单例)
 // 使用示例:
 //
 //	producer := facade.Queue().Producer("kafka_demo")
 //	consumers := facade.Queue().GetRunningConsumers()
 func Queue() *QueueFacade {
-	return &QueueFacade{
-		producers: make(map[string]queue.Producer),
-	}
+	queueOnce.Do(func() {
+		queueFacade = &QueueFacade{
+			producers: make(map[string]queue.Producer),
+		}
+	})
+	return queueFacade
 }
 
 type QueueFacade struct {
 	mu        sync.RWMutex
 	producers map[string]queue.Producer
-	cfg       *config.Config
-	log       *logger.Logger
-}
-
-// init 初始化门面
-func (q *QueueFacade) init() {
-	q.cfg = Config()
-	q.log = Log()
 }
 
 // Producer 获取指定名称的生产者
 // 使用示例: producer := facade.Queue().Producer("kafka_demo")
 func (q *QueueFacade) Producer(name string) queue.Producer {
-	q.init()
+	q.mu.Lock()
+	defer q.mu.Unlock()
 
-	q.mu.RLock()
-	producer, ok := q.producers[name]
-	q.mu.RUnlock()
-
-	if ok {
-		return producer
+	if p, ok := q.producers[name]; ok {
+		return p
 	}
 
 	registered := queue.GetProducerRegistry().Get(name)
 	if registered == nil {
-		q.log.Error(pkg.Sprintf("生产者 %s 未注册", name))
 		return nil
-	}
-
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	// 双重检查
-	if p, ok := q.producers[name]; ok {
-		return p
 	}
 	q.producers[name] = registered
 	return registered
@@ -63,7 +49,6 @@ func (q *QueueFacade) Producer(name string) queue.Producer {
 
 // GetAllProducers 获取所有生产者
 func (q *QueueFacade) GetAllProducers() []queue.Producer {
-	q.init()
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 
@@ -76,25 +61,21 @@ func (q *QueueFacade) GetAllProducers() []queue.Producer {
 
 // Consumer 获取指定名称的消费者
 func (q *QueueFacade) Consumer(name string) queue.Consumer {
-	q.init()
 	return queue.GetConsumerRegistry().Get(name)
 }
 
 // GetAllConsumers 获取所有消费者
 func (q *QueueFacade) GetAllConsumers() []queue.Consumer {
-	q.init()
 	return queue.GetConsumerRegistry().GetAll()
 }
 
 // GetAllConsumerNames 获取所有消费者名称
 func (q *QueueFacade) GetAllConsumerNames() []string {
-	q.init()
 	return queue.GetConsumerRegistry().GetNames()
 }
 
 // GetRunningConsumers 获取所有运行中的消费者
 func (q *QueueFacade) GetRunningConsumers() []queue.Consumer {
-	q.init()
 	consumers := queue.GetConsumerRegistry().GetAll()
 	running := make([]queue.Consumer, 0)
 	for _, c := range consumers {
@@ -107,7 +88,6 @@ func (q *QueueFacade) GetRunningConsumers() []queue.Consumer {
 
 // GetStoppedConsumers 获取所有已停止的消费者
 func (q *QueueFacade) GetStoppedConsumers() []queue.Consumer {
-	q.init()
 	consumers := queue.GetConsumerRegistry().GetAll()
 	stopped := make([]queue.Consumer, 0)
 	for _, c := range consumers {
@@ -127,14 +107,13 @@ type ConsumerStats struct {
 
 // GetAllConsumerStats 获取所有消费者统计信息
 func (q *QueueFacade) GetAllConsumerStats() []ConsumerStats {
-	q.init()
 	consumers := queue.GetConsumerRegistry().GetAll()
 	stats := make([]ConsumerStats, 0, len(consumers))
 	for _, c := range consumers {
 		stats = append(stats, ConsumerStats{
 			Name:    c.Name(),
 			Status:  c.Status(),
-			Enabled: c.Enabled(q.cfg),
+			Enabled: c.Enabled(Config()),
 		})
 	}
 	return stats
@@ -147,7 +126,6 @@ type ProducerStats struct {
 
 // GetAllProducerStats 获取所有生产者统计信息
 func (q *QueueFacade) GetAllProducerStats() []ProducerStats {
-	q.init()
 	producers := queue.GetProducerRegistry().GetAll()
 	stats := make([]ProducerStats, 0, len(producers))
 	for _, p := range producers {

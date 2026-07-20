@@ -25,7 +25,7 @@ func (s *ConsumerList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *ConsumerList) Execute(args []string) {
+func (s *ConsumerList) Execute(values map[string]string) {
 	consumers := queue.GetConsumerRegistry().GetAll()
 	if len(consumers) == 0 {
 		color.Yellow("暂无注册的消费者")

@@ -54,166 +54,106 @@ type Producer interface {
 	Close() error
 }
 
-// ConsumerRegistry 消费者注册表
-// 用于管理所有已注册的消费者
-type ConsumerRegistry struct {
-	consumers map[string]Consumer
-	mu        sync.RWMutex
+// Registry 通用注册表
+type Registry[T any] struct {
+	items map[string]T
+	mu    sync.RWMutex
 }
 
-var consumerRegistry = &ConsumerRegistry{
-	consumers: make(map[string]Consumer),
+// NewRegistry 创建注册表
+func NewRegistry[T any]() *Registry[T] {
+	return &Registry[T]{
+		items: make(map[string]T),
+	}
 }
 
-// Register 注册消费者(在消费者的init函数中调用)
-func (r *ConsumerRegistry) Register(c Consumer) {
+// namer 名称提取接口
+type namer interface {
+	Name() string
+}
+
+// Register 注册
+func (r *Registry[T]) Register(item T) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	name := c.Name()
+	name := ""
+	if n, ok := any(item).(namer); ok {
+		name = n.Name()
+	}
+
 	if name == "" {
-		flag.Errorf("Consumer name cannot be empty")
+		flag.Errorf("Queue name cannot be empty")
 		os.Exit(1)
 	}
 
-	// 检查是否已存在
-	if _, exists := r.consumers[name]; exists {
-		flag.Errorf("Consumer %s already registered", name)
+	if _, exists := r.items[name]; exists {
+		flag.Errorf("Queue %s already registered", name)
 		os.Exit(1)
 	}
 
-	r.consumers[name] = c
+	r.items[name] = item
 }
 
-// Get 获取指定名称的消费者
-func (r *ConsumerRegistry) Get(name string) Consumer {
+// Get 获取指定名称的项
+func (r *Registry[T]) Get(name string) T {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return r.consumers[name]
+	return r.items[name]
 }
 
-// GetAll 获取所有已注册的消费者
-func (r *ConsumerRegistry) GetAll() []Consumer {
+// GetAll 获取所有已注册的项
+func (r *Registry[T]) GetAll() []T {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	consumers := make([]Consumer, 0, len(r.consumers))
-	for _, c := range r.consumers {
-		consumers = append(consumers, c)
+	items := make([]T, 0, len(r.items))
+	for _, item := range r.items {
+		items = append(items, item)
 	}
-	return consumers
+	return items
 }
 
-// GetNames 获取所有消费者名称列表
-func (r *ConsumerRegistry) GetNames() []string {
+// GetNames 获取所有名称列表
+func (r *Registry[T]) GetNames() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	names := make([]string, 0, len(r.consumers))
-	for name := range r.consumers {
+	names := make([]string, 0, len(r.items))
+	for name := range r.items {
 		names = append(names, name)
 	}
 	return names
 }
 
-// Count 获取消费者数量
-func (r *ConsumerRegistry) Count() int {
+// Count 获取数量
+func (r *Registry[T]) Count() int {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return len(r.consumers)
+	return len(r.items)
 }
 
-// Exists 检查消费者是否存在
-func (r *ConsumerRegistry) Exists(name string) bool {
+// Exists 检查是否存在
+func (r *Registry[T]) Exists(name string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	_, exists := r.consumers[name]
+	_, exists := r.items[name]
 	return exists
 }
 
-// ProducerRegistry 生产者注册表
-// 用于管理所有已注册的生产者
-type ProducerRegistry struct {
-	producers map[string]Producer
-	mu        sync.RWMutex
-}
-
-var producerRegistry = &ProducerRegistry{
-	producers: make(map[string]Producer),
-}
-
-// Register 注册生产者(在生产者的init函数中调用)
-func (r *ProducerRegistry) Register(p Producer) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	name := p.Name()
-	if name == "" {
-		flag.Errorf("Producer name cannot be empty")
-		os.Exit(1)
-	}
-
-	// 检查是否已存在
-	if _, exists := r.producers[name]; exists {
-		flag.Errorf("Producer %s already registered", name)
-		os.Exit(1)
-	}
-
-	r.producers[name] = p
-}
-
-// Get 获取指定名称的生产者
-func (r *ProducerRegistry) Get(name string) Producer {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return r.producers[name]
-}
-
-// GetAll 获取所有已注册的生产者
-func (r *ProducerRegistry) GetAll() []Producer {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	producers := make([]Producer, 0, len(r.producers))
-	for _, p := range r.producers {
-		producers = append(producers, p)
-	}
-	return producers
-}
-
-// GetNames 获取所有生产者名称列表
-func (r *ProducerRegistry) GetNames() []string {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	names := make([]string, 0, len(r.producers))
-	for name := range r.producers {
-		names = append(names, name)
-	}
-	return names
-}
-
-// Count 获取生产者数量
-func (r *ProducerRegistry) Count() int {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return len(r.producers)
-}
-
-// Exists 检查生产者是否存在
-func (r *ProducerRegistry) Exists(name string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	_, exists := r.producers[name]
-	return exists
-}
+var (
+	// Consumers 消费者注册表
+	Consumers = NewRegistry[Consumer]()
+	// Producers 生产者注册表
+	Producers = NewRegistry[Producer]()
+)
 
 // GetConsumerRegistry 获取消费者注册表
-func GetConsumerRegistry() *ConsumerRegistry {
-	return consumerRegistry
+func GetConsumerRegistry() *Registry[Consumer] {
+	return Consumers
 }
 
 // GetProducerRegistry 获取生产者注册表
-func GetProducerRegistry() *ProducerRegistry {
-	return producerRegistry
+func GetProducerRegistry() *Registry[Producer] {
+	return Producers
 }
