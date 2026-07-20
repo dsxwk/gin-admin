@@ -8,7 +8,6 @@ import (
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/message"
 	"github.com/goccy/go-json"
-	"github.com/valyala/fasthttp"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -16,30 +15,28 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 )
 
-const timeout = 5 * time.Second
+const defaultTimeout = 5 * time.Second
 
-var (
-	defaultClient *fasthttp.Client
-	once          sync.Once
-)
+var defaultClient *http.Client
 
 // InitClient 初始化全局HTTP客户端
 func InitClient() {
-	once.Do(func() {
-		defaultClient = &fasthttp.Client{
-			MaxConnsPerHost: 100,
-			ReadTimeout:     timeout,
-			WriteTimeout:    timeout,
+	if defaultClient == nil {
+		defaultClient = &http.Client{
+			Transport: &TracingTransport{
+				Transport: &http.Transport{
+					MaxConnsPerHost: 100,
+				},
+			},
 		}
-	})
+	}
 }
 
 // GetClient 获取全局HTTP客户端
-func GetClient() *fasthttp.Client {
+func GetClient() *http.Client {
 	if defaultClient == nil {
 		InitClient()
 	}
@@ -48,15 +45,13 @@ func GetClient() *fasthttp.Client {
 
 // Client HTTP客户端
 type Client[T any] struct {
-	client  *fasthttp.Client
 	timeout time.Duration
 }
 
 // NewClient 创建HTTP客户端
 func NewClient[T any]() *Client[T] {
 	return &Client[T]{
-		timeout: timeout,
-		client:  GetClient(),
+		timeout: defaultTimeout,
 	}
 }
 
@@ -64,7 +59,6 @@ func NewClient[T any]() *Client[T] {
 func (c *Client[T]) WithTimeout(timeout time.Duration) *Client[T] {
 	return &Client[T]{
 		timeout: timeout,
-		client:  c.client,
 	}
 }
 
@@ -125,78 +119,69 @@ func (c *Client[T]) SendAsJson(ctx context.Context, method, uri string, opt *Opt
 	if err != nil {
 		return nil, err
 	}
-
 	return c.AsJson(data)
 }
 
 // doSend 发送请求
 func (c *Client[T]) doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
-	start := time.Now()
-	req := fasthttp.AcquireRequest()
-	resp := fasthttp.AcquireResponse()
-	defer func() {
-		fasthttp.ReleaseRequest(req)
-		fasthttp.ReleaseResponse(resp)
-	}()
-
 	if opt == nil {
 		opt = &Option{}
 	}
+
 	requestTimeout := opt.Timeout
 	if requestTimeout == 0 {
-		requestTimeout = timeout
+		requestTimeout = c.timeout
 	}
 
 	method = strings.ToUpper(method)
 	uri = c.buildUrl(uri, opt.Query)
-	req.Header.SetMethod(method)
-	req.SetRequestURI(uri)
 
 	// 判断是否有文件上传
 	if opt.Files != nil && len(opt.Files) > 0 {
-		return c.doFileUpload(ctx, req, resp, uri, opt, requestTimeout, start)
+		return c.doFileUpload(ctx, uri, opt, requestTimeout)
 	}
 
 	// 构建请求体
+	var bodyReader io.Reader
 	contentType := ""
 	if opt.Form != nil && len(opt.Form) > 0 {
 		values := url.Values{}
 		for k, v := range opt.Form {
 			values.Set(k, fmt.Sprintf("%v", v))
 		}
-		req.SetBodyString(values.Encode())
+		bodyReader = strings.NewReader(values.Encode())
 		contentType = "application/x-www-form-urlencoded"
+	} else if opt.Body != nil {
+		switch v := opt.Body.(type) {
+		case []byte:
+			bodyReader = bytes.NewReader(v)
+			contentType = "application/octet-stream"
+		case string:
+			bodyReader = strings.NewReader(v)
+			contentType = "text/plain"
+		case *bytes.Buffer:
+			bodyReader = v
+			contentType = "application/octet-stream"
+		case *strings.Reader:
+			bodyReader = v
+			contentType = "text/plain"
+		default:
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				return nil, fmt.Errorf("JSON序列化失败: %w", err)
+			}
+			bodyReader = bytes.NewReader(jsonBytes)
+			contentType = "application/json"
+		}
 	}
 
-	if opt.Body != nil {
-		method = strings.ToUpper(method)
-		if method != http.MethodGet && method != http.MethodHead {
-			switch v := opt.Body.(type) {
-			case []byte:
-				req.SetBody(v)
-				contentType = "application/octet-stream"
-			case string:
-				req.SetBodyString(v)
-				contentType = "text/plain"
-			case *bytes.Buffer:
-				req.SetBody(v.Bytes())
-				contentType = "application/octet-stream"
-			case *strings.Reader:
-				data, err := io.ReadAll(v)
-				if err != nil {
-					return nil, fmt.Errorf("读取Body失败: %w", err)
-				}
-				req.SetBody(data)
-				contentType = "text/plain"
-			default:
-				jsonBytes, err := json.Marshal(v)
-				if err != nil {
-					return nil, fmt.Errorf("JSON序列化失败: %w", err)
-				}
-				req.SetBody(jsonBytes)
-				contentType = "application/json"
-			}
-		}
+	// 通过上下文应用超时
+	ctx, cancel := context.WithTimeout(ctx, requestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, method, uri, bodyReader)
+	if err != nil {
+		return nil, fmt.Errorf("创建请求失败: %w", err)
 	}
 
 	// 设置默认Content-Type
@@ -215,57 +200,27 @@ func (c *Client[T]) doSend(ctx context.Context, method, uri string, opt *Option)
 		req.Header.Set(k, v)
 	}
 
-	c.client.ReadTimeout = requestTimeout
-	c.client.WriteTimeout = requestTimeout
-
-	var (
-		respJson interface{}
-		status   int
-	)
-	defer func() {
-		cost := time.Since(start)
-		costMs := float64(cost.Nanoseconds()) / 1e6
-
-		traceId := "unknown"
-		if ctx != nil {
-			if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
-				if s, ok := id.(string); ok && s != "" {
-					traceId = s
-				}
-			}
-		}
-
-		message.NewEvent().Publish(debugger.TopicHttp, debugger.HttpEvent{
-			TraceId:  traceId,
-			Url:      uri,
-			Method:   method,
-			Header:   opt.Headers,
-			Body:     string(req.Body()),
-			Status:   status,
-			Response: respJson,
-			Ms:       costMs,
-		})
-	}()
-
-	if err := c.client.Do(req, resp); err != nil {
+	// 发送请求
+	resp, err := GetClient().Do(req)
+	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
+	defer resp.Body.Close()
 
-	respBody := resp.Body()
-	err := json.Unmarshal(respBody, &respJson)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		respJson = respBody
+		return nil, fmt.Errorf("读取响应失败: %w", err)
 	}
-	status = resp.StatusCode()
-	if resp.StatusCode() != 200 {
-		return nil, fmt.Errorf("请求失败, 状态码: %d, 响应: %s", resp.Header.StatusCode(), respBody)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("请求失败, 状态码: %d, 响应: %s", resp.StatusCode, respBody)
 	}
 
 	return respBody, nil
 }
 
-// doFileUpload 文件上传内部函数
-func (c *Client[T]) doFileUpload(ctx context.Context, req *fasthttp.Request, resp *fasthttp.Response, uri string, opt *Option, requestTimeout time.Duration, start time.Time) ([]byte, error) {
+// doFileUpload 文件上传
+func (c *Client[T]) doFileUpload(ctx context.Context, uri string, opt *Option, requestTimeout time.Duration) ([]byte, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -316,61 +271,35 @@ func (c *Client[T]) doFileUpload(ctx context.Context, req *fasthttp.Request, res
 		return nil, fmt.Errorf("关闭writer失败: %w", err)
 	}
 
-	req.Header.SetMethod("POST")
-	req.SetRequestURI(uri)
-	req.SetBody(body.Bytes())
+	// 通过上下文应用超时
+	ctx, cancel := context.WithTimeout(ctx, requestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", uri, body)
+	if err != nil {
+		return nil, fmt.Errorf("创建请求失败: %w", err)
+	}
+
 	req.Header.Set("Content-Type", contentType)
 
 	for k, v := range opt.Headers {
 		req.Header.Set(k, v)
 	}
 
-	c.client.ReadTimeout = requestTimeout
-	c.client.WriteTimeout = requestTimeout
-
-	var (
-		respJson interface{}
-		status   int
-	)
-	defer func() {
-		cost := time.Since(start)
-		costMs := float64(cost.Nanoseconds()) / 1e6
-
-		traceId := "unknown"
-		if ctx != nil {
-			if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
-				if s, ok := id.(string); ok && s != "" {
-					traceId = s
-				}
-			}
-		}
-
-		message.NewEvent().Publish(debugger.TopicHttp, debugger.HttpEvent{
-			TraceId:  traceId,
-			Url:      uri,
-			Method:   "POST",
-			Header:   opt.Headers,
-			Body:     string(body.Bytes()),
-			Status:   status,
-			Response: respJson,
-			Ms:       costMs,
-		})
-	}()
-
-	if err := c.client.Do(req, resp); err != nil {
+	// 发送请求
+	resp, err := GetClient().Do(req)
+	if err != nil {
 		return nil, fmt.Errorf("请求失败: %w", err)
 	}
+	defer resp.Body.Close()
 
-	respBody := resp.Body()
-	status = resp.StatusCode()
-
-	err := json.Unmarshal(respBody, &respJson)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		respJson = respBody
+		return nil, fmt.Errorf("读取响应失败: %w", err)
 	}
 
-	if status != fasthttp.StatusOK {
-		return respBody, fmt.Errorf("上传失败, 状态码: %d, 响应: %s", status, string(respBody))
+	if resp.StatusCode != http.StatusOK {
+		return respBody, fmt.Errorf("上传失败, 状态码: %d, 响应: %s", resp.StatusCode, string(respBody))
 	}
 
 	return respBody, nil
@@ -389,4 +318,79 @@ func (c *Client[T]) buildUrl(baseURL string, query map[string]interface{}) strin
 		return baseURL + "&" + q.Encode()
 	}
 	return baseURL + "?" + q.Encode()
+}
+
+// TracingTransport 传输中间件追踪
+type TracingTransport struct {
+	Transport http.RoundTripper
+}
+
+// RoundTrip 实现http.RoundTripper
+func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	start := time.Now()
+
+	// 读取并缓存请求体用于tracing
+	var reqBodyBytes []byte
+	if req.Body != nil {
+		reqBodyBytes, _ = io.ReadAll(req.Body)
+		req.Body.Close()
+		req.Body = io.NopCloser(bytes.NewReader(reqBodyBytes))
+	}
+
+	resp, err := t.Transport.RoundTrip(req)
+
+	// 收集响应信息用于tracing
+	var (
+		respBodyBytes []byte
+		respStatus    int
+	)
+	if err == nil {
+		respStatus = resp.StatusCode
+		respBodyBytes, _ = io.ReadAll(resp.Body)
+		resp.Body.Close()
+		resp.Body = io.NopCloser(bytes.NewReader(respBodyBytes))
+	}
+
+	// 发布trace事件
+	costMs := float64(time.Since(start).Nanoseconds()) / 1e6
+
+	traceId := "unknown"
+	if req.Context() != nil {
+		if id := req.Context().Value(ctxkey.TraceIdKey); id != nil {
+			if s, ok := id.(string); ok && s != "" {
+				traceId = s
+			}
+		}
+	}
+
+	var respJson interface{}
+	if len(respBodyBytes) > 0 {
+		if err = json.Unmarshal(respBodyBytes, &respJson); err != nil {
+			respJson = respBodyBytes
+		}
+	}
+
+	message.NewEvent().Publish(debugger.TopicHttp, debugger.HttpEvent{
+		TraceId:  traceId,
+		Url:      req.URL.String(),
+		Method:   req.Method,
+		Header:   headersToMap(req.Header),
+		Body:     string(reqBodyBytes),
+		Status:   respStatus,
+		Response: respJson,
+		Ms:       costMs,
+	})
+
+	return resp, err
+}
+
+// headersToMap 将http.Header转换为map[string]string
+func headersToMap(header http.Header) map[string]string {
+	result := make(map[string]string, len(header))
+	for k, v := range header {
+		if len(v) > 0 {
+			result[k] = v[0]
+		}
+	}
+	return result
 }
