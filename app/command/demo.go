@@ -30,8 +30,8 @@ func (m *DemoCommand) Help() []base.CommandOption {
 	}
 }
 
-func (m *DemoCommand) Execute(args []string) {
-	_ = m.ParseFlags(m.Name(), args, m.Help())
+func (m *DemoCommand) Execute(values map[string]string) {
+	// todo
 }
 
 func init() {
