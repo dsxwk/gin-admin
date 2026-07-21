@@ -87,6 +87,14 @@ func Unauthorized() ErrorCode {
 	}
 }
 
+func Forbidden() ErrorCode {
+	return ErrorCode{
+		Code:     403,
+		Msg:      "Forbidden",
+		HttpCode: http.StatusForbidden,
+	}
+}
+
 func NotFound() ErrorCode {
 	return ErrorCode{
 		Code:     404,
