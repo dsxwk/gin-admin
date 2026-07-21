@@ -3,6 +3,7 @@ package router
 import (
 	"gin/app/facade"
 	"gin/app/middleware"
+	"gin/app/service"
 	"gin/common/errcode"
 	"gin/common/response"
 	_ "gin/docs"
@@ -14,12 +15,13 @@ import (
 )
 
 var (
-	timeoutMiddleware   = middleware.Timeout{}.Handle(facade.Config().App.Timeout)
-	loggerMiddleware    = middleware.Logger{}.Handle()
-	corsMiddleware      = middleware.Cors{}.Handle()
-	jwtMiddleware       = middleware.Jwt{}.Handle()
-	recoverMiddleware   = middleware.Recover{}.Handle()
-	rateLimitMiddleware = middleware.RateLimit{}
+	timeoutMiddleware    = middleware.Timeout{}.Handle(facade.Config().App.Timeout)
+	loggerMiddleware     = middleware.Logger{}.Handle()
+	corsMiddleware       = middleware.Cors{}.Handle()
+	jwtMiddleware        = middleware.Jwt{}.Handle()
+	recoverMiddleware    = middleware.Recover{}.Handle()
+	rateLimitMiddleware  = middleware.RateLimit{}
+	permissionMiddleware = middleware.Permission{}.Handle()
 )
 
 // LoadRouters 加载路由
@@ -34,8 +36,8 @@ func LoadRouters(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 路由分组
-	public := router.Group("")              // 无需权限
-	auth := router.Group("", jwtMiddleware) // 需要权限
+	public := router.Group("")                                    // 无需权限
+	auth := router.Group("", jwtMiddleware, permissionMiddleware) // 需要权限
 
 	// 全局限流:rateLimitMiddleware.Handle() 用户限流:rateLimitMiddleware.UserRateLimit(1, 1) ip限流:rateLimitMiddleware.IpRateLimit(1, 1)
 	// 健康检查
@@ -45,4 +47,10 @@ func LoadRouters(router *gin.Engine) {
 
 	// 自动注册
 	AutoLoads(public, auth)
+	// 自动生成权限Key并同步到权限表
+	permissionKeys := GenerateAuthPermissionKeys()
+	if len(permissionKeys) > 0 {
+		svc := service.PermissionService{}
+		_ = svc.SyncRoutePermissions(permissionKeys)
+	}
 }
