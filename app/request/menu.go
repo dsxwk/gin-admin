@@ -38,7 +38,6 @@ type MenuCreate struct {
 
 // MenuUpdate 菜单更新
 type MenuUpdate struct {
-	ID         int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
 	Pid        int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Type       int64        `json:"type" form:"type" validate:"required|int" label:"类型 1=菜单 2=功能"`
 	Name       string       `json:"name" form:"name" validate:"required" label:"路由名称|功能标识"`

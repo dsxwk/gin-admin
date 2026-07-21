@@ -31,7 +31,6 @@ type ArticleCreate struct {
 
 // ArticleUpdate 文章更新验证
 type ArticleUpdate struct {
-	ID         int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Title      string      `json:"title" form:"title" validate:"required" label:"标题"`
 	Content    string      `json:"content" form:"content" validate:"required" label:"内容"`
 	CategoryId int64       `json:"categoryId" form:"categoryId" validate:"int" label:"分类id"`

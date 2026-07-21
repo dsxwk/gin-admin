@@ -35,7 +35,6 @@ type DictCreate struct {
 
 // DictUpdate 字典更新验证
 type DictUpdate struct {
-	ID     int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Pid    int64       `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name   string      `json:"name" form:"name" validate:"required" label:"标识"`
 	Title  string      `json:"title" form:"title" validate:"required" label:"名称"`

@@ -36,7 +36,9 @@ type {{.StructName}}Create struct {
 // {{.StructName}}Update {{.StructName}}更新验证
 type {{.StructName}}Update struct {
 {{- range .Fields}}
+{{- if not .IsID}}
 {{.FormattedField}}
+{{- end}}
 {{- end}}
 }
 
