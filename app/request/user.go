@@ -33,7 +33,6 @@ type UserCreate struct {
 
 // UserUpdate 用户更新验证
 type UserUpdate struct {
-	ID       int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
 	Username string `json:"username" validate:"required" label:"用户名"`
 	FullName string `json:"fullName" validate:"required" label:"姓名"`
 	Nickname string `json:"nickname" validate:"required" label:"昵称"`
