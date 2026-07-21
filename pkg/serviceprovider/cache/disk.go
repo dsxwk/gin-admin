@@ -30,7 +30,7 @@ func NewDiskCache(conf *config.Config) *CacheProxy {
 	}
 	disk := &DiskCache{db: db}
 
-	diskCache = NewCacheProxy("disk", disk, message.NewEvent())
+	diskCache = NewCacheProxy("disk", disk, message.NewEvent(), nil)
 	return diskCache
 }
 

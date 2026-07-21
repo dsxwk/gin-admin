@@ -223,7 +223,7 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 
 	// 更新菜单主表
 	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.Now()
+	rows[model.UpdatedField] = time.Now()
 	if err = tx.Model(&m).Where("id = ?", id).Updates(rows).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -247,8 +247,8 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 	if len(meta) > 0 {
 		metaRows := model.FilterFields(db, model.MenuMeta{}, meta)
 		metaRows["menu_id"] = id
-		metaRows["created_at"] = time.Now()
-		metaRows["updated_at"] = time.Now()
+		metaRows[model.CreatedField] = time.Now()
+		metaRows[model.UpdatedField] = time.Now()
 		if err = tx.Model(&model.MenuMeta{}).Create(metaRows).Error; err != nil {
 			tx.Rollback()
 			return err
@@ -259,8 +259,8 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 	if len(menuAction) > 0 {
 		menuActionRows := model.FilterFields(db, model.MenuActions{}, menuAction)
 		menuActionRows["menu_id"] = id
-		menuActionRows["created_at"] = time.Now()
-		menuActionRows["updated_at"] = time.Now()
+		menuActionRows[model.CreatedField] = time.Now()
+		menuActionRows[model.UpdatedField] = time.Now()
 		if err = tx.Model(&model.MenuActions{}).Create(menuActionRows).Error; err != nil {
 			tx.Rollback()
 			return err

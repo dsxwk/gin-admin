@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/app/facade"
+	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
@@ -73,9 +74,9 @@ func (m *MakeService) Execute(values map[string]string) {
 			for _, col := range columns {
 				// 排除字段
 				if col.Name == "id" ||
-					col.Name == "created_at" ||
-					col.Name == "updated_at" ||
-					col.Name == "deleted_at" {
+					col.Name == model.CreatedField ||
+					col.Name == model.UpdatedField ||
+					col.Name == model.DeletedField {
 					continue
 				}
 				name := m.toGoName(col.Name)

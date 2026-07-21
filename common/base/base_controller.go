@@ -12,6 +12,5 @@ type BaseController struct {
 
 // GetUserId 获取当前登录用户id
 func (s *BaseController) GetUserId(ctx *gin.Context) int64 {
-	id, _ := ctx.Get(ctxkey.UserIdKey)
-	return int64(id.(float64))
+	return ctx.GetInt64(ctxkey.UserIdKey)
 }

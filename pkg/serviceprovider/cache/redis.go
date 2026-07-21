@@ -88,10 +88,12 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 
 // RedisCache Redis缓存
 type RedisCache struct {
-	client  *redis.Client
-	pubsubs map[string]*redis.PubSub
-	ctx     context.Context
-	bus     *message.Event
+	client       *redis.Client
+	pubsubs      map[string]*redis.PubSub
+	ctx          context.Context
+	bus          *message.Event
+	conf         *config.Config
+	lastPingFail time.Time
 }
 
 var (
@@ -105,7 +107,7 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 
 	bus := message.NewEvent()
 	client := redis.NewClient(&redis.Options{
-		Addr:     conf.Cache.Redis.Address,
+		Addr:     fmt.Sprintf("%s:%s", conf.Cache.Redis.Address, conf.Cache.Redis.Port),
 		Password: conf.Cache.Redis.Password,
 		DB:       conf.Cache.Redis.DB,
 	})
@@ -118,9 +120,10 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 		ctx:     context.Background(),
 		pubsubs: make(map[string]*redis.PubSub),
 		bus:     bus,
+		conf:    conf,
 	}
 
-	redisCache = NewCacheProxy("redis", r, bus)
+	redisCache = NewCacheProxy("redis", r, bus, conf)
 	return redisCache
 }
 
@@ -196,6 +199,22 @@ func (r *RedisCache) Delete(key string) error {
 	return nil
 }
 
+func (r *RedisCache) SAdd(key string, members ...interface{}) error {
+	err := r.client.SAdd(r.ctx, key, members...).Err()
+	if err != nil {
+		return fmt.Errorf("error SAdd Redis set: %v", err)
+	}
+	return nil
+}
+
+func (r *RedisCache) SIsMember(key string, member interface{}) (bool, error) {
+	result, err := r.client.SIsMember(r.ctx, key, member).Result()
+	if err != nil {
+		return false, fmt.Errorf("error SIsMember Redis set: %v", err)
+	}
+	return result, nil
+}
+
 func (r *RedisCache) Expire(key string) (interface{}, time.Time, bool, error) {
 	// Redis不支持使用相同的API获取到期时间,因此必须使用TTL
 	ttl, err := r.client.TTL(r.ctx, key).Result()
@@ -215,7 +234,7 @@ func (r *RedisCache) Expire(key string) (interface{}, time.Time, bool, error) {
 
 // Lock 获取锁
 func (r *RedisCache) Lock(key string, value string, expire time.Duration) error {
-	// 使用 SETNX 命令尝试设置锁
+	// 使用SETNX命令尝试设置锁
 	result, err := r.client.SetNX(r.ctx, key, value, expire).Result()
 	if err != nil {
 		return fmt.Errorf("failed to acquire lock: %v", err)
@@ -298,6 +317,16 @@ func (r *RedisCache) Subscribe(channel string, handler func(channel string, payl
 	}()
 
 	return nil
+}
+
+// Pipeline 返回一个 Redis Pipeline，用于批量执行命令
+func (r *RedisCache) Pipeline() redis.Pipeliner {
+	return r.client.Pipeline()
+}
+
+// Ping 检查Redis连接是否正常
+func (r *RedisCache) Ping() error {
+	return r.client.Ping(r.ctx).Err()
 }
 
 // Unsubscribe 取消订阅

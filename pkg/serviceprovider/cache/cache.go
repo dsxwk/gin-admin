@@ -25,13 +25,15 @@ type CacheProxy struct {
 	c      Cache
 	bus    *message.Event
 	ctx    context.Context
+	conf   *config.Config
 }
 
-func NewCacheProxy(driver string, c Cache, bus *message.Event) *CacheProxy {
+func NewCacheProxy(driver string, c Cache, bus *message.Event, conf *config.Config) *CacheProxy {
 	return &CacheProxy{
 		driver: driver,
 		c:      c,
 		bus:    bus,
+		conf:   conf,
 	}
 }
 
@@ -42,26 +44,26 @@ var (
 
 func NewCache(driver string, conf *config.Config) *CacheProxy {
 	cacheInstanceMu.RLock()
-	cp, ok := cacheInstance[driver]
+	c, ok := cacheInstance[driver]
 	cacheInstanceMu.RUnlock()
 	if ok {
-		return cp
+		return c
 	}
 	switch driver {
 	case "redis", "disk":
-		cp = NewRedisCache(conf)
+		c = NewRedisCache(conf)
 		cacheInstanceMu.Lock()
-		cacheInstance[driver] = cp
+		cacheInstance[driver] = c
 		cacheInstanceMu.Unlock()
 		flag.Infof("%s缓存初始化成功", driver)
-		return cp
+		return c
 	case "", "memory":
-		cp = NewMemoryCache(conf)
+		c = NewMemoryCache(conf)
 		cacheInstanceMu.Lock()
-		cacheInstance["memory"] = cp
+		cacheInstance["memory"] = c
 		cacheInstanceMu.Unlock()
 		flag.Infof("memory缓存初始化成功")
-		return cp
+		return c
 	default:
 		logger.NewLogger(conf).Fatal("不支持的缓存驱动: " + driver)
 		return nil
@@ -130,6 +132,11 @@ func (p *CacheProxy) publish(method, key string, val interface{}, cost time.Dura
 }
 
 func (p *CacheProxy) Redis() *RedisCache {
-	// 强制类型断言
-	return p.c.(*RedisCache)
+	r := p.c.(*RedisCache)
+	if err := r.Ping(); err != nil {
+		ResetRedisCache(p.conf)
+		p.c = redisCache.c
+		r = p.c.(*RedisCache)
+	}
+	return r
 }

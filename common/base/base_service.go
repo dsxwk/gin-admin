@@ -85,6 +85,6 @@ func (s *BaseService) Cache(cacheType ...string) *cache.CacheProxy {
 func (s *BaseService) Updates(m Model, id int64, data map[string]interface{}) error {
 	db := s.DB(m)
 	rows := model.FilterFields(db, m, data)
-	rows["updated_at"] = time.Now()
+	rows[model.UpdatedField] = time.Now()
 	return db.Model(m).Where("id = ?", id).Updates(rows).Error
 }

@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/app/facade"
+	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
@@ -280,9 +281,9 @@ func (m *MakeRequest) loadTableFields(conn, table string, camel bool) []Field {
 
 	for _, col := range columns {
 		// 过滤系统字段
-		if col.Name == "created_at" ||
-			col.Name == "updated_at" ||
-			col.Name == "deleted_at" {
+		if col.Name == model.CreatedField ||
+			col.Name == model.UpdatedField ||
+			col.Name == model.DeletedField {
 			continue
 		}
 

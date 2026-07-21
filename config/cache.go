@@ -13,6 +13,7 @@ type Cache struct {
 // Redis 数据库
 type Redis struct {
 	Address  string `mapstructure:"address" yaml:"address"`
+	Port     string `mapstructure:"port" yaml:"port"`
 	Password string `mapstructure:"password" yaml:"password"`
 	DB       int    `mapstructure:"db" yaml:"db"`
 }

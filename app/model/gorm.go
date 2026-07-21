@@ -13,6 +13,12 @@ import (
 	"time"
 )
 
+const (
+	CreatedField = "created_at"
+	UpdatedField = "updated_at"
+	DeletedField = "deleted_at"
+)
+
 type DateTime time.Time
 
 func (t *DateTime) MarshalJSON() ([]byte, error) {
@@ -206,8 +212,8 @@ func BatchUpdateSql(db *gorm.DB, model any, data []map[string]interface{}, prima
 
 		ids = append(ids, id)
 		for key := range row {
-			dbName, ok := getDBName(stmt.Schema, key)
-			if !ok {
+			dbName, _ok := getDBName(stmt.Schema, key)
+			if !_ok {
 				continue
 			}
 
@@ -276,7 +282,7 @@ func BatchUpdateSql(db *gorm.DB, model any, data []map[string]interface{}, prima
 
 	// 软删除
 	if stmt.Schema.LookUpField("DeletedAt") != nil {
-		where = append(where, "`deleted_at` IS NULL")
+		where = append(where, "`"+DeletedField+"` IS NULL")
 	}
 
 	sql := pkg.Sprintf(

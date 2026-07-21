@@ -177,3 +177,33 @@ func TestRedisDifferentDataTypes(t *testing.T) {
 		})
 	}
 }
+
+// TestRedisSet 测试Redis集合操作
+func TestRedisSet(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	redisCache := facade.Cache("redis").WithContext(ctx)
+	key := "test:set"
+
+	// 清理
+	defer redisCache.Redis().Delete(key)
+
+	// 测试 SAdd
+	err := redisCache.Redis().SAdd(key, "member1", "member2", "member3")
+	require.NoError(t, err)
+
+	// 测试 SIsMember - 存在的成员
+	isMember, err := redisCache.Redis().SIsMember(key, "member1")
+	require.NoError(t, err)
+	assert.True(t, isMember)
+
+	// 测试 SIsMember - 不存在的成员
+	isMember, err = redisCache.Redis().SIsMember(key, "nonexistent")
+	require.NoError(t, err)
+	assert.False(t, isMember)
+
+	// 测试 SAdd - 添加已存在的成员（不应报错）
+	err = redisCache.Redis().SAdd(key, "member1")
+	require.NoError(t, err)
+}
