@@ -33,7 +33,6 @@ type SystemConfigCreate struct {
 
 // SystemConfigUpdate 系统配置更新
 type SystemConfigUpdate struct {
-	ID               int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"id"`
 	Key              string `json:"key" form:"key" validate:"required" label:"标识"`
 	Name             string `json:"name" form:"name" validate:"required" label:"名称"`
 	DefaultValue     string `json:"defaultValue" form:"defaultValue" validate:"required" label:"默认值"`
