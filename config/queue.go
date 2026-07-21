@@ -1,5 +1,10 @@
 package config
 
+type Queue struct {
+	Kafka    Kafka    `mapstructure:"kafka" yaml:"kafka"`
+	Rabbitmq Rabbitmq `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+}
+
 type Kafka struct {
 	Enabled bool     `mapstructure:"enabled" yaml:"enabled"` // 是否启用
 	Brokers []string `mapstructure:"brokers" yaml:"brokers"`
