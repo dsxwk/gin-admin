@@ -2,8 +2,10 @@ package facade
 
 import (
 	"context"
+	"gin/common/ctxkey"
 	"gin/common/errcode"
 	"gin/common/response"
+	"gin/pkg"
 	"gin/pkg/serviceprovider/ratelimit"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -68,7 +70,10 @@ func ipRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 // userRateLimit 用户限流中间件
 func userRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID := c.GetString("user.id")
+		var userID string
+		if id := c.GetInt64(ctxkey.UserIdKey); id > 0 {
+			userID = pkg.IntToString[int64](id)
+		}
 		if userID == "" {
 			c.Next()
 			return

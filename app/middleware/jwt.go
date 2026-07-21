@@ -31,7 +31,7 @@ func (s Jwt) Handle() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(ctxkey.UserIdKey, data["id"])
+		c.Set(ctxkey.UserIdKey, int64(data["id"].(float64)))
 		c.Next()
 	}
 }
