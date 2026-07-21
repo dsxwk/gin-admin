@@ -25,3 +25,30 @@ func AutoLoads(public *gin.RouterGroup, auth *gin.RouterGroup) {
 		}
 	}
 }
+
+// GenerateAuthPermissionKeys 提取需要鉴权的路由权限 Key（格式: METHOD:PATH）
+func GenerateAuthPermissionKeys() []string {
+	engine := gin.New()
+	group := engine.Group("")
+	for _, r := range routerRegister {
+		if r.IsAuth() {
+			r.RegisterRoutes(group)
+		}
+	}
+	return extractPermissionKeys(engine)
+}
+
+// extractPermissionKeys 从 engine 提取去重的 METHOD:PATH 权限 Key
+func extractPermissionKeys(engine *gin.Engine) []string {
+	routes := engine.Routes()
+	seen := make(map[string]bool)
+	keys := make([]string, 0, len(routes))
+	for _, route := range routes {
+		key := route.Method + ":" + route.Path
+		if !seen[key] {
+			keys = append(keys, key)
+			seen[key] = true
+		}
+	}
+	return keys
+}
