@@ -232,6 +232,21 @@ definitions:
       updatedAt:
         type: string
     type: object
+  model.Permission:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      method:
+        type: string
+      updatedAt:
+        type: string
+      uri:
+        type: string
+    type: object
   model.RoleMenus:
     properties:
       createdAt:
@@ -242,6 +257,17 @@ definitions:
         type: integer
       name:
         type: string
+      roleId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  model.RolePermissions:
+    properties:
+      id:
+        type: integer
+      permissionId:
+        type: integer
       roleId:
         type: integer
       updatedAt:
@@ -260,6 +286,10 @@ definitions:
       roleMenus:
         items:
           $ref: '#/definitions/model.RoleMenus'
+        type: array
+      rolePermissions:
+        items:
+          $ref: '#/definitions/model.RolePermissions'
         type: array
       status:
         type: integer
@@ -407,8 +437,6 @@ definitions:
         type: string
       dataSource:
         type: integer
-      id:
-        type: integer
       isPublish:
         type: integer
       tag: {}
@@ -438,8 +466,6 @@ definitions:
     type: object
   request.ConfigCategoryUpdate:
     properties:
-      id:
-        type: integer
       name:
         type: string
     required:
@@ -472,8 +498,6 @@ definitions:
       desc:
         type: string
       extend: {}
-      id:
-        type: integer
       name:
         type: string
       pid:
@@ -518,8 +542,6 @@ definitions:
     type: object
   request.MenuUpdate:
     properties:
-      id:
-        type: integer
       menuAction:
         $ref: '#/definitions/request.ActionCreate'
       meta:
@@ -603,6 +625,10 @@ definitions:
         items:
           $ref: '#/definitions/request.RoleMenu'
         type: array
+      rolePermissions:
+        items:
+          $ref: '#/definitions/request.RolePermission'
+        type: array
       status:
         type: integer
     type: object
@@ -617,17 +643,26 @@ definitions:
     required:
     - name
     type: object
+  request.RolePermission:
+    properties:
+      permissionId:
+        type: integer
+      roleId:
+        type: integer
+    type: object
   request.RoleUpdate:
     properties:
       desc:
         type: string
-      id:
-        type: integer
       name:
         type: string
       roleMenus:
         items:
           $ref: '#/definitions/request.RoleMenu'
+        type: array
+      rolePermissions:
+        items:
+          $ref: '#/definitions/request.RolePermission'
         type: array
       status:
         type: integer
@@ -662,8 +697,6 @@ definitions:
         type: integer
       defaultValue:
         type: string
-      id:
-        type: integer
       key:
         type: string
       name:
@@ -794,8 +827,6 @@ definitions:
       fullName:
         type: string
       gender:
-        type: integer
-      id:
         type: integer
       nickname:
         type: string
@@ -1750,6 +1781,58 @@ paths:
       summary: 创建菜单
       tags:
       - 菜单管理
+  /api/v1/permission:
+    get:
+      description: 用户列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Permission'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 用户管理
   /api/v1/refresh-token:
     post:
       consumes:

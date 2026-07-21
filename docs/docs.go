@@ -1467,6 +1467,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/permission": {
+            "get": {
+                "description": "用户列表",
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "是否不分页",
+                        "name": "notPage",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/request.PageData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/model.Permission"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/refresh-token": {
             "post": {
                 "description": "刷新token",
@@ -2990,6 +3076,29 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Permission": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                }
+            }
+        },
         "model.RoleMenus": {
             "type": "object",
             "properties": {
@@ -3004,6 +3113,23 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "roleId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.RolePermissions": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "permissionId": {
+                    "type": "integer"
                 },
                 "roleId": {
                     "type": "integer"
@@ -3032,6 +3158,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.RoleMenus"
+                    }
+                },
+                "rolePermissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.RolePermissions"
                     }
                 },
                 "status": {
@@ -3250,9 +3382,6 @@ const docTemplate = `{
                 "dataSource": {
                     "type": "integer"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "isPublish": {
                     "type": "integer"
                 },
@@ -3294,9 +3423,6 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 }
@@ -3346,9 +3472,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "extend": {},
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -3413,9 +3536,6 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "menuAction": {
                     "$ref": "#/definitions/request.ActionCreate"
                 },
@@ -3535,6 +3655,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/request.RoleMenu"
                     }
                 },
+                "rolePermissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RolePermission"
+                    }
+                },
                 "status": {
                     "type": "integer"
                 }
@@ -3557,14 +3683,22 @@ const docTemplate = `{
                 }
             }
         },
+        "request.RolePermission": {
+            "type": "object",
+            "properties": {
+                "permissionId": {
+                    "type": "integer"
+                },
+                "roleId": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.RoleUpdate": {
             "type": "object",
             "properties": {
                 "desc": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -3573,6 +3707,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/request.RoleMenu"
+                    }
+                },
+                "rolePermissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.RolePermission"
                     }
                 },
                 "status": {
@@ -3629,9 +3769,6 @@ const docTemplate = `{
                 },
                 "defaultValue": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "key": {
                     "type": "string"
@@ -3825,9 +3962,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "integer"
-                },
-                "id": {
                     "type": "integer"
                 },
                 "nickname": {
