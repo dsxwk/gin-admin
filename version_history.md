@@ -1,3 +1,13 @@
+## v2.3.9
+> - Update configuration file
+> - Optimize validator request template
+> - Fix get login user problem
+> - Optimize database and cache
+> - Add 403 error code
+> - Add permission initialization synchronization command
+> - Add permission initialization synchronization command
+> - Add role permission control
+
 ## v2.3.8
 > - Optimize command line, debugger, queue, database, cache, http
 > - Update dependency package version

@@ -10,8 +10,9 @@
   - [Initialize Go Environment And Dependencies](#Initialize-Go-Environment-And-Dependencies)
     - [Method One](#Method-One)
     - [Method Two](#Method-Two)
-  - [Start](#Start)
   - [Initialize Database](#Initialize-Database)
+  - [Permission Sync](#Permission-Sync)
+  - [Start](#Start)
     - [Use Air Hot Update](#Use-Air-Hot-Update)
   - [Compile](#Compile)
     - [Compile Project](#Compile-Project)
@@ -148,7 +149,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version [v2.3.8](version_history.md#v238)
+> - Latest Version [v2.3.9](version_history.md#v239)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -181,6 +182,12 @@ $ go mod vendor
 ## Initialize Database
 ```bash
 $ go run ./cmd/cli.go db:seed --init=true
+```
+
+## Permission Sync
+> To synchronize permission data to Redis database, Redis service must be installed and started
+```bash
+$ go run ./cmd/cli.go permission:sync
 ```
 
 ## Start

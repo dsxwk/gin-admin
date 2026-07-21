@@ -11,6 +11,7 @@
     - [方式一](#方式一)
     - [方式二](#方式二)
   - [初始化数据库](#初始化数据库)
+  - [权限同步](#权限同步)
   - [启动](#启动)
     - [使用air热更新](#使用air热更新)
   - [编译](#编译)
@@ -148,7 +149,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本 [v2.3.8](version_history_zh.md#v238)
+> - 最新版本 [v2.3.9](version_history_zh.md#v239)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -181,6 +182,12 @@ $ go mod vendor
 ## 初始化数据库
 ```bash
 $ go run ./cmd/cli.go db:seed --init=true
+```
+
+## 权限同步
+> 同步权限数据到redis数据库,必须安装并启动redis服务
+```bash
+$ go run ./cmd/cli.go permission:sync
 ```
 
 ## 启动
