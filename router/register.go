@@ -1,6 +1,9 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"io"
+)
 
 // Router 路由接口
 type Router interface {
@@ -26,8 +29,15 @@ func AutoLoads(public *gin.RouterGroup, auth *gin.RouterGroup) {
 	}
 }
 
-// GenerateAuthPermissionKeys 提取需要鉴权的路由权限 Key（格式: METHOD:PATH）
+// GenerateAuthPermissionKeys 提取需要鉴权的路由权限Key(格式: METHOD:PATH)
 func GenerateAuthPermissionKeys() []string {
+	// 临时禁用Gin debug输出,避免二次打印路由
+	orig := gin.DefaultWriter
+	gin.DefaultWriter = io.Discard
+	defer func() {
+		gin.DefaultWriter = orig
+	}()
+
 	engine := gin.New()
 	group := engine.Group("")
 	for _, r := range routerRegister {
@@ -38,7 +48,7 @@ func GenerateAuthPermissionKeys() []string {
 	return extractPermissionKeys(engine)
 }
 
-// extractPermissionKeys 从 engine 提取去重的 METHOD:PATH 权限 Key
+// extractPermissionKeys 从engine提取去重的METHOD:PATH权限Key
 func extractPermissionKeys(engine *gin.Engine) []string {
 	routes := engine.Routes()
 	seen := make(map[string]bool)

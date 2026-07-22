@@ -50,7 +50,7 @@ func (p *QueueProvider) Boot(app serviceprovider.App) {
 	// 启动所有启用的消费者
 	for _, consumer := range p.consumers {
 		if consumer.Enabled(cfg) {
-			facade.Log().Info(pkg.Sprintf("启动消费者: %s", consumer.Name()))
+			flag.Infof("启动消费者: %s", consumer.Name())
 			if err := consumer.Start(cfg, log); err != nil {
 				facade.Log().Error(pkg.Sprintf("启动消费者 %s 失败: %v", consumer.Name(), err))
 			}

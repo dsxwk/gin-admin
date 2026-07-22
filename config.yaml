@@ -115,12 +115,11 @@ i18n:
   dir: "storage/locales" # 翻译文件存放路径
   lang: "zh,en" # 默认语言,多个语言用逗号分隔
 
-# 队列
-queue:
-  kafka:
-    enabled: false # 是否启用kafka
-    brokers:
-      - "172.30.117.79:9092"
-  rabbitmq:
-    enabled: false # 是否启用rabbitmq
-    url: "amqp://admin:admin@172.30.117.79:5672/"
+kafka:
+  enabled: false # 是否启用kafka
+  brokers:
+    - "172.30.117.79:9092"
+rabbitmq:
+  enabled: false # 是否启用rabbitmq
+  url: "amqp://admin:admin@172.30.117.79:5672/"
+
