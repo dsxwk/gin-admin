@@ -36,7 +36,7 @@ func NewRabbitmqWorker() *RabbitmqWorker {
 	ch, err := conn.Channel()
 	if err != nil {
 		facade.Log().Error(pkg.Sprintf("RabbitMQ Job Channel失败: %v", err))
-		conn.Close()
+		_ = conn.Close()
 		return nil
 	}
 	return &RabbitmqWorker{conn: conn, channel: ch, stopCh: make(chan struct{})}
@@ -75,7 +75,7 @@ func (w *RabbitmqWorker) Start() error {
 func (w *RabbitmqWorker) Stop() error {
 	close(w.stopCh)
 	if w.channel != nil {
-		w.channel.Close()
+		_ = w.channel.Close()
 	}
 	if w.conn != nil {
 		return w.conn.Close()
@@ -93,7 +93,7 @@ func (w *RabbitmqWorker) handleMessage(msg amqp091.Delivery) {
 	j := job.Get(jm.JobName)
 	if j == nil {
 		facade.Log().Error(pkg.Sprintf("Job [%s] 未注册", jm.JobName))
-		msg.Ack(false)
+		_ = msg.Ack(false)
 		return
 	}
 

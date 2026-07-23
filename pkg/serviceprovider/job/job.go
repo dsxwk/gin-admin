@@ -1,6 +1,9 @@
 package job
 
 import (
+	"gin/common/flag"
+	"gin/pkg"
+	"os"
 	"sync"
 )
 
@@ -36,7 +39,12 @@ var registry = &Registry{
 func Register(job Job) {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	registry.items[job.Name()] = job
+	name := job.Name()
+	if _, exists := registry.items[name]; exists {
+		flag.Errorf(pkg.Sprintf("Job [%s] 重复注册", name))
+		os.Exit(1)
+	}
+	registry.items[name] = job
 }
 
 // Get 获取任务

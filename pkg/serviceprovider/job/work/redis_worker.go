@@ -97,7 +97,7 @@ func (w *RedisWorker) processDelayed(client *redis.Client) {
 
 	for _, m := range members {
 		var msg JobMessage
-		if err := json.Unmarshal([]byte(m.Member.(string)), &msg); err != nil {
+		if err = json.Unmarshal([]byte(m.Member.(string)), &msg); err != nil {
 			continue
 		}
 		w.handleMessage(msg)

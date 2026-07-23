@@ -2,12 +2,12 @@ package work
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"gin/app/facade"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/job"
+	"github.com/goccy/go-json"
 	"github.com/segmentio/kafka-go"
 	"time"
 )
