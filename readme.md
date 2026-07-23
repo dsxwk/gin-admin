@@ -1,4 +1,4 @@
-## English | [中文](readme_zh.md)
+﻿## English | [中文](readme_zh.md)
 
 - [Project Introduction](#Project-Introduction)
   - [Project Address](#Project-Address)
@@ -88,6 +88,12 @@
   - [Queue Usage](#Queue-Usage)
   - [Consumer List](#Consumer-List)
   - [Producer List](#Producer-List)
+- [Job](#Job)
+  - [Job Creation](#Job-Creation)
+  - [Job Dispatch](#Job-Dispatch)
+  - [Job Interface](#Job-Interface)
+  - [Job List](#Job-List)
+  - [Job Clear](#Job-Clear)
 - [Publish Event](#Publish-Event)
   - [Event Test](#Event-Test)
 - [Event List](#Event-List)
@@ -149,7 +155,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version [v2.3.9](version_history.md#v239)
+> - Latest Version [v2.3.10](version_history.md#v2310)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -2047,12 +2053,14 @@ Options:
 ```bash
 $ go run ./cmd/cli.go make:queue --type=rabbitmq --name=rabbitmq_demo --queue=rabbitmq_demo --exchange=rabbitmq_demo --routing=rabbitmq_demo 
 ```
+
 ```go
 package consumer
 
 import (
   "gin/app/facade"
   "gin/common/base"
+  "gin/common/flag"
   "gin/config"
   "gin/pkg"
   "gin/pkg/logger"
@@ -2093,9 +2101,9 @@ func (c *RabbitmqDemoConsumer) Name() string {
   return "rabbitmq_demo"
 }
 
-func (c *RabbitmqDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
+func (c *RabbitmqDemoConsumer) Start() error {
   c.RabbitmqConsumer.Start(c)
-  log.Info(pkg.Sprintf("RabbitMQ Consumer Start Successed: %s", c.Name()))
+  flag.Infof("RabbitMQ Consumer Start Successed: %s", c.Name())
   return nil
 }
 
@@ -2175,7 +2183,6 @@ func init() {
 package controller
 
 import (
-    "fmt"
     "gin/app/facade"
     "gin/common/base"
 )
@@ -2219,6 +2226,132 @@ $ go run ./cmd/cli.go producer:list
 │ rabbitmq_demo          RabbitMQ ordinary queue producer    │
 └────────────────────────────────────────────────────────────┘
 Total 4 producers
+```
+
+
+## Job
+> The Job system provides Laravel-style asynchronous task processing with support for `sync`, `redis`, `kafka`, and `rabbitmq` drivers.
+
+### Job Creation
+> Create models, controllers, etc. using the command line, refer to the previous documentation for details.
+
+| Argument | Short | Required | Default | Description |
+|---|---|---|---|---|
+| `--name` | `-n` | Yes | - | Job name, e.g. `send_email` |
+| `--connection` | `-c` | No | `queue.connection` config | Driver: `sync`, `redis`, `kafka`, `rabbitmq` |
+| `--desc` | `-D` | No | Same as `--name` | Job description |
+| `--retry` | `-R` | No | `0` | Retry count |
+| `--delay` | `-d` | No | `0` | Retry delay (ms) |
+
+### Job Structure
+```go
+package job
+
+import (
+    "gin/app/facade"
+    "gin/pkg"
+    "gin/pkg/serviceprovider/job"
+)
+
+type SendEmailJob struct{}
+
+type SendEmail struct {
+    To      string `json:"to"`
+    Subject string `json:"subject"`
+    Content string `json:"content"`
+}
+
+func (j *SendEmailJob) Name() string        { return "send_email" }
+func (j *SendEmailJob) Description() string { return "Send email task" }
+func (j *SendEmailJob) Connection() string  { return "redis" }
+func (j *SendEmailJob) Retry() int          { return 3 }
+func (j *SendEmailJob) Delay() int64        { return 3000 }
+func (j *SendEmailJob) NewPayload() any     { return &SendEmail{} }
+
+func (j *SendEmailJob) Handle(payload any) error {
+    data := payload.(*SendEmail)
+    // todo: implement business logic
+    facade.Log().Info(pkg.Sprintf("Sending email to: %s, subject: %s", data.To, data.Subject))
+    return nil
+}
+
+func init() {
+    job.Register(&SendEmailJob{})
+}
+```
+
+### Job Dispatch
+```go
+package v1
+
+import (
+    "gin/app/facade"
+    "gin/app/job"
+    "github.com/gin-gonic/gin"
+)
+
+func (s *TestController) Test(c *gin.Context) {
+    ctx := c.Request.Context()
+
+    // Async dispatch (redis/kafka/rabbitmq)
+    _ = facade.Job().Dispatch(ctx, "send_email", job.SendEmail{
+        To:      "user@example.com",
+        Subject: "Hello",
+        Content: "Test email content",
+    })
+
+    // Sync dispatch (sync driver)
+    _ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{
+        UserID: 1,
+        Action: "update",
+    })
+}
+```
+
+### Job Interface
+| Method | Description |
+|---|---|
+| `Name() string` | Unique job name |
+| `Description() string` | Job description |
+| `Connection() string` | Driver: `"sync"`, `"redis"`, `"kafka"`, `"rabbitmq"` (empty = redis) |
+| `Retry() int` | Retry count (`0` = execute once) |
+| `Delay() int64` | Retry delay in milliseconds |
+| `NewPayload() any` | Returns pointer to payload struct for unmarshaling |
+| `Handle(payload any) error` | Business logic, `payload` is already deserialized |
+
+### Job List
+```bash
+$ go run ./cmd/cli.go job:list
+┌──────────────────────────────────────────────────────────────────────┐
+│ Job Name         Connection       Retry     Delay(ms)   Description  │
+├──────────────────────────────────────────────────────────────────────┤
+│ export_report   rabbitmq          0          10000ms    Export report│
+│ send_email      redis             3          3000ms     Send email   │
+│ sync_user       sync              1          0ms        Sync user    │
+└──────────────────────────────────────────────────────────────────────┘
+Total 3 jobs
+```
+
+### Job Clear
+```bash
+$ go run ./cmd/cli.go job:clear
+All unconsumed jobs have been cleared
+```
+> Only supports Redis driver.
+
+### Debugger
+Job dispatch events are automatically recorded in the debugger:
+```json
+{
+  "Job": [
+    {
+      "name": "send_email",
+      "connection": "redis",
+      "payload": "{\"to\":\"user@example.com\",\"subject\":\"Hello\"}",
+      "ms": 14.08
+    }
+  ]
+}
 ```
 
 # Publish Event

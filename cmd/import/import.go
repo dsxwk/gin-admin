@@ -2,6 +2,7 @@ package _import
 
 import (
 	_ "gin/app/command"
+	_ "gin/app/job"
 	_ "gin/app/listener"
 	_ "gin/app/queue/kafka/consumer"
 	_ "gin/app/queue/kafka/producer"
@@ -9,6 +10,7 @@ import (
 	_ "gin/app/queue/rabbitmq/producer"
 	_ "gin/pkg/cli/db"
 	_ "gin/pkg/cli/event"
+	_ "gin/pkg/cli/job"
 	_ "gin/pkg/cli/jwt"
 	_ "gin/pkg/cli/make"
 	_ "gin/pkg/cli/permission"

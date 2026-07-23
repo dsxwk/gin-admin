@@ -1,4 +1,4 @@
-## 中文 | [English](readme.md)
+﻿## 中文 | [English](readme.md)
 
 - [项目简介](#项目简介)
   - [项目地址](#项目地址) 
@@ -88,6 +88,12 @@
   - [队列使用](#队列使用)
   - [消费者列表](#消费者列表)
   - [生产者列表](#生产者列表)
+- [Job](#Job)
+  - [Job创建](#Job创建)
+  - [Job投递](#Job投递)
+  - [Job接口](#Job接口)
+  - [Job列表](#Job列表)
+  - [Job清除](#Job清除)
 - [发布事件](#发布事件)
   - [测试事件](#测试事件)
 - [事件列表](#事件列表)
@@ -149,7 +155,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本 [v2.3.9](version_history_zh.md#v239)
+> - 最新版本 [v2.3.10](version_history_zh.md#v2310)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -2069,12 +2075,14 @@ Options:
 ```bash
 $ go run ./cmd/cli.go make:queue --type=rabbitmq --name=rabbitmq_demo --queue=rabbitmq_demo --exchange=rabbitmq_demo --routing=rabbitmq_demo 
 ```
+
 ```go
 package consumer
 
 import (
   "gin/app/facade"
   "gin/common/base"
+  "gin/common/flag"
   "gin/config"
   "gin/pkg"
   "gin/pkg/logger"
@@ -2117,9 +2125,9 @@ func (c *RabbitmqDemoConsumer) Name() string {
 }
 
 // Start 启动消费者
-func (c *RabbitmqDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
+func (c *RabbitmqDemoConsumer) Start() error {
   c.RabbitmqConsumer.Start(c)
-  log.Info(pkg.Sprintf("RabbitMQ消费者启动成功: %s", c.Name()))
+  flag.Infof("RabbitMQ消费者启动成功: %s", c.Name())
   return nil
 }
 
@@ -2203,7 +2211,6 @@ func init() {
 package controller
 
 import (
-    "fmt"
     "gin/app/facade"
     "gin/common/base"
 )
@@ -2247,6 +2254,123 @@ $ go run ./cmd/cli.go producer:list
 │ rabbitmq_demo          rabbitmq普通队列生产者                │
 └────────────────────────────────────────────────────────────┘
 总计 4 个生产者
+```
+
+## Job
+> Job 系统提供 Laravel 风格的异步任务处理, 支持 `sync`、`redis`、`kafka`、`rabbitmq` 多种驱动。
+
+### Job创建
+> 同模型、控制器等使用命令行创建,具体参考之前文档。
+
+### Job结构
+```go
+package job
+
+import (
+    "gin/app/facade"
+    "gin/pkg"
+    "gin/pkg/serviceprovider/job"
+)
+
+type SendEmailJob struct{}
+
+type SendEmail struct {
+    To      string `json:"to"`
+    Subject string `json:"subject"`
+    Content string `json:"content"`
+}
+
+func (j *SendEmailJob) Name() string        { return "send_email" }
+func (j *SendEmailJob) Description() string { return "发送邮件任务" }
+func (j *SendEmailJob) Connection() string  { return "redis" }
+func (j *SendEmailJob) Retry() int          { return 3 }
+func (j *SendEmailJob) Delay() int64        { return 3000 }
+func (j *SendEmailJob) NewPayload() any     { return &SendEmail{} }
+
+func (j *SendEmailJob) Handle(payload any) error {
+    data := payload.(*SendEmail)
+    // TODO: 实现业务逻辑
+    facade.Log().Info(pkg.Sprintf("发送邮件至: %s, 主题: %s", data.To, data.Subject))
+    return nil
+}
+
+func init() {
+    job.Register(&SendEmailJob{})
+}
+```
+
+### Job投递
+```go
+package v1
+
+import (
+    "gin/app/facade"
+    "gin/app/job"
+    "github.com/gin-gonic/gin"
+)
+
+func (s *TestController) Test(c *gin.Context) {
+    ctx := c.Request.Context()
+
+    // 异步投递 (redis/kafka/rabbitmq)
+    _ = facade.Job().Dispatch(ctx, "send_email", job.SendEmail{
+        To:      "user@example.com",
+        Subject: "你好",
+        Content: "测试邮件内容",
+    })
+
+    // 同步执行 (sync 驱动)
+    _ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{
+        UserID: 1,
+        Action: "update",
+    })
+}
+```
+
+### Job接口
+| 方法 | 说明 |
+|---|---|
+| `Name() string` | 任务名称(唯一标识) |
+| `Description() string` | 任务描述 |
+| `Connection() string` | 驱动: `"sync"`、`"redis"`、`"kafka"`、`"rabbitmq"` (空字符串默认 redis) |
+| `Retry() int` | 重试次数 (`0` = 执行一次) |
+| `Delay() int64` | 重试间隔时间(毫秒) |
+| `NewPayload() any` | 返回 payload 结构体指针, 用于反序列化 |
+| `Handle(payload any) error` | 业务处理逻辑, `payload` 已反序列化 |
+
+### Job列表
+```bash
+$ go run ./cmd/cli.go job:list
+┌───────────────────────────────────────────────────────────────┐
+│ Job名称         连接       重试次数   延迟(ms)   描述         │
+├───────────────────────────────────────────────────────────────┤
+│ export_report   rabbitmq   0          10000ms    导出报表任务 │
+│ send_email      redis      3          3000ms     发送邮件任务 │
+│ sync_user       sync       1          0ms        同步用户任务 │
+└───────────────────────────────────────────────────────────────┘
+总计 4 个Job
+```
+
+### Job清除
+```bash
+$ go run ./cmd/cli.go job:clear
+所有未消费Job已清除
+```
+> 仅支持 Redis 驱动。
+
+### 调试器
+Job 投递事件自动记录到调试器:
+```json
+{
+  "Job": [
+    {
+      "name": "send_email",
+      "connection": "redis",
+      "payload": "{\"to\":\"user@example.com\",\"subject\":\"你好\"}",
+      "ms": 14.08
+    }
+  ]
+}
 ```
 
 # 发布事件

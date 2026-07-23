@@ -3,6 +3,7 @@ package v1
 import (
 	"gin/app/enum"
 	"gin/app/facade"
+	"gin/app/job"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
@@ -149,6 +150,7 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 func (s *LoginController) Test(c *gin.Context) {
 	var (
 		userEnum enum.UserEnum
+		ctx      = c.Request.Context()
 	)
 
 	status := userEnum.Status().Get()
@@ -166,6 +168,18 @@ func (s *LoginController) Test(c *gin.Context) {
 	containsValue2 := userEnum.Gender().ContainsValue(enum.UserGenderMale)
 	containsDesc2 := userEnum.Gender().ContainsDesc("男")
 	length2 := userEnum.Gender().Len()
+
+	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, []byte(`{"name":"kafka_test111"}`))
+	_ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, []byte(`{"name":"kafka_test222"}`))
+	_ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, []byte(`{"name":"test111"}`))
+	_ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, []byte(`{"name":"test222"}`))
+	_ = facade.Job().Dispatch(ctx, "send_email", job.SendEmail{
+		To:      "a@b.com",
+		Subject: "你好",
+		Content: "这是一封测试邮件",
+	})
+	_ = facade.Job().Dispatch(ctx, "export_report", job.ExportReport{ReportType: "daily", UserID: 1})
+	_ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{UserID: 1, Action: "update"})
 
 	s.Response.Success(c, errcode.Success().WithData(map[string]any{
 		"status":         status,

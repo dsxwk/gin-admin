@@ -1,3 +1,9 @@
+# Version History
+
+## v2.3.10
+> - Optimize queue debugger and other
+> - Add job task support connection type redis, kafak, rabbitmq, sync, sync is synchronous
+
 ## v2.3.9
 > - Update configuration file
 > - Optimize validator request template
