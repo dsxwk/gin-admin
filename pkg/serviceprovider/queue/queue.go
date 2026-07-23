@@ -4,7 +4,6 @@ import (
 	"context"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg/serviceprovider/logger"
 	"os"
 	"sync"
 )
@@ -17,7 +16,7 @@ type Consumer interface {
 	// Description 消费者描述
 	Description() string
 	// Start 启动消费者
-	Start(cfg *config.Config, log *logger.Logger) error
+	Start() error
 	// Stop 停止消费者
 	Stop() error
 	// Enabled 是否启用

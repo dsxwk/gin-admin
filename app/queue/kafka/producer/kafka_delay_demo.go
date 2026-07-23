@@ -3,7 +3,6 @@ package producer
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -17,7 +16,7 @@ func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Writer = &kafka.Writer{
-		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
+		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "kafka_delay_demo",
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: kafka.RequireAll,
@@ -29,7 +28,7 @@ func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 			Topic:        "kafka_delay_demo",
 			Key:          "kafka_delay_demo_key",
 			IsDelayQueue: true,
-			DelayMs:      20000, // 20秒延迟
+			DelayMs:      20000,
 		},
 	}
 }
@@ -40,11 +39,4 @@ func (p *KafkaDelayDemoProducer) Name() string {
 
 func (p *KafkaDelayDemoProducer) Description() string {
 	return "kafka延迟队列生产者"
-}
-
-func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Kafka.Enabled {
-		queue.GetProducerRegistry().Register(NewKafkaDelayDemoProducer())
-	}
 }

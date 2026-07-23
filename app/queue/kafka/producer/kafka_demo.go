@@ -3,7 +3,6 @@ package producer
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -17,7 +16,7 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Writer = &kafka.Writer{
-		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
+		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "kafka_demo",
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: kafka.RequireAll,
@@ -38,11 +37,4 @@ func (p *KafkaDemoProducer) Name() string {
 
 func (p *KafkaDemoProducer) Description() string {
 	return "kafka普通队列生产者"
-}
-
-func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Kafka.Enabled {
-		queue.GetProducerRegistry().Register(NewKafkaDemoProducer())
-	}
 }

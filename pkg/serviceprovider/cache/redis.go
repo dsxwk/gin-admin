@@ -256,7 +256,7 @@ func (r *RedisCache) UnLock(key string, value string) error {
 	else
 		return 0
 	end`
-	// 使用 EVAL 命令执行 Lua 脚本
+	// 使用EVAL命令执行Lua脚本
 	status, err := r.client.Eval(r.ctx, script, []string{key}, value).Int()
 	if err != nil {
 		return fmt.Errorf("failed to unlock: %v", err)
@@ -327,6 +327,11 @@ func (r *RedisCache) Pipeline() redis.Pipeliner {
 // Ping 检查Redis连接是否正常
 func (r *RedisCache) Ping() error {
 	return r.client.Ping(r.ctx).Err()
+}
+
+// Client 获取Redis客户端
+func (r *RedisCache) Client() *redis.Client {
+	return r.client
 }
 
 // Unsubscribe 取消订阅

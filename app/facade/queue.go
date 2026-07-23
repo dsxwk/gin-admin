@@ -1,6 +1,9 @@
 package facade
 
 import (
+	"context"
+	"fmt"
+	"gin/common/flag"
 	"gin/pkg/serviceprovider/queue"
 	"sync"
 )
@@ -41,11 +44,24 @@ func (q *QueueFacade) Producer(name string) queue.Producer {
 
 	registered := queue.GetProducerRegistry().Get(name)
 	if registered == nil {
-		return nil
+		flag.Errorf(fmt.Sprintf("队列生产者 [%s] 未注册, 请检查配置是否启用或生产者是否存在", name))
+		return &nilProducer{name: name}
 	}
 	q.producers[name] = registered
 	return registered
 }
+
+// nilProducer 未找到生产者时的安全桩
+type nilProducer struct {
+	name string
+}
+
+func (n *nilProducer) Name() string        { return n.name }
+func (n *nilProducer) Description() string { return "未注册的生产者" }
+func (n *nilProducer) Publish(ctx context.Context, msg []byte) error {
+	return fmt.Errorf("队列生产者 [%s] 未注册", n.name)
+}
+func (n *nilProducer) Close() error { return nil }
 
 // GetAllProducers 获取所有生产者
 func (q *QueueFacade) GetAllProducers() []queue.Producer {
@@ -69,7 +85,7 @@ func (q *QueueFacade) GetAllConsumers() []queue.Consumer {
 	return queue.GetConsumerRegistry().GetAll()
 }
 
-// GetAllConsumerNames 获取所有消费者名称
+// GetAllConsumerNames 获取所有消费者名称列表
 func (q *QueueFacade) GetAllConsumerNames() []string {
 	return queue.GetConsumerRegistry().GetNames()
 }

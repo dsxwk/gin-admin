@@ -3,9 +3,9 @@ package consumer
 import (
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 )
 
@@ -17,7 +17,6 @@ type RabbitmqDemoConsumer struct {
 // NewRabbitmqDemoConsumer 创建消费者实例
 func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
 	log := facade.Log()
-	// 创建RabbitMQ连接
 	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
@@ -36,7 +35,6 @@ func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
 	}
 }
 
-// Name 消费者名称
 func (c *RabbitmqDemoConsumer) Name() string {
 	return "rabbitmq_demo"
 }
@@ -45,39 +43,25 @@ func (c *RabbitmqDemoConsumer) Description() string {
 	return "rabbitmq普通队列消费者"
 }
 
-// Start 启动消费者
-func (c *RabbitmqDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
+func (c *RabbitmqDemoConsumer) Start() error {
 	c.RabbitmqConsumer.Start(c)
-	log.Info(pkg.Sprintf("RabbitMQ消费者启动成功: %s", c.Name()))
+	flag.Infof("RabbitMQ消费者启动成功: %s", c.Name())
 	return nil
 }
 
-// Stop 停止消费者
 func (c *RabbitmqDemoConsumer) Stop() error {
 	return c.RabbitmqConsumer.Stop()
 }
 
-// Enabled 是否启用
 func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
-	return cfg.Rabbitmq.Enabled
+	return cfg.Queue.Rabbitmq.Enabled
 }
 
-// Status 消费者状态
 func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
 	return c.RabbitmqConsumer.Status()
 }
 
-// Handle 处理消息的业务逻辑
 func (c *RabbitmqDemoConsumer) Handle(msg string) error {
 	facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
-	// todo 处理业务逻辑
 	return nil
-}
-
-// init 注册消费者到注册表
-func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Rabbitmq.Enabled {
-		queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
-	}
 }

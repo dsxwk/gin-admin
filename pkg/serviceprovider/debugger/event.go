@@ -6,6 +6,7 @@ const (
 	TopicHttp     = "debug:http"
 	TopicMq       = "debug:mq"
 	TopicListener = "debug:listener"
+	TopicJob      = "debug:job"
 )
 
 // SqlEvent Sql事件
@@ -56,4 +57,13 @@ type ListenerEvent struct {
 	Name        string // 监听名称
 	Description string // 监听描述
 	Data        any    // 监听数据
+}
+
+// JobEvent Job事件
+type JobEvent struct {
+	TraceId    string  `json:"traceId"`    // traceId
+	Name       string  `json:"name"`       // Job名称
+	Connection string  `json:"connection"` // 连接类型
+	Payload    string  `json:"payload"`    // 消息内容
+	Ms         float64 `json:"ms"`         // 耗时ms
 }

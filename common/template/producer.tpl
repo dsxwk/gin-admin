@@ -27,7 +27,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Writer = &kafka.Writer{
-		Addr:         kafka.TCP(cfg.Kafka.Brokers...),
+		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "{{.Topic}}",
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: kafka.RequireAll,

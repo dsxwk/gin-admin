@@ -3,9 +3,9 @@ package consumer
 import (
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 )
 
@@ -29,7 +29,7 @@ func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
 			Queue:        "rabbitmq_delay_demo",
 			Exchange:     "rabbitmq_delay_demo_exchange",
 			Routing:      "rabbitmq_delay_demo",
-			IsDelayQueue: true, // 标记为延迟队列
+			IsDelayQueue: true,
 			Retry:        3,
 		},
 	}
@@ -43,9 +43,9 @@ func (c *RabbitmqDelayDemoConsumer) Description() string {
 	return "rabbitmq延迟队列消费者"
 }
 
-func (c *RabbitmqDelayDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
+func (c *RabbitmqDelayDemoConsumer) Start() error {
 	c.RabbitmqConsumer.Start(c)
-	log.Info(pkg.Sprintf("RabbitMQ延迟消费者启动成功: %s", c.Name()))
+	flag.Infof("RabbitMQ延迟消费者启动成功: %s", c.Name())
 	return nil
 }
 
@@ -54,7 +54,7 @@ func (c *RabbitmqDelayDemoConsumer) Stop() error {
 }
 
 func (c *RabbitmqDelayDemoConsumer) Enabled(cfg *config.Config) bool {
-	return cfg.Rabbitmq.Enabled
+	return cfg.Queue.Rabbitmq.Enabled
 }
 
 func (c *RabbitmqDelayDemoConsumer) Status() queue.ConsumerStatus {
@@ -63,13 +63,5 @@ func (c *RabbitmqDelayDemoConsumer) Status() queue.ConsumerStatus {
 
 func (c *RabbitmqDelayDemoConsumer) Handle(msg string) error {
 	facade.Log().Info(pkg.Sprintf("RabbitMq Delay Received Msg: %s", msg))
-	// todo 处理业务逻辑
 	return nil
-}
-
-func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Rabbitmq.Enabled {
-		queue.GetConsumerRegistry().Register(NewRabbitmqDelayDemoConsumer())
-	}
 }

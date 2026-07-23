@@ -77,6 +77,16 @@ func (d *Debugger) Start() {
 			})
 		}
 	})
+	id6 := d.Bus.Subscribe(TopicJob, func(ev any) {
+		if e, ok := ev.(JobEvent); ok {
+			AddJob(e.TraceId, map[string]any{
+				"name":       e.Name,
+				"connection": e.Connection,
+				"payload":    e.Payload,
+				"ms":         e.Ms,
+			})
+		}
+	})
 
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -86,6 +96,7 @@ func (d *Debugger) Start() {
 	d.subIds[TopicHttp] = id3
 	d.subIds[TopicMq] = id4
 	d.subIds[TopicListener] = id5
+	d.subIds[TopicJob] = id6
 }
 
 func (d *Debugger) Stop() {

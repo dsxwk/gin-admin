@@ -18,7 +18,6 @@ func init() {
 }
 
 // QueueProvider 队列服务提供者
-// 管理所有消费者的生命周期
 type QueueProvider struct {
 	consumers []queue.Consumer
 	producers []queue.Producer
@@ -38,26 +37,23 @@ func (p *QueueProvider) Register(app serviceprovider.App) {
 	flag.Infof(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
 }
 
-// Boot 启动服务(只启动消费者,生产者按需使用)
+// Boot 启动服务
 func (p *QueueProvider) Boot(app serviceprovider.App) {
 	cfg := facade.Config()
 	log := facade.Log()
-
 	if cfg == nil {
 		return
 	}
 
-	// 启动所有启用的消费者
 	for _, consumer := range p.consumers {
 		if consumer.Enabled(cfg) {
 			flag.Infof("启动消费者: %s", consumer.Name())
-			if err := consumer.Start(cfg, log); err != nil {
-				facade.Log().Error(pkg.Sprintf("启动消费者 %s 失败: %v", consumer.Name(), err))
+			if err := consumer.Start(); err != nil {
+				log.Error(pkg.Sprintf("启动消费者 %s 失败: %v", consumer.Name(), err))
 			}
 		}
 	}
 
-	// 获取所有生产者引用
 	p.producers = facade.Queue().GetAllProducers()
 }
 

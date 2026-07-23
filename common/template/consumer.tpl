@@ -3,9 +3,9 @@ package {{.Package}}
 import (
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
@@ -28,7 +28,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:        cfg.Kafka.Brokers,
+		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "{{.Topic}}",
 		GroupID:        "{{.Group}}",
 		MinBytes:       1,
@@ -80,13 +80,13 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Description() string {
 	return "{{.Description}}"
 }
 
-func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Start(cfg *config.Config, log *logger.Logger) error {
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Start() error {
 	{{- if eq .Type "kafka"}}
 	c.KafkaConsumer.Start(c)
 	{{- else}}
 	c.RabbitmqConsumer.Start(c)
 	{{- end}}
-	log.Info(pkg.Sprintf("%s消费者启动成功: %s", "{{.TypeTitle}}", c.Name()))
+	flag.Infof("%s消费者启动成功: %s", "{{.TypeTitle}}", c.Name())
 	return nil
 }
 
@@ -100,9 +100,9 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Stop() error {
 
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Enabled(cfg *config.Config) bool {
 	{{- if eq .Type "kafka"}}
-	return cfg.Kafka.Enabled
+	return cfg.Queue.Kafka.Enabled
 	{{- else}}
-	return cfg.Rabbitmq.Enabled
+	return cfg.Queue.Rabbitmq.Enabled
 	{{- end}}
 }
 

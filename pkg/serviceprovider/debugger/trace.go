@@ -12,6 +12,7 @@ type TraceData struct {
 	Http          []map[string]any `json:"Http"`
 	Mq            []map[string]any `json:"Mq"`
 	ListenerEvent []map[string]any `json:"ListenerEvent"`
+	Job           []map[string]any `json:"Job"`
 }
 
 // TraceStore 追踪存储
@@ -39,6 +40,7 @@ func (ts *TraceStore) Get(traceId string) *TraceData {
 		Http:          make([]map[string]any, 0),
 		Mq:            make([]map[string]any, 0),
 		ListenerEvent: make([]map[string]any, 0),
+		Job:           make([]map[string]any, 0),
 	}
 	ts.store[traceId] = data
 	return data
@@ -73,6 +75,7 @@ func addTraceField(traceId string, data map[string]any, fieldFn func(d *TraceDat
 			Http:          make([]map[string]any, 0),
 			Mq:            make([]map[string]any, 0),
 			ListenerEvent: make([]map[string]any, 0),
+			Job:           make([]map[string]any, 0),
 		}
 		Store.store[traceId] = d
 	}
@@ -106,4 +109,9 @@ func AddMq(traceId string, data map[string]any) {
 // AddListener 记录监听调试信息
 func AddListener(traceId string, data map[string]any) {
 	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.ListenerEvent })
+}
+
+// AddJob 记录Job调试信息
+func AddJob(traceId string, data map[string]any) {
+	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Job })
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"gin/common/ctxkey"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/debugger"
@@ -74,7 +75,7 @@ func (c *KafkaConsumer) Start(h queue.Handler) {
 		for {
 			select {
 			case <-c.ctx.Done():
-				c.Kafka.Log.Info(pkg.Sprintf("Kafka消费者 %s 已停止", c.Topic))
+				flag.Infof("[Kafka] 消费者 %s 已停止", c.Topic)
 				return
 			default:
 				c.consumeLoop(h)

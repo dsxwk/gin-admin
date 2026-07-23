@@ -12,7 +12,7 @@ import (
 // TestKafkaPublish 测试Kafka普通消息发布和消费
 func TestKafkaPublish(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Kafka.Enabled {
+	if !cfg.Queue.Kafka.Enabled {
 		t.Skip("Kafka not enabled, skipping test")
 	}
 
@@ -55,7 +55,7 @@ func TestKafkaPublish(t *testing.T) {
 // TestKafkaDelayPublish 测试Kafka延迟消息
 func TestKafkaDelayPublish(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Kafka.Enabled {
+	if !cfg.Queue.Kafka.Enabled {
 		t.Skip("Kafka not enabled, skipping test")
 	}
 
@@ -99,7 +99,7 @@ func TestKafkaDelayPublish(t *testing.T) {
 // TestKafkaConsumerStatus 测试消费者状态
 func TestKafkaConsumerStatus(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Kafka.Enabled {
+	if !cfg.Queue.Kafka.Enabled {
 		t.Skip("Kafka not enabled, skipping test")
 	}
 

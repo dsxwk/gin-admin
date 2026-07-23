@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"gin/common/ctxkey"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/debugger"
@@ -25,7 +26,7 @@ type RabbitMQ struct {
 
 // NewRabbitMQ 创建RabbitMQ连接
 func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *message.Event) (*RabbitMQ, error) {
-	conn, err := amqp091.Dial(conf.Rabbitmq.Url)
+	conn, err := amqp091.Dial(conf.Queue.Rabbitmq.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func (c *RabbitmqConsumer) Start(h queue.Handler) {
 		for {
 			select {
 			case <-c.ctx.Done():
-				c.Mq.Log.Info(pkg.Sprintf("[RabbitMq] 消费者 %s 已停止", c.Queue))
+				flag.Infof("[RabbitMq] 消费者 %s 已停止", c.Queue)
 				return
 			default:
 				c.consumeLoop(h)

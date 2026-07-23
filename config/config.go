@@ -21,8 +21,7 @@ type Config struct {
 	Log       Log       `mapstructure:"log" yaml:"log"`
 	Cache     Cache     `mapstructure:"cache" yaml:"cache"`
 	I18n      I18n      `mapstructure:"i18n" yaml:"i18n"`
-	Kafka     Kafka     `mapstructure:"kafka" yaml:"kafka"`
-	Rabbitmq  Rabbitmq  `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+	Queue     Queue     `mapstructure:"queue" yaml:"queue"`
 }
 
 var (

@@ -12,7 +12,7 @@ import (
 // TestRabbitMQPublish 测试RabbitMQ普通消息发布和消费
 func TestRabbitMQPublish(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Rabbitmq.Enabled {
+	if !cfg.Queue.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
@@ -55,7 +55,7 @@ func TestRabbitMQPublish(t *testing.T) {
 // TestRabbitMQDelayPublish 测试RabbitMQ延迟消息
 func TestRabbitMQDelayPublish(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Rabbitmq.Enabled {
+	if !cfg.Queue.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
@@ -99,7 +99,7 @@ func TestRabbitMQDelayPublish(t *testing.T) {
 // TestRabbitMQMultipleMessages 测试批量消息
 func TestRabbitMQMultipleMessages(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Rabbitmq.Enabled {
+	if !cfg.Queue.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 
@@ -140,7 +140,7 @@ func TestRabbitMQMultipleMessages(t *testing.T) {
 // TestRabbitMQConsumerStatus 测试消费者状态
 func TestRabbitMQConsumerStatus(t *testing.T) {
 	cfg := facade.Config()
-	if !cfg.Rabbitmq.Enabled {
+	if !cfg.Queue.Rabbitmq.Enabled {
 		t.Skip("RabbitMQ not enabled, skipping test")
 	}
 

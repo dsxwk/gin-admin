@@ -4,7 +4,6 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDelayDemoProducer RabbitMQ延迟生产者
@@ -28,7 +27,7 @@ func NewRabbitmqDelayDemoProducer() *RabbitmqDelayDemoProducer {
 			Exchange:     "rabbitmq_delay_demo_exchange",
 			Routing:      "rabbitmq_delay_demo",
 			IsDelayQueue: true,
-			DelayMs:      10000, // 10秒延迟
+			DelayMs:      10000,
 		},
 	}
 }
@@ -39,11 +38,4 @@ func (p *RabbitmqDelayDemoProducer) Name() string {
 
 func (p *RabbitmqDelayDemoProducer) Description() string {
 	return "rabbitmq延迟队列生产者"
-}
-
-func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Rabbitmq.Enabled {
-		queue.GetProducerRegistry().Register(NewRabbitmqDelayDemoProducer())
-	}
 }

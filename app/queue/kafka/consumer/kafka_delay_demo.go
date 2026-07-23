@@ -3,9 +3,9 @@ package consumer
 import (
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 	"time"
@@ -21,7 +21,7 @@ func NewKafkaDelayDemoConsumer() *KafkaDelayDemoConsumer {
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:        cfg.Kafka.Brokers,
+		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "kafka_delay_demo",
 		GroupID:        "kafka_delay_demo_group",
 		MinBytes:       1,
@@ -47,12 +47,12 @@ func (c *KafkaDelayDemoConsumer) Name() string {
 }
 
 func (c *KafkaDelayDemoConsumer) Description() string {
-	return "kakfa延迟队列消费者"
+	return "kafka延迟队列消费者"
 }
 
-func (c *KafkaDelayDemoConsumer) Start(cfg *config.Config, log *logger.Logger) error {
+func (c *KafkaDelayDemoConsumer) Start() error {
 	c.KafkaConsumer.Start(c)
-	log.Info(pkg.Sprintf("Kafka延迟消费者启动成功: %s", c.Name()))
+	flag.Infof("Kafka延迟消费者启动成功: %s", c.Name())
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (c *KafkaDelayDemoConsumer) Stop() error {
 }
 
 func (c *KafkaDelayDemoConsumer) Enabled(cfg *config.Config) bool {
-	return cfg.Kafka.Enabled
+	return cfg.Queue.Kafka.Enabled
 }
 
 func (c *KafkaDelayDemoConsumer) Status() queue.ConsumerStatus {
@@ -70,13 +70,5 @@ func (c *KafkaDelayDemoConsumer) Status() queue.ConsumerStatus {
 
 func (c *KafkaDelayDemoConsumer) Handle(msg string) error {
 	facade.Log().Info(pkg.Sprintf("Kafka Delay Received Msg: %s", msg))
-	// todo 处理业务逻辑
 	return nil
-}
-
-func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Kafka.Enabled {
-		queue.GetConsumerRegistry().Register(NewKafkaDelayDemoConsumer())
-	}
 }
