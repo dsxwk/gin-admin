@@ -1,4 +1,4 @@
-﻿## 中文 | [English](readme.md)
+## 中文 | [English](readme.md)
 
 - [项目简介](#项目简介)
   - [项目地址](#项目地址) 
@@ -220,26 +220,22 @@ $ ./cli demo:command --args=11
 
  SUCCESS  执行命令: demo:command --args=11
 ```
-
-# 目录结构
-```
+# 项目目录结构
+$ tree cli,app/service
 ├── app                                 # 应用程序
 │   ├── command                         # 命令
 │   ├── controller                      # 控制器
 │   ├── enum                            # 枚举
 │   ├── event                           # 事件
 │   ├── facade                          # 门面
+│   ├── job                             # 任务
 │   ├── listener                        # 监听
 │   ├── middleware                      # 中间件
 │   ├── model                           # 模型
 │   ├── provider                        # 服务提供者
-│   ├── queue                           # 消息队列
-│   ├──├── kafka                        # Kafka
-│   ├──├──├── consumer                  # 消费者
-│   ├──├──├── producer                  # 生产者
-│   ├──├── rabbitmq                     # Rabbitmq
-│   ├──├──├── consumer                  # 消费者
-│   ├──├──├── producer                  # 生产者
+│   ├── queue                           # 消息队列(Kafka/RabbitMQ/Redis)
+│   │   ├── consumer                    # 消费者
+│   │   └── producer                    # 生产者
 │   ├── request                         # 验证器
 │   ├── service                         # 服务
 ├── bootstrap                           # 初始化文件 
@@ -256,29 +252,27 @@ $ ./cli demo:command --args=11
 ├── database                            # 数据库测试文件
 ├── docs                                # 文档
 ├── pkg                                 # 工具包
-│   ├──├── cli                          # 命令行
-│   ├──├── serviceprovider              # 服务提供者相关包
-│   ├──├──├── cache                     # 缓存
-│   ├──├──├── debugger                  # 调试
-│   ├──├──├── eventbus                  # 事件
-│   ├──├──├── http                      # http请求
-│   ├──├──├── lang                      # 多语言
-│   ├──├──├── logger                    # 日志
-│   ├──├──├── message                   # 消息事件
-│   ├──├──├── orm                       # orm工具
-│   ├──├──├── queue                     # 队列
-│   ├──├──├── ratelimit                 # 限流
-│   ├──├──├── request                   # 请求
-│   ├──├──├── queue                     # 队列
-│   ├──├── time                         # 时间处理
-├── public                              # 静态资源
+│   ├── cli                             # 命令行
+│   ├── serviceprovider                 # 服务提供者相关包
+│       ├── cache                       # 缓存
+│       ├── debugger                    # 调试器
+│       ├── eventbus                    # 事件总线
+│       ├── http                        # http请求
+│       ├── lang                        # 语言包
+│       ├── logger                      # 日志
+│       ├── message                     # 消息事件
+│       ├── orm                         # orm工具
+│       ├── queue                       # 队列
+│       ├── ratelimit                   # 限流
+│       ├── request                     # 请求
+├── public                              # 静态资源目录
 ├── router                              # 路由
 ├── storage                             # 存储
 │   ├── cache                           # 磁盘缓存
 │   ├── logs                            # 日志
 │   ├── locales                         # 翻译文件
-│   ├──├── en                           # 英文翻译
-│   ├──├── zh                           # 中文翻译
+│       ├── en                           # 英文翻译
+│       ├── zh                           # 中文翻译
 ├── tests                               # 测试用例
 ├── tmp                                 # 临时文件
 ├── vendor                              # 依赖包
@@ -294,6 +288,7 @@ $ ./cli demo:command --args=11
 ├── readme_zh.md                        # 中文文档
 ├── version_history.md                  # 版本记录英文文档
 └── version_history_zh.md               # 版本记录中文文档
+```
 ```
 
 # 启动服务
@@ -391,7 +386,7 @@ make:
   make:model       模型创建
   make:model-old   模型创建old
   make:provider    创建服务提供者
-  make:queue       创建消息队列(Kafka/RabbitMQ)
+  make:queue       创建消息队列(Kafka/RabbitMQ/Redis)
   make:request     验证请求创建
   make:router      路由创建
   make:seed        生成数据库seeder模板
@@ -481,7 +476,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:provider"
     },
     {
-      "description": "创建消息队列(Kafka/RabbitMQ)",
+      "description": "创建消息队列(Kafka/RabbitMQ/Redis)",
       "name": "make:queue"
     },
     {
@@ -2039,7 +2034,8 @@ func init() {
 ```
 
 # 队列
-> 执行队列创建命令会根据队列类型同时创建消费者和生产者, 如: kafka会创建kafka消费者和生产者, rabbitmq会创建rabbitmq消费者和生产者. 你只需要完善消费者当中`Handle`方法完善你的业务逻辑即可, 支持自动错误重试以及延迟队列.
+> 执行队列创建命令会根据连接类型(kafka/rabbitmq/redis)同时创建消费者和生产者. 你只需要实现`Handle`方法完善业务逻辑即可, 支持自动错误重试以及延迟队列.
+
 ## 队列创建帮助
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
@@ -2055,163 +2051,162 @@ Usage:
   cli [command] [options]
 
 Command:
-  make:queue  消息队列创建
+  make:queue  消息队列创建(Kafka/RabbitMQ/Redis)
 
 Options:
-  -t, --type      队列类型, 如: kafka或rabbitmq  required:true
-  -n, --name      队列文件名称, 如: order_create  required:true
-  -d, --isDelay   是否延迟队列, 如: true或false   required:false
-  -T, --topic     队列主题, 如: kafka_demo       required:false
-  -k, --key       消息键, 如: kafka_demo         required:false
-  -g, --group     消费组, 如: kafka_demo         required:false
-  -q, --queue     队列名, 如: rabbitmq_demo      required:false
-  -e, --exchange  交换机, 如: rabbitmq_demo      required:false
-  -r, --routing   路由键, 如: rabbitmq_demo      required:false
-  -R, --retry     错误重试次数, 如: 3             required:false
-  -m, --delayMs   延迟毫秒, 如: 10000            required:false
+  -n, --name        队列名称, 如: order        required:true
+  -c, --connection  连接类型: kafka, rabbitmq, redis(默认取配置)
+  -d, --delay       是否延迟队列: true/false
+  -D, --desc        队列描述
 ```
+
+> `topic`, `key`, `group`, `queue`, `exchange`, `routing` 会根据`name`自动生成. `retry`默认为3, `delayMs`默认为0.
 
 ## 队列创建
+
+### Kafka
 ```bash
-$ go run ./cmd/cli.go make:queue --type=rabbitmq --name=rabbitmq_demo --queue=rabbitmq_demo --exchange=rabbitmq_demo --routing=rabbitmq_demo 
+$ go run ./cmd/cli.go make:queue --connection=kafka --name=kafka_demo
+```
+生成文件: `app/queue/consumer/kafka_demo.go`, `app/queue/producer/kafka_demo.go`
+
+### RabbitMQ
+```bash
+$ go run ./cmd/cli.go make:queue --connection=rabbitmq --name=rabbitmq_demo
 ```
 
+### Redis
+```bash
+$ go run ./cmd/cli.go make:queue --connection=redis --name=redis_demo
+```
+
+### 延迟队列
+```bash
+$ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=true
+```
+
+### 生成的消费者示例(Kafka)
 ```go
 package consumer
 
 import (
-  "gin/app/facade"
-  "gin/common/base"
-  "gin/common/flag"
-  "gin/config"
-  "gin/pkg"
-  "gin/pkg/logger"
-  "gin/pkg/queue"
+    "gin/app/facade"
+    "gin/common/base"
+    "gin/common/flag"
+    "gin/config"
+    "gin/pkg"
+    "gin/pkg/serviceprovider/queue"
+    "github.com/segmentio/kafka-go"
+    "time"
 )
 
-// RabbitmqDemoConsumer RabbitMQ普通消费者
-type RabbitmqDemoConsumer struct {
-  *base.RabbitmqConsumer
+// KafkaDemoConsumer Kafka消费者
+type KafkaDemoConsumer struct {
+    *base.KafkaConsumer
 }
 
-// NewRabbitmqDemoConsumer 创建消费者实例
-func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
-  cfg := facade.Config()
-  log := facade.Log()
-  bus := facade.Message()
+// KafkaDemoPayload 消息体
+type KafkaDemoPayload struct {
+    Name string `json:"name"`
+}
 
-  // 创建RabbitMQ连接
-  mq, err := base.NewRabbitMQ(cfg, log, bus)
-  if err != nil {
-    log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+func NewKafkaDemoConsumer() *KafkaDemoConsumer {
+    cfg := facade.Config()
+    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+    kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
+        Brokers:        cfg.Queue.Kafka.Brokers,
+        Topic:          "kafka_demo",
+        GroupID:        "kafka_demo_group",
+        MinBytes:       1,
+        MaxBytes:       10e6,
+        StartOffset:    kafka.LastOffset,
+        CommitInterval: 0,
+        MaxWait:        5 * time.Second,
+    })
+    return &KafkaDemoConsumer{
+        KafkaConsumer: &base.KafkaConsumer{
+            Kafka: kfk,
+            Topic: "kafka_demo",
+            Group: "kafka_demo_group",
+        },
+    }
+}
+
+func (c *KafkaDemoConsumer) Handle(payload any) error {
+    data := payload.(*KafkaDemoPayload)
+    facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
+    // todo 处理业务逻辑
     return nil
-  }
-
-  return &RabbitmqDemoConsumer{
-    RabbitmqConsumer: &base.RabbitmqConsumer{
-      Mq:           mq,
-      Queue:        "rabbitmq_demo",
-      Exchange:     "rabbitmq_demo_exchange",
-      Routing:      "rabbitmq_demo",
-      IsDelayQueue: false,
-      Retry:        3,
-    },
-  }
 }
 
-// Name 消费者名称
-func (c *RabbitmqDemoConsumer) Name() string {
-  return "rabbitmq_demo"
-}
-
-// Start 启动消费者
-func (c *RabbitmqDemoConsumer) Start() error {
-  c.RabbitmqConsumer.Start(c)
-  flag.Infof("RabbitMQ消费者启动成功: %s", c.Name())
-  return nil
-}
-
-// Stop 停止消费者
-func (c *RabbitmqDemoConsumer) Stop() error {
-  return c.RabbitmqConsumer.Stop()
-}
-
-// Enabled 是否启用
-func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
-  return cfg.Rabbitmq.Enabled
-}
-
-// Status 消费者状态
-func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
-  return c.RabbitmqConsumer.Status()
-}
-
-// Handle 处理消息的业务逻辑
-func (c *RabbitmqDemoConsumer) Handle(msg string) error {
-  facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
-  // todo 处理业务逻辑
-  return nil
-}
-
-// init 注册消费者到注册表
 func init() {
-  queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
+    cfg := facade.Config()
+    if cfg != nil && cfg.Queue.Kafka.Enabled {
+        if c := NewKafkaDemoConsumer(); c != nil {
+            queue.GetConsumerRegistry().Register(c)
+        }
+    }
 }
 ```
+
+### 生成的生产者示例(Kafka)
 ```go
 package producer
 
 import (
-  "gin/app/facade"
-  "gin/common/base"
-  "gin/pkg"
-  "gin/pkg/queue"
+    "context"
+    "gin/app/facade"
+    "gin/common/base"
+    "gin/pkg/serviceprovider/queue"
+    "github.com/segmentio/kafka-go"
 )
 
-// RabbitmqDemoProducer RabbitMQ普通生产者
-type RabbitmqDemoProducer struct {
-  *base.RabbitmqProducer
+type KafkaDemoProducer struct {
+    *base.KafkaProducer
 }
 
-// NewRabbitmqDemoProducer 创建生产者实例
-func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
-  cfg := facade.Config()
-  log := facade.Log()
-  bus := facade.Message()
-
-  mq, err := base.NewRabbitMQ(cfg, log, bus)
-  if err != nil {
-    log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
-    return nil
-  }
-
-  return &RabbitmqDemoProducer{
-    RabbitmqProducer: &base.RabbitmqProducer{
-      Mq:           mq,
-      Queue:        "rabbitmq_demo",
-      Exchange:     "rabbitmq_demo_exchange",
-      Routing:      "rabbitmq_demo",
-      IsDelayQueue: false,
-    },
-  }
+func NewKafkaDemoProducer() *KafkaDemoProducer {
+    cfg := facade.Config()
+    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+    kfk.Writer = &kafka.Writer{
+        Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
+        Topic:        "kafka_demo",
+        Balancer:     &kafka.LeastBytes{},
+        RequiredAcks: kafka.RequireAll,
+    }
+    p := &KafkaDemoProducer{
+        KafkaProducer: &base.KafkaProducer{
+            Kafka: kfk,
+            Topic: "kafka_demo",
+            Key:   "kafka_demo_key",
+        },
+    }
+    p.KafkaProducer.Owner = p
+    return p
 }
 
-func (p *RabbitmqDemoProducer) Name() string {
-  return "rabbitmq_demo"
+func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
+    return p.KafkaProducer.Publish(ctx, msg)
 }
 
 func init() {
-  queue.GetProducerRegistry().Register(NewRabbitmqDemoProducer())
+    cfg := facade.Config()
+    if cfg != nil && cfg.Queue.Kafka.Enabled {
+        if p := NewKafkaDemoProducer(); p != nil {
+            queue.GetProducerRegistry().Register(p)
+        }
+    }
 }
 ```
 
 ## 队列使用
-> 消费者启动项目时自动注册在容器中无限额外启动,生产者直接使用门面初始化即可使用。
+> 消费者启动项目时自动注册在容器中, 生产者直接使用门面配合结构体Payload即可.
 ```go
 package controller
 
 import (
     "gin/app/facade"
+    "gin/app/queue/consumer"
     "gin/common/base"
 )
 
@@ -2219,10 +2214,18 @@ type TestController struct {
     base.BaseController
 }
 
-func (s *TestController) Test() {
-    // 获取生产者
-    producer := facade.Queue().Producer("rabbitmq_demo")
-	_ = producer.Publish(ctx, []byte(`{"orderId":111, "message":"message 111"}`))
+func (s *TestController) Test(ctx context.Context) {
+    // Kafka
+    _ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
+    _ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
+
+    // RabbitMQ
+    _ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, consumer.RabbitmqDemoPayload{Name: "test111"})
+    _ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, consumer.RabbitmqDelayDemoPayload{Name: "test222"})
+
+    // Redis
+    _ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
+    _ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
 }
 ```
 
@@ -2230,30 +2233,34 @@ func (s *TestController) Test() {
 ```bash
 $ go run ./cmd/cli.go consumer:list
 
-┌────────────────────────────────────────────────────────────┐
-│ 消费者名称             描述                                  │
-├────────────────────────────────────────────────────────────┤
-│ kafka_delay_demo       kakfa延迟队列消费者                   │
-│ kafka_demo             kakfa普通队列消费者                   │
-│ rabbitmq_delay_demo    rabbitmq延迟队列消费者                │
-│ rabbitmq_demo          rabbitmq普通队列消费者                │
-└────────────────────────────────────────────────────────────┘
-总计 4 个消费者
+┌──────────────────────────────────────────────────────────────────┐
+│ 消费者名称           连接      延迟队列  描述                    │
+├──────────────────────────────────────────────────────────────────┤
+│ kafka_delay_demo     kafka     true     kafka延迟队列消费者      │
+│ kafka_demo           kafka     false    kafka普通队列消费者      │
+│ rabbitmq_delay_demo  rabbitmq  true     rabbitmq延迟队列消费者   │
+│ rabbitmq_demo        rabbitmq  false    rabbitmq普通队列消费者   │
+│ redis_delay_demo     redis     true     redis延迟队列消费者      │
+│ redis_demo           redis     false    redis普通队列消费者      │
+└──────────────────────────────────────────────────────────────────┘
+总计 6 个消费者
 ```
 
 ## 生产者列表
 ```bash
 $ go run ./cmd/cli.go producer:list
 
-┌────────────────────────────────────────────────────────────┐
-│ 生产者名称               描述                                │
-├────────────────────────────────────────────────────────────┤
-│ kafka_delay_demo       kafka延迟队列生产者                   │
-│ kafka_demo             kafka普通队列生产者                   │
-│ rabbitmq_delay_demo    rabbitmq延迟队列生产者                │
-│ rabbitmq_demo          rabbitmq普通队列生产者                │
-└────────────────────────────────────────────────────────────┘
-总计 4 个生产者
+┌───────────────────────────────────────────────────────────────────────┐
+│ 生产者名称           连接      延迟队列  延迟(ms)  描述                    │
+├──────────────────────────────────────────────────────────────────────┤
+│ kafka_delay_demo     kafka     true     0ms      kafka延迟队列生产者    │
+│ kafka_demo           kafka     false    0ms      kafka普通队列生产者    │
+│ rabbitmq_delay_demo  rabbitmq  true     0ms      rabbitmq延迟队列生产者 │
+│ rabbitmq_demo        rabbitmq  false    0ms      rabbitmq普通队列生产者 │
+│ redis_delay_demo     redis     true     0ms      redis延迟队列生产者    │
+│ redis_demo           redis     false    0ms      redis普通队列生产者    │
+└───────────────────────────────────────────────────────────────────────┘
+总计 6 个生产者
 ```
 
 ## Job

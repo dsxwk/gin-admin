@@ -5,6 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/job"
 	"gin/app/model"
+	"gin/app/queue/consumer"
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
@@ -169,10 +170,12 @@ func (s *LoginController) Test(c *gin.Context) {
 	containsDesc2 := userEnum.Gender().ContainsDesc("男")
 	length2 := userEnum.Gender().Len()
 
-	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, []byte(`{"name":"kafka_test111"}`))
-	_ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, []byte(`{"name":"kafka_test222"}`))
-	_ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, []byte(`{"name":"test111"}`))
-	_ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, []byte(`{"name":"test222"}`))
+	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
+	_ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
+	_ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, consumer.RabbitmqDemoPayload{Name: "test111"})
+	_ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, consumer.RabbitmqDelayDemoPayload{Name: "test222"})
+	_ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
+	_ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
 	_ = facade.Job().Dispatch(ctx, "send_email", job.SendEmail{
 		To:      "a@b.com",
 		Subject: "你好",

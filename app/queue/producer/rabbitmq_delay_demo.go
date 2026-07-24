@@ -21,21 +21,28 @@ func NewRabbitmqDelayDemoProducer() *RabbitmqDelayDemoProducer {
 		return nil
 	}
 
-	return &RabbitmqDelayDemoProducer{
+	p := &RabbitmqDelayDemoProducer{
 		RabbitmqProducer: &base.RabbitmqProducer{
-			Mq:           mq,
-			Queue:        "rabbitmq_delay_demo",
-			Exchange:     "rabbitmq_delay_demo_exchange",
-			Routing:      "rabbitmq_delay_demo",
-			IsDelayQueue: true,
-			DelayMs:      10000,
+			Mq:       mq,
+			Queue:    "rabbitmq_delay_demo",
+			Exchange: "rabbitmq_delay_demo_exchange",
+			Routing:  "rabbitmq_delay_demo",
 		},
 	}
+
+	p.RabbitmqProducer.Owner = p
+	return p
 }
 
 func (p *RabbitmqDelayDemoProducer) Name() string {
 	return "rabbitmq_delay_demo"
 }
+
+func (p *RabbitmqDelayDemoProducer) Connection() string { return "rabbitmq" }
+
+func (p *RabbitmqDelayDemoProducer) IsDelay() bool { return true }
+
+func (p *RabbitmqDelayDemoProducer) DelayMs() int64 { return 10000 }
 
 func (p *RabbitmqDelayDemoProducer) Description() string {
 	return "rabbitmq延迟队列生产者"

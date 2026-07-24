@@ -14,7 +14,27 @@ type RabbitmqDelayDemoConsumer struct {
 	*base.RabbitmqConsumer
 }
 
-// NewRabbitmqDelayDemoConsumer 创建延迟消费者实例
+// RabbitmqDelayDemoPayload 延迟消息体
+type RabbitmqDelayDemoPayload struct {
+	Name string `json:"name"`
+}
+
+func (c *RabbitmqDelayDemoConsumer) NewPayload() any {
+	return &RabbitmqDelayDemoPayload{}
+}
+
+func (c *RabbitmqDelayDemoConsumer) Connection() string { return "rabbitmq" }
+
+func (c *RabbitmqDelayDemoConsumer) Retry() int { return 3 }
+
+func (c *RabbitmqDelayDemoConsumer) IsDelay() bool { return true }
+
+func (c *RabbitmqDelayDemoConsumer) Handle(payload any) error {
+	data := payload.(*RabbitmqDelayDemoPayload)
+	facade.Log().Info(pkg.Sprintf("RabbitMq Delay Received Msg: name=%s", data.Name))
+	return nil
+}
+
 func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
 	log := facade.Log()
 	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
@@ -25,12 +45,10 @@ func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
 
 	return &RabbitmqDelayDemoConsumer{
 		RabbitmqConsumer: &base.RabbitmqConsumer{
-			Mq:           mq,
-			Queue:        "rabbitmq_delay_demo",
-			Exchange:     "rabbitmq_delay_demo_exchange",
-			Routing:      "rabbitmq_delay_demo",
-			IsDelayQueue: true,
-			Retry:        3,
+			Mq:       mq,
+			Queue:    "rabbitmq_delay_demo",
+			Exchange: "rabbitmq_delay_demo_exchange",
+			Routing:  "rabbitmq_delay_demo",
 		},
 	}
 }
@@ -59,11 +77,6 @@ func (c *RabbitmqDelayDemoConsumer) Enabled(cfg *config.Config) bool {
 
 func (c *RabbitmqDelayDemoConsumer) Status() queue.ConsumerStatus {
 	return c.RabbitmqConsumer.Status()
-}
-
-func (c *RabbitmqDelayDemoConsumer) Handle(msg string) error {
-	facade.Log().Info(pkg.Sprintf("RabbitMq Delay Received Msg: %s", msg))
-	return nil
 }
 
 func init() {

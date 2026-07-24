@@ -13,13 +13,19 @@ import (
 	{{- end}}
 )
 
-// {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {{.Type}}消费者
+// {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {{.TypeTitle}}消费者
 type {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer struct {
 	{{- if eq .Type "kafka"}}
 	*base.KafkaConsumer
-	{{- else}}
+	{{- else if eq .Type "rabbitmq"}}
 	*base.RabbitmqConsumer
+	{{- else}}
+	*base.RedisConsumer
 	{{- end}}
+}
+
+// {{.TypeTitle}}{{.Name}}Payload 消息体
+type {{.TypeTitle}}{{.Name}}Payload struct {
 }
 
 // New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer 创建消费者实例
@@ -40,14 +46,12 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 
 	return &{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{
 		KafkaConsumer: &base.KafkaConsumer{
-			Kafka:        kfk,
-			Topic:        "{{.Topic}}",
-			Group:        "{{.Group}}",
-			Retry:        {{.Retry}},
-			IsDelayQueue: {{.IsDelay}},
+			Kafka: kfk,
+			Topic: "{{.Topic}}",
+			Group: "{{.Group}}",
 		},
 	}
-	{{- else}}
+	{{- else if eq .Type "rabbitmq"}}
 	log := facade.Log()
 	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
 	if err != nil {
@@ -57,12 +61,16 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 
 	return &{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{
 		RabbitmqConsumer: &base.RabbitmqConsumer{
-			Mq:           mq,
-			Queue:        "{{.Queue}}",
-			Exchange:     "{{.Exchange}}",
-			Routing:      "{{.Routing}}",
-			IsDelayQueue: {{.IsDelay}},
-			Retry:        {{.Retry}},
+			Mq:      mq,
+			Queue:   "{{.Queue}}",
+			Exchange: "{{.Exchange}}",
+			Routing: "{{.Routing}}",
+		},
+	}
+	{{- else}}
+	return &{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{
+		RedisConsumer: &base.RedisConsumer{
+			Queue: "{{.Queue}}",
 		},
 	}
 	{{- end}}
@@ -80,49 +88,83 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Description() string {
 	return "{{.Description}}"
 }
 
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Connection() string {
+	return "{{.Type}}"
+}
+
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Retry() int { return {{.Retry}} }
+
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) IsDelay() bool { return {{.IsDelay}} }
+
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Start() error {
 	{{- if eq .Type "kafka"}}
 	c.KafkaConsumer.Start(c)
-	{{- else}}
+	{{- else if eq .Type "rabbitmq"}}
 	c.RabbitmqConsumer.Start(c)
+	{{- else}}
+	c.RedisConsumer.Start(c)
 	{{- end}}
-	flag.Infof("%s消费者启动成功: %s", "{{.TypeTitle}}", c.Name())
+	flag.Infof("{{.TypeTitle}}消费者启动成功: %s", c.Name())
 	return nil
 }
 
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Stop() error {
 	{{- if eq .Type "kafka"}}
 	return c.KafkaConsumer.Stop()
-	{{- else}}
+	{{- else if eq .Type "rabbitmq"}}
 	return c.RabbitmqConsumer.Stop()
+	{{- else}}
+	return c.RedisConsumer.Stop()
 	{{- end}}
 }
 
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Enabled(cfg *config.Config) bool {
 	{{- if eq .Type "kafka"}}
 	return cfg.Queue.Kafka.Enabled
-	{{- else}}
+	{{- else if eq .Type "rabbitmq"}}
 	return cfg.Queue.Rabbitmq.Enabled
+	{{- else}}
+	return true
 	{{- end}}
 }
 
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Status() queue.ConsumerStatus {
 	{{- if eq .Type "kafka"}}
 	return c.KafkaConsumer.Status()
-	{{- else}}
+	{{- else if eq .Type "rabbitmq"}}
 	return c.RabbitmqConsumer.Status()
+	{{- else}}
+	return c.RedisConsumer.Status()
 	{{- end}}
 }
 
-func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(msg string) error {
-	facade.Log().Info(pkg.Sprintf("%s Received Msg: %s", "{{.TypeTitle}}", msg))
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) NewPayload() any {
+	return &{{.TypeTitle}}{{.Name}}Payload{}
+}
+
+func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(payload any) error {
+	data := payload.(*{{.TypeTitle}}{{.Name}}Payload)
+	facade.Log().Info(pkg.Sprintf("{{.TypeTitle}} Received Msg: %v", data))
 	// todo 处理业务逻辑
 	return nil
 }
 
 func init() {
-    cfg := facade.Config()
-	if cfg != nil && cfg.{{if eq .Type "kafka"}}Kafka{{else}}Rabbitmq{{end}}.Enabled {
-	    queue.GetConsumerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
+	{{- if eq .Type "kafka"}}
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if c := New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer(); c != nil {
+			queue.GetConsumerRegistry().Register(c)
+		}
 	}
+	{{- else if eq .Type "rabbitmq"}}
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
+		if c := New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer(); c != nil {
+			queue.GetConsumerRegistry().Register(c)
+		}
+	}
+	{{- else}}
+	queue.GetConsumerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
+	{{- end}}
 }

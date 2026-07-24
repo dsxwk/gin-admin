@@ -10,18 +10,18 @@ import (
 	"time"
 )
 
+const (
+	JobRabbitmqQueue    = "job"
+	JobRabbitmqExchange = "job_exchange"
+	JobRabbitmqRouting  = "job"
+)
+
 // RabbitmqWorker RabbitMQ任务消费者
 type RabbitmqWorker struct {
 	conn    *amqp091.Connection
 	channel *amqp091.Channel
 	stopCh  chan struct{}
 }
-
-const (
-	JobRabbitmqQueue    = "job"
-	JobRabbitmqExchange = "job_exchange"
-	JobRabbitmqRouting  = "job"
-)
 
 func NewRabbitmqWorker() *RabbitmqWorker {
 	cfg := facade.Config()
@@ -83,6 +83,7 @@ func (w *RabbitmqWorker) Stop() error {
 	return nil
 }
 
+// handleMessage 处理消息(延迟已由RabbitMQ TTL+DLX机制在exchange层处理)
 func (w *RabbitmqWorker) handleMessage(msg amqp091.Delivery) {
 	var jm JobMessage
 	if err := json.Unmarshal(msg.Body, &jm); err != nil {
@@ -95,13 +96,6 @@ func (w *RabbitmqWorker) handleMessage(msg amqp091.Delivery) {
 		facade.Log().Error(pkg.Sprintf("Job [%s] 未注册", jm.JobName))
 		_ = msg.Ack(false)
 		return
-	}
-
-	if jm.RunAt > 0 {
-		now := time.Now().UnixMilli()
-		if jm.RunAt > now {
-			time.Sleep(time.Millisecond * time.Duration(jm.RunAt-now))
-		}
 	}
 
 	payload := j.NewPayload()

@@ -23,18 +23,27 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 		RequiredAcks: kafka.RequireAll,
 	}
 
-	return &KafkaDemoProducer{
+	p := &KafkaDemoProducer{
 		KafkaProducer: &base.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Key:   "kafka_demo_key",
 		},
 	}
+
+	p.KafkaProducer.Owner = p
+	return p
 }
 
 func (p *KafkaDemoProducer) Name() string {
 	return "kafka_demo"
 }
+
+func (p *KafkaDemoProducer) Connection() string { return "kafka" }
+
+func (p *KafkaDemoProducer) IsDelay() bool { return false }
+
+func (p *KafkaDemoProducer) DelayMs() int64 { return 0 }
 
 func (p *KafkaDemoProducer) Description() string {
 	return "kafka普通队列生产者"

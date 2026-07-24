@@ -9,18 +9,20 @@ import (
 	"gin/pkg/serviceprovider/job"
 	"github.com/goccy/go-json"
 	"github.com/segmentio/kafka-go"
+	"sync"
 	"time"
 )
 
-// KafkaWorker Kafka任务消费者
-type KafkaWorker struct {
-	reader *kafka.Reader
-	ctx    context.Context
-	cancel context.CancelFunc
-}
-
 const JobKafkaTopic = "job"
 const JobKafkaGroup = "job_group"
+const kafkaWorkerPoolSize = 3
+
+// KafkaWorker Kafka任务消费者(worker pool模式,消费和延迟处理分离)
+type KafkaWorker struct {
+	reader *kafka.Reader
+	ctx    context.CancelFunc
+	wg     sync.WaitGroup
+}
 
 // NewKafkaWorker 创建KafkaWorker
 func NewKafkaWorker() *KafkaWorker {
@@ -43,62 +45,105 @@ func NewKafkaWorker() *KafkaWorker {
 	return &KafkaWorker{reader: reader}
 }
 
+// Start 启动消费者(消费goroutine + worker pool)
 func (w *KafkaWorker) Start() error {
-	w.ctx, w.cancel = context.WithCancel(context.Background())
+	baseCtx, cancel := context.WithCancel(context.Background())
+	w.ctx = cancel
+
+	msgCh := make(chan kafka.Message, 10)
+
+	// 启动worker pool, 处理业务(允许time.Sleep延迟不阻塞消费)
+	for i := 0; i < kafkaWorkerPoolSize; i++ {
+		w.wg.Add(1)
+		go w.processWorker(baseCtx, msgCh)
+	}
+
+	// 启动消费goroutine, 只负责拉取消息
+	w.wg.Add(1)
 	go func() {
+		defer w.wg.Done()
+		defer close(msgCh)
 		flag.Infof("Job Kafka Worker 已启动")
 		defer flag.Infof("Job Kafka Worker 已停止")
 		for {
-			select {
-			case <-w.ctx.Done():
+			msg, err := w.reader.FetchMessage(baseCtx)
+			if err != nil {
+				if !errors.Is(err, context.Canceled) {
+					time.Sleep(time.Second)
+					continue
+				}
 				return
-			default:
-				w.consume()
+			}
+			select {
+			case <-baseCtx.Done():
+				return
+			case msgCh <- msg:
 			}
 		}
 	}()
+
 	return nil
 }
 
+// Stop 停止消费者
 func (w *KafkaWorker) Stop() error {
-	if w.cancel != nil {
-		w.cancel()
+	if w.ctx != nil {
+		w.ctx()
 	}
+	w.wg.Wait()
 	if w.reader != nil {
 		return w.reader.Close()
 	}
 	return nil
 }
 
-func (w *KafkaWorker) consume() {
-	msg, err := w.reader.FetchMessage(w.ctx)
-	if err != nil {
-		if !errors.Is(err, context.Canceled) {
-			time.Sleep(time.Second)
+// processWorker worker池, 处理消息(延迟通过time.Sleep实现)
+func (w *KafkaWorker) processWorker(ctx context.Context, msgCh <-chan kafka.Message) {
+	defer w.wg.Done()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case msg, ok := <-msgCh:
+			if !ok {
+				return
+			}
+			var jm JobMessage
+			if err := json.Unmarshal(msg.Value, &jm); err != nil {
+				facade.Log().Error(pkg.Sprintf("Kafka Job 消息解析失败: %v", err))
+				w.commit(ctx, msg)
+				continue
+			}
+			w.handleMessage(ctx, jm)
+			w.commit(ctx, msg)
 		}
-		return
 	}
-	var jm JobMessage
-	if err = json.Unmarshal(msg.Value, &jm); err != nil {
-		facade.Log().Error(pkg.Sprintf("Kafka Job 消息解析失败: %v", err))
-		return
-	}
-	w.handleMessage(jm)
-	_ = w.reader.CommitMessages(w.ctx, msg)
 }
 
-func (w *KafkaWorker) handleMessage(msg JobMessage) {
+// commit 提交消息偏移
+func (w *KafkaWorker) commit(ctx context.Context, msg kafka.Message) {
+	if err := w.reader.CommitMessages(ctx, msg); err != nil {
+		facade.Log().Error(pkg.Sprintf("Kafka Job Commit失败: %v", err))
+	}
+}
+
+// handleMessage 处理消息(延迟在worker池内执行,不阻塞消费)
+func (w *KafkaWorker) handleMessage(ctx context.Context, msg JobMessage) {
 	j := job.Get(msg.JobName)
 	if j == nil {
 		facade.Log().Error(pkg.Sprintf("Job [%s] 未注册", msg.JobName))
 		return
 	}
 
-	// 延迟执行
+	// 延迟执行(Kafka无原生延迟, worker池内time.Sleep不阻塞其他消息消费)
 	if msg.RunAt > 0 {
 		now := time.Now().UnixMilli()
 		if msg.RunAt > now {
-			time.Sleep(time.Millisecond * time.Duration(msg.RunAt-now))
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(time.Millisecond * time.Duration(msg.RunAt-now)):
+			}
 		}
 	}
 
@@ -118,7 +163,11 @@ func (w *KafkaWorker) handleMessage(msg JobMessage) {
 		}
 		facade.Log().Error(pkg.Sprintf("Job [%s] 处理失败(attempt %d/%d): %v", msg.JobName, attempt+1, retry, err))
 		if delay > 0 {
-			time.Sleep(time.Millisecond * time.Duration(delay))
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(time.Millisecond * time.Duration(delay)):
+			}
 		}
 	}
 }

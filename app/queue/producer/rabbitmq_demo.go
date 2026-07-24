@@ -21,20 +21,28 @@ func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
 		return nil
 	}
 
-	return &RabbitmqDemoProducer{
+	p := &RabbitmqDemoProducer{
 		RabbitmqProducer: &base.RabbitmqProducer{
-			Mq:           mq,
-			Queue:        "rabbitmq_demo",
-			Exchange:     "rabbitmq_demo_exchange",
-			Routing:      "rabbitmq_demo",
-			IsDelayQueue: false,
+			Mq:       mq,
+			Queue:    "rabbitmq_demo",
+			Exchange: "rabbitmq_demo_exchange",
+			Routing:  "rabbitmq_demo",
 		},
 	}
+
+	p.RabbitmqProducer.Owner = p
+	return p
 }
 
 func (p *RabbitmqDemoProducer) Name() string {
 	return "rabbitmq_demo"
 }
+
+func (p *RabbitmqDemoProducer) Connection() string { return "rabbitmq" }
+
+func (p *RabbitmqDemoProducer) IsDelay() bool { return false }
+
+func (p *RabbitmqDemoProducer) DelayMs() int64 { return 0 }
 
 func (p *RabbitmqDemoProducer) Description() string {
 	return "rabbitmq普通队列生产者"

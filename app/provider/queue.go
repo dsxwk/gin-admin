@@ -3,10 +3,8 @@ package provider
 import (
 	"context"
 	"gin/app/facade"
-	_ "gin/app/queue/kafka/consumer"
-	_ "gin/app/queue/kafka/producer"
-	_ "gin/app/queue/rabbitmq/consumer"
-	_ "gin/app/queue/rabbitmq/producer"
+	_ "gin/app/queue/consumer"
+	_ "gin/app/queue/producer"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/serviceprovider"

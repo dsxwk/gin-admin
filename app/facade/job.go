@@ -19,6 +19,8 @@ const JobKafkaTopic = "job"
 const JobRabbitmqQueue = "job"
 const JobRabbitmqExchange = "job_exchange"
 const JobRabbitmqRouting = "job"
+const JobRabbitmqDelayExchange = "job_delay_exchange"
+const JobRabbitmqDelayQueue = "job_delay_queue"
 
 var (
 	jobOnce   sync.Once
@@ -61,6 +63,13 @@ func (j *JobFacade) initConnections() {
 					_ = ch.ExchangeDeclare(JobRabbitmqExchange, "direct", true, false, false, false, nil)
 					_, _ = ch.QueueDeclare(JobRabbitmqQueue, true, false, false, false, nil)
 					_ = ch.QueueBind(JobRabbitmqQueue, JobRabbitmqRouting, JobRabbitmqExchange, false, nil)
+					// 延迟队列: 使用DLX模式, 消息到期后自动路由到普通队列
+					_ = ch.ExchangeDeclare(JobRabbitmqDelayExchange, "direct", true, false, false, false, nil)
+					_, _ = ch.QueueDeclare(JobRabbitmqDelayQueue, true, false, false, false, amqp091.Table{
+						"x-dead-letter-exchange":    JobRabbitmqExchange,
+						"x-dead-letter-routing-key": JobRabbitmqRouting,
+					})
+					_ = ch.QueueBind(JobRabbitmqDelayQueue, JobRabbitmqRouting, JobRabbitmqDelayExchange, false, nil)
 					j.rabbitmqConn = conn
 					j.rabbitmqCh = ch
 				}
@@ -196,7 +205,27 @@ func (j *JobFacade) dispatchRabbitmq(ctx context.Context, jobName string, payloa
 	if j.rabbitmqCh == nil {
 		return fmt.Errorf("rabbitmq channel 未初始化")
 	}
-	msg := buildJobMessage(jobName, payloadBytes, delayMs)
+	// 延迟消息: 发送到延迟exchange, 通过TTL+DLX自动到期后路由到普通队列
+	if delayMs > 0 {
+		msg := buildJobMessage(jobName, payloadBytes, 0)
+		msgBytes, err := json.Marshal(msg)
+		if err != nil {
+			return err
+		}
+		return j.rabbitmqCh.Publish(
+			JobRabbitmqDelayExchange,
+			JobRabbitmqRouting,
+			false,
+			false,
+			amqp091.Publishing{
+				ContentType: "application/json",
+				Body:        msgBytes,
+				Expiration:  fmt.Sprintf("%d", delayMs),
+			},
+		)
+	}
+	// 普通消息: 直接发送到普通exchange
+	msg := buildJobMessage(jobName, payloadBytes, 0)
 	msgBytes, err := json.Marshal(msg)
 	if err != nil {
 		return err

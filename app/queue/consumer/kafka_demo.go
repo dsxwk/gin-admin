@@ -16,7 +16,27 @@ type KafkaDemoConsumer struct {
 	*base.KafkaConsumer
 }
 
-// NewKafkaDemoConsumer 创建消费者实例
+// KafkaDemoPayload 消息体
+type KafkaDemoPayload struct {
+	Name string `json:"name"`
+}
+
+func (c *KafkaDemoConsumer) NewPayload() any {
+	return &KafkaDemoPayload{}
+}
+
+func (c *KafkaDemoConsumer) Connection() string { return "kafka" }
+
+func (c *KafkaDemoConsumer) Retry() int { return 3 }
+
+func (c *KafkaDemoConsumer) IsDelay() bool { return false }
+
+func (c *KafkaDemoConsumer) Handle(payload any) error {
+	data := payload.(*KafkaDemoPayload)
+	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
+	return nil
+}
+
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
@@ -36,7 +56,6 @@ func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
-			Retry: 3,
 		},
 	}
 }
@@ -65,11 +84,6 @@ func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
 
 func (c *KafkaDemoConsumer) Status() queue.ConsumerStatus {
 	return c.KafkaConsumer.Status()
-}
-
-func (c *KafkaDemoConsumer) Handle(msg string) error {
-	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: %s", msg))
-	return nil
 }
 
 func init() {

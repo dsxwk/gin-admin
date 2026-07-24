@@ -16,7 +16,27 @@ type KafkaDelayDemoConsumer struct {
 	*base.KafkaConsumer
 }
 
-// NewKafkaDelayDemoConsumer 创建延迟消费者实例
+// KafkaDelayDemoPayload 延迟消息体
+type KafkaDelayDemoPayload struct {
+	Name string `json:"name"`
+}
+
+func (c *KafkaDelayDemoConsumer) NewPayload() any {
+	return &KafkaDelayDemoPayload{}
+}
+
+func (c *KafkaDelayDemoConsumer) Connection() string { return "kafka" }
+
+func (c *KafkaDelayDemoConsumer) Retry() int { return 3 }
+
+func (c *KafkaDelayDemoConsumer) IsDelay() bool { return true }
+
+func (c *KafkaDelayDemoConsumer) Handle(payload any) error {
+	data := payload.(*KafkaDelayDemoPayload)
+	facade.Log().Info(pkg.Sprintf("Kafka Delay Received Msg: name=%s", data.Name))
+	return nil
+}
+
 func NewKafkaDelayDemoConsumer() *KafkaDelayDemoConsumer {
 	cfg := facade.Config()
 	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
@@ -33,11 +53,9 @@ func NewKafkaDelayDemoConsumer() *KafkaDelayDemoConsumer {
 
 	return &KafkaDelayDemoConsumer{
 		KafkaConsumer: &base.KafkaConsumer{
-			Kafka:        kfk,
-			Topic:        "kafka_delay_demo",
-			Group:        "kafka_delay_demo_group",
-			Retry:        3,
-			IsDelayQueue: true,
+			Kafka: kfk,
+			Topic: "kafka_delay_demo",
+			Group: "kafka_delay_demo_group",
 		},
 	}
 }
@@ -66,11 +84,6 @@ func (c *KafkaDelayDemoConsumer) Enabled(cfg *config.Config) bool {
 
 func (c *KafkaDelayDemoConsumer) Status() queue.ConsumerStatus {
 	return c.KafkaConsumer.Status()
-}
-
-func (c *KafkaDelayDemoConsumer) Handle(msg string) error {
-	facade.Log().Info(pkg.Sprintf("Kafka Delay Received Msg: %s", msg))
-	return nil
 }
 
 func init() {

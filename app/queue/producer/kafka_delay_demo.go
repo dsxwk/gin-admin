@@ -23,20 +23,27 @@ func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 		RequiredAcks: kafka.RequireAll,
 	}
 
-	return &KafkaDelayDemoProducer{
+	p := &KafkaDelayDemoProducer{
 		KafkaProducer: &base.KafkaProducer{
-			Kafka:        kfk,
-			Topic:        "kafka_delay_demo",
-			Key:          "kafka_delay_demo_key",
-			IsDelayQueue: true,
-			DelayMs:      20000,
+			Kafka: kfk,
+			Topic: "kafka_delay_demo",
+			Key:   "kafka_delay_demo_key",
 		},
 	}
+
+	p.KafkaProducer.Owner = p
+	return p
 }
 
 func (p *KafkaDelayDemoProducer) Name() string {
 	return "kafka_delay_demo"
 }
+
+func (p *KafkaDelayDemoProducer) Connection() string { return "kafka" }
+
+func (p *KafkaDelayDemoProducer) IsDelay() bool { return true }
+
+func (p *KafkaDelayDemoProducer) DelayMs() int64 { return 10000 }
 
 func (p *KafkaDelayDemoProducer) Description() string {
 	return "kafka延迟队列生产者"

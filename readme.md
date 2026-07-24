@@ -233,13 +233,9 @@ $ ./cli demo:command --args=11
 │   ├── middleware                      # Middleware
 │   ├── model                           # Model
 │   ├── provider                        # Provider
-│   ├── queue                           # Queue
-│   ├──├── kafka                        # Kafka
-│   ├──├──├── consumer                  # Consumer
-│   ├──├──├── producer                  # Producer
-│   ├──├── rabbitmq                     # Rabbitmq
-│   ├──├──├── consumer                  # Consumer
-│   ├──├──├── producer                  # Producer
+│   ├── queue                           # Queue(Kafka/RabbitMQ/Redis)
+│   ├──├── consumer                  # Consumer
+│   ├──├── producer                  # Producer
 │   ├── request                         # Validator
 │   ├── service                         # Service
 ├── bootstrap                           # Bootstrap 
@@ -389,7 +385,7 @@ make:
   make:model       Model Creation
   make:model-old   Model Creation old
   make:provider    Producer Creation
-  make:queue       Queue Creation(Kafka/RabbitMQ)
+  make:queue       Queue Creation(Kafka/RabbitMQ/Redis)
   make:request     Request Creation
   make:router      Router Creation
   make:seed        Generate database seeder template
@@ -479,7 +475,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:provider"
     },
     {
-      "description": "Queue Creation(Kafka/RabbitMQ)",
+      "description": "Queue Creation(Kafka/RabbitMQ/Redis)",
       "name": "make:queue"
     },
     {
@@ -2017,7 +2013,8 @@ func init() {
 ```
 
 # Queue
-> Executing the queue creation command will create both consumers and producers based on the queue type. For example, Kafka will create Kafka consumers and producers, while RabbitMQ will create RabbitMQ consumers and producers You only need to improve the `Handle` method among consumers to enhance your business logic, supporting automatic error retries and delayed queues
+> Executing the queue creation command will create both consumers and producers based on the connection type (kafka/rabbitmq/redis). You only need to implement the `Handle` method to process your business logic, with automatic error retries and delayed queue support.
+
 ## Queue Creation Help
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
@@ -2033,157 +2030,162 @@ Usage:
   cli [command] [options]
 
 Command:
-  make:queue  Queue Creation
+  make:queue  Queue Creation(Kafka/RabbitMQ/Redis)
 
 Options:
-  -t, --type      Queue Type, Example: kafka or rabbitmq     required:true
-  -n, --name      Queue File Name, Example: order_create     required:true
-  -d, --isDelay   Is Delay Queue, Example: true or false     required:false
-  -T, --topic     Queue Topic, Example: kafka_demo           required:false
-  -k, --key       Message Key, Example: kafka_demo           required:false
-  -g, --group     Goup, Example: kafka_demo                  required:false
-  -q, --queue     Queue Name, Example: rabbitmq_demo         required:false
-  -e, --exchange  Exchange, Example: rabbitmq_demo           required:false
-  -r, --routing   Routing Key, Example: rabbitmq_demo        required:false
-  -R, --retry     Retry Times, Example: 3                    required:false
-  -m, --delayMs   Delay In Milliseconds, Example: 10000      required:false
+  -n, --name        Queue Name, Example: order       required:true
+  -c, --connection  Connection Type: kafka, rabbitmq, redis(Default from config)
+  -d, --delay       Is Delay Queue: true/false
+  -D, --desc        Queue Description
 ```
+
+> `topic`, `key`, `group`, `queue`, `exchange`, `routing` are auto-generated from `name`. `retry` defaults to 3, `delayMs` defaults to 0.
 
 ## Queue Creation
+
+### Kafka
 ```bash
-$ go run ./cmd/cli.go make:queue --type=rabbitmq --name=rabbitmq_demo --queue=rabbitmq_demo --exchange=rabbitmq_demo --routing=rabbitmq_demo 
+$ go run ./cmd/cli.go make:queue --connection=kafka --name=kafka_demo
+```
+Generated files: `app/queue/consumer/kafka_demo.go`, `app/queue/producer/kafka_demo.go`
+
+### RabbitMQ
+```bash
+$ go run ./cmd/cli.go make:queue --connection=rabbitmq --name=rabbitmq_demo
 ```
 
+### Redis
+```bash
+$ go run ./cmd/cli.go make:queue --connection=redis --name=redis_demo
+```
+
+### Delay Queue
+```bash
+$ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=true
+```
+
+### Generated Consumer Example (Kafka)
 ```go
 package consumer
 
 import (
-  "gin/app/facade"
-  "gin/common/base"
-  "gin/common/flag"
-  "gin/config"
-  "gin/pkg"
-  "gin/pkg/logger"
-  "gin/pkg/queue"
+    "gin/app/facade"
+    "gin/common/base"
+    "gin/common/flag"
+    "gin/config"
+    "gin/pkg"
+    "gin/pkg/serviceprovider/queue"
+    "github.com/segmentio/kafka-go"
+    "time"
 )
 
-// RabbitmqDemoConsumer RabbitMQ Consumer
-type RabbitmqDemoConsumer struct {
-  *base.RabbitmqConsumer
+// KafkaDemoConsumer Kafka consumer
+type KafkaDemoConsumer struct {
+    *base.KafkaConsumer
 }
 
-// NewRabbitmqDemoConsumer Consumer Creation
-func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
-  cfg := facade.Config()
-  log := facade.Log()
-  bus := facade.Message()
+// KafkaDemoPayload message payload
+type KafkaDemoPayload struct {
+    Name string `json:"name"`
+}
 
-  // RabbitMQ Connection Creation
-  mq, err := base.NewRabbitMQ(cfg, log, bus)
-  if err != nil {
-    log.Error(pkg.Sprintf("RabbitMQ Connection Failed: %v", err))
+func NewKafkaDemoConsumer() *KafkaDemoConsumer {
+    cfg := facade.Config()
+    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+    kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
+        Brokers:        cfg.Queue.Kafka.Brokers,
+        Topic:          "kafka_demo",
+        GroupID:        "kafka_demo_group",
+        MinBytes:       1,
+        MaxBytes:       10e6,
+        StartOffset:    kafka.LastOffset,
+        CommitInterval: 0,
+        MaxWait:        5 * time.Second,
+    })
+    return &KafkaDemoConsumer{
+        KafkaConsumer: &base.KafkaConsumer{
+            Kafka: kfk,
+            Topic: "kafka_demo",
+            Group: "kafka_demo_group",
+        },
+    }
+}
+
+func (c *KafkaDemoConsumer) Handle(payload any) error {
+    data := payload.(*KafkaDemoPayload)
+    facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
+    // todo business logic
     return nil
-  }
-
-  return &RabbitmqDemoConsumer{
-    RabbitmqConsumer: &base.RabbitmqConsumer{
-      Mq:           mq,
-      Queue:        "rabbitmq_demo",
-      Exchange:     "rabbitmq_demo_exchange",
-      Routing:      "rabbitmq_demo",
-      IsDelayQueue: false,
-      Retry:        3,
-    },
-  }
-}
-
-func (c *RabbitmqDemoConsumer) Name() string {
-  return "rabbitmq_demo"
-}
-
-func (c *RabbitmqDemoConsumer) Start() error {
-  c.RabbitmqConsumer.Start(c)
-  flag.Infof("RabbitMQ Consumer Start Successed: %s", c.Name())
-  return nil
-}
-
-func (c *RabbitmqDemoConsumer) Stop() error {
-  return c.RabbitmqConsumer.Stop()
-}
-
-func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
-  return cfg.Rabbitmq.Enabled
-}
-
-func (c *RabbitmqDemoConsumer) Status() queue.ConsumerStatus {
-  return c.RabbitmqConsumer.Status()
-}
-
-// Handle Process business logic
-func (c *RabbitmqDemoConsumer) Handle(msg string) error {
-  facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
-  // todo Process business logic
-  return nil
 }
 
 func init() {
-  queue.GetConsumerRegistry().Register(NewRabbitmqDemoConsumer())
+    cfg := facade.Config()
+    if cfg != nil && cfg.Queue.Kafka.Enabled {
+        if c := NewKafkaDemoConsumer(); c != nil {
+            queue.GetConsumerRegistry().Register(c)
+        }
+    }
 }
 ```
+
+### Generated Producer Example (Kafka)
 ```go
 package producer
 
 import (
-  "gin/app/facade"
-  "gin/common/base"
-  "gin/pkg"
-  "gin/pkg/queue"
+    "context"
+    "gin/app/facade"
+    "gin/common/base"
+    "gin/pkg/serviceprovider/queue"
+    "github.com/segmentio/kafka-go"
 )
 
-// RabbitmqDemoProducer RabbitMQ Producer
-type RabbitmqDemoProducer struct {
-  *base.RabbitmqProducer
+type KafkaDemoProducer struct {
+    *base.KafkaProducer
 }
 
-// NewRabbitmqDemoProducer Producer Creation
-func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
-  cfg := facade.Config()
-  log := facade.Log()
-  bus := facade.Message()
-
-  mq, err := base.NewRabbitMQ(cfg, log, bus)
-  if err != nil {
-    log.Error(pkg.Sprintf("RabbitMQ Connection Failed: %v", err))
-    return nil
-  }
-
-  return &RabbitmqDemoProducer{
-    RabbitmqProducer: &base.RabbitmqProducer{
-      Mq:           mq,
-      Queue:        "rabbitmq_demo",
-      Exchange:     "rabbitmq_demo_exchange",
-      Routing:      "rabbitmq_demo",
-      IsDelayQueue: false,
-    },
-  }
+func NewKafkaDemoProducer() *KafkaDemoProducer {
+    cfg := facade.Config()
+    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+    kfk.Writer = &kafka.Writer{
+        Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
+        Topic:        "kafka_demo",
+        Balancer:     &kafka.LeastBytes{},
+        RequiredAcks: kafka.RequireAll,
+    }
+    p := &KafkaDemoProducer{
+        KafkaProducer: &base.KafkaProducer{
+            Kafka: kfk,
+            Topic: "kafka_demo",
+            Key:   "kafka_demo_key",
+        },
+    }
+    p.KafkaProducer.Owner = p
+    return p
 }
 
-func (p *RabbitmqDemoProducer) Name() string {
-  return "rabbitmq_demo"
+func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
+    return p.KafkaProducer.Publish(ctx, msg)
 }
 
 func init() {
-  queue.GetProducerRegistry().Register(NewRabbitmqDemoProducer())
+    cfg := facade.Config()
+    if cfg != nil && cfg.Queue.Kafka.Enabled {
+        if p := NewKafkaDemoProducer(); p != nil {
+            queue.GetProducerRegistry().Register(p)
+        }
+    }
 }
 ```
 
 ## Queue Usage
-> When consumers start a project, it is automatically registered in the container for unlimited additional launches, and producers can use it directly by initializing the storefront.
+> Consumers are auto-registered at startup. Producers can be used directly via the facade with typed payload structs.
 ```go
 package controller
 
 import (
     "gin/app/facade"
+    "gin/app/queue/consumer"
     "gin/common/base"
 )
 
@@ -2191,10 +2193,18 @@ type TestController struct {
     base.BaseController
 }
 
-func (s *TestController) Test() {
-    // Get Producer
-    producer := facade.Queue().Producer("rabbitmq_demo")
-	_ = producer.Publish(ctx, []byte(`{"orderId":111, "message":"message 111"}`))
+func (s *TestController) Test(ctx context.Context) {
+    // Kafka
+    _ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
+    _ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
+
+    // RabbitMQ
+    _ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, consumer.RabbitmqDemoPayload{Name: "test111"})
+    _ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, consumer.RabbitmqDelayDemoPayload{Name: "test222"})
+
+    // Redis
+    _ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
+    _ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
 }
 ```
 
@@ -2202,32 +2212,35 @@ func (s *TestController) Test() {
 ```bash
 $ go run ./cmd/cli.go consumer:list
 
-┌────────────────────────────────────────────────────────────┐
-│ Consumer Name          Description                         │
-├────────────────────────────────────────────────────────────┤
-│ kafka_delay_demo       Kafka delay queue consumer          │
-│ kafka_demo             Kafka consumer for queue            │
-│ rabbitmq_delay_demo    RabbitMQ delay queue consumer       │
-│ rabbitmq_demo          RabbitMQ ordinary queue consumer    │
-└────────────────────────────────────────────────────────────┘
-Total 4 consumers
+┌────────────────────────────────────────────────────────────────────────┐
+│ Consumer Name        Conn     Delay    Description                     │
+├────────────────────────────────────────────────────────────────────────┤
+│ kafka_delay_demo     kafka    true     kafka delay queue consumer      │
+│ kafka_demo           kafka    false    kafka demo                      │
+│ rabbitmq_delay_demo  rabbitmq true     rabbitmq delay queue consumer   │
+│ rabbitmq_demo        rabbitmq false    rabbitmq demo                   │
+│ redis_delay_demo     redis    true     redis delay queue consumer      │
+│ redis_demo           redis    false    redis demo                      │
+└────────────────────────────────────────────────────────────────────────┘
+Total 6 consumers
 ```
 
 ## Producer List
 ```bash
 $ go run ./cmd/cli.go producer:list
 
-┌────────────────────────────────────────────────────────────┐
-│ Producer Name          Description                         │
-├────────────────────────────────────────────────────────────┤
-│ kafka_delay_demo       Kafka delay queue producer          │
-│ kafka_demo             Kafka producer for queue            │
-│ rabbitmq_delay_demo    RabbitMQ delay queue producer       │
-│ rabbitmq_demo          RabbitMQ ordinary queue producer    │
-└────────────────────────────────────────────────────────────┘
-Total 4 producers
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ Producer Name        Conn     Delay    DelayMs  Description                   │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ kafka_delay_demo     kafka    true     0ms      kafka delay queue producer    │
+│ kafka_demo           kafka    false    0ms      kafka demo                    │
+│ rabbitmq_delay_demo  rabbitmq true     0ms      rabbitmq delay queue producer │
+│ rabbitmq_demo        rabbitmq false    0ms      rabbitmq demo                 │
+│ redis_delay_demo     redis    true     0ms      redis delay queue producer    │
+│ redis_demo           redis    false    0ms      redis demo                    │
+└───────────────────────────────────────────────────────────────────────────────┘
+Total 6 producers
 ```
-
 
 ## Job
 > The Job system provides Laravel-style asynchronous task processing with support for `sync`, `redis`, `kafka`, and `rabbitmq` drivers.
