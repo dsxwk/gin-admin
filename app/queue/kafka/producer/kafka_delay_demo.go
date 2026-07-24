@@ -3,6 +3,7 @@ package producer
 import (
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -39,4 +40,13 @@ func (p *KafkaDelayDemoProducer) Name() string {
 
 func (p *KafkaDelayDemoProducer) Description() string {
 	return "kafka延迟队列生产者"
+}
+
+func init() {
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if p := NewKafkaDelayDemoProducer(); p != nil {
+			queue.GetProducerRegistry().Register(p)
+		}
+	}
 }

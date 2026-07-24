@@ -65,3 +65,12 @@ func (c *RabbitmqDemoConsumer) Handle(msg string) error {
 	facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: %s", msg))
 	return nil
 }
+
+func init() {
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
+		if c := NewRabbitmqDemoConsumer(); c != nil {
+			queue.GetConsumerRegistry().Register(c)
+		}
+	}
+}

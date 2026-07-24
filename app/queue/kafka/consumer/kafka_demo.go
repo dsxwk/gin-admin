@@ -71,3 +71,12 @@ func (c *KafkaDemoConsumer) Handle(msg string) error {
 	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: %s", msg))
 	return nil
 }
+
+func init() {
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if c := NewKafkaDemoConsumer(); c != nil {
+			queue.GetConsumerRegistry().Register(c)
+		}
+	}
+}

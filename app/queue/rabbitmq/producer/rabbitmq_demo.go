@@ -4,6 +4,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDemoProducer RabbitMQ普通生产者
@@ -37,4 +38,13 @@ func (p *RabbitmqDemoProducer) Name() string {
 
 func (p *RabbitmqDemoProducer) Description() string {
 	return "rabbitmq普通队列生产者"
+}
+
+func init() {
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
+		if p := NewRabbitmqDemoProducer(); p != nil {
+			queue.GetProducerRegistry().Register(p)
+		}
+	}
 }
