@@ -3,6 +3,7 @@
 ## v2.3.10
 > - Optimize queue debugger and other
 > - Add job task support connection type redis, kafak, rabbitmq, sync, sync is synchronous
+> - Add command line job creation, job task list data acquisition, job queue tasks not executed
 
 ## v2.3.9
 > - Update configuration file
