@@ -14,14 +14,15 @@ import (
 
 // Config 配置
 type Config struct {
-	App       App       `mapstructure:"app" yaml:"app"`
-	Databases Databases `mapstructure:"databases" yaml:"databases"`
-	Cors      Cors      `mapstructure:"cors" yaml:"cors"`
-	Jwt       Jwt       `mapstructure:"jwt" yaml:"jwt"`
-	Log       Log       `mapstructure:"log" yaml:"log"`
-	Cache     Cache     `mapstructure:"cache" yaml:"cache"`
-	I18n      I18n      `mapstructure:"i18n" yaml:"i18n"`
-	Queue     Queue     `mapstructure:"queue" yaml:"queue"`
+	App            App            `mapstructure:"app" yaml:"app"`
+	Databases      Databases      `mapstructure:"databases" yaml:"databases"`
+	Cors           Cors           `mapstructure:"cors" yaml:"cors"`
+	Jwt            Jwt            `mapstructure:"jwt" yaml:"jwt"`
+	Log            Log            `mapstructure:"log" yaml:"log"`
+	Cache          Cache          `mapstructure:"cache" yaml:"cache"`
+	I18n           I18n           `mapstructure:"i18n" yaml:"i18n"`
+	Queue          Queue          `mapstructure:"queue" yaml:"queue"`
+	OperatorRecord OperatorRecord `mapstructure:"operator-record" yaml:"operator-record"`
 }
 
 var (

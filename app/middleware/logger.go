@@ -34,7 +34,7 @@ func (s Logger) Handle() gin.HandlerFunc {
 		ctx = ctxkey.WithValue(ctx, ctxkey.IpKey, c.ClientIP())
 		ctx = ctxkey.WithValue(ctx, ctxkey.PathKey, c.Request.URL.Path)
 		ctx = ctxkey.WithValue(ctx, ctxkey.MethodKey, c.Request.Method)
-		ctx = ctxkey.WithValue(ctx, ctxkey.ParamsKey, s.getParams(c))
+		ctx = ctxkey.WithValue(ctx, ctxkey.ParamsKey, GetParams(c))
 		ctx = ctxkey.WithValue(ctx, ctxkey.LangKey, lang)
 		ctx = ctxkey.WithValue(ctx, ctxkey.StartTimeKey, start)
 
@@ -67,11 +67,11 @@ func (s Logger) Handle() gin.HandlerFunc {
 	}
 }
 
-// 获取参数
-func (s Logger) getParams(c *gin.Context) any {
+// GetParams 获取请求参数
+func GetParams(c *gin.Context) any {
 	// GET/DELETE/query 参数
 	if c.Request.Method == http.MethodGet || c.Request.Method == http.MethodDelete {
-		return c.Request.URL.Query()
+		return queryToMap(c.Request.URL.Query())
 	}
 
 	// 其他方法尝试读取body
@@ -127,4 +127,15 @@ func (s Logger) matchLang(input string, supported []string) string {
 		}
 	}
 	return ""
+}
+
+// queryToMap 将url.Values转为map 避免值变成数组
+func queryToMap(values map[string][]string) map[string]string {
+	m := make(map[string]string, len(values))
+	for k, v := range values {
+		if len(v) > 0 {
+			m[k] = v[0]
+		}
+	}
+	return m
 }

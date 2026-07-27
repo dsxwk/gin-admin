@@ -7,7 +7,7 @@ import (
 
 // Context 统一管理context
 type Context struct {
-	Ctx context.Context
+	Ctx context.Context `swaggerignore:"true"`
 }
 
 // Set 设置ctx

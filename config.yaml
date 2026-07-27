@@ -126,3 +126,7 @@ queue:
     enabled: false # 是否启用rabbitmq
     url: "amqp://admin:admin@172.30.117.79:5672/"
 
+# 操作记录
+operator-record:
+  enabled: false # 是否启用操作记录
+

@@ -232,6 +232,37 @@ definitions:
       updatedAt:
         type: string
     type: object
+  model.OperatorLog:
+    properties:
+      costMs:
+        type: number
+      createdAt:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      lang:
+        type: string
+      method:
+        type: string
+      params:
+        $ref: '#/definitions/model.JsonValue'
+      statusCode:
+        type: integer
+      traceId:
+        type: string
+      updatedAt:
+        type: string
+      uri:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+      userAgent:
+        type: string
+      userId:
+        type: integer
+    type: object
   model.Permission:
     properties:
       createdAt:
@@ -592,6 +623,31 @@ definitions:
     - icon
     - path
     - title
+    type: object
+  request.OperatorLog:
+    properties:
+      __search:
+        additionalProperties: true
+        type: object
+      __sort:
+        additionalProperties: true
+        type: object
+      id:
+        type: integer
+      ids:
+        items:
+          type: integer
+        type: array
+      ip:
+        type: string
+      notPage:
+        type: boolean
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    required:
+    - ids
     type: object
   request.PageData:
     properties:
@@ -1781,6 +1837,157 @@ paths:
       summary: 创建菜单
       tags:
       - 菜单管理
+  /api/v1/operator-log:
+    get:
+      description: 操作日志列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      - description: 搜索条件(JSON)
+        in: query
+        name: __search
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.OperatorLog'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 操作日志管理
+  /api/v1/operator-log/{id}:
+    delete:
+      description: 操作日志删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 删除
+      tags:
+      - 操作日志管理
+    get:
+      description: 操作日志详情
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.OperatorLog'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 详情
+      tags:
+      - 操作日志管理
+  /api/v1/operator-log/batch-delete:
+    post:
+      description: 操作日志批量删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 批量删除参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.OperatorLog'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 批量删除
+      tags:
+      - 操作日志管理
   /api/v1/permission:
     get:
       description: 用户列表

@@ -15,19 +15,20 @@ import (
 )
 
 var (
-	timeoutMiddleware    = middleware.Timeout{}.Handle(facade.Config().App.Timeout)
-	loggerMiddleware     = middleware.Logger{}.Handle()
-	corsMiddleware       = middleware.Cors{}.Handle()
-	jwtMiddleware        = middleware.Jwt{}.Handle()
-	recoverMiddleware    = middleware.Recover{}.Handle()
-	rateLimitMiddleware  = middleware.RateLimit{}
-	permissionMiddleware = middleware.Permission{}.Handle()
+	timeoutMiddleware     = middleware.Timeout{}.Handle(facade.Config().App.Timeout)
+	loggerMiddleware      = middleware.Logger{}.Handle()
+	corsMiddleware        = middleware.Cors{}.Handle()
+	jwtMiddleware         = middleware.Jwt{}.Handle()
+	recoverMiddleware     = middleware.Recover{}.Handle()
+	rateLimitMiddleware   = middleware.RateLimit{}
+	permissionMiddleware  = middleware.Permission{}.Handle()
+	operatorLogMiddleware = middleware.OperatorLog{}.Handle()
 )
 
 // LoadRouters 加载路由
 func LoadRouters(router *gin.Engine) {
 	// 全局中间件
-	router.Use(corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware)
+	router.Use(corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware, operatorLogMiddleware)
 
 	// 静态文件
 	router.StaticFS("/public", http.Dir(pkg.GetRootPath()+"/public"))
