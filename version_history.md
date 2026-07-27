@@ -1,5 +1,10 @@
 # Version History
 
+## v2.3.11
+> - Optimize permission middleware 
+> - Add operation log recording related
+> - Add data operation record table and data backup
+
 ## v2.3.10
 > - Optimize queue debugger and other
 > - Add job task support connection type redis, kafak, rabbitmq, sync, sync is synchronous
