@@ -199,6 +199,15 @@ func (r *RedisCache) Delete(key string) error {
 	return nil
 }
 
+// Exists ??key????
+func (r *RedisCache) Exists(key string) (int64, error) {
+	result, err := r.client.Exists(r.ctx, key).Result()
+	if err != nil {
+		return 0, fmt.Errorf("error checking key exists: %v", err)
+	}
+	return result, nil
+}
+
 func (r *RedisCache) SAdd(key string, members ...interface{}) error {
 	err := r.client.SAdd(r.ctx, key, members...).Err()
 	if err != nil {
