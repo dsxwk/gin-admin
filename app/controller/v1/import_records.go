@@ -52,9 +52,9 @@ func (s *ImportRecordsController) List(c *gin.Context) {
 }
 
 // Delete 删除
-// @Tags 导入记录管理
+// @Tags 导入管理
 // @Summary 删除
-// @Description 导入记录删除
+// @Description 记录删除
 // @Param token header string true "认证Token"
 // @Param id path int true "ID"
 // @Success 200 {object} errcode.SuccessResponse "成功"

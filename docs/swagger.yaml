@@ -1593,7 +1593,7 @@ paths:
       - 导入管理
   /api/v1/import-records/{id}:
     delete:
-      description: 导入记录删除
+      description: 记录删除
       parameters:
       - description: 认证Token
         in: header
@@ -1620,7 +1620,7 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-      - 导入记录管理
+      - 导入管理
   /api/v1/login:
     post:
       consumes:

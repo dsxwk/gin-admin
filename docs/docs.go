@@ -1078,9 +1078,9 @@ const docTemplate = `{
         },
         "/api/v1/import-records/{id}": {
             "delete": {
-                "description": "导入记录删除",
+                "description": "记录删除",
                 "tags": [
-                    "导入记录管理"
+                    "导入管理"
                 ],
                 "summary": "删除",
                 "parameters": [
