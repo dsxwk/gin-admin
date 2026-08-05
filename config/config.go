@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 )
 
 // Config 配置
@@ -26,10 +25,12 @@ type Config struct {
 }
 
 var (
-	Conf     *Config
-	vp       *viper.Viper
-	confOnce sync.Once
-	mu       sync.RWMutex // 添加读写锁保证并发安全
+	// OnConfigUpdated 配置更新回调(由provider注册)
+	OnConfigUpdated func(*Config)
+	Conf            *Config
+	vp              *viper.Viper
+	confOnce        sync.Once
+	mu              sync.RWMutex // 添加读写锁保证并发安全
 )
 
 func NewConfig() *Config {
@@ -82,7 +83,6 @@ func NewConfig() *Config {
 		// 监听配置变化
 		v.WatchConfig()
 
-		var lastEventTime int64
 		v.OnConfigChange(func(e fsnotify.Event) {
 			mu.Lock()
 			defer mu.Unlock()
@@ -91,17 +91,13 @@ func NewConfig() *Config {
 				return
 			}
 
-			now := time.Now().UnixNano()
-			// 如果两次事件间隔小于200ms则忽略
-			if now-lastEventTime < 200*1e6 {
-				return
-			}
-			lastEventTime = now
-
 			flag.Infof("配置文件修改: %s", e.Name)
 			if err := v.Unmarshal(cfg); err != nil {
 				flag.Errorf("配置热更新失败: %v", err)
 				os.Exit(1)
+			}
+			if OnConfigUpdated != nil {
+				OnConfigUpdated(cfg)
 			}
 		})
 

@@ -54,12 +54,20 @@ func Get[T any](name string) T {
 	defer mgr.mu.RUnlock()
 
 	if instance, ok := mgr.instances[name]; ok {
-		if typed, ok := instance.(T); ok {
+		if typed, _ok := instance.(T); _ok {
 			return typed
 		}
 	}
 	var zero T
 	return zero
+}
+
+// Unregister 注销服务实例
+func Unregister(name string) {
+	mgr := GetManager()
+	mgr.mu.Lock()
+	defer mgr.mu.Unlock()
+	delete(mgr.instances, name)
 }
 
 // Has 检查服务是否存在

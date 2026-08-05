@@ -7,6 +7,9 @@ import (
 )
 
 func init() {
+	config.OnConfigUpdated = func(cfg *config.Config) {
+		facade.Register[*config.Config]("config", cfg)
+	}
 	serviceprovider.Register(&ConfigProvider{})
 }
 
