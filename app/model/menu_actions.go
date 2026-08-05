@@ -12,6 +12,7 @@ type MenuActions struct {
 	BtnSize   string     `gorm:"column:btn_size;not null;default:small;type:varchar(20);comment:按钮尺寸" json:"btnSize" form:"btnSize"`
 	IsConfirm int64      `gorm:"column:is_confirm;not null;default:2;type:tinyint(3) unsigned;comment:是否确认 1=是 2=否" json:"isConfirm" form:"isConfirm"`
 	Label     string     `gorm:"column:label;not null;type:varchar(30);comment:功能名称" json:"label" form:"label"`
+	TransKey  string     `gorm:"column:trans_key;not null;default:'';type:varchar(100);comment:翻译键" json:"transKey" form:"transKey"`
 	AuthValue string     `gorm:"column:auth_value;not null;type:varchar(100);comment:权限标识" json:"authValue" form:"authValue"`
 	IsLink    int64      `gorm:"column:is_link;not null;default:2;type:tinyint(3) unsigned;comment:是否为链接 1=是 2=否" json:"isLink" form:"isLink"`
 	CreatedAt *DateTime  `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`

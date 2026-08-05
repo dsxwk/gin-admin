@@ -133,6 +133,7 @@ func (s *MenuService) Create(req request.Menu) (model.Menu, error) {
 			MenuId:      m.ID,
 			Title:       req.Meta.Title,
 			Icon:        req.Meta.Icon,
+			TransKey:    req.Meta.TransKey,
 			Path:        req.Meta.Path,
 			Redirect:    req.Meta.Redirect,
 			Component:   req.Meta.Component,
@@ -161,6 +162,7 @@ func (s *MenuService) Create(req request.Menu) (model.Menu, error) {
 			IsConfirm: req.MenuAction.IsConfirm,
 			IsLink:    req.MenuAction.IsLink,
 			Label:     req.MenuAction.Label,
+			TransKey:  req.MenuAction.TransKey,
 		}
 
 		err = db.Model(&menuAction).Create(&menuAction).Error

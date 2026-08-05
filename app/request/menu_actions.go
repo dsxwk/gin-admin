@@ -43,6 +43,7 @@ type ActionCreate struct {
 	BtnSize   string `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
 	IsConfirm int64  `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
 	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
+	TransKey  string `json:"transKey" form:"transKey" validate:"" label:"翻译键"`
 	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
 }
@@ -56,6 +57,7 @@ type ActionUpdate struct {
 	BtnSize   string `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
 	IsConfirm int64  `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
 	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
+	TransKey  string `json:"transKey" form:"transKey" validate:"" label:"翻译键"`
 	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
 	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
 }

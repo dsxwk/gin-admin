@@ -53,6 +53,7 @@ type Meta struct {
 	MenuId      int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 	Title       string `json:"title" form:"title" validate:"required" label:"菜单名称"`
 	Icon        string `json:"icon" form:"icon" validate:"required" label:"菜单图标"`
+	TransKey    string `json:"transKey" form:"transKey" validate:"" label:"翻译键"`
 	Path        string `json:"path" form:"path" validate:"required" label:"路由路径"`
 	Redirect    string `json:"redirect" form:"redirect" validate:"" label:"重定向"`
 	Component   string `json:"component" form:"component" validate:"required" label:"组件路径"`

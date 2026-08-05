@@ -8,11 +8,11 @@ type Queue struct {
 }
 
 type Kafka struct {
-	Enabled bool     `mapstructure:"enabled" yaml:"enabled"` // 鏄惁鍚敤
+	Enabled bool     `mapstructure:"enabled" yaml:"enabled"` // 是否启用kafka
 	Brokers []string `mapstructure:"brokers" yaml:"brokers"`
 }
 
 type Rabbitmq struct {
-	Enabled bool   `mapstructure:"enabled" yaml:"enabled"` // 鏄惁鍚敤
+	Enabled bool   `mapstructure:"enabled" yaml:"enabled"` // 是否启用rabbitmq
 	Url     string `mapstructure:"url" yaml:"url"`
 }
