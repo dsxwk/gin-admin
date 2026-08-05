@@ -1,5 +1,10 @@
 # Version History
 
+## v2.3.12
+> - Optimize menu function and configuration loading
+> - Database structure change and database backup
+> - Add dashboard statistics interface and swagger document update
+
 ## v2.3.11
 > - Optimize permission middleware 
 > - Add operation log recording related
