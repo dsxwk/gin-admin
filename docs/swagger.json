@@ -688,6 +688,141 @@
                 }
             }
         },
+        "/api/v1/dashboard/cards": {
+            "get": {
+                "description": "仪表盘卡片统计 用户数/角色数/菜单数/文章数/今日日志/字典项/系统配置/导入记录",
+                "tags": [
+                    "仪表盘管理"
+                ],
+                "summary": "卡片统计",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/service.DashboardCard"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/dashboard/statistics": {
+            "get": {
+                "description": "操作日志统计 方法统计/耗时分布/小时请求量/状态码/PV/UV/平均响应/峰值时段",
+                "tags": [
+                    "仪表盘管理"
+                ],
+                "summary": "操作日志统计",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/service.OperatorLogStatistics"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/dashboard/system-resource": {
+            "get": {
+                "description": "系统资源监控 CPU/内存/磁盘/带宽",
+                "tags": [
+                    "仪表盘管理"
+                ],
+                "summary": "系统资源",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/service.SystemResource"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/dict": {
             "get": {
                 "description": "字典列表",
@@ -4285,6 +4420,222 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "service.CPUInfo": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "usage": {
+                    "type": "number"
+                }
+            }
+        },
+        "service.CostDist": {
+            "type": "object",
+            "properties": {
+                "bt100200": {
+                    "type": "integer"
+                },
+                "bt200500": {
+                    "type": "integer"
+                },
+                "bt50100": {
+                    "type": "integer"
+                },
+                "gt500": {
+                    "type": "integer"
+                },
+                "lt50": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.DashboardCard": {
+            "type": "object",
+            "properties": {
+                "change": {
+                    "type": "integer"
+                },
+                "changePercent": {
+                    "type": "number"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "trend": {
+                    "type": "string"
+                },
+                "yesterdayCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.DashboardSummary": {
+            "type": "object",
+            "properties": {
+                "avgCost": {
+                    "type": "number"
+                },
+                "costChange": {
+                    "type": "number"
+                },
+                "peakHour": {
+                    "type": "integer"
+                },
+                "peakQps": {
+                    "type": "number"
+                },
+                "pvChange": {
+                    "type": "number"
+                },
+                "todayPv": {
+                    "type": "integer"
+                },
+                "todayUv": {
+                    "type": "integer"
+                },
+                "uvChange": {
+                    "type": "number"
+                },
+                "yesterdayAvgCost": {
+                    "type": "number"
+                },
+                "yesterdayPv": {
+                    "type": "integer"
+                },
+                "yesterdayUv": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.DiskInfo": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "string"
+                },
+                "used": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.HourlyStat": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.MemoryInfo": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "string"
+                },
+                "used": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.MethodStat": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.NetInfo": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "string"
+                },
+                "used": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.OperatorLogStatistics": {
+            "type": "object",
+            "properties": {
+                "costDist": {
+                    "$ref": "#/definitions/service.CostDist"
+                },
+                "hourlyStats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.HourlyStat"
+                    }
+                },
+                "methodStats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.MethodStat"
+                    }
+                },
+                "statusCodeStats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.StatusCodeStat"
+                    }
+                },
+                "summary": {
+                    "$ref": "#/definitions/service.DashboardSummary"
+                }
+            }
+        },
+        "service.StatusCodeStat": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.SystemResource": {
+            "type": "object",
+            "properties": {
+                "cpu": {
+                    "$ref": "#/definitions/service.CPUInfo"
+                },
+                "disk": {
+                    "$ref": "#/definitions/service.DiskInfo"
+                },
+                "memory": {
+                    "$ref": "#/definitions/service.MemoryInfo"
+                },
+                "net": {
+                    "$ref": "#/definitions/service.NetInfo"
                 }
             }
         },

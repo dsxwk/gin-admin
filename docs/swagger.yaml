@@ -893,6 +893,146 @@ definitions:
     - nickname
     - username
     type: object
+  service.CPUInfo:
+    properties:
+      available:
+        type: number
+      total:
+        type: number
+      usage:
+        type: number
+    type: object
+  service.CostDist:
+    properties:
+      bt50100:
+        type: integer
+      bt100200:
+        type: integer
+      bt200500:
+        type: integer
+      gt500:
+        type: integer
+      lt50:
+        type: integer
+    type: object
+  service.DashboardCard:
+    properties:
+      change:
+        type: integer
+      changePercent:
+        type: number
+      count:
+        type: integer
+      title:
+        type: string
+      trend:
+        type: string
+      yesterdayCount:
+        type: integer
+    type: object
+  service.DashboardSummary:
+    properties:
+      avgCost:
+        type: number
+      costChange:
+        type: number
+      peakHour:
+        type: integer
+      peakQps:
+        type: number
+      pvChange:
+        type: number
+      todayPv:
+        type: integer
+      todayUv:
+        type: integer
+      uvChange:
+        type: number
+      yesterdayAvgCost:
+        type: number
+      yesterdayPv:
+        type: integer
+      yesterdayUv:
+        type: integer
+    type: object
+  service.DiskInfo:
+    properties:
+      available:
+        type: string
+      total:
+        type: string
+      used:
+        type: string
+    type: object
+  service.HourlyStat:
+    properties:
+      count:
+        type: integer
+      hour:
+        type: integer
+    type: object
+  service.MemoryInfo:
+    properties:
+      available:
+        type: string
+      total:
+        type: string
+      used:
+        type: string
+    type: object
+  service.MethodStat:
+    properties:
+      count:
+        type: integer
+      method:
+        type: string
+    type: object
+  service.NetInfo:
+    properties:
+      available:
+        type: string
+      total:
+        type: string
+      used:
+        type: string
+    type: object
+  service.OperatorLogStatistics:
+    properties:
+      costDist:
+        $ref: '#/definitions/service.CostDist'
+      hourlyStats:
+        items:
+          $ref: '#/definitions/service.HourlyStat'
+        type: array
+      methodStats:
+        items:
+          $ref: '#/definitions/service.MethodStat'
+        type: array
+      statusCodeStats:
+        items:
+          $ref: '#/definitions/service.StatusCodeStat'
+        type: array
+      summary:
+        $ref: '#/definitions/service.DashboardSummary'
+    type: object
+  service.StatusCodeStat:
+    properties:
+      code:
+        type: integer
+      count:
+        type: integer
+    type: object
+  service.SystemResource:
+    properties:
+      cpu:
+        $ref: '#/definitions/service.CPUInfo'
+      disk:
+        $ref: '#/definitions/service.DiskInfo'
+      memory:
+        $ref: '#/definitions/service.MemoryInfo'
+      net:
+        $ref: '#/definitions/service.NetInfo'
+    type: object
   v1.CaptchaResponse:
     properties:
       captchaId:
@@ -1353,6 +1493,86 @@ paths:
       summary: 更新
       tags:
       - 配置分类管理
+  /api/v1/dashboard/cards:
+    get:
+      description: 仪表盘卡片统计 用户数/角色数/菜单数/文章数/今日日志/字典项/系统配置/导入记录
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/service.DashboardCard'
+                  type: array
+              type: object
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 卡片统计
+      tags:
+      - 仪表盘管理
+  /api/v1/dashboard/statistics:
+    get:
+      description: 操作日志统计 方法统计/耗时分布/小时请求量/状态码/PV/UV/平均响应/峰值时段
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.OperatorLogStatistics'
+              type: object
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 操作日志统计
+      tags:
+      - 仪表盘管理
+  /api/v1/dashboard/system-resource:
+    get:
+      description: 系统资源监控 CPU/内存/磁盘/带宽
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.SystemResource'
+              type: object
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 系统资源
+      tags:
+      - 仪表盘管理
   /api/v1/dict:
     get:
       description: 字典列表
