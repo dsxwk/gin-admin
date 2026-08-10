@@ -77,6 +77,9 @@ func setupEngine() *gin.Engine {
 	// 加载路由
 	router.LoadRouters(r)
 
+	// 同步路由权限到数据库
+	router.SyncPermissionRoutes()
+
 	return r
 }
 
