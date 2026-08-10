@@ -95,7 +95,7 @@ func (s *JobList) Execute(values map[string]string) {
 		maxDescLen = titleDescLen
 	}
 
-	totalWidth := maxNameLen + maxConnLen + maxRetryLen + maxDelayLen + maxDescLen + 15
+	totalWidth := maxNameLen + maxConnLen + maxRetryLen + maxDelayLen + maxDescLen + 16
 
 	color.Yellow("┌" + strings.Repeat("─", totalWidth-2) + "┐")
 
