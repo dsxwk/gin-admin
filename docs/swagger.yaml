@@ -65,6 +65,45 @@ definitions:
       updatedAt:
         type: string
     type: object
+  model.Department:
+    properties:
+      children:
+        items: {}
+        type: array
+      createdAt:
+        type: string
+      deptLeaders:
+        items:
+          $ref: '#/definitions/model.DepartmentLeaders'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      pid:
+        type: integer
+      sort:
+        type: integer
+      status:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  model.DepartmentLeaders:
+    properties:
+      createdAt:
+        type: string
+      departmentId:
+        type: integer
+      id:
+        type: integer
+      leader:
+        $ref: '#/definitions/model.User'
+      leaderUserId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
   model.Dict:
     properties:
       children:
@@ -182,6 +221,8 @@ definitions:
         type: string
       menuId:
         type: integer
+      transKey:
+        type: string
       type:
         type: integer
       updatedAt:
@@ -190,7 +231,6 @@ definitions:
   model.MenuMeta:
     properties:
       authBtnList:
-        description: 按钮权限列表
         items:
           $ref: '#/definitions/model.MenuActions'
         type: array
@@ -207,27 +247,24 @@ definitions:
       isHide:
         type: integer
       isIframe:
-        description: 是否内嵌,开启条件`1 isIframe:true 2 isLink:链接地址不为空`
         type: integer
       isKeepAlive:
         type: integer
       isLink:
-        description: 外链/内嵌时链接地址(http:xxx.com),开启外链条件`1 isLink:链接地址不为空`
         type: string
       menuId:
         type: integer
       path:
-        description: 路由路径
         type: string
       redirect:
-        description: 重定向
         type: string
       roles:
-        description: 权限标识,取角色管理
         items:
           $ref: '#/definitions/model.RoleMenus'
         type: array
       title:
+        type: string
+      transKey:
         type: string
       updatedAt:
         type: string
@@ -377,6 +414,8 @@ definitions:
       id:
         description: ID
         type: integer
+      mainDept:
+        $ref: '#/definitions/model.UserDepartments'
       nickname:
         description: 昵称
         type: string
@@ -389,6 +428,10 @@ definitions:
       updatedAt:
         description: 更新时间
         type: string
+      userDepts:
+        items:
+          $ref: '#/definitions/model.UserDepartments'
+        type: array
       userRoles:
         description: 用户角色
         items:
@@ -397,6 +440,23 @@ definitions:
       username:
         description: 用户名
         type: string
+    type: object
+  model.UserDepartments:
+    properties:
+      createdAt:
+        type: string
+      departmentId:
+        type: integer
+      dept:
+        $ref: '#/definitions/model.Department'
+      id:
+        type: integer
+      isMain:
+        type: integer
+      updatedAt:
+        type: string
+      userId:
+        type: integer
     type: object
   model.UserRoles:
     properties:
@@ -439,6 +499,8 @@ definitions:
         type: string
       menuId:
         type: integer
+      transKey:
+        type: string
       type:
         type: integer
     type: object
@@ -501,6 +563,37 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  request.DepartmentCreate:
+    properties:
+      name:
+        type: string
+      pid:
+        type: integer
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - name
+    type: object
+  request.DepartmentUpdate:
+    properties:
+      name:
+        type: string
+      pid:
+        type: integer
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - name
+    type: object
+  request.Dept:
+    properties:
+      departmentId:
+        type: integer
     type: object
   request.DictCreate:
     properties:
@@ -617,6 +710,8 @@ definitions:
       redirect:
         type: string
       title:
+        type: string
+      transKey:
         type: string
     required:
     - component
@@ -800,16 +895,24 @@ definitions:
         type: string
       gender:
         type: integer
+      mainDept:
+        $ref: '#/definitions/request.Dept'
       nickname:
         type: string
       password:
         type: string
+      userDepts:
+        items:
+          $ref: '#/definitions/request.Dept'
+        type: array
       username:
         type: string
     required:
     - fullName
+    - mainDept
     - nickname
     - password
+    - userDepts
     - username
     type: object
   request.UserImport:
@@ -884,13 +987,21 @@ definitions:
         type: string
       gender:
         type: integer
+      mainDept:
+        $ref: '#/definitions/request.Dept'
       nickname:
         type: string
+      userDepts:
+        items:
+          $ref: '#/definitions/request.Dept'
+        type: array
       username:
         type: string
     required:
     - fullName
+    - mainDept
     - nickname
+    - userDepts
     - username
     type: object
   service.CPUInfo:
@@ -1071,6 +1182,192 @@ info:
   title: Gin Swagger API
   version: "2.0"
 paths:
+  /api/department:
+    get:
+      description: 部门列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Department'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 列表
+      tags:
+      - 部门管理
+    post:
+      description: 部门创建
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DepartmentCreate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Department'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 创建
+      tags:
+      - 部门管理
+  /api/department/{id}:
+    delete:
+      description: 部门删除
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 删除
+      tags:
+      - 部门管理
+    get:
+      description: 部门详情
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Department'
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 详情
+      tags:
+      - 部门管理
+    put:
+      description: 部门更新
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DepartmentUpdate'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 更新
+      tags:
+      - 部门管理
   /api/v1/article:
     get:
       description: 文章列表

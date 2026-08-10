@@ -20,6 +20,301 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/department": {
+            "get": {
+                "description": "部门列表",
+                "tags": [
+                    "部门管理"
+                ],
+                "summary": "列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "是否不分页",
+                        "name": "notPage",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/request.PageData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/model.Department"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "部门创建",
+                "tags": [
+                    "部门管理"
+                ],
+                "summary": "创建",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "创建参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DepartmentCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Department"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/department/{id}": {
+            "get": {
+                "description": "部门详情",
+                "tags": [
+                    "部门管理"
+                ],
+                "summary": "详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Department"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "部门更新",
+                "tags": [
+                    "部门管理"
+                ],
+                "summary": "更新",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DepartmentUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "部门删除",
+                "tags": [
+                    "部门管理"
+                ],
+                "summary": "删除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/article": {
             "get": {
                 "description": "文章列表",
@@ -3202,6 +3497,65 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Department": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {}
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deptLeaders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.DepartmentLeaders"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.DepartmentLeaders": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "leader": {
+                    "$ref": "#/definitions/model.User"
+                },
+                "leaderUserId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Dict": {
             "type": "object",
             "properties": {
@@ -3377,6 +3731,9 @@ const docTemplate = `{
                 "menuId": {
                     "type": "integer"
                 },
+                "transKey": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "integer"
                 },
@@ -3389,7 +3746,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "authBtnList": {
-                    "description": "按钮权限列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.MenuActions"
@@ -3414,35 +3770,33 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "isIframe": {
-                    "description": "是否内嵌,开启条件` + "`" + `1 isIframe:true 2 isLink:链接地址不为空` + "`" + `",
                     "type": "integer"
                 },
                 "isKeepAlive": {
                     "type": "integer"
                 },
                 "isLink": {
-                    "description": "外链/内嵌时链接地址(http:xxx.com),开启外链条件` + "`" + `1 isLink:链接地址不为空` + "`" + `",
                     "type": "string"
                 },
                 "menuId": {
                     "type": "integer"
                 },
                 "path": {
-                    "description": "路由路径",
                     "type": "string"
                 },
                 "redirect": {
-                    "description": "重定向",
                     "type": "string"
                 },
                 "roles": {
-                    "description": "权限标识,取角色管理",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.RoleMenus"
                     }
                 },
                 "title": {
+                    "type": "string"
+                },
+                "transKey": {
                     "type": "string"
                 },
                 "updatedAt": {
@@ -3667,6 +4021,9 @@ const docTemplate = `{
                     "description": "ID",
                     "type": "integer"
                 },
+                "mainDept": {
+                    "$ref": "#/definitions/model.UserDepartments"
+                },
                 "nickname": {
                     "description": "昵称",
                     "type": "string"
@@ -3683,6 +4040,12 @@ const docTemplate = `{
                     "description": "更新时间",
                     "type": "string"
                 },
+                "userDepts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.UserDepartments"
+                    }
+                },
                 "userRoles": {
                     "description": "用户角色",
                     "type": "array",
@@ -3693,6 +4056,32 @@ const docTemplate = `{
                 "username": {
                     "description": "用户名",
                     "type": "string"
+                }
+            }
+        },
+        "model.UserDepartments": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "integer"
+                },
+                "dept": {
+                    "$ref": "#/definitions/model.Department"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isMain": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },
@@ -3754,6 +4143,9 @@ const docTemplate = `{
                 },
                 "menuId": {
                     "type": "integer"
+                },
+                "transKey": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "integer"
@@ -3846,6 +4238,54 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "request.DepartmentCreate": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.DepartmentUpdate": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.Dept": {
+            "type": "object",
+            "properties": {
+                "departmentId": {
+                    "type": "integer"
                 }
             }
         },
@@ -4026,6 +4466,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "transKey": {
                     "type": "string"
                 }
             }
@@ -4288,8 +4731,10 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "fullName",
+                "mainDept",
                 "nickname",
                 "password",
+                "userDepts",
                 "username"
             ],
             "properties": {
@@ -4299,11 +4744,20 @@ const docTemplate = `{
                 "gender": {
                     "type": "integer"
                 },
+                "mainDept": {
+                    "$ref": "#/definitions/request.Dept"
+                },
                 "nickname": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
+                },
+                "userDepts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.Dept"
+                    }
                 },
                 "username": {
                     "type": "string"
@@ -4409,7 +4863,9 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "fullName",
+                "mainDept",
                 "nickname",
+                "userDepts",
                 "username"
             ],
             "properties": {
@@ -4422,8 +4878,17 @@ const docTemplate = `{
                 "gender": {
                     "type": "integer"
                 },
+                "mainDept": {
+                    "$ref": "#/definitions/request.Dept"
+                },
                 "nickname": {
                     "type": "string"
+                },
+                "userDepts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.Dept"
+                    }
                 },
                 "username": {
                     "type": "string"

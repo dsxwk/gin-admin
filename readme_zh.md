@@ -3,6 +3,7 @@
 - [项目简介](#项目简介)
   - [项目地址](#项目地址) 
   - [前端地址](#前端地址) 
+  - [预览截图](#预览截图) 
 - [许可证](#许可证)
 - [版本记录](#版本记录)
 - [安装说明](#安装说明)
@@ -140,6 +141,19 @@
 ## 前端地址
 - Github: https://github.com/dsxwk/gin-web.git
 - Gitee: https://gitee.com/dsxwk/gin-web.git
+
+## 预览截图
+![image](docs/images/Cli_2026-08-07_16-36-40_0.png)
+![image](docs/images/Cli_2026-08-07_16-24-03_2.png)
+![image](docs/images/Cli_2026-08-07_16-30-09_3.png)
+![image](docs/images/Cli_2026-08-07_16-16-42_8.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-11-03_1.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-12-06_2.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-12-44_3.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-13-30_4.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-14-00_5.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-14-28_6.png)
+![image](docs/images/SwaggerApi_2026-08-07_16-15-15_7.png)
 
 ## Gin框架介绍
 > Gin是一个用Go语言编写的Web框架。它具有简单、快速、高效等特点, 被广泛应用于Go语言的Web开发中。
