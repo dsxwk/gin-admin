@@ -1,5 +1,11 @@
 # Version History
 
+## v2.3.13
+> - Permission synchronization and command line task list view adjustment
+> - New effect preview screenshot
+> - New department related interfaces and user function add user department
+> - Database backup
+
 ## v2.3.12
 > - Optimize menu function and configuration loading
 > - Database structure change and database backup

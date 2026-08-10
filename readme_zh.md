@@ -169,7 +169,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本 [v2.3.12](version_history_zh.md#v2312)
+> - 最新版本 [v2.3.13](version_history_zh.md#v2313)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
