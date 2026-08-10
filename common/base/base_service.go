@@ -39,20 +39,9 @@ func (s *BaseService) getDB(model Model) *gorm.DB {
 	return facade.DB().WithContext(s.Ctx)
 }
 
-// DB 获取数据库连接,连接无效时自动重连
+// DB 获取数据库连接
 func (s *BaseService) DB(model Model) *gorm.DB {
-	db := s.getDB(model)
-
-	// 检查连接是否有效
-	sqlDB, err := db.DB()
-	if err == nil {
-		if err = sqlDB.Ping(); err != nil {
-			facade.Log().Warn("数据库连接无效,关闭旧连接并重建")
-			db = facade.ResetDB(db).WithContext(s.Ctx)
-		}
-	}
-
-	return db
+	return s.getDB(model)
 }
 
 // Search 搜索扩展方法

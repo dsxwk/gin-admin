@@ -48,7 +48,10 @@ func LoadRouters(router *gin.Engine) {
 
 	// 自动注册
 	AutoLoads(public, auth)
-	// 自动生成权限Key并同步到权限表
+}
+
+// SyncPermissionRoutes 同步路由权限到数据库(仅服务器启动时调用)
+func SyncPermissionRoutes() {
 	permissionKeys := GenerateAuthPermissionKeys()
 	if len(permissionKeys) > 0 {
 		svc := service.PermissionService{}
