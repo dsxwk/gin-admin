@@ -8,20 +8,22 @@ const TableNameUser = "user"
 
 // User 用户表
 type User struct {
-	ID        int64        `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`           // ID
-	Avatar    string       `gorm:"column:avatar;type:varchar(255);not null;comment:头像" json:"avatar"`                            // 头像
-	Username  string       `gorm:"column:username;type:varchar(10);not null;comment:用户名" json:"username"`                        // 用户名
-	FullName  string       `gorm:"column:full_name;type:varchar(20);not null;comment:姓名" json:"fullName"`                        // 姓名
-	Email     string       `gorm:"column:email;type:varchar(50);not null;comment:邮箱" json:"email"`                               // 邮箱
-	Password  string       `gorm:"column:password;type:varchar(255);not null;comment:密码" json:"password"`                        // 密码
-	Nickname  string       `gorm:"column:nickname;type:varchar(50);not null;comment:昵称" json:"nickname"`                         // 昵称
-	Gender    int64        `gorm:"column:gender;type:tinyint(1) unsigned;not null;comment:性别 1=男 2=女" json:"gender"`             // 性别 1=男 2=女
-	Age       int64        `gorm:"column:age;type:int(10) unsigned;not null;comment:年龄" json:"age"`                              // 年龄
-	Status    int64        `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"` // 状态 1=启用 2=停用
-	UserRoles []*UserRoles `gorm:"foreignKey:user_id;references:id;comment:用户角色" json:"userRoles"`                               // 用户角色
-	CreatedAt *DateTime    `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                // 创建时间
-	UpdatedAt *DateTime    `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                // 更新时间
-	DeletedAt *DeletedAt   `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`           // 删除时间
+	ID        int64              `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true;comment:ID" json:"id"`           // ID
+	Avatar    string             `gorm:"column:avatar;type:varchar(255);not null;comment:头像" json:"avatar"`                            // 头像
+	Username  string             `gorm:"column:username;type:varchar(10);not null;comment:用户名" json:"username"`                        // 用户名
+	FullName  string             `gorm:"column:full_name;type:varchar(20);not null;comment:姓名" json:"fullName"`                        // 姓名
+	Email     string             `gorm:"column:email;type:varchar(50);not null;comment:邮箱" json:"email"`                               // 邮箱
+	Password  string             `gorm:"column:password;type:varchar(255);not null;comment:密码" json:"password"`                        // 密码
+	Nickname  string             `gorm:"column:nickname;type:varchar(50);not null;comment:昵称" json:"nickname"`                         // 昵称
+	Gender    int64              `gorm:"column:gender;type:tinyint(1) unsigned;not null;comment:性别 1=男 2=女" json:"gender"`             // 性别 1=男 2=女
+	Age       int64              `gorm:"column:age;type:int(10) unsigned;not null;comment:年龄" json:"age"`                              // 年龄
+	Status    int64              `gorm:"column:status;type:tinyint(3) unsigned;not null;default:1;comment:状态 1=启用 2=停用" json:"status"` // 状态 1=启用 2=停用
+	UserRoles []*UserRoles       `gorm:"foreignKey:user_id;references:id;comment:用户角色" json:"userRoles"`                               // 用户角色
+	MainDept  *UserDepartments   `gorm:"foreignKey:user_id;references:id;comment:主部门" json:"mainDept"`
+	UserDepts []*UserDepartments `gorm:"foreignKey:user_id;references:id;comment:用户部门" json:"userDepts"`
+	CreatedAt *DateTime          `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                      // 创建时间
+	UpdatedAt *DateTime          `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                      // 更新时间
+	DeletedAt *DeletedAt         `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"` // 删除时间
 }
 
 // TableName User's table name

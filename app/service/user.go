@@ -23,7 +23,13 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 	)
 
 	// 搜索
-	db = s.Search(db, m, req.Search).Model(&m).Preload("UserRoles")
+	db = s.Search(db, m, req.Search).
+		Model(&m).
+		Preload("UserRoles").
+		Preload("MainDept", "is_main = ?", 1).
+		Preload("MainDept.Dept").
+		Preload("UserDepts").
+		Preload("UserDepts.Dept")
 
 	err = db.Count(&pageData.Total).Error
 	if err != nil {
@@ -102,6 +108,49 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 		}
 	}
 
+	// 处理用户部门
+	if len(req.UserDepts) > 0 {
+		var newUserDepts []model.UserDepartments
+		for _, v := range req.UserDepts {
+			newUserDepts = append(newUserDepts, model.UserDepartments{
+				UserId:       m.ID,
+				DepartmentId: v.DepartmentId,
+			})
+		}
+
+		err = tx.Model(&model.UserDepartments{}).Create(&newUserDepts).Error
+		if err != nil {
+			tx.Rollback()
+			return m, err
+		}
+
+		// 设置主部门
+		if req.MainDept.DepartmentId > 0 {
+			mainDeptId := req.MainDept.DepartmentId
+
+			// 校验主部门必须在所属部门中
+			found := false
+			for _, v := range req.UserDepts {
+				if v.DepartmentId == mainDeptId {
+					found = true
+					break
+				}
+			}
+			if !found {
+				tx.Rollback()
+				return m, errors.New("主部门必须为所属部门其中一个")
+			}
+
+			err = tx.Model(&model.UserDepartments{}).
+				Where("user_id = ? AND department_id = ?", m.ID, mainDeptId).
+				Update("is_main", 1).Error
+			if err != nil {
+				tx.Rollback()
+				return m, err
+			}
+		}
+	}
+
 	tx.Commit()
 
 	return m, nil
@@ -118,6 +167,13 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 	if !ok {
 		userRolesData = []interface{}{}
 	}
+
+	userDeptsData, ok := data["userDepts"].([]interface{})
+	if !ok {
+		userDeptsData = []interface{}{}
+	}
+
+	mainDeptData, _ := data["mainDept"].(map[string]interface{})
 
 	// 校验用户名是否重复
 	err = db.Model(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
@@ -176,6 +232,65 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 		}
 	}
 
+	// 更新用户部门
+	if len(userDeptsData) > 0 {
+		err = tx.Model(&model.UserDepartments{}).Where("user_id = ?", id).Delete(&model.UserDepartments{}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		var newUserDepts []model.UserDepartments
+		for _, item := range userDeptsData {
+			deptMap, _ok := item.(map[string]interface{})
+			if !_ok {
+				continue
+			}
+
+			newUserDepts = append(newUserDepts, model.UserDepartments{
+				UserId:       id,
+				DepartmentId: int64(deptMap["departmentId"].(float64)),
+			})
+		}
+
+		if len(newUserDepts) > 0 {
+			err = tx.Model(&model.UserDepartments{}).Create(&newUserDepts).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+
+		// 设置主部门
+		if mainDeptData != nil && len(mainDeptData) > 0 {
+			mainDeptId, _ := mainDeptData["departmentId"].(float64)
+
+			// 校验主部门必须在所属部门中
+			found := false
+			for _, item := range userDeptsData {
+				deptMap, _ok := item.(map[string]interface{})
+				if !_ok {
+					continue
+				}
+				if int64(deptMap["departmentId"].(float64)) == int64(mainDeptId) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				tx.Rollback()
+				return errors.New("主部门必须为所属部门其中一个")
+			}
+
+			err = tx.Model(&model.UserDepartments{}).
+				Where("user_id = ? AND department_id = ?", id, int64(mainDeptId)).
+				Update("is_main", enum.DepartmentMainYes).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
 	tx.Commit()
 
 	return nil
@@ -189,6 +304,10 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 
 	err = db.Model(&m).
 		Preload("UserRoles").
+		Preload("MainDept", "is_main = ?", enum.DepartmentMainYes).
+		Preload("MainDept.Dept").
+		Preload("UserDepts").
+		Preload("UserDepts.Dept").
 		First(&m, id).Error
 	if err != nil {
 		return m, err

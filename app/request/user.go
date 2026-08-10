@@ -19,25 +19,36 @@ type User struct {
 	Age       int64      `json:"age" validate:"int" label:"年龄"`
 	UserRoles []UserRole `json:"userRoles" validate:"" label:"用户角色"`
 	IDs       []int64    `json:"ids" validate:"required" label:"ID列表"`
+	MainDept  Dept       `json:"mainDept" validate:"required" label:"主部门"`
+	UserDepts []Dept     `json:"userDepts" validate:"required" label:"用户部门"`
 	PageListValidate
+}
+
+// Dept 部门
+type Dept struct {
+	DepartmentId int64 `json:"departmentId" form:"departmentId" validate:"required|int|gt:0" label:"部门id"`
 }
 
 // UserCreate 用户创建验证
 type UserCreate struct {
-	Username string `json:"username" validate:"required" label:"用户名"`
-	FullName string `json:"fullName" validate:"required" label:"姓名"`
-	Nickname string `json:"nickname" validate:"required" label:"昵称"`
-	Gender   int    `json:"gender" validate:"required|int" label:"性别"`
-	Password string `json:"password" validate:"required" label:"密码"`
+	Username  string `json:"username" validate:"required" label:"用户名"`
+	FullName  string `json:"fullName" validate:"required" label:"姓名"`
+	Nickname  string `json:"nickname" validate:"required" label:"昵称"`
+	Gender    int    `json:"gender" validate:"required|int" label:"性别"`
+	Password  string `json:"password" validate:"required" label:"密码"`
+	MainDept  Dept   `json:"mainDept" validate:"required" label:"主部门"`
+	UserDepts []Dept `json:"userDepts" validate:"required" label:"用户部门"`
 }
 
 // UserUpdate 用户更新验证
 type UserUpdate struct {
-	Username string `json:"username" validate:"required" label:"用户名"`
-	FullName string `json:"fullName" validate:"required" label:"姓名"`
-	Nickname string `json:"nickname" validate:"required" label:"昵称"`
-	Gender   int    `json:"gender" validate:"required|int" label:"性别"`
-	Age      int    `json:"age" validate:"int" label:"年龄"`
+	Username  string `json:"username" validate:"required" label:"用户名"`
+	FullName  string `json:"fullName" validate:"required" label:"姓名"`
+	Nickname  string `json:"nickname" validate:"required" label:"昵称"`
+	Gender    int    `json:"gender" validate:"required|int" label:"性别"`
+	Age       int    `json:"age" validate:"int" label:"年龄"`
+	MainDept  Dept   `json:"mainDept" validate:"required" label:"主部门"`
+	UserDepts []Dept `json:"userDepts" validate:"required" label:"用户部门"`
 }
 
 // UserPassword 用户密码
@@ -87,8 +98,8 @@ func (s User) Validate(data User, scene string) error {
 func (s User) ConfigValidation(v *validate.Validation) {
 	scenes := validate.SValues{
 		"List":        []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"Create":      []string{"Username", "FullName", "Nickname", "Gender", "Password"},
-		"Update":      []string{"ID", "Username", "FullName", "Nickname", "Gender"},
+		"Create":      []string{"Username", "FullName", "Nickname", "Gender", "Password", "MainDept.DepartmentId", "UserDepts"},
+		"Update":      []string{"ID", "Username", "FullName", "Nickname", "Gender", "MainDept.DepartmentId", "UserDepts"},
 		"Detail":      []string{"ID"},
 		"Delete":      []string{"ID"},
 		"BatchDelete": []string{"IDs"},
@@ -109,7 +120,7 @@ func (s User) Messages() map[string]string {
 
 // Translates 字段翻译
 func (s User) Translates() map[string]string {
-	return validate.MS{
+	ms := validate.MS{
 		"PageListValidate.Page":     "页码",
 		"PageListValidate.PageSize": "每页数量",
 		"ID":                        "ID",
@@ -118,7 +129,15 @@ func (s User) Translates() map[string]string {
 		"Nickname":                  "昵称",
 		"Gender":                    "性别",
 		"Password":                  "密码",
+		"MainDept.DepartmentId":     "主部门",
+		"UserDepts":                 "用户部门",
 	}
+	for i := range s.UserDepts {
+		prefix := pkg.Sprintf("UserDepts.%d.", i)
+		rowLabel := pkg.Sprintf("用户部门第 %d 项 ", i+1)
+		ms[prefix+"DepartmentId"] = rowLabel + "部门ID"
+	}
+	return ms
 }
 
 // Validate 用户导入验证
