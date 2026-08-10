@@ -7,15 +7,21 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// RelationInfo 关联信息
-type RelationInfo struct {
+// JoinStep 关联链中的一步
+type JoinStep struct {
 	Relation *schema.Relationship
 	Schema   *schema.Schema
-	Field    *schema.Field
+}
+
+// RelationInfo 关联信息
+type RelationInfo struct {
+	Chain  []JoinStep
+	Schema *schema.Schema
+	Field  *schema.Field
 }
 
 // ParseRelation 解析关联路径
-// 例如: RoleMenus.Menu.Name
+// 例如: deptLeaders.leader.fullName
 func ParseRelation(root *schema.Schema, path string) (*RelationInfo, error) {
 	items := strings.Split(path, ".")
 	if len(items) < 2 {
@@ -23,13 +29,18 @@ func ParseRelation(root *schema.Schema, path string) (*RelationInfo, error) {
 	}
 
 	current := root
-	var relation *schema.Relationship
+	var chain []JoinStep
 
 	for _, name := range items[:len(items)-1] {
-		relation = FindRelation(current, name)
+		relation := FindRelation(current, name)
 		if relation == nil {
 			return nil, fmt.Errorf("关联[%s]不存在", name)
 		}
+
+		chain = append(chain, JoinStep{
+			Relation: relation,
+			Schema:   current,
+		})
 
 		current = relation.FieldSchema
 	}
@@ -40,29 +51,65 @@ func ParseRelation(root *schema.Schema, path string) (*RelationInfo, error) {
 	}
 
 	return &RelationInfo{
-		Relation: relation,
-		Schema:   current,
-		Field:    field,
+		Chain:  chain,
+		Schema: current,
+		Field:  field,
 	}, nil
 }
 
-// JoinSQL 生成关联条件
-func (r *RelationInfo) JoinSQL(parentTable string) string {
-	sqls := make([]string, 0, len(r.Relation.References))
+// fromClause 生成FROM子句(含JOIN)
+func (r *RelationInfo) fromClause() string {
+	if len(r.Chain) == 0 {
+		return r.Schema.Table
+	}
 
-	for _, ref := range r.Relation.References {
-		sqls = append(sqls,
-			fmt.Sprintf(
-				"%s.%s=%s.%s",
-				r.Schema.Table,
+	var parts []string
+	// 第一个表
+	first := r.Chain[0]
+	parts = append(parts, first.Relation.FieldSchema.Table)
+
+	// 后续表通过JOIN连接
+	for i := 1; i < len(r.Chain); i++ {
+		curr := r.Chain[i].Relation.FieldSchema.Table
+		rel := r.Chain[i].Relation
+
+		var joins []string
+		for _, ref := range rel.References {
+			joins = append(joins,
+				fmt.Sprintf("%s.%s = %s.%s",
+					ref.PrimaryKey.Schema.Table,
+					ref.PrimaryKey.DBName,
+					ref.ForeignKey.Schema.Table,
+					ref.ForeignKey.DBName,
+				),
+			)
+		}
+		parts = append(parts, fmt.Sprintf("INNER JOIN %s ON %s", curr, strings.Join(joins, " AND ")))
+	}
+
+	return strings.Join(parts, " ")
+}
+
+// joinConditions 生成根表与第一个关联表的连接条件
+func (r *RelationInfo) joinConditions(rootTable string) string {
+	if len(r.Chain) == 0 {
+		return ""
+	}
+
+	var conditions []string
+	first := r.Chain[0]
+	for _, ref := range first.Relation.References {
+		conditions = append(conditions,
+			fmt.Sprintf("%s.%s = %s.%s",
+				ref.ForeignKey.Schema.Table,
 				ref.ForeignKey.DBName,
-				parentTable,
+				rootTable,
 				ref.PrimaryKey.DBName,
 			),
 		)
 	}
 
-	return strings.Join(sqls, " AND ")
+	return strings.Join(conditions, " AND ")
 }
 
 // BuildRelation 构建关联字段查询
@@ -77,7 +124,17 @@ func BuildRelation(root *schema.Schema, field string, operator string, value any
 		return "", nil, err
 	}
 
-	sql := fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE %s AND %s)", info.Schema.Table, info.JoinSQL(root.Table), expr)
+	from := info.fromClause()
+	conditions := info.joinConditions(root.Table)
+
+	var where string
+	if conditions != "" {
+		where = conditions + " AND " + expr
+	} else {
+		where = expr
+	}
+
+	sql := fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE %s)", from, where)
 
 	return sql, args, nil
 }
@@ -94,13 +151,18 @@ func BuildExists(root *schema.Schema, relation string, filter map[string]any, no
 		return "", nil, err
 	}
 
-	where := info.JoinSQL(root.Table)
+	conditions := info.joinConditions(root.Table)
 
 	if sql != "" {
-		where += " AND " + sql
+		if conditions != "" {
+			conditions += " AND " + sql
+		} else {
+			conditions = sql
+		}
 	}
 
-	result := fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE %s)", info.Schema.Table, where)
+	from := info.fromClause()
+	result := fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE %s)", from, conditions)
 
 	if not {
 		result = "NOT " + result

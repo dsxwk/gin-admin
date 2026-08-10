@@ -131,12 +131,7 @@ func (p *CacheProxy) publish(method, key string, val interface{}, cost time.Dura
 	}
 }
 
+// Redis 获取Redis实例
 func (p *CacheProxy) Redis() *RedisCache {
-	r := p.c.(*RedisCache)
-	if err := r.Ping(); err != nil {
-		ResetRedisCache(p.conf)
-		p.c = redisCache.c
-		r = p.c.(*RedisCache)
-	}
-	return r
+	return p.c.(*RedisCache)
 }

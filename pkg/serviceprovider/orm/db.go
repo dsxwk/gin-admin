@@ -70,11 +70,11 @@ func Connection(driver string, cfg *config.Config) *gorm.DB {
 		os.Exit(1)
 	}
 
-	// 设置连接池参数
+	// 设置连接池参数(ConnMaxLifetime小于MySQLwait_timeout,避免僵尸连接)
 	sqlDB.SetMaxIdleConns(20)
 	sqlDB.SetMaxOpenConns(200)
-	sqlDB.SetConnMaxLifetime(30 * time.Minute)
-	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+	sqlDB.SetConnMaxLifetime(3 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(1 * time.Minute)
 
 	// 测试Ping
 	if err = sqlDB.Ping(); err != nil {
