@@ -11,11 +11,100 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 10/08/2026 11:14:20
+ Date: 13/08/2026 14:22:34
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for agent_message
+-- ----------------------------
+DROP TABLE IF EXISTS `agent_message`;
+CREATE TABLE `agent_message`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `session_id` int(10) UNSIGNED NOT NULL COMMENT 'AI会话ID',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'user=用户问题 assistant=模型回答 tool=工具执行结果 system=系统提示语',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '消息正文,user存问题原文,assistant存回答或空(有工具调用时content为空),tool存工具返回的JSON',
+  `tool_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '工具名称,assistant消息存要调用的工具名(如route:list),tool消息存已执行的工具名',
+  `tool_call_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'DeepSeek返回的工具调用ID,assistant和对应的tool消息共用一个ID,用于关联\"调了什么→返回了什么\"',
+  `tool_args` json NULL COMMENT '工具参数,仅assistant消息,存模型传过来的参数JSON(如{\"command\":\"route:list\"})',
+  `tokens` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '本条消息消耗的token数（API返回的usage）',
+  `cost_ms` decimal(10, 2) UNSIGNED NOT NULL DEFAULT 0.00 COMMENT '本轮对话耗时(毫秒),包含API调用+工具执行的总时间',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_session_id`(`session_id`) USING BTREE,
+  INDEX `idx_tool_call_id`(`tool_call_id`) USING BTREE,
+  INDEX `idx_created_at`(`created_at`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI消息详情表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of agent_message
+-- ----------------------------
+INSERT INTO `agent_message` VALUES (5, 3, 'user', '你能做什么', '', '', NULL, 0, 0.00, '2026-08-13 09:48:40', '2026-08-13 09:48:40', NULL);
+INSERT INTO `agent_message` VALUES (6, 3, 'assistant', '你好！我是 Gin-Admin 后台 AI 助手，可以帮你处理以下范围的事情：\n\n## 📊 数据查询\n- **操作日志统计**：查询今日/指定日期的 PV、UV、请求方法分布、状态码统计等\n- **系统配置查询**：查询站点名称、LOGO 等系统配置项\n- **用户搜索**：根据姓名或用户名搜索系统用户\n- **部门查询**：查询部门树结构、指定上级的子部门、部门成员数量\n- **字典查询**：查询性别、状态等枚举字典项\n\n## 🛠️ CLI 命令执行\n- **代码生成**：\n  - 创建控制器（`make:controller`）\n  - 创建模型（`make:model`）\n  - 创建服务（`make:service`）\n  - 创建验证器（`make:request`）\n  - 创建中间件（`make:middleware`）\n  - 创建路由（`make:router`）\n  - 生成 Swagger 文档（`make:docs`）\n- **权限管理**：\n  - 同步用户权限到 Redis（`permission:sync`）\n  - 授予 admin 全部权限（`permission:grant-admin`）\n- **查看信息**：\n  - 查看路由列表（`route:list`）\n  - 查看 Job 列表（`job:list`）\n\n有什么需要帮忙的，尽管告诉我～ 😊', '', '', NULL, 0, 6815.00, '2026-08-13 09:48:47', '2026-08-13 09:48:47', NULL);
+INSERT INTO `agent_message` VALUES (7, 3, 'user', '给我重新生成swagger文档', '', '', NULL, 0, 0.00, '2026-08-13 09:57:46', '2026-08-13 09:57:46', NULL);
+INSERT INTO `agent_message` VALUES (8, 3, 'assistant', '好的，我来为你重新生成 Swagger 文档。', 'execute_cli', 'call_00_kw6tQZJkVLir15isHcsw2949', '{\"command\": \"make:docs\"}', 0, 1779.00, '2026-08-13 09:57:48', '2026-08-13 09:57:48', NULL);
+INSERT INTO `agent_message` VALUES (9, 3, 'tool', '{\"args\":{},\"command\":\"make:docs\",\"message\":\"命令 make:docs 执行完成\",\"output\":\"2026/08/13 09:57:48 Generate swagger docs....\\n2026/08/13 09:57:48 Generate general API Info, search dir:./\\n2026/08/13 09:57:53 Generating request.AgentAsk\\n2026/08/13 09:57:53 Generating base.BaseRequest\\n2026/08/13 09:57:53 Generating base.Context\\n2026/08/13 09:57:53 Generating errcode.SuccessResponse\\n2026/08/13 09:57:53 Generating model.AgentMessage\\n2026/08/13 09:57:53 Generating model.JsonValue\\n2026/08/13 09:57:53 Generating model.DateTime\\n2026/08/13 09:57:53 Generating errcode.ArgsErrorResponse\\n2026/08/13 09:57:53 Generating errcode.SystemErrorResponse\\n2026/08/13 09:57:53 Generating request.PageData\\n2026/08/13 09:57:53 Generating model.Article\\n2026/08/13 09:57:53 Generating model.User\\n2026/08/13 09:57:53 Generating model.UserRoles\\n2026/08/13 09:57:53 Skipping \'model.User\', recursion detected.\\n2026/08/13 09:57:53 Generating model.UserDepartments\\n2026/08/13 09:57:53 Generating model.Department\\n2026/08/13 09:57:53 Generating model.DepartmentLeaders\\n2026/08/13 09:57:53 Skipping \'model.User\', recursion detected.\\n2026/08/13 09:57:53 Generating pkg.TreeNode\\n2026/08/13 09:57:53 Generating request.ArticleCreate\\n2026/08/13 09:57:53 Generating request.ArticleUpdate\\n2026/08/13 09:57:53 Generating model.ConfigCategory\\n2026/08/13 09:57:53 Generating request.ConfigCategoryCreate\\n2026/08/13 09:57:53 Generating request.ConfigCategoryUpdate\\n2026/08/13 09:57:53 Generating service.DashboardCard\\n2026/08/13 09:57:53 Generating service.OperatorLogStatistics\\n2026/08/13 09:57:53 Generating service.MethodStat\\n2026/08/13 09:57:53 Generating service.CostDist\\n2026/08/13 09:57:53 Generating service.HourlyStat\\n2026/08/13 09:57:53 Generating service.StatusCodeStat\\n2026/08/13 09:57:53 Generating service.DashboardSummary\\n2026/08/13 09:57:53 Generating service.SystemResource\\n2026/08/13 09:57:53 Generating service.CPUInfo\\n2026/08/13 09:57:53 Generating service.MemoryInfo\\n2026/08/13 09:57:53 Generating service.DiskInfo\\n2026/08/13 09:57:53 Generating service.NetInfo\\n2026/08/13 09:57:53 Generating request.DepartmentCreate\\n2026/08/13 09:57:53 Generating request.DepartmentUpdate\\n2026/08/13 09:57:53 Generating model.Dict\\n2026/08/13 09:57:53 Generating request.DictCreate\\n2026/08/13 09:57:53 Generating request.DictUpdate\\n2026/08/13 09:57:53 Generating model.ImportRecords\\n2026/08/13 09:57:53 Generating request.UserLogin\\n2026/08/13 09:57:53 Generating v1.LoginResponse\\n2026/08/13 09:57:53 Generating v1.Token\\n2026/08/13 09:57:53 Generating v1.CaptchaResponse\\n2026/08/13 09:57:53 Generating request.CheckCaptcha\\n2026/08/13 09:57:53 Generating model.Menu\\n2026/08/13 09:57:53 Generating model.MenuActions\\n2026/08/13 09:57:53 Generating model.RoleMenus\\n2026/08/13 09:57:53 Generating model.MenuMeta\\n2026/08/13 09:57:53 Generating request.MenuCreate\\n2026/08/13 09:57:53 Generating request.Meta\\n2026/08/13 09:57:53 Generating request.ActionCreate\\n2026/08/13 09:57:53 Generating request.RoleMenu\\n2026/08/13 09:57:53 Generating request.MenuUpdate\\n2026/08/13 09:57:53 Generating model.OperatorLog\\n2026/08/13 09:57:53 Generating request.OperatorLog\\n2026/08/13 09:57:53 Generating request.PageListValidate\\n2026/08/13 09:57:53 Generating model.Permission\\n2026/08/13 09:57:53 Generating model.Roles\\n2026/08/13 09:57:53 Generating model.RolePermissions\\n2026/08/13 09:57:53 Generating request.RoleCreate\\n2026/08/13 09:57:53 Generating request.UserRoles\\n2026/08/13 09:57:53 Generating request.RolePermission\\n2026/08/13 09:57:53 Generating request.RoleUpdate\\n2026/08/13 09:57:53 Generating model.SystemConfig\\n2026/08/13 09:57:53 Generating request.SystemConfigUpdates\\n2026/08/13 09:57:53 Generating request.SystemConfigValueUpdate\\n2026/08/13 09:57:53 Generating request.SystemConfigCreate\\n2026/08/13 09:57:53 Generating request.SystemConfigUpdate\\n2026/08/13 09:57:53 Generating request.UserCreate\\n2026/08/13 09:57:53 Generating request.Dept\\n2026/08/13 09:57:53 Generating request.UserUpdate\\n2026/08/13 09:57:53 Generating request.UserImport\\n2026/08/13 09:57:53 Generating request.UserImportItem\\n2026/08/13 09:57:53 Generating request.UserBatchDelete\\n2026/08/13 09:57:53 Generating request.UserPassword\\n2026/08/13 09:57:53 create docs.go at docs/docs.go\\n2026/08/13 09:57:53 create swagger.json at docs/swagger.json\\n2026/08/13 09:57:53 create swagger.yaml at docs/swagger.yaml\\n\\n\"}', 'execute_cli', 'call_00_kw6tQZJkVLir15isHcsw2949', NULL, 0, 0.00, '2026-08-13 09:57:54', '2026-08-13 09:57:54', NULL);
+INSERT INTO `agent_message` VALUES (10, 3, 'user', '给admin用户赋予全部权限', '', '', NULL, 0, 0.00, '2026-08-13 09:58:58', '2026-08-13 09:58:58', NULL);
+INSERT INTO `agent_message` VALUES (11, 3, 'assistant', '好的，我来为 admin 用户授予全部权限。', 'execute_cli', 'call_00_ZWGevBpdELwKr0n8CXsG8751', '{\"command\": \"permission:grant-admin\"}', 0, 1680.00, '2026-08-13 09:58:59', '2026-08-13 09:58:59', NULL);
+INSERT INTO `agent_message` VALUES (12, 3, 'tool', '{\"args\":{},\"command\":\"permission:grant-admin\",\"message\":\"命令 permission:grant-admin 执行完成\",\"output\":\"\"}', 'execute_cli', 'call_00_ZWGevBpdELwKr0n8CXsG8751', NULL, 0, 0.00, '2026-08-13 09:59:00', '2026-08-13 09:59:00', NULL);
+INSERT INTO `agent_message` VALUES (13, 3, 'assistant', '已成功为 admin 用户授予全部权限 ✅\n\n如需确认权限是否同步到 Redis，可以再执行 `permission:sync` 命令。', '', '', NULL, 0, 1247.00, '2026-08-13 09:59:01', '2026-08-13 09:59:01', NULL);
+INSERT INTO `agent_message` VALUES (14, 3, 'user', '可以再执行 `permission:sync` 命令', '', '', NULL, 0, 0.00, '2026-08-13 09:59:26', '2026-08-13 09:59:26', NULL);
+INSERT INTO `agent_message` VALUES (15, 3, 'assistant', '好的，我来执行权限同步命令。', 'execute_cli', 'call_00_4t6OhJzoEru8Hmi9g0ed0449', '{\"command\": \"permission:sync\"}', 0, 2182.00, '2026-08-13 09:59:28', '2026-08-13 09:59:28', NULL);
+INSERT INTO `agent_message` VALUES (16, 3, 'tool', '{\"args\":{},\"command\":\"permission:sync\",\"message\":\"命令 permission:sync 执行完成\",\"output\":\"\"}', 'execute_cli', 'call_00_4t6OhJzoEru8Hmi9g0ed0449', NULL, 0, 0.00, '2026-08-13 09:59:28', '2026-08-13 09:59:28', NULL);
+INSERT INTO `agent_message` VALUES (17, 3, 'assistant', '权限同步命令已执行完成 ✅\n\n现在 admin 用户的权限已成功授予并同步到 Redis 了。', '', '', NULL, 0, 1879.00, '2026-08-13 09:59:30', '2026-08-13 09:59:30', NULL);
+INSERT INTO `agent_message` VALUES (20, 4, 'user', '当前系统配置有哪些配置', '', '', NULL, 0, 0.00, '2026-08-13 10:45:58', '2026-08-13 10:45:58', NULL);
+INSERT INTO `agent_message` VALUES (21, 4, 'assistant', '', 'query_system_config', 'call_00_CexaC0YCXk4qjdKy545Z8425', '{}', 0, 1379.00, '2026-08-13 10:46:00', '2026-08-13 10:46:00', NULL);
+INSERT INTO `agent_message` VALUES (22, 4, 'tool', '{\"error\":\"Error 1054 (42S22): Unknown column \'sort\' in \'order clause\'\"}', 'query_system_config', 'call_00_CexaC0YCXk4qjdKy545Z8425', NULL, 0, 0.00, '2026-08-13 10:46:00', '2026-08-13 10:46:00', NULL);
+INSERT INTO `agent_message` VALUES (23, 4, 'assistant', '抱歉，查询系统配置时出现了数据库错误：\n\n**Error 1054 (42S22): Unknown column \'sort\' in \'order clause\'**\n\n这表示系统配置表在排序时引用了一个不存在的 `sort` 字段，属于后端程序或数据库结构问题，我无法获取到配置数据。\n\n建议联系开发人员检查系统配置表（如 `sys_config`）是否存在 `sort` 字段，或修正相关查询语句。', '', '', NULL, 0, 2496.00, '2026-08-13 10:46:02', '2026-08-13 10:46:02', NULL);
+INSERT INTO `agent_message` VALUES (24, 4, 'user', '重新查询', '', '', NULL, 0, 0.00, '2026-08-13 10:51:39', '2026-08-13 10:51:39', NULL);
+INSERT INTO `agent_message` VALUES (25, 4, 'assistant', '', 'query_system_config', 'call_00_4oHKJxxvbEGZh40iCNIM6608', '{}', 0, 1315.00, '2026-08-13 10:51:40', '2026-08-13 10:51:40', NULL);
+INSERT INTO `agent_message` VALUES (26, 4, 'tool', '{\"list\":[{\"key\":\"web_domain\",\"name\":\"网站域名\",\"value\":\"www.a.com\",\"type\":1},{\"key\":\"is_open_site\",\"name\":\"关闭站点\",\"value\":\"开启\",\"type\":2},{\"key\":\"site_logo\",\"name\":\"网站Logo\",\"value\":\"\",\"type\":6},{\"key\":\"email_port\",\"name\":\"邮件端口\",\"value\":\"465\",\"type\":1},{\"key\":\"email_title\",\"name\":\"邮件标题\",\"value\":\"【xxx】验证码\",\"type\":1},{\"key\":\"send_user_info\",\"name\":\"发件人信息\",\"value\":\"【管理员】\",\"type\":1},{\"key\":\"email_content\",\"name\":\"发送内容\",\"value\":\"【xxx】你的验证码是：\",\"type\":5},{\"key\":\"web_keyword\",\"name\":\"关键词\",\"value\":\"关键词...\",\"type\":5},{\"key\":\"email\",\"name\":\"邮箱账号\",\"value\":\"xxx@email.com\",\"type\":1},{\"key\":\"record_number\",\"name\":\"备案编号\",\"value\":\"Copyright© 2014-2019 | Powered by ***1.1 | 粤ICP备****号\",\"type\":1},{\"key\":\"web_description\",\"name\":\"网站描述\",\"value\":\"web\",\"type\":1},{\"key\":\"select\",\"name\":\"下拉选项\",\"value\":\"下拉3\",\"type\":4},{\"key\":\"checkbox\",\"name\":\"复选框\",\"value\":\"HTML,CSS\",\"type\":3},{\"key\":\"textarea\",\"name\":\"文本域\",\"value\":\"文本域\",\"type\":5},{\"key\":\"default_head_img\",\"name\":\"默认头像\",\"value\":\"\",\"type\":6},{\"key\":\"seo_description\",\"name\":\"描述\",\"value\":\"11\",\"type\":5}],\"total\":16}', 'query_system_config', 'call_00_4oHKJxxvbEGZh40iCNIM6608', NULL, 0, 0.00, '2026-08-13 10:51:40', '2026-08-13 10:51:40', NULL);
+INSERT INTO `agent_message` VALUES (27, 4, 'assistant', '当前系统配置共 **16 项**，详情如下：\n\n| 配置键 | 名称 | 值 | 类型 |\n|---|---|---|---|\n| web_domain | 网站域名 | www.a.com | 文本 |\n| is_open_site | 关闭站点 | 开启 | 开关 |\n| site_logo | 网站Logo | （空） | 图片 |\n| email_port | 邮件端口 | 465 | 文本 |\n| email_title | 邮件标题 | 【xxx】验证码 | 文本 |\n| send_user_info | 发件人信息 | 【管理员】 | 文本 |\n| email_content | 发送内容 | 【xxx】你的验证码是： | 文本域 |\n| web_keyword | 关键词 | 关键词... | 文本域 |\n| email | 邮箱账号 | xxx@email.com | 文本 |\n| record_number | 备案编号 | Copyright© 2014-2019 | Powered by ***1.1 | 粤ICP备****号 | 文本 |\n| web_description | 网站描述 | web | 文本 |\n| select | 下拉选项 | 下拉3 | 下拉框 |\n| checkbox | 复选框 | HTML,CSS | 复选框 |\n| textarea | 文本域 | 文本域 | 文本域 |\n| default_head_img | 默认头像 | （空） | 图片 |\n| seo_description | 描述 | 11 | 文本域 |\n\n**主要配置概览：**\n- **站点信息**：域名 `www.a.com`，站点处于开启状态，Logo 未设置\n- **邮件配置**：邮箱账号 `xxx@email.com`，端口 465，发件人为【管理员】\n- **SEO/备案**：关键词、描述、备案编号均已配置\n\n如需查询某项具体配置，可告诉我配置键名。', '', '', NULL, 0, 4759.00, '2026-08-13 10:51:45', '2026-08-13 10:51:45', NULL);
+INSERT INTO `agent_message` VALUES (28, 4, 'user', '帮我重新生成swagger文档', '', '', NULL, 0, 0.00, '2026-08-13 10:53:08', '2026-08-13 10:53:08', NULL);
+INSERT INTO `agent_message` VALUES (29, 4, 'assistant', '', 'execute_cli', 'call_00_ESvviGKFDutFyNiVnr7N0190', '{\"command\": \"make:docs\"}', 0, 1681.00, '2026-08-13 10:53:10', '2026-08-13 10:53:10', NULL);
+INSERT INTO `agent_message` VALUES (30, 4, 'tool', '{\"args\":{},\"command\":\"make:docs\",\"message\":\"命令 make:docs 执行完成\",\"output\":\"2026/08/13 10:53:10 Generate swagger docs....\\n2026/08/13 10:53:10 Generate general API Info, search dir:./\\n2026/08/13 10:53:12 Generating request.AgentAsk\\n2026/08/13 10:53:12 Generating base.BaseRequest\\n2026/08/13 10:53:12 Generating base.Context\\n2026/08/13 10:53:12 Generating errcode.SuccessResponse\\n2026/08/13 10:53:12 Generating model.AgentSession\\n2026/08/13 10:53:12 Generating model.DateTime\\n2026/08/13 10:53:12 Generating errcode.SystemErrorResponse\\n2026/08/13 10:53:12 Generating model.AgentMessage\\n2026/08/13 10:53:12 Generating model.JsonValue\\n2026/08/13 10:53:12 Generating errcode.ArgsErrorResponse\\n2026/08/13 10:53:12 Generating request.PageData\\n2026/08/13 10:53:12 Generating model.Article\\n2026/08/13 10:53:12 Generating model.User\\n2026/08/13 10:53:12 Generating model.UserRoles\\n2026/08/13 10:53:12 Skipping \'model.User\', recursion detected.\\n2026/08/13 10:53:12 Generating model.UserDepartments\\n2026/08/13 10:53:12 Generating model.Department\\n2026/08/13 10:53:12 Generating model.DepartmentLeaders\\n2026/08/13 10:53:12 Skipping \'model.User\', recursion detected.\\n2026/08/13 10:53:12 Generating pkg.TreeNode\\n2026/08/13 10:53:12 Generating request.ArticleCreate\\n2026/08/13 10:53:12 Generating request.ArticleUpdate\\n2026/08/13 10:53:12 Generating model.ConfigCategory\\n2026/08/13 10:53:12 Generating request.ConfigCategoryCreate\\n2026/08/13 10:53:12 Generating request.ConfigCategoryUpdate\\n2026/08/13 10:53:12 Generating service.DashboardCard\\n2026/08/13 10:53:12 Generating service.OperatorLogStatistics\\n2026/08/13 10:53:12 Generating service.MethodStat\\n2026/08/13 10:53:12 Generating service.CostDist\\n2026/08/13 10:53:12 Generating service.HourlyStat\\n2026/08/13 10:53:12 Generating service.StatusCodeStat\\n2026/08/13 10:53:12 Generating service.DashboardSummary\\n2026/08/13 10:53:12 Generating service.SystemResource\\n2026/08/13 10:53:12 Generating service.CPUInfo\\n2026/08/13 10:53:12 Generating service.MemoryInfo\\n2026/08/13 10:53:12 Generating service.DiskInfo\\n2026/08/13 10:53:12 Generating service.NetInfo\\n2026/08/13 10:53:12 Generating request.DepartmentCreate\\n2026/08/13 10:53:12 Generating request.DepartmentUpdate\\n2026/08/13 10:53:12 Generating model.Dict\\n2026/08/13 10:53:12 Generating request.DictCreate\\n2026/08/13 10:53:12 Generating request.DictUpdate\\n2026/08/13 10:53:12 Generating model.ImportRecords\\n2026/08/13 10:53:12 Generating request.UserLogin\\n2026/08/13 10:53:12 Generating v1.LoginResponse\\n2026/08/13 10:53:12 Generating v1.Token\\n2026/08/13 10:53:12 Generating v1.CaptchaResponse\\n2026/08/13 10:53:12 Generating request.CheckCaptcha\\n2026/08/13 10:53:12 Generating model.Menu\\n2026/08/13 10:53:12 Generating model.MenuActions\\n2026/08/13 10:53:12 Generating model.RoleMenus\\n2026/08/13 10:53:12 Generating model.MenuMeta\\n2026/08/13 10:53:12 Generating request.MenuCreate\\n2026/08/13 10:53:12 Generating request.Meta\\n2026/08/13 10:53:12 Generating request.ActionCreate\\n2026/08/13 10:53:12 Generating request.RoleMenu\\n2026/08/13 10:53:12 Generating request.MenuUpdate\\n2026/08/13 10:53:12 Generating model.OperatorLog\\n2026/08/13 10:53:12 Generating request.OperatorLog\\n2026/08/13 10:53:12 Generating request.PageListValidate\\n2026/08/13 10:53:12 Generating model.Permission\\n2026/08/13 10:53:12 Generating model.Roles\\n2026/08/13 10:53:12 Generating model.RolePermissions\\n2026/08/13 10:53:12 Generating request.RoleCreate\\n2026/08/13 10:53:12 Generating request.UserRoles\\n2026/08/13 10:53:12 Generating request.RolePermission\\n2026/08/13 10:53:12 Generating request.RoleUpdate\\n2026/08/13 10:53:12 Generating model.SystemConfig\\n2026/08/13 10:53:12 Generating request.SystemConfigUpdates\\n2026/08/13 10:53:12 Generating request.SystemConfigValueUpdate\\n2026/08/13 10:53:12 Generating request.SystemConfigCreate\\n2026/08/13 10:53:12 Generating request.SystemConfigUpdate\\n2026/08/13 10:53:12 Generating request.UserCreate\\n2026/08/13 10:53:12 Generating request.Dept\\n2026/08/13 10:53:12 Generating request.UserUpdate\\n2026/08/13 10:53:12 Generating request.UserImport\\n2026/08/13 10:53:12 Generating request.UserImportItem\\n2026/08/13 10:53:12 Generating request.UserBatchDelete\\n2026/08/13 10:53:12 Generating request.UserPassword\\n2026/08/13 10:53:12 create docs.go at docs/docs.go\\n2026/08/13 10:53:12 create swagger.json at docs/swagger.json\\n2026/08/13 10:53:12 create swagger.yaml at docs/swagger.yaml\\n\\n\"}', 'execute_cli', 'call_00_ESvviGKFDutFyNiVnr7N0190', NULL, 0, 0.00, '2026-08-13 10:53:12', '2026-08-13 10:53:12', NULL);
+INSERT INTO `agent_message` VALUES (31, 4, 'assistant', 'Swagger 文档已成功重新生成 ✅\n\n**生成结果：**\n- 📄 `docs/docs.go`\n- 📄 `docs/swagger.json`\n- 📄 `docs/swagger.yaml`\n\n**生成时间：** 2026/08/13 10:53:12\n\n本次共扫描并生成了所有模型、请求体、响应体等结构定义，涵盖用户、部门、菜单、角色、权限、系统配置、操作日志、字典、文章等模块，以及登录、验证码等接口相关结构。生成过程正常完成，无报错。', '', '', NULL, 0, 1966.00, '2026-08-13 10:53:14', '2026-08-13 10:53:14', NULL);
+INSERT INTO `agent_message` VALUES (34, 6, 'user', '你能查询天气吗', '', '', NULL, 0, 0.00, '2026-08-13 11:07:50', '2026-08-13 11:07:50', NULL);
+INSERT INTO `agent_message` VALUES (35, 6, 'assistant', '抱歉,我当前只能处理以下范围:查询操作日志统计、查询系统配置项、根据姓名或用户名搜索系统用户、执行CLI命令、查询部门列表或指定上级的子部门、根据字典类型查询字典项', '', '', NULL, 0, 2064.00, '2026-08-13 11:07:53', '2026-08-13 11:07:53', NULL);
+INSERT INTO `agent_message` VALUES (39, 8, 'user', '给test角色新增ai助手权限', '', '', NULL, 0, 0.00, '2026-08-13 14:06:43', '2026-08-13 14:06:43', NULL);
+INSERT INTO `agent_message` VALUES (40, 8, 'assistant', '', 'execute_cli', 'call_00_jlWKIiR7BCMuBiJ5N2YC3616', '{\"command\": \"route:list\"}', 0, 3208.00, '2026-08-13 14:06:46', '2026-08-13 14:06:46', NULL);
+INSERT INTO `agent_message` VALUES (41, 8, 'tool', '{\"args\":{},\"command\":\"route:list\",\"message\":\"命令 route:list 执行完成\",\"output\":\"Method   Path                                Handler                                 \\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/agent/ask                  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).Ask\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/agent/history              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).History\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/agent/sessions             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).Sessions\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/article                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/article                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).List\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Update\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/captcha                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).CheckCaptcha\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/captcha                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).GetCaptcha\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/config-category            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/config-category            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).List\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/cards            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).Cards\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/statistics       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).Statistics\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/system-resource  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).SystemResource\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/department                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/department                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).List\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dict                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/dict                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Create\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Detail\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/import-records             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ImportRecordsController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/import-records/:id         \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ImportRecordsController).Delete\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/login                      \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).Login\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/menu                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/menu                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Create\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/operator-log               \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/operator-log/:id           \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/operator-log/:id           \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).Detail\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/operator-log/batch-delete  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).BatchDelete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/permission                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*PermissionController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/refresh-token              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).RefreshToken\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/role                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role/:id/menu              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).RoleMenu\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Create\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).UpdateConfig\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Detail\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/test                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).Test\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/user                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/user/:id/password          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Password\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user/batch-delete          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).BatchDelete\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user/import                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Import\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/ping                              \\u001b[0m \\u001b[37mgin/router.LoadRouters                  \\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/public/*filepath                  \\u001b[0m \\u001b[37mgithub.com/gin-gonic/gin.(*RouterGroup).createStaticHandler\\u001b[0m\\n\\u001b[37mHEAD    \\u001b[0m \\u001b[36m/public/*filepath                  \\u001b[0m \\u001b[37mgithub.com/gin-gonic/gin.(*RouterGroup).createStaticHandler\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/swagger/*any                      \\u001b[0m \\u001b[37mgithub.com/swaggo/gin-swagger.CustomWrapHandler\\u001b[0m\\n\"}', 'execute_cli', 'call_00_jlWKIiR7BCMuBiJ5N2YC3616', NULL, 0, 0.00, '2026-08-13 14:06:46', '2026-08-13 14:06:46', NULL);
+INSERT INTO `agent_message` VALUES (42, 8, 'assistant', '我已找到与\"AI助手\"相关的路由（AgentController 相关）。现在为 test 角色授予 AI 助手相关权限。', 'set_role_permissions', 'call_00_15ooOP4khTaevZYBSken9981', '{\"role\": \"test\", \"permissions\": [\"POST:/api/v1/agent/ask\", \"GET:/api/v1/agent/history\", \"GET:/api/v1/agent/sessions\"]}', 0, 3684.00, '2026-08-13 14:06:50', '2026-08-13 14:06:50', NULL);
+INSERT INTO `agent_message` VALUES (43, 8, 'tool', '{\"granted\":3,\"message\":\"权限设置完成\",\"permissions\":[\"POST:/api/v1/agent/ask\",\"GET:/api/v1/agent/history\",\"GET:/api/v1/agent/sessions\"],\"role\":\"test\"}', 'set_role_permissions', 'call_00_15ooOP4khTaevZYBSken9981', NULL, 0, 0.00, '2026-08-13 14:06:50', '2026-08-13 14:06:50', NULL);
+INSERT INTO `agent_message` VALUES (44, 8, 'assistant', '已为 **test** 角色成功授予 AI 助手相关权限，共 3 项：\n\n| 方法 | 路径 | 说明 |\n|------|------|------|\n| POST | /api/v1/agent/ask | AI 助手问答 |\n| GET | /api/v1/agent/history | AI 助手历史记录 |\n| GET | /api/v1/agent/sessions | AI 助手会话列表 |', '', '', NULL, 0, 1794.00, '2026-08-13 14:06:52', '2026-08-13 14:06:52', NULL);
+
+-- ----------------------------
+-- Table structure for agent_session
+-- ----------------------------
+DROP TABLE IF EXISTS `agent_session`;
+CREATE TABLE `agent_session`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) UNSIGNED NOT NULL COMMENT '用户ID',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '会话标题',
+  `provider` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模型提供商,如deepseek、openai、moonshot',
+  `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模型名,如deepseek-v4-pro',
+  `message_count` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '该会话总消息条数(含user、assistant、tool)',
+  `total_tokens` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '该会话累计消耗的token总数',
+  `trace_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '请求追踪ID',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_created_at`(`created_at`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI会话主表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of agent_session
+-- ----------------------------
+INSERT INTO `agent_session` VALUES (3, 1, '你能做什么', 'deepseek', 'deepseek-v4-pro', 15, 0, '2506d2e9-198e-4fef-9b6a-073111c05d7b', '2026-08-13 09:48:40', '2026-08-13 10:40:07', NULL);
+INSERT INTO `agent_session` VALUES (4, 1, '当前系统配置有哪些配置', 'deepseek', 'deepseek-v4-pro', 12, 0, 'b084afb5-5c5d-4f9a-a818-f068d2337124', '2026-08-13 10:45:58', '2026-08-13 10:53:14', NULL);
+INSERT INTO `agent_session` VALUES (6, 1, '你能查询天气吗', 'deepseek', 'deepseek-v4-pro', 2, 0, 'd5ef56bd-692a-44ed-92de-5a64c0690c47', '2026-08-13 11:07:50', '2026-08-13 11:07:53', NULL);
+INSERT INTO `agent_session` VALUES (8, 1, '给test角色新增ai助手权限', 'deepseek', 'deepseek-v4-pro', 6, 0, '3345a3af-6356-4e41-996a-89bdbb83d98a', '2026-08-13 14:06:43', '2026-08-13 14:06:52', NULL);
 
 -- ----------------------------
 -- Table structure for article
@@ -253,6 +342,7 @@ INSERT INTO `menu` VALUES (68, 67, 2, 'sys.dept.add', 1, 0, '2026-08-06 15:55:23
 INSERT INTO `menu` VALUES (69, 67, 2, 'sys.dept.edit', 1, 0, '2026-08-06 15:58:32', '2026-08-06 16:01:58', NULL);
 INSERT INTO `menu` VALUES (70, 67, 2, 'sys.dept.addChildren', 1, 0, '2026-08-06 16:03:34', '2026-08-06 16:03:34', NULL);
 INSERT INTO `menu` VALUES (71, 67, 2, 'sys.dept.del', 1, 0, '2026-08-06 16:04:07', '2026-08-06 16:04:07', NULL);
+INSERT INTO `menu` VALUES (72, 0, 1, 'agent', 1, 0, '2026-08-13 10:38:41', '2026-08-13 10:38:41', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -358,6 +448,7 @@ INSERT INTO `menu_meta` VALUES (11, 23, '配置分类', '', 'iconfont icon--chai
 INSERT INTO `menu_meta` VALUES (24, 63, '操作日志', '', 'ele-AlarmClock', '/operator-log', '', 'operator_log/index', 2, 1, 2, '', 2, '2026-07-27 14:22:13', '2026-07-27 14:22:13', NULL);
 INSERT INTO `menu_meta` VALUES (27, 1, '首页', 'message.router.home', 'iconfont icon-shouye', '/home', '', 'home/index', 2, 1, 1, '', 2, '2026-08-04 17:15:38', '2026-08-04 17:15:38', NULL);
 INSERT INTO `menu_meta` VALUES (28, 67, '部门管理', '', 'ele-Avatar', '/system/department', '', 'system/department/index', 2, 1, 2, '', 2, '2026-08-06 15:45:45', '2026-08-06 15:45:45', NULL);
+INSERT INTO `menu_meta` VALUES (29, 72, 'AI助手', '', 'fa fa-window-restore', '/assistant', '', 'agent/index', 2, 1, 2, '', 2, '2026-08-13 10:38:41', '2026-08-13 10:38:41', NULL);
 
 -- ----------------------------
 -- Table structure for migrations
@@ -444,7 +535,7 @@ CREATE TABLE `permission`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_key`(`key`) USING BTREE,
   INDEX `idx_key`(`key`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of permission
@@ -504,6 +595,9 @@ INSERT INTO `permission` VALUES (56, 'PUT:/api/v1/department/:id', 'PUT', '/api/
 INSERT INTO `permission` VALUES (57, 'GET:/api/v1/department/:id', 'GET', '/api/v1/department/:id', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
 INSERT INTO `permission` VALUES (58, 'DELETE:/api/v1/department/:id', 'DELETE', '/api/v1/department/:id', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
 INSERT INTO `permission` VALUES (59, 'GET:/api/v1/department', 'GET', '/api/v1/department', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
+INSERT INTO `permission` VALUES (60, 'POST:/api/v1/agent/ask', 'POST', '/api/v1/agent/ask', '2026-08-12 15:04:41', '2026-08-12 15:04:41', NULL);
+INSERT INTO `permission` VALUES (62, 'GET:/api/v1/agent/history', 'GET', '/api/v1/agent/history', '2026-08-13 10:10:15', '2026-08-13 10:10:15', NULL);
+INSERT INTO `permission` VALUES (63, 'GET:/api/v1/agent/sessions', 'GET', '/api/v1/agent/sessions', '2026-08-13 10:23:51', '2026-08-13 10:23:51', NULL);
 
 -- ----------------------------
 -- Table structure for role_menus
@@ -519,7 +613,7 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 719 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 768 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
@@ -529,55 +623,56 @@ INSERT INTO `role_menus` VALUES (304, 2, 27, 'test', '2026-07-20 14:19:04', '202
 INSERT INTO `role_menus` VALUES (305, 2, 2, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `role_menus` VALUES (306, 2, 3, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `role_menus` VALUES (666, 2, 1, 'test', '2026-08-04 17:15:38', '2026-08-04 17:15:38', NULL);
-INSERT INTO `role_menus` VALUES (669, 1, 1, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (670, 1, 2, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (671, 1, 3, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (672, 1, 58, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (673, 1, 24, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (674, 1, 25, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (675, 1, 27, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (676, 1, 4, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (677, 1, 54, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (678, 1, 56, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (679, 1, 62, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (680, 1, 61, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (681, 1, 32, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (682, 1, 33, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (683, 1, 34, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (684, 1, 60, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (685, 1, 35, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (686, 1, 5, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (687, 1, 37, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (688, 1, 38, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (689, 1, 39, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (690, 1, 6, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (691, 1, 41, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (692, 1, 40, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (693, 1, 59, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (694, 1, 42, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (695, 1, 20, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (696, 1, 23, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (697, 1, 51, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (698, 1, 52, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (699, 1, 53, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (700, 1, 21, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (701, 1, 49, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (702, 1, 50, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (703, 1, 48, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (704, 1, 22, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (705, 1, 10, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (706, 1, 45, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (707, 1, 43, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (708, 1, 44, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (709, 1, 63, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (710, 1, 64, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (711, 1, 65, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (712, 1, 66, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_menus` VALUES (713, 1, 67, 'admin', '2026-08-06 15:45:45', '2026-08-06 15:45:45', NULL);
-INSERT INTO `role_menus` VALUES (715, 1, 68, 'admin', '2026-08-06 15:55:47', '2026-08-06 15:55:47', NULL);
-INSERT INTO `role_menus` VALUES (717, 1, 69, 'admin', '2026-08-06 16:01:58', '2026-08-06 16:01:58', NULL);
-INSERT INTO `role_menus` VALUES (718, 1, 70, 'admin', '2026-08-06 16:03:34', '2026-08-06 16:03:34', NULL);
-INSERT INTO `role_menus` VALUES (719, 1, 71, 'admin', '2026-08-06 16:04:07', '2026-08-06 16:04:07', NULL);
+INSERT INTO `role_menus` VALUES (818, 1, 1, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (819, 1, 2, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (820, 1, 67, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (821, 1, 68, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (822, 1, 69, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (823, 1, 70, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (824, 1, 71, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (825, 1, 3, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (826, 1, 58, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (827, 1, 24, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (828, 1, 25, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (829, 1, 27, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (830, 1, 4, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (831, 1, 54, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (832, 1, 56, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (833, 1, 61, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (834, 1, 62, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (835, 1, 32, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (836, 1, 33, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (837, 1, 34, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (838, 1, 60, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (839, 1, 35, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (840, 1, 5, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (841, 1, 37, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (842, 1, 38, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (843, 1, 39, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (844, 1, 6, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (845, 1, 40, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (846, 1, 41, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (847, 1, 59, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (848, 1, 42, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (849, 1, 20, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (850, 1, 23, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (851, 1, 51, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (852, 1, 52, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (853, 1, 53, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (854, 1, 21, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (855, 1, 48, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (856, 1, 49, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (857, 1, 50, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (858, 1, 22, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (859, 1, 10, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (860, 1, 43, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (861, 1, 44, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (862, 1, 45, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (863, 1, 63, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (864, 1, 65, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (865, 1, 64, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (866, 1, 66, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_menus` VALUES (867, 1, 72, 'admin', '2026-08-13 10:38:41', '2026-08-13 10:38:41', NULL);
 
 -- ----------------------------
 -- Table structure for role_permissions
@@ -591,66 +686,72 @@ CREATE TABLE `role_permissions`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 390 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 447 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_permissions
 -- ----------------------------
-INSERT INTO `role_permissions` VALUES (336, 1, 1, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (337, 1, 3, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (338, 1, 38, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (339, 1, 19, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (340, 1, 8, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (341, 1, 6, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (342, 1, 15, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (343, 1, 39, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (344, 1, 20, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (345, 1, 17, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (346, 1, 54, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (347, 1, 52, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (348, 1, 53, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (349, 1, 12, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (350, 1, 16, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (351, 1, 18, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (352, 1, 21, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (353, 1, 10, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (354, 1, 28, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (355, 1, 40, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (356, 1, 2, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (357, 1, 23, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (358, 1, 9, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (359, 1, 33, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (360, 1, 25, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (361, 1, 46, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (362, 1, 47, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (363, 1, 44, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (364, 1, 45, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (365, 1, 43, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (366, 1, 42, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (367, 1, 24, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (368, 1, 31, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (369, 1, 32, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (370, 1, 34, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (371, 1, 35, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (372, 1, 26, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (373, 1, 7, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (374, 1, 4, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (375, 1, 11, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (376, 1, 27, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (377, 1, 37, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (378, 1, 13, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (379, 1, 29, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (380, 1, 41, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (381, 1, 14, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (382, 1, 30, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (383, 1, 5, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (384, 1, 36, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (385, 1, 22, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (386, 1, 59, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (387, 1, 55, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (388, 1, 58, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (389, 1, 57, '2026-08-06 15:12:16', NULL);
-INSERT INTO `role_permissions` VALUES (390, 1, 56, '2026-08-06 15:12:16', NULL);
+INSERT INTO `role_permissions` VALUES (562, 1, 60, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (563, 1, 62, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (564, 1, 1, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (565, 1, 3, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (566, 1, 38, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (567, 1, 19, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (568, 1, 8, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (569, 1, 6, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (570, 1, 15, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (571, 1, 39, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (572, 1, 20, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (573, 1, 17, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (574, 1, 54, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (575, 1, 52, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (576, 1, 53, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (577, 1, 59, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (578, 1, 55, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (579, 1, 58, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (580, 1, 57, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (581, 1, 56, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (582, 1, 12, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (583, 1, 16, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (584, 1, 18, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (585, 1, 21, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (586, 1, 10, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (587, 1, 28, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (588, 1, 40, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (589, 1, 2, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (590, 1, 23, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (591, 1, 9, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (592, 1, 33, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (593, 1, 25, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (594, 1, 46, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (595, 1, 47, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (596, 1, 44, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (597, 1, 45, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (598, 1, 43, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (599, 1, 42, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (600, 1, 24, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (601, 1, 31, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (602, 1, 32, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (603, 1, 34, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (604, 1, 35, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (605, 1, 26, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (606, 1, 7, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (607, 1, 4, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (608, 1, 11, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (609, 1, 27, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (610, 1, 37, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (611, 1, 13, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (612, 1, 29, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (613, 1, 41, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (614, 1, 14, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (615, 1, 30, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (616, 1, 5, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (617, 1, 36, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (618, 1, 22, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (619, 1, 63, '2026-08-13 10:24:45', NULL);
+INSERT INTO `role_permissions` VALUES (623, 2, 62, '2026-08-13 14:06:50', NULL);
+INSERT INTO `role_permissions` VALUES (624, 2, 63, '2026-08-13 14:06:50', NULL);
+INSERT INTO `role_permissions` VALUES (625, 2, 60, '2026-08-13 14:06:50', NULL);
 
 -- ----------------------------
 -- Table structure for roles
@@ -670,7 +771,7 @@ CREATE TABLE `roles`  (
 -- ----------------------------
 -- Records of roles
 -- ----------------------------
-INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2026-08-06 15:12:16', NULL);
+INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2026-08-13 10:24:45', NULL);
 INSERT INTO `roles` VALUES (2, 'test', '测试', 1, '2025-05-28 10:47:22', '2026-07-20 14:19:04', NULL);
 
 -- ----------------------------
@@ -799,15 +900,15 @@ CREATE TABLE `user_roles`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_roles
 -- ----------------------------
 INSERT INTO `user_roles` VALUES (35, 2, 2, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `user_roles` VALUES (55, 61, 2, 'test', '2026-08-04 16:28:39', '2026-08-04 16:28:39', NULL);
-INSERT INTO `user_roles` VALUES (56, 1, 1, 'admin', '2026-08-06 15:12:16', '2026-08-06 15:12:16', NULL);
 INSERT INTO `user_roles` VALUES (58, 10, 2, 'test', '2026-08-07 16:06:05', '2026-08-07 16:06:05', NULL);
-INSERT INTO `user_roles` VALUES (59, 10, 1, 'admin', '2026-08-07 16:06:05', '2026-08-07 16:06:05', NULL);
+INSERT INTO `user_roles` VALUES (64, 1, 1, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `user_roles` VALUES (65, 10, 1, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
