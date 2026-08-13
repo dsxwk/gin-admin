@@ -8,6 +8,7 @@ import (
 	"gin/common/response"
 	_ "gin/docs"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/mcp"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -48,6 +49,18 @@ func LoadRouters(router *gin.Engine) {
 
 	// 自动注册
 	AutoLoads(public, auth)
+
+	// MCP服务路由(MCP自带认证,使用public分组)
+	if cfg := facade.Config(); cfg != nil && cfg.Mcp.Enabled {
+		mcpHandler := facade.Get[*mcp.Handler]("mcp")
+		if mcpHandler != nil {
+			mcpPath := cfg.Mcp.Path
+			if mcpPath == "" {
+				mcpPath = "/mcp"
+			}
+			router.POST(mcpPath, mcpHandler.ServeHTTP)
+		}
+	}
 }
 
 // SyncPermissionRoutes 同步路由权限到数据库(仅服务器启动时调用)

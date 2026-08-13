@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const SkipTimeoutKey = "_skip_timeout"
+
 type Timeout struct {
 	base.BaseMiddleware
 }
@@ -43,6 +45,12 @@ func (w *timeoutWriter) WriteString(s string) (int, error) {
 // Handle 超时中间件
 func (s Timeout) Handle(timeout time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 如果标记了跳过,直接放行
+		if _, ok := c.Get(SkipTimeoutKey); ok {
+			c.Next()
+			return
+		}
+
 		if timeout <= 0 {
 			c.Next()
 			return
