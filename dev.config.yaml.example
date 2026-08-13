@@ -130,3 +130,35 @@ queue:
 # 操作记录
 operator-record:
     enabled: false # 是否启用操作记录
+
+# MCP服务配置
+mcp:
+  enabled: false # 是否启用MCP服务
+  path: /mcp # MCP路由前缀
+  auth: # 认证配置
+    enabled: false # 是否启用认证
+    token: "" # 认证token
+
+# AI Agent
+agent:
+  enabled: true # 是否启用Agent
+  default: deepseek # 默认Agent
+  max-tokens: 4096 # 最大token数
+  temperature: 0.7 # 温度参数,控制大模型输出随机性/创造性的参数,接近 0 更确定,接近 1 更随机
+  providers: # 模型提供商列表
+    deepseek:
+      api-key: "sk-xxxxxx" # APIKey
+      base-url: "https://api.deepseek.com/v1" # API地址
+      model: "deepseek-v4-pro" # 模型名称
+    openai:
+      api-key: ""
+      base-url: "https://api.openai.com/v1"
+      model: "gpt-4o"
+    moonshot:
+      api-key: ""
+      base-url: "https://api.moonshot.cn/v1"
+      model: "moonshot-v1-8k"
+    custom:
+      api-key: ""
+      base-url: "http://localhost:11434/v1"
+      model: "qwen2.5:7b"

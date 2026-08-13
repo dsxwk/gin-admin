@@ -22,6 +22,8 @@ type Config struct {
 	I18n           I18n           `mapstructure:"i18n" yaml:"i18n"`
 	Queue          Queue          `mapstructure:"queue" yaml:"queue"`
 	OperatorRecord OperatorRecord `mapstructure:"operator-record" yaml:"operator-record"`
+	Mcp            Mcp            `mapstructure:"mcp" yaml:"mcp"`
+	Agent          Agent          `mapstructure:"agent" yaml:"agent"`
 }
 
 var (
