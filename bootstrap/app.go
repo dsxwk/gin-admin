@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"gin/app/facade"
-	_ "gin/app/listener"
-	_ "gin/app/provider"
+	_ "gin/bootstrap/import"
 	"gin/common/flag"
 	"gin/common/response"
 	"gin/config"
@@ -238,7 +237,7 @@ func (a *App) startHttpServer(conf *config.Config) *http.Server {
 		Addr:              ":" + port,
 		Handler:           a.Engine,
 		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      10 * time.Second,
+		WriteTimeout:      0 * time.Second,
 		IdleTimeout:       30 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
