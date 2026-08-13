@@ -29,6 +29,54 @@ definitions:
         example: Internal server error
         type: string
     type: object
+  model.AgentMessage:
+    properties:
+      content:
+        type: string
+      costMs:
+        type: number
+      createdAt:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      sessionId:
+        type: integer
+      tokens:
+        type: integer
+      toolArgs:
+        $ref: '#/definitions/model.JsonValue'
+      toolCallId:
+        type: string
+      toolName:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.AgentSession:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      messageCount:
+        type: integer
+      model:
+        type: string
+      provider:
+        type: string
+      title:
+        type: string
+      totalTokens:
+        type: integer
+      traceId:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+    type: object
   model.Article:
     properties:
       categoryId:
@@ -503,6 +551,17 @@ definitions:
         type: string
       type:
         type: integer
+    type: object
+  request.AgentAsk:
+    properties:
+      provider:
+        type: string
+      question:
+        type: string
+      sessionId:
+        type: integer
+    required:
+    - question
     type: object
   request.ArticleCreate:
     properties:
@@ -1368,6 +1427,94 @@ paths:
       summary: 更新
       tags:
       - 部门管理
+  /api/v1/agent/ask:
+    post:
+      description: AI Agent对话接口,自动调用MCP工具,数据持久化到数据库
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 对话参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AgentAsk'
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+      summary: AI对话
+      tags:
+      - AI助手
+  /api/v1/agent/history:
+    get:
+      description: 获取指定会话的历史消息记录
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 会话ID
+        in: query
+        name: sessionId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.AgentMessage'
+                  type: array
+              type: object
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 会话历史记录
+      tags:
+      - AI助手
+  /api/v1/agent/sessions:
+    get:
+      description: 获取当前用户的会话列表
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.AgentSession'
+                  type: array
+              type: object
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/errcode.SystemErrorResponse'
+      summary: 会话列表
+      tags:
+      - AI助手
   /api/v1/article:
     get:
       description: 文章列表

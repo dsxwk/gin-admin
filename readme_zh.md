@@ -134,6 +134,29 @@
 # 项目简介
 > - 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
 > - 命令行按照模型、请求验证、服务层、控制器、路由的顺序正确创建可生成可运行带swagger文档的CURD完整代码。
+> - AI智能助手支持
+>   - 数据查询
+>     - **操作日志统计**: 查询今日/指定日期的 PV、UV、请求方法分布、状态码统计等
+>     - **系统配置查询**: 查询站点名称、LOGO 等系统配置项
+>     - **用户搜索**: 根据姓名或用户名搜索系统用户
+>     - **部门查询**: 查询部门树结构、指定上级的子部门、部门成员数量
+>     - **字典查询**: 查询性别、状态等枚举字典项
+
+>   - CLI命令执行
+>     - **代码生成**:
+>       - 创建控制器(`make:controller`)
+>       - 创建模型(`make:model`)
+>       - 创建服务(`make:service`)
+>       - 创建验证器(`make:request`)
+>       - 创建中间件(`make:middleware`)
+>       - 创建路由(`make:router`)
+>       - 生成 Swagger 文档(`make:docs`)
+>   - **权限管理**:
+>     - 同步用户权限到 Redis(`permission:sync`)
+>   - **查看信息**:
+>     - 查看路由列表(`route:list`)
+>     - 查看 Job 列表(`job:list`)
+  
 ## 项目地址
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
@@ -147,6 +170,7 @@
 ![image](docs/images/Cli_2026-08-07_16-24-03_2.png)
 ![image](docs/images/Cli_2026-08-07_16-30-09_3.png)
 ![image](docs/images/Cli_2026-08-07_16-16-42_8.png)
+![image](docs/images/MCP__2026-08-13_14-01-16.png)
 ![image](docs/images/SwaggerApi_2026-08-07_16-11-03_1.png)
 ![image](docs/images/SwaggerApi_2026-08-07_16-12-06_2.png)
 ![image](docs/images/SwaggerApi_2026-08-07_16-12-44_3.png)
@@ -169,7 +193,7 @@
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
-> - 最新版本 [v2.3.13](version_history_zh.md#v2313)
+> - 最新版本 [v2.3.14](version_history_zh.md#v2314)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明

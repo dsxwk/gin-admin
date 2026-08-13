@@ -315,6 +315,148 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/agent/ask": {
+            "post": {
+                "description": "AI Agent对话接口,自动调用MCP工具,数据持久化到数据库",
+                "tags": [
+                    "AI助手"
+                ],
+                "summary": "AI对话",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "对话参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AgentAsk"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent/history": {
+            "get": {
+                "description": "获取指定会话的历史消息记录",
+                "tags": [
+                    "AI助手"
+                ],
+                "summary": "会话历史记录",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "会话ID",
+                        "name": "sessionId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.AgentMessage"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.ArgsErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/agent/sessions": {
+            "get": {
+                "description": "获取当前用户的会话列表",
+                "tags": [
+                    "AI助手"
+                ],
+                "summary": "会话列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证Token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/errcode.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.AgentSession"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "系统错误",
+                        "schema": {
+                            "$ref": "#/definitions/errcode.SystemErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/article": {
             "get": {
                 "description": "文章列表",
@@ -3442,6 +3584,79 @@ const docTemplate = `{
                 }
             }
         },
+        "model.AgentMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "costMs": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "sessionId": {
+                    "type": "integer"
+                },
+                "tokens": {
+                    "type": "integer"
+                },
+                "toolArgs": {
+                    "$ref": "#/definitions/model.JsonValue"
+                },
+                "toolCallId": {
+                    "type": "string"
+                },
+                "toolName": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AgentSession": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "messageCount": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "totalTokens": {
+                    "type": "integer"
+                },
+                "traceId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.Article": {
             "type": "object",
             "properties": {
@@ -4148,6 +4363,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.AgentAsk": {
+            "type": "object",
+            "required": [
+                "question"
+            ],
+            "properties": {
+                "provider": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                },
+                "sessionId": {
                     "type": "integer"
                 }
             }

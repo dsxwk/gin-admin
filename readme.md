@@ -133,7 +133,30 @@
 
 # Project Introduction
 > - A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`, `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
-> - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of model, request validation, service, controller, and routing. 
+> - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of model, request validation, service, controller, and routing.
+> - AI assistant support
+>   - Data query
+>     - **Operation log statistics**: Query PV, UV, request method distribution, status code statistics, etc. for today/specified date
+>     - **System configuration query**: Query system configuration items such as site name and logo
+>     - **User search**: Search system users by name or username
+>     - **Department query**: Query department tree structure, specify superior sub departments, and number of department members
+>     - **Dict query**: Query gender, status, and other enumerated dictionary entries
+
+>   - CLI command execution
+>     - **Code generation**:
+>       - Controller creation(`make:controller`)
+>       - Model creation(`make:model`)
+>       - Service creation(`make:service`)
+>       - Request creation(`make:request`)
+>       - Middleware creation(`make:middleware`)
+>       - Router creation(`make:router`)
+>       - Generate Swagger document(`make:docs`)
+>   - **Permission Management**:
+>     - Synchronize user permissions to Redis(`permission:sync`)
+>   - **View information**:
+>     - View routing list(`route:list`)
+>     - View Job List(`job:list`)
+
 ## Project Address
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
@@ -147,6 +170,7 @@
 ![image](docs/images/Cli_2026-08-07_16-24-03_2.png)
 ![image](docs/images/Cli_2026-08-07_16-30-09_3.png)
 ![image](docs/images/Cli_2026-08-07_16-16-42_8.png)
+![image](docs/images/MCP__2026-08-13_14-01-16.png)
 ![image](docs/images/SwaggerApi_2026-08-07_16-11-03_1.png)
 ![image](docs/images/SwaggerApi_2026-08-07_16-12-06_2.png)
 ![image](docs/images/SwaggerApi_2026-08-07_16-12-44_3.png)
@@ -169,7 +193,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version [v2.3.13](version_history.md#v2313)
+> - Latest Version [v2.3.14](version_history.md#v2314)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
