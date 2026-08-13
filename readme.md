@@ -134,11 +134,11 @@
 # Project Introduction
 > - A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`, `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
 > - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of model, request validation, service, controller, and routing.
-> - AI assistant support
+> - AI assistant support(openai、deepseek...)
 >   - Data query
 >     - **Operation log statistics**: Query PV, UV, request method distribution, status code statistics, etc. for today/specified date
 >     - **System configuration query**: Query system configuration items such as site name and logo
->     - **User search**: Search system users by name or username
+>     - **User search**:[readme_zh.md](readme_zh.md) Search system users by name or username
 >     - **Department query**: Query department tree structure, specify superior sub departments, and number of department members
 >     - **Dict query**: Query gender, status, and other enumerated dictionary entries
 

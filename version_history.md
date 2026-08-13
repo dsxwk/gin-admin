@@ -1,5 +1,12 @@
 # Version History
 
+## v2.3.14
+> - Add AI Agent model configuration support openai, deepseek, etc.
+> - Add mcp tools and ai intelligent assistant
+> - Add command line creation of mcp tools and mcp tool list query
+> - Data table migration file and database backup
+> - Command line generation of model file field comment escape processing
+
 ## v2.3.13
 > - Permission synchronization and command line task list view adjustment
 > - New effect preview screenshot
