@@ -15,6 +15,8 @@ func init() {
 	migration = []database.Migration{
 		&CreateUserTable{},
 		&CreateUserRolesTable{},
+		&CreateAgentSessionTable{},
+		&CreateAgentMessageTable{},
 		// ...
 	}
 
