@@ -431,8 +431,15 @@ func buildGormTag(c Column) string {
 
 	// 注释
 	if c.Comment != "" {
-		tags = append(tags, "comment:"+c.Comment)
+		tags = append(tags, "comment:"+escapeTagValue(c.Comment))
 	}
 
 	return "gorm:\"" + strings.Join(tags, ";") + "\""
+}
+
+// escapeTagValue 转义tag值中的双引号和反斜杠
+func escapeTagValue(s string) string {
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "\"", "\\\"")
+	return s
 }
