@@ -36,7 +36,7 @@ func (s *OperatorLogController) List(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	err := facade.Request[any]().BindValidate(c, &req, "List")
+	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -69,9 +69,9 @@ func (s *OperatorLogController) Detail(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
-	err := facade.Request[any]().BindValidate(c, &req, "Detail")
+	err := facade.Request().BindValidate(c, &req, "Detail")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -104,9 +104,9 @@ func (s *OperatorLogController) Delete(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
-	err := facade.Request[any]().BindValidate(c, &req, "Delete")
+	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -139,7 +139,7 @@ func (s *OperatorLogController) BatchDelete(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	err := facade.Request[any]().BindValidate(c, &req, "BatchDelete")
+	err := facade.Request().BindValidate(c, &req, "BatchDelete")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

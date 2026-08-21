@@ -20,12 +20,13 @@ func NewEvent() *Event {
 	return event
 }
 
-type SubscriberFunc func(event any)
+// SubscriberFunc 泛型订阅函数
+type SubscriberFunc[T any] func(event T)
 
 type subscriber struct {
 	Id     uint64
 	Async  bool
-	Handle SubscriberFunc
+	Handle func(any)
 }
 
 type Event struct {
@@ -35,17 +36,25 @@ type Event struct {
 }
 
 // SubscribeAsync 订阅(异步)
-func (b *Event) SubscribeAsync(topic string, fn SubscriberFunc) uint64 {
-	return b.addSubscriber(topic, fn, true)
+func (b *Event) SubscribeAsync[T any](topic string, fn func(T)) uint64 {
+	return b.addSubscriber(topic, func(event any) {
+		if v, ok := event.(T); ok {
+			fn(v)
+		}
+	}, true)
 }
 
 // Subscribe 订阅(同步)
-func (b *Event) Subscribe(topic string, fn SubscriberFunc) uint64 {
-	return b.addSubscriber(topic, fn, false)
+func (b *Event) Subscribe[T any](topic string, fn func(T)) uint64 {
+	return b.addSubscriber(topic, func(event any) {
+		if v, ok := event.(T); ok {
+			fn(v)
+		}
+	}, false)
 }
 
 // 通用订阅
-func (b *Event) addSubscriber(topic string, fn SubscriberFunc, async bool) uint64 {
+func (b *Event) addSubscriber(topic string, fn func(any), async bool) uint64 {
 	id := atomic.AddUint64(&b.idCounter, 1)
 
 	sub := &subscriber{
@@ -90,7 +99,7 @@ func (b *Event) Unsubscribe(topic string, id uint64) bool {
 }
 
 // Publish 发布事件
-func (b *Event) Publish(topic string, event any) {
+func (b *Event) Publish[T any](topic string, event T) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 

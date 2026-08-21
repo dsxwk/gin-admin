@@ -33,7 +33,7 @@ func (c *RedisConsumer) setStatus(status queue.ConsumerStatus) {
 	c.status = status
 }
 
-func (c *RedisConsumer) Start(h interface{}) {
+func (c *RedisConsumer) Start[T queue.ConsumerHandler](h T) {
 	c.setStatus(queue.ConsumerStatusRunning)
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	go func() {
@@ -50,13 +50,13 @@ func (c *RedisConsumer) Start(h interface{}) {
 	}()
 }
 
-func (c *RedisConsumer) consumeLoop(h interface{}) {
+func (c *RedisConsumer) consumeLoop[T queue.ConsumerHandler](h T) {
 	client := facade.Cache("redis").Redis().Client()
 	if client == nil {
 		time.Sleep(time.Second)
 		return
 	}
-	if h.(queue.Consumer).IsDelay() {
+	if h.IsDelay() {
 		c.processDelayed(client, h)
 		time.Sleep(time.Second)
 		return
@@ -64,7 +64,7 @@ func (c *RedisConsumer) consumeLoop(h interface{}) {
 	c.processNormal(client, h)
 }
 
-func (c *RedisConsumer) processNormal(client *redis.Client, h interface{}) {
+func (c *RedisConsumer) processNormal[T queue.ConsumerHandler](client *redis.Client, h T) {
 	result, err := client.BRPop(c.ctx, 3*time.Second, c.Queue).Result()
 	if err != nil {
 		return
@@ -72,7 +72,7 @@ func (c *RedisConsumer) processNormal(client *redis.Client, h interface{}) {
 	c.handleMessage([]byte(result[1]), h)
 }
 
-func (c *RedisConsumer) processDelayed(client *redis.Client, h interface{}) {
+func (c *RedisConsumer) processDelayed[T queue.ConsumerHandler](client *redis.Client, h T) {
 	delayedKey := c.Queue + ":delayed"
 	now := float64(time.Now().UnixMilli())
 	members, err := client.ZRangeByScoreWithScores(c.ctx, delayedKey, &redis.ZRangeBy{
@@ -87,8 +87,8 @@ func (c *RedisConsumer) processDelayed(client *redis.Client, h interface{}) {
 	}
 }
 
-func (c *RedisConsumer) handleMessage(body []byte, h interface{}) {
-	retry := h.(queue.Consumer).Retry()
+func (c *RedisConsumer) handleMessage[T queue.ConsumerHandler](body []byte, h T) {
+	retry := h.Retry()
 	var handleErr error
 	for attempt := 0; attempt < retry || attempt == 0; attempt++ {
 		handleErr = queue.TryHandle(h, body)

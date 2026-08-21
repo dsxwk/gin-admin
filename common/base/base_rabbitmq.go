@@ -77,7 +77,7 @@ func (c *RabbitmqConsumer) setStatus(status queue.ConsumerStatus) {
 	c.status = status
 }
 
-func (c *RabbitmqConsumer) Start(h interface{}) {
+func (c *RabbitmqConsumer) Start[T queue.ConsumerHandler](h T) {
 	c.setStatus(queue.ConsumerStatusRunning)
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 
@@ -95,7 +95,7 @@ func (c *RabbitmqConsumer) Start(h interface{}) {
 	}()
 }
 
-func (c *RabbitmqConsumer) consumeLoop(h interface{}) {
+func (c *RabbitmqConsumer) consumeLoop[T queue.ConsumerHandler](h T) {
 	if c.Mq == nil || c.Mq.Channel == nil {
 		time.Sleep(time.Second)
 		return
@@ -103,7 +103,7 @@ func (c *RabbitmqConsumer) consumeLoop(h interface{}) {
 
 	args := amqp091.Table{}
 	exchangeType := "direct"
-	if h.(queue.Consumer).IsDelay() {
+	if h.IsDelay() {
 		exchangeType = "x-delayed-message"
 		args["x-delayed-type"] = "direct"
 	}
@@ -143,8 +143,8 @@ func (c *RabbitmqConsumer) consumeLoop(h interface{}) {
 	}
 }
 
-func (c *RabbitmqConsumer) handleMessage(msg amqp091.Delivery, h interface{}) {
-	maxRetry := h.(queue.Consumer).Retry()
+func (c *RabbitmqConsumer) handleMessage[T queue.ConsumerHandler](msg amqp091.Delivery, h T) {
+	maxRetry := h.Retry()
 	retry := 0
 	for {
 		err := queue.TryHandle(h, msg.Body)

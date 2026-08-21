@@ -38,7 +38,7 @@ func (s *SystemConfigController) List(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "List")
+	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -116,10 +116,10 @@ func (s *SystemConfigController) Detail(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Detail")
+	err := facade.Request().BindValidate(c, &req, "Detail")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -153,7 +153,7 @@ func (s *SystemConfigController) Create(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Create")
+	err := facade.Request().BindValidate(c, &req, "Create")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -199,7 +199,7 @@ func (s *SystemConfigController) Update(c *gin.Context) {
 		return
 	}
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
@@ -233,10 +233,10 @@ func (s *SystemConfigController) Delete(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Delete")
+	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

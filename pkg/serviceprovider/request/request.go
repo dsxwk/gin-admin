@@ -9,14 +9,14 @@ import (
 	"strings"
 )
 
-func NewClient[T any]() *Client[T] {
-	return &Client[T]{}
+func NewClient() *Client {
+	return &Client{}
 }
 
-type Client[T any] struct{}
+type Client struct{}
 
 // Query 泛型获取请求查询参数
-func (c Client[T]) Query(ctx *gin.Context, key string, defaultValue T) T {
+func (c Client) Query[T any](ctx *gin.Context, key string, defaultValue T) T {
 	val := ctx.Query(key)
 	if val == "" {
 		return defaultValue
@@ -89,7 +89,7 @@ func getValue[T any](val string, defaultValue T) T {
 }
 
 // Path 泛型获取请求路径参数
-func (c Client[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
+func (c Client) Path[T any](ctx *gin.Context, key string, defaultValue T) T {
 	val := ctx.Param(key)
 	if val == "" {
 		return defaultValue
@@ -99,7 +99,7 @@ func (c Client[T]) Path(ctx *gin.Context, key string, defaultValue T) T {
 }
 
 // GetHeader 泛型获取请求头参数
-func (c Client[T]) GetHeader(ctx *gin.Context, key string, defaultValue T) T {
+func (c Client) GetHeader[T any](ctx *gin.Context, key string, defaultValue T) T {
 	val := ctx.GetHeader(key)
 	if val == "" {
 		return defaultValue
@@ -109,12 +109,12 @@ func (c Client[T]) GetHeader(ctx *gin.Context, key string, defaultValue T) T {
 }
 
 // Header 泛型设置请求头参数
-func (c Client[T]) Header(ctx *gin.Context, key string, value T) {
+func (c Client) Header[T any](ctx *gin.Context, key string, value T) {
 	ctx.Header(key, fmt.Sprintf("%v", value))
 }
 
 // Bind 绑定请求参数
-func (c Client[T]) Bind(ctx *gin.Context, v any) error {
+func (c Client) Bind(ctx *gin.Context, v any) error {
 	// 先绑定Query参数
 	if err := ctx.ShouldBindQuery(v); err != nil {
 		return fmt.Errorf("bind query error: %w", err)
@@ -138,7 +138,7 @@ func (c Client[T]) Bind(ctx *gin.Context, v any) error {
 }
 
 // BindValidate 绑定参数并验证
-func (c Client[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
+func (c Client) BindValidate(ctx *gin.Context, v any, scene string) error {
 	if err := c.Bind(ctx, v); err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (c Client[T]) BindValidate(ctx *gin.Context, v any, scene string) error {
 }
 
 // ValidateWithMessages 验证并自定义错误消息
-func (c Client[T]) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
+func (c Client) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
 	v := validate.Struct(data, scene)
 	v.WithMessages(messages)
 	if !v.Validate(scene) {
@@ -160,7 +160,7 @@ func (c Client[T]) ValidateWithMessages(data interface{}, scene string, messages
 }
 
 // ValidateWithTranslates 验证并自定义字段翻译
-func (c Client[T]) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
+func (c Client) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
 	v := validate.Struct(data, scene)
 	v.WithTranslates(translates)
 	if !v.Validate(scene) {
@@ -170,12 +170,12 @@ func (c Client[T]) ValidateWithTranslates(data interface{}, scene string, transl
 }
 
 // GetValidator 获取验证器实例
-func (c Client[T]) GetValidator(data interface{}, scene string) *validate.Validation {
+func (c Client) GetValidator(data interface{}, scene string) *validate.Validation {
 	return validate.Struct(data, scene)
 }
 
 // Validate 通用验证函数
-func (c Client[T]) Validate(data interface{}, scene string) error {
+func (c Client) Validate(data interface{}, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errors.New(v.Errors.One())

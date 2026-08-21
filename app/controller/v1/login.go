@@ -60,7 +60,7 @@ func (s *LoginController) Login(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Login")
+	err := facade.Request().BindValidate(c, &req, "Login")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -120,7 +120,7 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 	token := c.Request.Header.Get("token")
 	req.RefreshToken.Token = token
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "RefreshToken")
+	err := facade.Request().BindValidate(c, &req, "RefreshToken")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -275,7 +275,7 @@ func (s *LoginController) CheckCaptcha(c *gin.Context) {
 	)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "CheckCaptcha")
+	err := facade.Request().BindValidate(c, &req, "CheckCaptcha")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

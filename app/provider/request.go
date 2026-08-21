@@ -20,7 +20,7 @@ func (p *RequestProvider) Name() string {
 
 // Register 注册服务到门面
 func (p *RequestProvider) Register(app serviceprovider.App) {
-	facade.Register("request", facade.Request[any]())
+	facade.Register("request", facade.Request())
 }
 
 // Boot 启动服务

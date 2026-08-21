@@ -3,14 +3,13 @@ package queue
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"gin/common/flag"
 	"gin/config"
 	"os"
 	"sync"
 )
 
-// Consumer interface for queue consumers
+// Consumer 队列消费者接口
 type Consumer interface {
 	Name() string
 	Description() string
@@ -23,7 +22,7 @@ type Consumer interface {
 	Status() ConsumerStatus
 }
 
-// ConsumerStatus consumer status
+// ConsumerStatus 消费者状态
 type ConsumerStatus string
 
 const (
@@ -32,13 +31,13 @@ const (
 	ConsumerStatusError   ConsumerStatus = "error"
 )
 
-// PayloadHandler payload handler interface
+// PayloadHandler 消息负载处理接口
 type PayloadHandler interface {
 	NewPayload() any
 	Handle(payload any) error
 }
 
-// Producer interface for queue producers
+// Producer 队列生产者接口
 type Producer interface {
 	Name() string
 	Description() string
@@ -49,33 +48,32 @@ type Producer interface {
 	Close() error
 }
 
-// Registry generic registry
-type Registry[T any] struct {
+// Named 名称接口
+type Named interface {
+	Name() string
+}
+
+// ConsumerHandler 消费者处理接口
+type ConsumerHandler interface {
+	Consumer
+	PayloadHandler
+}
+
+// Registry 泛型注册表
+type Registry[T Named] struct {
 	items map[string]T
 	mu    sync.RWMutex
 }
 
-func NewRegistry[T any]() *Registry[T] {
+func NewRegistry[T Named]() *Registry[T] {
 	return &Registry[T]{items: make(map[string]T)}
-}
-
-type namer interface {
-	Name() string
 }
 
 func (r *Registry[T]) Register(item T) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	name := ""
-	if n, ok := any(item).(namer); ok {
-		name = n.Name()
-	}
-
-	if name == "" {
-		flag.Errorf("Queue name cannot be empty")
-		os.Exit(1)
-	}
+	name := item.Name()
 
 	if _, exists := r.items[name]; exists {
 		flag.Errorf("Queue %s already registered", name)
@@ -137,15 +135,11 @@ func GetProducerRegistry() *Registry[Producer] {
 	return Producers
 }
 
-// TryHandle auto deserialize and call Handle
-func TryHandle(h interface{}, body []byte) error {
-	ph, ok := h.(PayloadHandler)
-	if !ok {
-		return fmt.Errorf("consumer does not implement PayloadHandler")
-	}
-	payload := ph.NewPayload()
+// TryHandle 自动反序列化并调用处理
+func TryHandle[T PayloadHandler](h T, body []byte) error {
+	payload := h.NewPayload()
 	if err := json.Unmarshal(body, payload); err != nil {
 		return err
 	}
-	return ph.Handle(payload)
+	return h.Handle(payload)
 }

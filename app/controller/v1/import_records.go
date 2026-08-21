@@ -36,7 +36,7 @@ func (s *ImportRecordsController) List(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "List")
+	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -69,10 +69,10 @@ func (s *ImportRecordsController) Delete(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Delete")
+	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

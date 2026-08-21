@@ -44,20 +44,20 @@ func GetClient() *http.Client {
 }
 
 // Client HTTP客户端
-type Client[T any] struct {
+type Client struct {
 	timeout time.Duration
 }
 
 // NewClient 创建HTTP客户端
-func NewClient[T any]() *Client[T] {
-	return &Client[T]{
+func NewClient() *Client {
+	return &Client{
 		timeout: defaultTimeout,
 	}
 }
 
 // WithTimeout 自定义超时的HTTP客户端
-func (c *Client[T]) WithTimeout(timeout time.Duration) *Client[T] {
-	return &Client[T]{
+func (c *Client) WithTimeout(timeout time.Duration) *Client {
+	return &Client{
 		timeout: timeout,
 	}
 }
@@ -80,32 +80,32 @@ type Option struct {
 }
 
 // Send 发送HTTP请求
-func (c *Client[T]) Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
+func (c *Client) Send(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
 	return c.doSend(ctx, method, uri, opt)
 }
 
 // Get 发送GET请求
-func (c *Client[T]) Get(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+func (c *Client) Get(ctx context.Context, uri string, opt *Option) ([]byte, error) {
 	return c.Send(ctx, "GET", uri, opt)
 }
 
 // Post 发送POST请求
-func (c *Client[T]) Post(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+func (c *Client) Post(ctx context.Context, uri string, opt *Option) ([]byte, error) {
 	return c.Send(ctx, "POST", uri, opt)
 }
 
 // Put 发送PUT请求
-func (c *Client[T]) Put(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+func (c *Client) Put(ctx context.Context, uri string, opt *Option) ([]byte, error) {
 	return c.Send(ctx, "PUT", uri, opt)
 }
 
 // Delete 发送DELETE请求
-func (c *Client[T]) Delete(ctx context.Context, uri string, opt *Option) ([]byte, error) {
+func (c *Client) Delete(ctx context.Context, uri string, opt *Option) ([]byte, error) {
 	return c.Send(ctx, "DELETE", uri, opt)
 }
 
 // AsJson 将响应体解析为T类型
-func (c *Client[T]) AsJson(data []byte) (*T, error) {
+func (c *Client) AsJson[T any](data []byte) (*T, error) {
 	var result T
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, data)
@@ -114,16 +114,16 @@ func (c *Client[T]) AsJson(data []byte) (*T, error) {
 }
 
 // SendAsJson 发送请求并解析为T类型
-func (c *Client[T]) SendAsJson(ctx context.Context, method, uri string, opt *Option) (*T, error) {
+func (c *Client) SendAsJson[T any](ctx context.Context, method, uri string, opt *Option) (*T, error) {
 	data, err := c.doSend(ctx, method, uri, opt)
 	if err != nil {
 		return nil, err
 	}
-	return c.AsJson(data)
+	return c.AsJson[T](data)
 }
 
 // doSend 发送请求
-func (c *Client[T]) doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
+func (c *Client) doSend(ctx context.Context, method, uri string, opt *Option) ([]byte, error) {
 	if opt == nil {
 		opt = &Option{}
 	}
@@ -220,7 +220,7 @@ func (c *Client[T]) doSend(ctx context.Context, method, uri string, opt *Option)
 }
 
 // doFileUpload 文件上传
-func (c *Client[T]) doFileUpload(ctx context.Context, uri string, opt *Option, requestTimeout time.Duration) ([]byte, error) {
+func (c *Client) doFileUpload(ctx context.Context, uri string, opt *Option, requestTimeout time.Duration) ([]byte, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -306,7 +306,7 @@ func (c *Client[T]) doFileUpload(ctx context.Context, uri string, opt *Option, r
 }
 
 // buildURL 拼接get请求query参数
-func (c *Client[T]) buildUrl(baseURL string, query map[string]interface{}) string {
+func (c *Client) buildUrl(baseURL string, query map[string]interface{}) string {
 	if len(query) == 0 {
 		return baseURL
 	}
@@ -333,7 +333,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	var reqBodyBytes []byte
 	if req.Body != nil {
 		reqBodyBytes, _ = io.ReadAll(req.Body)
-		req.Body.Close()
+		_ = req.Body.Close()
 		req.Body = io.NopCloser(bytes.NewReader(reqBodyBytes))
 	}
 

@@ -8,11 +8,11 @@ import (
 	"gin/pkg/serviceprovider/debugger"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
-	"github.com/google/uuid"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+	"uuid"
 )
 
 type Logger struct {

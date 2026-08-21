@@ -37,7 +37,7 @@ func (s *UserController) List(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "List")
+	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -71,7 +71,7 @@ func (s *UserController) Create(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Create")
+	err := facade.Request().BindValidate(c, &req, "Create")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -118,7 +118,7 @@ func (s *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 	err = req.Validate(req, "Update")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
@@ -152,10 +152,10 @@ func (s *UserController) Detail(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Detail")
+	err := facade.Request().BindValidate(c, &req, "Detail")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -188,10 +188,10 @@ func (s *UserController) Delete(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Delete")
+	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -225,7 +225,7 @@ func (s *UserController) Import(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Import")
+	err := facade.Request().BindValidate(c, &req, "Import")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -259,7 +259,7 @@ func (s *UserController) BatchDelete(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "BatchDelete")
+	err := facade.Request().BindValidate(c, &req, "BatchDelete")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
@@ -294,10 +294,10 @@ func (s *UserController) Password(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	req.ID = facade.Request[int64]().Path(c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "Password")
+	err := facade.Request().BindValidate(c, &req, "Password")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

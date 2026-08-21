@@ -22,70 +22,58 @@ func (d *Debugger) Start() {
 	if d.Bus == nil {
 		return
 	}
-	id1 := d.Bus.Subscribe(TopicSql, func(ev any) {
-		if e, ok := ev.(SqlEvent); ok {
-			AddSql(e.TraceId, map[string]any{
-				"sql":  e.Sql,
-				"rows": e.Rows,
-				"ms":   e.Ms,
-			})
-		}
+	id1 := d.Bus.Subscribe(TopicSql, func(e SqlEvent) {
+		AddSql(e.TraceId, map[string]any{
+			"sql":  e.Sql,
+			"rows": e.Rows,
+			"ms":   e.Ms,
+		})
 	})
-	id2 := d.Bus.Subscribe(TopicCache, func(ev any) {
-		if e, ok := ev.(CacheEvent); ok {
-			AddCache(e.TraceId, map[string]any{
-				"driver": e.Driver,
-				"name":   e.Name,
-				"cmd":    e.Cmd,
-				"args":   e.Args,
-				"ms":     e.Ms,
-			})
-		}
+	id2 := d.Bus.Subscribe(TopicCache, func(e CacheEvent) {
+		AddCache(e.TraceId, map[string]any{
+			"driver": e.Driver,
+			"name":   e.Name,
+			"cmd":    e.Cmd,
+			"args":   e.Args,
+			"ms":     e.Ms,
+		})
 	})
-	id3 := d.Bus.Subscribe(TopicHttp, func(ev any) {
-		if e, ok := ev.(HttpEvent); ok {
-			AddHttp(e.TraceId, map[string]any{
-				"url":      e.Url,
-				"method":   e.Method,
-				"header":   e.Header,
-				"body":     e.Body,
-				"status":   e.Status,
-				"response": e.Response,
-				"ms":       e.Ms,
-			})
-		}
+	id3 := d.Bus.Subscribe(TopicHttp, func(e HttpEvent) {
+		AddHttp(e.TraceId, map[string]any{
+			"url":      e.Url,
+			"method":   e.Method,
+			"header":   e.Header,
+			"body":     e.Body,
+			"status":   e.Status,
+			"response": e.Response,
+			"ms":       e.Ms,
+		})
 	})
-	id4 := d.Bus.Subscribe(TopicMq, func(ev any) {
-		if e, ok := ev.(MqEvent); ok {
-			AddMq(e.TraceId, map[string]any{
-				"driver":  e.Driver,
-				"topic":   e.Topic,
-				"message": e.Message,
-				"key":     e.Key,
-				"group":   e.Group,
-				"ms":      e.Ms,
-				"extra":   e.Extra,
-			})
-		}
+	id4 := d.Bus.Subscribe(TopicMq, func(e MqEvent) {
+		AddMq(e.TraceId, map[string]any{
+			"driver":  e.Driver,
+			"topic":   e.Topic,
+			"message": e.Message,
+			"key":     e.Key,
+			"group":   e.Group,
+			"ms":      e.Ms,
+			"extra":   e.Extra,
+		})
 	})
-	id5 := d.Bus.Subscribe(TopicListener, func(ev any) {
-		if e, ok := ev.(ListenerEvent); ok {
-			AddListener(e.TraceId, map[string]any{
-				"name":  e.Name,
-				"topic": e.Description,
-				"data":  e.Data,
-			})
-		}
+	id5 := d.Bus.Subscribe(TopicListener, func(e ListenerEvent) {
+		AddListener(e.TraceId, map[string]any{
+			"name":  e.Name,
+			"topic": e.Description,
+			"data":  e.Data,
+		})
 	})
-	id6 := d.Bus.Subscribe(TopicJob, func(ev any) {
-		if e, ok := ev.(JobEvent); ok {
-			AddJob(e.TraceId, map[string]any{
-				"name":       e.Name,
-				"connection": e.Connection,
-				"payload":    e.Payload,
-				"ms":         e.Ms,
-			})
-		}
+	id6 := d.Bus.Subscribe(TopicJob, func(e JobEvent) {
+		AddJob(e.TraceId, map[string]any{
+			"name":       e.Name,
+			"connection": e.Connection,
+			"payload":    e.Payload,
+			"ms":         e.Ms,
+		})
 	})
 
 	d.mu.Lock()

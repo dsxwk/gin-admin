@@ -32,7 +32,7 @@ func (s *AgentController) Ask(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	if err := facade.Request[any]().BindValidate(c, &req, "Ask"); err != nil {
+	if err := facade.Request().BindValidate(c, &req, "Ask"); err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}
@@ -136,7 +136,7 @@ func (s *AgentController) History(c *gin.Context) {
 
 	s.service.WithContext(ctx)
 
-	if err := facade.Request[any]().BindValidate(c, &req, "History"); err != nil {
+	if err := facade.Request().BindValidate(c, &req, "History"); err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return
 	}

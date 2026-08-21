@@ -36,7 +36,7 @@ func (s *PermissionController) List(c *gin.Context) {
 	s.service.WithContext(ctx)
 
 	// 绑定参数并验证
-	err := facade.Request[any]().BindValidate(c, &req, "List")
+	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
 		return

@@ -21,7 +21,7 @@ func (p *HttpProvider) Name() string {
 
 // Register 注册服务到门面
 func (p *HttpProvider) Register(app serviceprovider.App) {
-	facade.Register[*http.Client[any]]("http", http.NewClient[any]())
+	facade.Register[*http.Client]("http", http.NewClient())
 }
 
 // Boot 启动服务

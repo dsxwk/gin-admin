@@ -4,7 +4,6 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/serviceprovider/eventbus"
 )
 
 type EventListenerList struct{}
@@ -22,7 +21,7 @@ func (s *EventListenerList) Help() []base.CommandOption {
 }
 
 func (s *EventListenerList) Execute(values map[string]string) {
-	facade.Event[eventbus.Event]().Debug()
+	facade.Event().Debug()
 }
 
 func init() {

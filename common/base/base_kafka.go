@@ -53,7 +53,7 @@ func (c *KafkaConsumer) setStatus(status queue.ConsumerStatus) {
 	c.status = status
 }
 
-func (c *KafkaConsumer) Start(h interface{}) {
+func (c *KafkaConsumer) Start[T queue.ConsumerHandler](h T) {
 	c.setStatus(queue.ConsumerStatusRunning)
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 
@@ -71,8 +71,8 @@ func (c *KafkaConsumer) Start(h interface{}) {
 	}()
 }
 
-func (c *KafkaConsumer) consumeLoop(h interface{}) {
-	retry := h.(queue.Consumer).Retry()
+func (c *KafkaConsumer) consumeLoop[T queue.ConsumerHandler](h T) {
+	retry := h.Retry()
 	msg, err := c.Kafka.Reader.FetchMessage(c.ctx)
 	if err != nil {
 		if !errors.Is(err, context.Canceled) {
@@ -82,7 +82,7 @@ func (c *KafkaConsumer) consumeLoop(h interface{}) {
 		return
 	}
 
-	isDelay := h.(queue.Consumer).IsDelay()
+	isDelay := h.IsDelay()
 	body := c.parseBody(msg, isDelay)
 
 	var handleErr error
