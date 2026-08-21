@@ -197,6 +197,7 @@
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
+> - Project update Golang version to 1.27.0, low version is not compatible, adjust the support for generic methods, the installation version must be >= 1.27.0.
 > - On June 24, 2026, the Golang project was updated to version 1.26.4. There may be version differences in lower versions, and it is recommended to have a version>=1.26.4. 
 > - The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
 
