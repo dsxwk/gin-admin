@@ -1,4 +1,4 @@
-﻿## English | [中文](readme_zh.md)
+## English | [中文](readme_zh.md)
 
 - [Project Introduction](#Project-Introduction)
   - [Project Address](#Project-Address)
@@ -193,7 +193,7 @@
 - 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
-> - Latest Version [v2.3.14](version_history.md#v2314)
+> - Latest Version [v2.4.0](version_history.md#v240)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -1263,7 +1263,7 @@ func (s *UserController) List(c *gin.Context) {
     }*/
     // Method Two
     // Bind And Validate
-    err := facade.Request[any]().BindValidate(c, &req, "List")
+    err := facade.Request().BindValidate(c, &req, "List")
     if err != nil {
         s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
         return
@@ -1375,7 +1375,7 @@ func (s *UserController) List(c *gin.Context) {
   s.service.WithContext(ctx)
 
   // 绑定参数并验证
-  err := facade.Request[any]().BindValidate(c, &req, "List")
+  err := facade.Request().BindValidate(c, &req, "List")
   if err != nil {
     s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1409,7 +1409,7 @@ func (s *UserController) Create(c *gin.Context) {
   s.service.WithContext(ctx)
 
   // 绑定参数并验证
-  err := facade.Request[any]().BindValidate(c, &req, "Create")
+  err := facade.Request().BindValidate(c, &req, "Create")
   if err != nil {
     s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1456,7 +1456,7 @@ func (s *UserController) Update(c *gin.Context) {
     return
   }
 
-  req.ID = facade.Request[int64]().Path(c, "id", 0)
+  req.ID = facade.Request().Path[int64](c, "id", 0)
   err = req.Validate(req, "Update")
   if err != nil {
     s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
@@ -1490,10 +1490,10 @@ func (s *UserController) Detail(c *gin.Context) {
 
   s.service.WithContext(ctx)
 
-  req.ID = facade.Request[int64]().Path(c, "id", 0)
+  req.ID = facade.Request().Path[int64](c, "id", 0)
 
   // 绑定参数并验证
-  err := facade.Request[any]().BindValidate(c, &req, "Detail")
+  err := facade.Request().BindValidate(c, &req, "Detail")
   if err != nil {
     s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -1526,10 +1526,10 @@ func (s *UserController) Delete(c *gin.Context) {
 
   s.service.WithContext(ctx)
 
-  req.ID = facade.Request[int64]().Path(c, "id", 0)
+  req.ID = facade.Request().Path[int64](c, "id", 0)
 
   // 绑定参数并验证
-  err := facade.Request[any]().BindValidate(c, &req, "Delete")
+  err := facade.Request().BindValidate(c, &req, "Delete")
   if err != nil {
     s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -2457,7 +2457,7 @@ func (s *LoginController) Login(c *gin.Context) {
   s.service.WithContext(ctx)
 
   // Bind And Validate
-  err := facade.Request[any]().BindValidate(c, &req, "Login")
+  err := facade.Request().BindValidate(c, &req, "Login")
   if err != nil {
     s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
     return
@@ -2476,7 +2476,7 @@ func (s *LoginController) Login(c *gin.Context) {
   }
 
   // Publish Event
-  facade.Event[event.UserLoginEvent]().Publish(ctx, event.UserLoginEvent{
+  facade.Event().Publish[event.UserLoginEvent](ctx, event.UserLoginEvent{
     UserId:   userModel.ID,
     Username: userModel.Username,
   })
@@ -3127,7 +3127,7 @@ func (s *TestController) Test(c *gin.Context) {
     s.service.WithContext(ctx)
   
     // Bind and validate parameters
-    err := facade.Request[any]().BindValidate(c, &req, "List")
+    err := facade.Request().BindValidate(c, &req, "List")
     if err != nil {
         s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
         return

@@ -1,5 +1,10 @@
 # Version History
 
+## v2.4.0
+> - Update go version to 1.27.0
+> - Adjust generic structure method to new version generic method
+> - Update documentation
+
 ## v2.3.14
 > - Add AI Agent model configuration support openai, deepseek, etc.
 > - Add mcp tools and ai intelligent assistant
