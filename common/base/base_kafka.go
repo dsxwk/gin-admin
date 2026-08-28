@@ -11,10 +11,11 @@ import (
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
 	"gin/pkg/serviceprovider/queue"
-	"github.com/goccy/go-json"
-	"github.com/segmentio/kafka-go"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
+	"github.com/segmentio/kafka-go"
 )
 
 // Kafka Kafka连接
@@ -186,7 +187,7 @@ func (p *KafkaProducer) Publish(ctx context.Context, msg any) error {
 		Topic:   p.Topic,
 		Message: string(body),
 		Ms:      float64(time.Since(start).Milliseconds()),
-		Extra: map[string]interface{}{
+		Extra: map[string]any{
 			"key": p.Key,
 			"err": err,
 		},

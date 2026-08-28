@@ -3,8 +3,9 @@ package router
 import (
 	v1 "gin/app/controller/v1"
 	"gin/app/middleware"
-	"github.com/gin-gonic/gin"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func init() {

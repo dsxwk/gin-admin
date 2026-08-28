@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"gin/pkg/serviceprovider/mcp"
-	"github.com/goccy/go-json"
 	"time"
+
+	"github.com/goccy/go-json"
 )
 
 // Agent AI智能体
@@ -200,11 +201,7 @@ func (a *Agent) callTool(name string, args map[string]any) (any, error) {
 	if !ok {
 		return nil, errors.New("tool not found: " + name)
 	}
-	// 支持带用户上下文的工具调用
-	if uc, ok := tool.(mcp.UserContextCall); ok {
-		return uc.CallWithUser(a.ctx, a.userId, args)
-	}
-	return tool.Call(a.ctx, args)
+	return mcp.CallTool(a.ctx, a.userId, tool, args)
 }
 
 // Reset 重置对话历史

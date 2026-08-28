@@ -7,10 +7,11 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
-	"github.com/go-redis/redis/v8"
-	"github.com/goccy/go-json"
 	"sync"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/goccy/go-json"
 )
 
 type RedisConsumer struct {

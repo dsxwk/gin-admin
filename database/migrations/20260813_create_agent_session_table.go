@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"gin/app/model"
+
 	"gorm.io/gorm"
 )
 

@@ -12,9 +12,6 @@ import (
 	"gin/pkg"
 	"gin/pkg/serviceprovider"
 	"gin/router"
-	"github.com/fatih/color"
-	"github.com/gin-gonic/gin"
-	"github.com/mattn/go-runewidth"
 	"net"
 	"net/http"
 	"os"
@@ -23,6 +20,10 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/fatih/color"
+	"github.com/gin-gonic/gin"
+	"github.com/mattn/go-runewidth"
 )
 
 // App 应用结构
@@ -111,7 +112,7 @@ func (a *App) printStartupInfo(conf *config.Config) {
 	port := pkg.IntToString(conf.App.Port)
 
 	// 构建数据
-	data := map[string]interface{}{
+	data := map[string]any{
 		"应用":  conf.App.Name,
 		"环境":  conf.App.Env,
 		"端口":  color.YellowString(pkg.IntToString[int64](conf.App.Port)),
@@ -151,7 +152,7 @@ func (a *App) printStartupInfo(conf *config.Config) {
 }
 
 // PrintAligned 打印冒号对齐,支持中文
-func PrintAligned(data map[string]interface{}, order []string) {
+func PrintAligned(data map[string]any, order []string) {
 	if len(order) == 0 {
 		return
 	}

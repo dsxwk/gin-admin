@@ -10,10 +10,11 @@ import (
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
 	"gin/pkg/serviceprovider/queue"
-	"github.com/goccy/go-json"
-	"github.com/rabbitmq/amqp091-go"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 // RabbitMQ RabbitMQ连接

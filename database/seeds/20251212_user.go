@@ -2,6 +2,7 @@ package seeds
 
 import (
 	"gin/app/model"
+
 	"gorm.io/gorm"
 )
 

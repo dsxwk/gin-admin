@@ -74,7 +74,7 @@ func (s *ArticleService) Create(createdUser int64, req request.Article) (model.A
 }
 
 // Update 更新
-func (s *ArticleService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *ArticleService) Update(id int64, data map[string]any) (err error) {
 	if pkg.HasKey(data, "tag") {
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}

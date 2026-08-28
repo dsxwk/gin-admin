@@ -4,6 +4,7 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/pkg/serviceprovider/agent"
+
 	"github.com/goccy/go-json"
 	"gorm.io/gorm"
 )
@@ -78,7 +79,7 @@ func (s *AgentService) RecordMessage(sessionId int64, record agent.MessageRecord
 		// 更新会话统计
 		return tx.Model(&model.AgentSession{}).
 			Where("id = ?", sessionId).
-			Updates(map[string]interface{}{
+			Updates(map[string]any{
 				"message_count": gorm.Expr("message_count + ?", 1),
 				"total_tokens":  gorm.Expr("total_tokens + ?", record.Tokens),
 			}).Error
