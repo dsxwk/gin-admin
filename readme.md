@@ -1,171 +1,183 @@
 ## English | [中文](readme_zh.md)
 
 - [Project Introduction](#Project-Introduction)
-  - [Project Address](#Project-Address)
-  - [Web Address](#Web-Address)
-  - [View Screenshots](#View-Screenshots)
+    - [Project Address](#Project-Address)
+    - [Web Address](#Web-Address)
+    - [View Screenshots](#View-Screenshots)
 - [License](#License)
 - [Version History](#Version-History)
 - [Installation Instructions](#Installation-Instructions)
-  - [Clone Project](#Clone-Project)
-  - [Initialize Go Environment And Dependencies](#Initialize-Go-Environment-And-Dependencies)
-    - [Method One](#Method-One)
-    - [Method Two](#Method-Two)
-  - [Initialize Database](#Initialize-Database)
-  - [Permission Sync](#Permission-Sync)
-  - [Start](#Start)
-    - [Use Air Hot Update](#Use-Air-Hot-Update)
-  - [Compile](#Compile)
-    - [Compile Project](#Compile-Project)
-    - [Compile Command](#Compile-Command)
+    - [Clone Project](#Clone-Project)
+    - [Initialize Go Environment And Dependencies](#Initialize-Go-Environment-And-Dependencies)
+        - [Method One](#Method-One)
+        - [Method Two](#Method-Two)
+    - [Initialize Database](#Initialize-Database)
+    - [Permission Sync](#Permission-Sync)
+    - [Start](#Start)
+        - [Use Air Hot Update](#Use-Air-Hot-Update)
+    - [Compile](#Compile)
+        - [Compile Project](#Compile-Project)
+        - [Compile Command](#Compile-Command)
 - [Directory Structure](#Directory-Structure)
 - [Start Service](#Start-Service)
-  - [Air Hot Update](#Air-Hot-Update)
+    - [Air Hot Update](#Air-Hot-Update)
 - [Configuration File](#Configuration-File)
-  - [Project Configuration](#Project-Configuration)
-  - [Hot Update Configuration](#Hot-Update-Configuration)
+    - [Project Configuration](#Project-Configuration)
+    - [Hot Update Configuration](#Hot-Update-Configuration)
 - [Command](#Command)
-  - [Get Version](#Get-Version)
-  - [Command Help](#Command-Help)
-  - [Command List](#Command-List)
-  - [Command Creation Help](#Command-Creation-Help)
-  - [Command Creation](#Command-Creation)
-  - [Command Structure](#Command-Structure)
-  - [Command Registration](#Command-Registration)
-  - [Help Options](#Help-Options)
-  - [Execute Command](#Execute-Command)
-  - [Compile And Execute Commands](#Compile-And-Execute-Commands)
+    - [Get Version](#Get-Version)
+    - [Command Help](#Command-Help)
+    - [Command List](#Command-List)
+    - [Command Creation Help](#Command-Creation-Help)
+    - [Command Creation](#Command-Creation)
+    - [Command Structure](#Command-Structure)
+    - [Command Registration](#Command-Registration)
+    - [Help Options](#Help-Options)
+    - [Execute Command](#Execute-Command)
+    - [Compile And Execute Commands](#Compile-And-Execute-Commands)
 - [Model](#Model)
-  - [Model Creation Help](#Model-Creation-Help)
-  - [Model Creation](#Model-Creation)
-  - [ORM Dynamic Filtering](#ORM-Dynamic-Filtering)
-    - [OR Condition Query](#OR-Condition-Query)
-    - [AND Condition Query](#AND-Condition-Query)
-    - [JSON Field Query](#JSON-Field-Query)
-    - [Complex Condition Query](#Complex-Condition-Query)
-    - [Query Example](#Query-Example)
+    - [Model Creation Help](#Model-Creation-Help)
+    - [Model Creation](#Model-Creation)
+    - [ORM Dynamic Filtering](#ORM-Dynamic-Filtering)
+        - [OR Condition Query](#OR-Condition-Query)
+        - [AND Condition Query](#AND-Condition-Query)
+        - [JSON Field Query](#JSON-Field-Query)
+        - [Complex Condition Query](#Complex-Condition-Query)
+        - [Query Example](#Query-Example)
 - [Form Validation](#Form-Validation)
-  - [Validator Creation Help](#Validator-Creation-Help)
-  - [Validator Creation](#Validator-Creation)
-  - [Validator Rules](#Validator-Rules)
-  - [Validator Scenes](#Validator-Scenes)
-  - [Prompt Message](#Prompt-Message)
-  - [Field Translation](#Field-Translation)
-  - [Batch Validation](#Batch-Validation)
-  - [Custom Validation](#Custom-Validation)
-    - [Global Rules](#Global-Rules)
-    - [Local Rules](#Local-Rules)
-    - [Temporary Rules](#Temporary-Rules)
-    - [Validator Usage](#Validator-Usage)
-    - [Used In The Controller](#Used-In-The-Controller)
+    - [Validator Creation Help](#Validator-Creation-Help)
+    - [Validator Creation](#Validator-Creation)
+    - [Validator Rules](#Validator-Rules)
+    - [Validator Scenes](#Validator-Scenes)
+    - [Prompt Message](#Prompt-Message)
+    - [Field Translation](#Field-Translation)
+    - [Batch Validation](#Batch-Validation)
+    - [Custom Validation](#Custom-Validation)
+        - [Global Rules](#Global-Rules)
+        - [Local Rules](#Local-Rules)
+        - [Temporary Rules](#Temporary-Rules)
+        - [Validator Usage](#Validator-Usage)
+        - [Used In The Controller](#Used-In-The-Controller)
 - [Service](#Service)
-  - [Service Creation Help](#Service-Creation-Help)
-  - [Service Creation](#Service-Creation)
+    - [Service Creation Help](#Service-Creation-Help)
+    - [Service Creation](#Service-Creation)
 - [Controller](#Controller)
-  - [Controller Creation Help](#Controller-Creation-Help)
-  - [Controller Creation](#Controller-Creation)
+    - [Controller Creation Help](#Controller-Creation-Help)
+    - [Controller Creation](#Controller-Creation)
 - [Route](#Route)
-  - [Route Creation Help](#Route-Creation-Help)
-  - [Route Creation](#Route-Creation)
-  - [Route List](#Route-List)
+    - [Route Creation Help](#Route-Creation-Help)
+    - [Route Creation](#Route-Creation)
+    - [Route List](#Route-List)
 - [Middleware](#Middleware)
-  - [Middleware Creation Help](#Middleware-Creation-Help)
-  - [Middleware Creation](#Middleware-Creation)
-  - [Rate Limit Middleware](#Rate-Limit-Middleware)
+    - [Middleware Creation Help](#Middleware-Creation-Help)
+    - [Middleware Creation](#Middleware-Creation)
+    - [Rate Limit Middleware](#Rate-Limit-Middleware)
 - [Cache](#Cache)
-  - [Global Cache](#Global-Cache)
-  - [Redis Cache](#Redis-Cache)
-  - [Memory Cache](#Memory-Cache)
-  - [Disk Cache](#Disk-Cache)
+    - [Global Cache](#Global-Cache)
+    - [Redis Cache](#Redis-Cache)
+    - [Memory Cache](#Memory-Cache)
+    - [Disk Cache](#Disk-Cache)
 - [Event](#Event)
-  - [Event Creation Help](#Event-Creation-Help)
-  - [Event Creation](#Event-Creation)
+    - [Event Creation Help](#Event-Creation-Help)
+    - [Event Creation](#Event-Creation)
 - [Listener](#Listener)
-  - [Listener Creation Help](#Listener-Creation-Help)
-  - [Listener Creation](#Listener-Creation)
+    - [Listener Creation Help](#Listener-Creation-Help)
+    - [Listener Creation](#Listener-Creation)
 - [Queue](#Queue)
-  - [Queue Creation Help](#Queue-Creation-Help)
-  - [Queue Creation](#Queue-Creation)
-  - [Queue Usage](#Queue-Usage)
-  - [Consumer List](#Consumer-List)
-  - [Producer List](#Producer-List)
+    - [Queue Creation Help](#Queue-Creation-Help)
+    - [Queue Creation](#Queue-Creation)
+    - [Queue Usage](#Queue-Usage)
+    - [Consumer List](#Consumer-List)
+    - [Producer List](#Producer-List)
 - [Job](#Job)
-  - [Job Creation](#Job-Creation)
-  - [Job Dispatch](#Job-Dispatch)
-  - [Job Interface](#Job-Interface)
-  - [Job List](#Job-List)
-  - [Job Clear](#Job-Clear)
+    - [Job Creation](#Job-Creation)
+    - [Job Dispatch](#Job-Dispatch)
+    - [Job Interface](#Job-Interface)
+    - [Job List](#Job-List)
+    - [Job Clear](#Job-Clear)
 - [Publish Event](#Publish-Event)
-  - [Event Test](#Event-Test)
+    - [Event Test](#Event-Test)
 - [Event List](#Event-List)
-  - [Event Listener List](#Event-Listener-List)
+    - [Event Listener List](#Event-Listener-List)
 - [Response](#Response)
-  - [Response Success](#Response-Success)
-    - [Response Success With Message](#Response-Success-With-Message)
-    - [Response Success With Data](#Response-Success-With-Data)
-  - [Response Error](#Response-Error)
-    - [Response Error With Code](#Response-Error-With-Code)
-    - [Response Error With Message](#Response-Error-With-Message)
-    - [Response Error With Data](#Response-Error-With-Data)
-    - [Response Error With HTTP Code](#Response-Error-With-HTTP-Code)
+    - [Response Success](#Response-Success)
+        - [Response Success With Message](#Response-Success-With-Message)
+        - [Response Success With Data](#Response-Success-With-Data)
+    - [Response Error](#Response-Error)
+        - [Response Error With Code](#Response-Error-With-Code)
+        - [Response Error With Message](#Response-Error-With-Message)
+        - [Response Error With Data](#Response-Error-With-Data)
+        - [Response Error With HTTP Code](#Response-Error-With-HTTP-Code)
 - [Log](#Log)
-  - [Write Log](#Write-Log)
-  - [Error Debug](#Error-Debug)
+    - [Write Log](#Write-Log)
+    - [Error Debug](#Error-Debug)
 - [Language Support](#Language-Support)
-  - [Directory Configuration](#Directory-Configuration) 
-  - [Ordinary Translation](#Ordinary-Translation) 
-  - [Template Translation](#Template-Translation) 
-  - [Add Language Support](#Add-Language-Support) 
+    - [Directory Configuration](#Directory-Configuration)
+    - [Ordinary Translation](#Ordinary-Translation)
+    - [Template Translation](#Template-Translation)
+    - [Add Language Support](#Add-Language-Support)
 - [Service Provider](#Service-Provider)
-  - [Service Provider Creation](#Service-Provider-Creation)
+    - [Service Provider Creation](#Service-Provider-Creation)
 - [Facade](#Facade)
-  - [Facade Creation](#Facade-Creation)
-  - [Facade Usage](#Facade-Usage)
+    - [Facade Creation](#Facade-Creation)
+    - [Facade Usage](#Facade-Usage)
 - [Enum](#Enum)
-  - [Enum Creation](#Enum-Creation)
-  - [Enum Example](#Enum-Example)
-  - [Enum Usage](#Enum-Usage)
+    - [Enum Creation](#Enum-Creation)
+    - [Enum Example](#Enum-Example)
+    - [Enum Usage](#Enum-Usage)
 - [Database](#Database)
-  - [Database Configuration](#Database-Configuration)
-  - [Database Connection](#Database-Connection)
-  - [Database Search](#Database-Search)
+    - [Database Configuration](#Database-Configuration)
+    - [Database Connection](#Database-Connection)
+    - [Database Search](#Database-Search)
 - [Swagger Documents](#Swagger-Documents)
 
 # Project Introduction
-> - A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`, `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
-> - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of model, request validation, service, controller, and routing.
-> - AI assistant support(openai、deepseek...)
+
+> - A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by
+    mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear
+    hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`,
+    `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other
+    technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
+> - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of
+    model, request validation, service, controller, and routing.
+> - The directory structure of the `grpc service` uses `model`, `proto`, `request`, and `service` to support one-click command-line generation of model, request, proto, and service code, with `grpc-gen` automatically generating the gRPC code
+> - AI assistant support (openai、deepseek...)
 >   - Data query
->     - **Operation log statistics**: Query PV, UV, request method distribution, status code statistics, etc. for today/specified date
+>     - **Operation log statistics**: Query PV, UV, request method distribution, status code statistics, etc. for
+        today/specified date
 >     - **System configuration query**: Query system configuration items such as site name and logo
 >     - **User search**:[readme_zh.md](readme_zh.md) Search system users by name or username
->     - **Department query**: Query department tree structure, specify superior sub departments, and number of department members
+>     - **Department query**: Query department tree structure, specify superior sub departments, and number of
+        department members
 >     - **Dict query**: Query gender, status, and other enumerated dictionary entries
 
 >   - CLI command execution
 >     - **Code generation**:
->       - Controller creation(`make:controller`)
->       - Model creation(`make:model`)
->       - Service creation(`make:service`)
->       - Request creation(`make:request`)
->       - Middleware creation(`make:middleware`)
->       - Router creation(`make:router`)
->       - Generate Swagger document(`make:docs`)
+>       - Controller creation (`make:controller`)
+>       - Model creation (`make:model`)
+>       - Service creation (`make:service`)
+>       - Request creation (`make:request`)
+>       - Middleware creation (`make:middleware`)
+>       - Router creation (`make:router`)
+>       - Generate Swagger document (`make:docs`)
 >   - **Permission Management**:
->     - Synchronize user permissions to Redis(`permission:sync`)
+>     - Synchronize user permissions to Redis (`permission:sync`)
 >   - **View information**:
->     - View routing list(`route:list`)
->     - View Job List(`job:list`)
+>     - View routing list (`route:list`)
+>     - View Job List (`job:list`)
 
 ## Project Address
+
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
 
 ## Web Address
+
 - Github: https://github.com/dsxwk/gin-web.git
 - Gitee: https://gitee.com/dsxwk/gin-web.git
 
 ## View Screenshots
+
 ![image](docs/images/Cli_2026-08-07_16-36-40_0.png)
 ![image](docs/images/Cli_2026-08-07_16-24-03_2.png)
 ![image](docs/images/Cli_2026-08-07_16-30-09_3.png)
@@ -180,28 +192,44 @@
 ![image](docs/images/SwaggerApi_2026-08-07_16-15-15_7.png)
 
 ## Introduction to the Gin Framework
-> Gin is a web framework written in Go language. It has the characteristics of simplicity, speed, and efficiency, and is widely used in Go language web development.
+
+> Gin is a web framework written in Go language. It has the characteristics of simplicity, speed, and efficiency, and is
+> widely used in Go language web development.
 
 ## Features of Gin Framework
-- Fast: The Gin framework is based on the standard library net/http, using goroutines and channels to implement asynchronous processing and improve performance.
-- Simple: The Gin framework provides a range of APIs and middleware, enabling developers to quickly build web applications.
-- Efficient: The Gin framework uses sync. Pool to cache objects, reducing memory allocation and release, and improving performance.
-> Golang Gin is a lightweight and efficient Golang web framework. It has the characteristics of high performance, ease of use, and flexibility, and is widely used in the development of various web applications.
+
+- Fast: The Gin framework is based on the standard library net/http, using goroutines and channels to implement
+  asynchronous processing and improve performance.
+- Simple: The Gin framework provides a range of APIs and middleware, enabling developers to quickly build web
+  applications.
+- Efficient: The Gin framework uses sync. Pool to cache objects, reducing memory allocation and release, and improving
+  performance.
+
+> Golang Gin is a lightweight and efficient Golang web framework. It has the characteristics of high performance, ease
+> of use, and flexibility, and is widely used in the development of various web applications.
 
 # License
+
 - 📘 Open source version: Following AGPL-3.0, for learning, research, and non-commercial use only.
-- 💼 Commercial version: If closed source or commercial use is required, please contact the author 📧   [ 25076778@qq.com ]Obtain commercial authorization.
+- 💼 Commercial version: If closed source or commercial use is required, please contact the author
+  📧   [ 25076778@qq.com ]Obtain commercial authorization.
 
 # Version History
+
 > - Latest Version [v2.4.0](version_history.md#v240)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
-> - Project update Golang version to 1.27.0, low version is not compatible, adjust the support for generic methods, the installation version must be >= 1.27.0.
-> - On June 24, 2026, the Golang project was updated to version 1.26.4. There may be version differences in lower versions, and it is recommended to have a version>=1.26.4. 
-> - The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It is recommended that the version be greater than or equal to 1.25.2.
+
+> - Project update Golang version to 1.27.0, low version is not compatible, adjust the support for generic methods, the
+    installation version must be >= 1.27.0.
+> - On June 24, 2026, the Golang project was updated to version 1.26.4. There may be version differences in lower
+    versions, and it is recommended to have a version>=1.26.4.
+> - The project is developed based on Golang version 1.25.2, and there may be version differences in lower versions. It
+    is recommended that the version be greater than or equal to 1.25.2.
 
 ## Clone Project
+
 ```bash
 $ git clone https://github.com/dsxwk/gin-admin.git
 $ cd gin-admin
@@ -209,12 +237,16 @@ $ copy dev.config.yaml.example dev.config.yaml
 ```
 
 ## Initialize Go Environment And Dependencies
+
 ### Method One
+
 ```bash
 $ go env -w GOPROXY=https://goproxy.cn,direct
 $ go generate ./...
 ```
+
 ### Method Two
+
 ```bash
 $ go env -w GO111MODULE=on
 $ go env -w GOPROXY=https://goproxy.cn,direct
@@ -225,34 +257,43 @@ $ go mod vendor
 ```
 
 ## Initialize Database
+
 ```bash
 $ go run ./cmd/cli.go db:seed --init=true
 ```
 
 ## Permission Sync
+
 > To synchronize permission data to Redis database, Redis service must be installed and started
+
 ```bash
 $ go run ./cmd/cli.go permission:sync
 ```
 
 ## Start
+
 ```bash
 $ go run main.go
 ```
+
 ### Use Air Hot Update
+
 ```bash
 $ go install github.com/air-verse/air@latest
 $ air
 ```
 
 ## Compile
+
 ### Compile Project
+
 ```bash
 $ go build main.go
 $ ./main
 ```
 
 ### Compile Command
+
 ```bash
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=11
@@ -261,6 +302,7 @@ $ ./cli demo:command --args=11
 ```
 
 # Directory Structure
+
 ```
 ├── app                                 # Application
 │   ├── command                         # Command
@@ -268,51 +310,61 @@ $ ./cli demo:command --args=11
 │   ├── enum                            # Enum
 │   ├── event                           # Event
 │   ├── facade                          # Facade
+│   ├── job                             # Job
 │   ├── listener                        # Listener
+│   ├── mcp                             # MCP Tool
 │   ├── middleware                      # Middleware
 │   ├── model                           # Model
 │   ├── provider                        # Provider
 │   ├── queue                           # Queue(Kafka/RabbitMQ/Redis)
-│   ├──├── consumer                  # Consumer
-│   ├──├── producer                  # Producer
+│   │   ├── consumer                    # Consumer
+│   │   └── producer                    # Producer
 │   ├── request                         # Validator
-│   ├── service                         # Service
-├── bootstrap                           # Bootstrap 
+│   └── service                         # Service
+├── bootstrap                           # Bootstrap
 ├── cmd                                 # Command Script Tool
-│   ├── cli.go                          # Entry File
+│   └── cli.go                          # Entry File
 ├── common                              # Common Module
 │   ├── base                            # Base
 │   ├── ctxkey                          # Context Key
 │   ├── errcode                         # Errcode
 │   ├── flag                            # Flag
 │   ├── response                        # Response
-│   ├── template                        # Template
+│   └── template                        # Template
 ├── config                              # Config File
-├── database                            # Database Test File 
+├── database                            # Database Test File
 ├── docs                                # Swagger Doc
-├── pkg                                 # Pakage
-│   ├──├── cli                          # Command
-│   ├──├── serviceprovider              # Service Providers Package
-│   ├──├──├── cache                     # Cache
-│   ├──├──├── debugger                  # Debugger
-│   ├──├──├── eventbus                  # Event Bus
-│   ├──├──├── http                      # Http Request
-│   ├──├──├── lang                      # Language
-│   ├──├──├── logger                    # Logger
-│   ├──├──├── message                   # Message Event
-│   ├──├──├── orm                       # Orm Tool
-│   ├──├──├── queue                     # Queue
-│   ├──├──├── ratelimit                 # Rate Limit
-│   ├──├──├── request                   # Request
-│   ├──├── time                         # Time Processing
+├── grpc                                # gRPC
+│   ├── model                           # gRPC Model
+│   ├── proto                           # Proto Definition
+│   ├── request                         # gRPC Request
+│   └── service                         # gRPC Service
+├── pkg                                 # Package
+│   ├── cli                             # Command
+│   │   ├── grpcgen                     # gRPC Code Generator
+│   │   └── make                        # Make Command
+│   ├── serviceprovider                 # Service Providers Package
+│   │   ├── cache                       # Cache
+│   │   ├── debugger                    # Debugger
+│   │   ├── eventbus                    # Event Bus
+│   │   ├── grpcclient                  # gRPC Client
+│   │   ├── http                        # Http Request
+│   │   ├── lang                        # Language
+│   │   ├── logger                      # Logger
+│   │   ├── message                     # Message Event
+│   │   ├── orm                         # Orm Tool
+│   │   ├── queue                       # Queue
+│   │   ├── ratelimit                   # Rate Limit
+│   │   └── request                     # Request
+│   └── time                            # Time Processing
 ├── public                              # Static Resources
 ├── router                              # Router
 ├── storage                             # Storage
 │   ├── cache                           # Disk Cache
 │   ├── logs                            # Logs
-│   ├── locales                         # Translation
-│   ├──├── en                           # English Translation
-│   ├──├── zh                           # Chinese Translation
+│   └── locales                         # Translation
+│       ├── en                          # English Translation
+│       └── zh                          # Chinese Translation
 ├── tests                               # Test Case
 ├── vendor                              # Vendor
 ├── .air.linux.toml                     # Air Configuration File
@@ -330,10 +382,13 @@ $ ./cli demo:command --args=11
 ```
 
 # Start Service
+
 ```bash
 $ go run main.go
 ```
+
 ## Air Hot Update
+
 ```bash
 $ go install github.com/air-verse/air@latest
 $ air
@@ -363,18 +418,26 @@ Database:              gin
 ```
 
 # Configuration File
+
 ## Project Configuration
-> `config.yaml` is the default configuration file and can be modified by oneself. `dev.config.yaml` corresponds to the local environment configuration, and environment variables can be configured through the following app.exe file to switch environments
+
+> `config.yaml` is the default configuration file and can be modified by oneself. `dev.config.yaml` corresponds to the
+> local environment configuration, and environment variables can be configured through the following app.exe file to
+> switch environments
 > ```
 > app:
 >   env: dev # dev|testing|production dev=local-environment testing=test-environment production=production-environment
 > ```
 
 ## Hot Update Configuration
-> `.air.toml` is the default configuration file in Windows environment, and `.air.Linux.toml` is the default configuration file in Linux environment. You can modify it according to the overall needs of the project.
+
+> `.air.toml` is the default configuration file in Windows environment, and `.air.Linux.toml` is the default
+> configuration file in Linux environment. You can modify it according to the overall needs of the project.
 
 # Command
+
 ## Get Version
+
 ```bash
 $ go run ./cmd/cli.go --version # -v
   ██████  ██████ ██   ██
@@ -387,6 +450,7 @@ Gin Cli v2.0.0, built with Go go1.25.2
 ```
 
 ## Command Help
+
 ```bash
 $ go run ./cmd/cli.go -h # --help
   ██████  ██████ ██   ██
@@ -441,6 +505,7 @@ Options:
 ```
 
 ## Command List
+
 ```bash
 $ go run ./cmd/cli.go --format=json # -f=json
 {
@@ -547,6 +612,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
 ```
 
 ## Command Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:command -h # --help
   ██████  ██████ ██   ██
@@ -570,12 +636,18 @@ Options:
 ```
 
 ## Command Creation
+
 ```bash
 $ go run ./cmd/cli.go make:command --file=cronjob/demo --name=demo-test --desc=command-desc
 ```
 
 ## Command Structure
-> After generating the command, appropriate values should be defined for the ` Name() ` and ` Descript() ` functions. These properties will be used when displaying the command list. The `Name()` function also allows you to define the expected input value for the command. It will call the `Execute()` function when executing the command. You can put the command logic in this method. Let's take a look at an example command.
+
+> After generating the command, appropriate values should be defined for the ` Name() ` and ` Descript() ` functions.
+> These properties will be used when displaying the command list. The `Name()` function also allows you to define the
+> expected input value for the command. It will call the `Execute()` function when executing the command. You can put the
+> command logic in this method. Let's take a look at an example command.
+
 ```go
 package cronjob
 
@@ -621,7 +693,11 @@ func init() {
 ```
 
 ## Command Registration
-> `cli. go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the command you registered is not `command` package, you can add the path to import the package in `./cmd/imports/import.go`.
+
+> `cli. go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the
+> command you registered is not `command` package, you can add the path to import the package in
+> `./cmd/imports/import.go`.
+
 ```go
 //go:build cli
 
@@ -642,7 +718,14 @@ func main() {
 ```
 
 ## Help Options
-> Command option parameters are defined using the `base. CommandOption` structure. The `base. CommandOption` struct contains two attributes: `Flag` and `Description`. The `Flag` attribute is used to define the flag of command options, which can be a short flag (such as `- a `) or a long flag (such as `--args`). The `Description` attribute is used to define the description of command options. The `base. CommandOption` struct also contains a `Required` attribute that specifies whether a command option is required. At the same time, this method supports the console `--help` parameter and automatically generates help information.
+
+> Command option parameters are defined using the `base. CommandOption` structure. The `base. CommandOption` struct
+> contains two attributes: `Flag` and `Description`. The `Flag` attribute is used to define the flag of command options,
+> which can be a short flag (such as `- a `) or a long flag (such as `--args`). The `Description` attribute is used to
+> define the description of command options. The `base. CommandOption` struct also contains a `Required` attribute that
+> specifies whether a command option is required. At the same time, this method supports the console `--help` parameter
+> and automatically generates help information.
+
 ```go
 func (m *DemoCommand) Help() []base.CommandOption {
 	return []base.CommandOption{
@@ -657,6 +740,7 @@ func (m *DemoCommand) Help() []base.CommandOption {
     }
 }
 ```
+
 ```bash
 $ go run ./cmd/cli.go demo-test -h # --help
   ██████  ██████ ██   ██
@@ -678,19 +762,125 @@ Options:
 ```
 
 ## Execute Command
+
 ```bash
 $ go run ./cmd/cli.go demo:command --args=arg1
  SUCCESS  Excute Command: demo:command --args=arg1
 ```
 
 ## Compile And Execute Commands
+
 ```bash
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=arg1
 ```
 
+## gRPC
+
+### Generate gRPC Code
+
+Generate protobuf message and gRPC service code from `grpc/proto/*.proto`:
+
+```bash
+$ go run -tags cli ./cmd grpc-gen
+```
+
+Options:
+
+- `--type=all` Generate message and service code (default)
+- `--type=pb` Generate message code only (`user.pb.go`)
+- `--type=grpc` Generate service code only (`user_grpc.pb.go`)
+- `--file=grpc/proto/user.proto` Generate the specified proto file
+- `--tool-dir=.tools/bin` Plugin directory (installed automatically)
+
+### Generate Model
+
+Generate a Go model from a database table:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:model --table=user
+```
+
+Options:
+
+- `--path=grpc/model` Output directory (default)
+- `--connection=mysql` Database connection
+
+Integer columns are generated as `int32`, so Postman displays numbers instead of strings. The gRPC service layer uses the models under `grpc/model`.
+
+### Generate Proto
+
+Generate a gRPC proto file from a database table:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:proto --table=user
+```
+
+It generates the `Detail`, `List`, `Create`, `Update`, and `Delete` rpc methods by default, with integer fields as `int32`.
+The shared `EmptyResponse` is defined in `grpc/proto/base.proto` and imported by generated protos.
+
+Options:
+
+- `--path=grpc/proto` Output directory (default)
+- `--connection=mysql` Database connection
+
+### Generate Request
+
+Generate a gRPC request from a database table:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:request --table=user
+```
+
+Options:
+
+- `--path=grpc/request` Output directory (default)
+- `--connection=mysql` Database connection
+
+### Generate Service
+
+Generate a gRPC service from a database table:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:service --table=user
+```
+
+Options:
+
+- `--path=grpc/service` Output directory (default)
+- `--connection=mysql` Database connection
+
+The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc-gen`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
+
+### Call From Go
+
+```go
+user, err := facade.Grpc().Service(proto.NewUserServiceClient)
+if err != nil {
+    return err
+}
+resp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
+```
+
+### Call From Postman
+
+The server uses the standard protobuf codec and enables gRPC reflection.
+
+- Server URL: `grpc://127.0.0.1:50051`
+- Method: `grpc.UserService/Detail`
+- Message: `{"id": 1}`
+
+Update example:
+
+- Method: `grpc.UserService/Update`
+- Message: `{"id": 1, "data": {"username": "张三", "gender": 0}}`
+
+You can import `grpc/proto/user.proto` in Postman or use server reflection to load the service definition.
+
 # Model
+
 ## Model Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:model -h # --help
   ██████  ██████ ██   ██
@@ -715,11 +905,15 @@ Options:
 ```
 
 ## Model Creation
-> Support the creation of multiple model files simultaneously. If multiple model files need to be created, please separate the table name parameters of the descendants with commas, such as: user, menu
+
+> Support the creation of multiple model files simultaneously. If multiple model files need to be created, please
+> separate the table name parameters of the descendants with commas, such as: user, menu
+
 ```bash
 $ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
 # go run ./cmd/cli.go make:model --table=user --path=api/user --camel=true --connection=sqlsrv
 ```
+
 ```go
 // Code generated by gorm.io/gen. DO NOT EDIT.
 // Code generated by gorm.io/gen. DO NOT EDIT.
@@ -760,40 +954,57 @@ func (*User) Connection() string {
 ```
 
 ## ORM Dynamic Filtering
-> By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria based on the list fields. The `__search` type is `map[string]interface{}`, for example:__ search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}.  support or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes: `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where' condition, SQL statements will be automatically constructed based on the condition
+
+> By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria
+> based on the list fields. The `__search` type is `map[string]any`, for example:__
+> search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. support or、and、in、not
+> in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not
+> exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes:
+> `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where'
+> condition, SQL statements will be automatically constructed based on the condition
+
 ### OR Condition Query
+
 ```http
 GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"username":["=", "test"]},{"age":["=", 18]}]}
 ```
+
 ```sql
 SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
 ```
 
 ### AND Condition Query
+
 ```http
 GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"username":["=", "test"]},{"age":["=", 18]}]}
 ```
+
 ```sql
 SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
 ```
 
 ### JSON Field Query
+
 ```http
 GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"name":""},{"$.meta.icon":["=","ele-Collection"]}]}]}
 ```
+
 ```sql
  SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
 ```
 
 ### Complex Condition Query
+
 ```http
 GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"not exist":{"userRoles.name":"admin"}}]},{"username":"admin"}]}
 ```
+
 ```sql
  SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
 ```
 
 ### Query Example
+
 ```go
 package service
 
@@ -849,7 +1060,9 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 ```
 
 # Form Validation
+
 ## Validator Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:request -h # --help
   ██████  ██████ ██   ██
@@ -875,9 +1088,11 @@ Options:
 ```
 
 ## Validator Creation
+
 ```bash
 $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-request-validation
 ```
+
 ```go
 package request
 
@@ -943,7 +1158,9 @@ func (s Roles) Translates() map[string]string {
 ```
 
 ### Validator Rules
+
 > For more rules, please refer to [gookit/validate](https://github.com/gookit/validate)
+
 ```go
 package request
 
@@ -959,6 +1176,7 @@ type Roles struct {
 ```
 
 ## Validator Scenes
+
 ```go
 package request
 
@@ -978,6 +1196,7 @@ func (s Roles) ConfigValidation(v *validate.Validation) {
 ```
 
 ## Prompt Message
+
 ```go
 package request
 
@@ -993,6 +1212,7 @@ func (s Roles) Messages() map[string]string {
 ```
 
 ## Field Translation
+
 ```go
 package request
 
@@ -1010,7 +1230,9 @@ func (s Roles) Translates() map[string]string {
 ```
 
 ## Batch Validation
+
 > Method One
+
 ```go
 package request
 
@@ -1086,7 +1308,9 @@ func (s UserImport) Translates() map[string]string {
     return ms
 }
 ```
+
 > Method Two
+
 ```go
 package request
 
@@ -1148,8 +1372,12 @@ func (s SystemConfigValueUpdate) Messages() map[string]string {
 ```
 
 ## Custom Validation
+
 ### Global Rules
-> Global rules only need to be defined in the entry file `main.go`,applicable to all validators, without the need for repeated definitions.
+
+> Global rules only need to be defined in the entry file `main.go`,applicable to all validators, without the need for
+> repeated definitions.
+
 ```go
 package main
 
@@ -1170,6 +1398,7 @@ func init() {
 ```
 
 ### Local Rules
+
 ```go
 package request
 
@@ -1181,6 +1410,7 @@ func (s User) ValidateIsEven(val any) bool {
 ```
 
 ### Temporary Rules
+
 ```go
 package request
 
@@ -1203,6 +1433,7 @@ func (s User) Validate(data User, scene string) error {
 ```
 
 ### Validator Usage
+
 ```go
 package request
 
@@ -1212,6 +1443,7 @@ type User struct {
 ```
 
 ### Used In The Controller
+
 ```go
 package v1
 
@@ -1281,7 +1513,9 @@ func (s *UserController) List(c *gin.Context) {
 ```
 
 # Service
+
 ## Service Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:service -h # --help
   ██████  ██████ ██   ██
@@ -1305,12 +1539,15 @@ Options:
 ```
 
 ## Service Creation
+
 ```bash
 $ go run ./cmd/cli.go make:service -f=user --table=user -c=mysql
 ```
 
 # Controller
+
 ## Controller Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:controller -h # --help
   ██████  ██████ ██   ██
@@ -1333,9 +1570,11 @@ Options:
 ```
 
 ## Controller Creation
+
 ```bash
 $ go run ./cmd/cli.go make:controller --file=v1/user --desc=user
 ```
+
 ```go
 package v1
 
@@ -1439,7 +1678,7 @@ func (s *UserController) Create(c *gin.Context) {
 func (s *UserController) Update(c *gin.Context) {
   var (
     ctx  = c.Request.Context()
-    data map[string]interface{}
+    data map[string]any
     req  request.User
   )
 
@@ -1548,8 +1787,12 @@ func (s *UserController) Delete(c *gin.Context) {
 ```
 
 # Route
-> The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need to be defaulted.
+
+> The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need
+> to be defaulted.
+
 ## Route Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:router -h # --help
   ██████  ██████ ██   ██
@@ -1572,9 +1815,11 @@ Options:
 ```
 
 ## Route Creation
+
 ```bash
 $ go run ./cmd/cli.go make:router --file=user --desc=User-Routing
 ```
+
 ```go
 package router
 
@@ -1619,6 +1864,7 @@ func (r *UserRouter) IsAuth() bool {
 ```
 
 ## Route List
+
 ```bash
 $ go run ./cmd/cli.go route:list
 
@@ -1640,8 +1886,11 @@ A total of 10 routes
 ```
 
 # Middleware
+
 > `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
+
 ## Middleware Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:middleware -h # --help
   ██████  ██████ ██   ██
@@ -1664,12 +1913,16 @@ Options:
 ```
 
 ## Middleware Creation
+
 ```bash
 $ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middleware
 ```
 
 ## Rate Limit Middleware
-> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow limiting, IP interface flow limiting, and global flow limiting.
+
+> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow
+> limiting, IP interface flow limiting, and global flow limiting.
+
 ```go
 package router
 
@@ -1730,9 +1983,17 @@ func LoadRouters(router *gin.Engine) {
 ```
 
 # Cache
-> With `memory` as the default cache driver and support for custom extensions. By default, it supports three modes: `Memory cache`, `Redis cache`, and `Disk cache`. It can use global cache or any cache separately. The global cache only integrates the common methods of `Set`, `Get`, `Delete`, and `Expire` by default. If you need to use more, you can use them separately, or you can integrate them yourself.
+
+> With `memory` as the default cache driver and support for custom extensions. By default, it supports three modes:
+> `Memory cache`, `Redis cache`, and `Disk cache`. It can use global cache or any cache separately. The global cache only
+> integrates the common methods of `Set`, `Get`, `Delete`, and `Expire` by default. If you need to use more, you can use
+> them separately, or you can integrate them yourself.
+
 ## Global Cache
-> The configuration of global cache can be switched through the `cache.driver` configuration in the `yaml` configuration file, or dynamically switched.
+
+> The configuration of global cache can be switched through the `cache.driver` configuration in the `yaml` configuration
+> file, or dynamically switched.
+
 ```go
 package controller
 
@@ -1786,6 +2047,7 @@ func (s *TestController) Test()  {
 ```
 
 ## Redis Cache
+
 ```go
 package controller
 
@@ -1840,6 +2102,7 @@ func (s *TestController) Test()  {
 ```
 
 ## Memory Cache
+
 ```go
 package controller
 
@@ -1894,6 +2157,7 @@ func (s *TestController) Test()  {
 ```
 
 ## Disk Cache
+
 ```go
 package controller
 
@@ -1948,7 +2212,9 @@ func (s *TestController) Test() {
 ```
 
 # Event
+
 ## Event Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:event -h # --help
   ██████  ██████ ██   ██
@@ -1972,9 +2238,11 @@ Options:
 ```
 
 ## Event Creation
+
 ```bash
 $ go run ./cmd/cli.go make:event -f=user_login -n='user.login' -d=user-login-event
 ```
+
 ```go
 package event
 
@@ -1997,7 +2265,9 @@ func (u UserLoginEvent) Description() string {
 ```
 
 # Listener
+
 ## Listener Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:listener -h # --help
   ██████  ██████ ██   ██
@@ -2020,9 +2290,11 @@ Options:
 ```
 
 ## Listener Creation
+
 ```bash
 $ go run ./cmd/cli.go make:listener -f=user_login -e=UserLoginEvent
 ```
+
 ```go
 package listener
 
@@ -2052,9 +2324,13 @@ func init() {
 ```
 
 # Queue
-> Executing the queue creation command will create both consumers and producers based on the connection type (kafka/rabbitmq/redis). You only need to implement the `Handle` method to process your business logic, with automatic error retries and delayed queue support.
+
+> Executing the queue creation command will create both consumers and producers based on the connection type
+> (kafka/rabbitmq/redis). You only need to implement the `Handle` method to process your business logic, with automatic
+> error retries and delayed queue support.
 
 ## Queue Creation Help
+
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
   ██████  ██████ ██   ██
@@ -2078,32 +2354,39 @@ Options:
   -D, --desc        Queue Description
 ```
 
-> `topic`, `key`, `group`, `queue`, `exchange`, `routing` are auto-generated from `name`. `retry` defaults to 3, `delayMs` defaults to 0.
+> `topic`, `key`, `group`, `queue`, `exchange`, `routing` are auto-generated from `name`. `retry` defaults to 3,
+> `delayMs` defaults to 0.
 
 ## Queue Creation
 
 ### Kafka
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=kafka --name=kafka_demo
 ```
+
 Generated files: `app/queue/consumer/kafka_demo.go`, `app/queue/producer/kafka_demo.go`
 
 ### RabbitMQ
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=rabbitmq --name=rabbitmq_demo
 ```
 
 ### Redis
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=redis --name=redis_demo
 ```
 
 ### Delay Queue
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=true
 ```
 
 ### Generated Consumer Example (Kafka)
+
 ```go
 package consumer
 
@@ -2168,6 +2451,7 @@ func init() {
 ```
 
 ### Generated Producer Example (Kafka)
+
 ```go
 package producer
 
@@ -2218,7 +2502,9 @@ func init() {
 ```
 
 ## Queue Usage
+
 > Consumers are auto-registered at startup. Producers can be used directly via the facade with typed payload structs.
+
 ```go
 package controller
 
@@ -2248,6 +2534,7 @@ func (s *TestController) Test(ctx context.Context) {
 ```
 
 ## Consumer List
+
 ```bash
 $ go run ./cmd/cli.go consumer:list
 
@@ -2265,6 +2552,7 @@ Total 6 consumers
 ```
 
 ## Producer List
+
 ```bash
 $ go run ./cmd/cli.go producer:list
 
@@ -2282,20 +2570,24 @@ Total 6 producers
 ```
 
 ## Job
-> The Job system provides Laravel-style asynchronous task processing with support for `sync`, `redis`, `kafka`, and `rabbitmq` drivers.
+
+> The Job system provides Laravel-style asynchronous task processing with support for `sync`, `redis`, `kafka`, and
+> `rabbitmq` drivers.
 
 ### Job Creation
+
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
-| Argument | Short | Required | Default | Description |
-|---|---|---|---|---|
-| `--name` | `-n` | Yes | - | Job name, e.g. `send_email` |
-| `--connection` | `-c` | No | `queue.connection` config | Driver: `sync`, `redis`, `kafka`, `rabbitmq` |
-| `--desc` | `-D` | No | Same as `--name` | Job description |
-| `--retry` | `-R` | No | `0` | Retry count |
-| `--delay` | `-d` | No | `0` | Retry delay (ms) |
+| Argument       | Short | Required | Default                   | Description                                  |
+|----------------|-------|----------|---------------------------|----------------------------------------------|
+| `--name`       | `-n`  | Yes      | -                         | Job name, e.g. `send_email`                  |
+| `--connection` | `-c`  | No       | `queue.connection` config | Driver: `sync`, `redis`, `kafka`, `rabbitmq` |
+| `--desc`       | `-D`  | No       | Same as `--name`          | Job description                              |
+| `--retry`      | `-R`  | No       | `0`                       | Retry count                                  |
+| `--delay`      | `-d`  | No       | `0`                       | Retry delay (ms)                             |
 
 ### Job Structure
+
 ```go
 package job
 
@@ -2333,6 +2625,7 @@ func init() {
 ```
 
 ### Job Dispatch
+
 ```go
 package v1
 
@@ -2361,17 +2654,19 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### Job Interface
-| Method | Description |
-|---|---|
-| `Name() string` | Unique job name |
-| `Description() string` | Job description |
-| `Connection() string` | Driver: `"sync"`, `"redis"`, `"kafka"`, `"rabbitmq"` (empty = redis) |
-| `Retry() int` | Retry count (`0` = execute once) |
-| `Delay() int64` | Retry delay in milliseconds |
-| `NewPayload() any` | Returns pointer to payload struct for unmarshaling |
-| `Handle(payload any) error` | Business logic, `payload` is already deserialized |
+
+| Method                      | Description                                                          |
+|-----------------------------|----------------------------------------------------------------------|
+| `Name() string`             | Unique job name                                                      |
+| `Description() string`      | Job description                                                      |
+| `Connection() string`       | Driver: `"sync"`, `"redis"`, `"kafka"`, `"rabbitmq"` (empty = redis) |
+| `Retry() int`               | Retry count (`0` = execute once)                                     |
+| `Delay() int64`             | Retry delay in milliseconds                                          |
+| `NewPayload() any`          | Returns pointer to payload struct for unmarshaling                   |
+| `Handle(payload any) error` | Business logic, `payload` is already deserialized                    |
 
 ### Job List
+
 ```bash
 $ go run ./cmd/cli.go job:list
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -2385,14 +2680,18 @@ Total 3 jobs
 ```
 
 ### Job Clear
+
 ```bash
 $ go run ./cmd/cli.go job:clear
 All unconsumed jobs have been cleared
 ```
+
 > Only supports Redis driver.
 
 ### Debugger
+
 Job dispatch events are automatically recorded in the debugger:
+
 ```json
 {
   "Job": [
@@ -2407,6 +2706,7 @@ Job dispatch events are automatically recorded in the debugger:
 ```
 
 # Publish Event
+
 ```go
 package v1
 
@@ -2484,7 +2784,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
   s.Response.Success(
     c, errcode.Success().WithMsg(
-      facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
+      facade.Lang().Trans(ctx, "login.success", map[string]any{
         "name": userModel.Username,
       }),
     ).WithData(LoginResponse{
@@ -2501,6 +2801,7 @@ func (s *LoginController) Login(c *gin.Context) {
 ```
 
 ## Event Test
+
 ```bash
 $ POST /api/v1/login HTTP/1.1
 Host: 127.0.0.1:8080
@@ -2517,6 +2818,7 @@ Content-Length: 56
 ```
 
 # Event List
+
 ```bash
 $ go run ./cmd/cli.go event:list
 
@@ -2529,6 +2831,7 @@ Total 1 event
 ```
 
 ## Event Listener List
+
 ```bash
 $ go run ./cmd/cli.go listener:list
 
@@ -2543,7 +2846,9 @@ Total 1 event 2 listeners
 ```
 
 # Response
+
 ## Response Success
+
 ```go
 package v1
 
@@ -2562,7 +2867,8 @@ func (s *TestController) Test(c *gin.Context) {
 }
 ```
 
-###  Response Success With Message
+### Response Success With Message
+
 ```go
 package v1
 
@@ -2582,6 +2888,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### Response Success With Data
+
 ```go
 package v1
 
@@ -2601,6 +2908,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ## Response Error
+
 ```go
 package v1
 
@@ -2620,6 +2928,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### Response Error With Code
+
 ```go
 package v1
 
@@ -2639,6 +2948,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### Response Error With Message
+
 ```go
 package v1
 
@@ -2658,6 +2968,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### Response Error With Data
+
 ```go
 package v1
 
@@ -2677,6 +2988,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ## Response Error With HTTP Code
+
 ```go
 package v1
 
@@ -2697,7 +3009,13 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 # Log
-> Use the `zap` package to implement logging. The storage path for log files is `storage/logs`, and the default log level is `debug`. When the error code returned is not 0, it automatically records log TraceId, stack, SQL, HTTP, Redis, and other call information. Logging can also be directly called to automatically record debugging information. Does `log.access` in the configuration file `yaml` support automatic recording of request logs? If enabled, it will automatically record request logs.
+
+> Use the `zap` package to implement logging. The storage path for log files is `storage/logs`, and the default log
+> level is `debug`. When the error code returned is not 0, it automatically records log TraceId, stack, SQL, HTTP, Redis,
+> GRPC, and other call information. Logging can also be directly called to automatically record debugging information.
+> Does `log.access` in the configuration file `yaml` support automatic recording of request logs? If enabled, it will
+> automatically record request logs.
+
 ```json
 {
   "level": "info",
@@ -2724,13 +3042,17 @@ func (s *TestController) Test(c *gin.Context) {
     "Cache": [],
     "Http": [],
     "Mq": [],
+    "Grpc": [],
     "ListenerEvent": []
   }
 }
 ```
 
 ## Write Log
-> Encapsulated in the facade, the log level supports debug, info, warn, error, dpanic, panic, and fatal, with the default being `debug`.
+
+> Encapsulated in the facade, the log level supports debug, info, warn, error, dpanic, panic, and fatal, with the
+> default being `debug`.
+
 ```go
 package v1
 
@@ -2749,7 +3071,11 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ## Error Debug
-> When using public return errors and calling the Withdebugger() method, it will automatically record log TraceId, stack, SQL, HTTP, Redis, and other call information. Debugging can be done based on debug and trace stack information. The log file storage path is' storage/logs'.
+
+> When using public return errors and calling the Withdebugger () method, it will automatically record log TraceId,
+> stack, SQL, HTTP, Redis, GRPC, and other call information. Debugging can be done based on debug and trace stack
+> information. The log file storage path is' storage/logs'.
+
 ```go
 package v1
 
@@ -2768,6 +3094,7 @@ func (s *TestController) Test(c *gin.Context) {
     facade.Log().WithDebugger(ctx).Error("System Error")
 }
 ```
+
 ```json
 {
   "level": "error",
@@ -2794,6 +3121,7 @@ func (s *TestController) Test(c *gin.Context) {
     "Cache": [],
     "Http": [],
     "Mq": [],
+    "Grpc": [],
     "ListenerEvent": []
   },
   "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
@@ -2801,9 +3129,18 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 # Language Support
-> Multilingualism has been integrated into the facade and provider, supporting both `zh` and `en` languages, and supporting custom extensions. Language transmission defaults to transmitting the `Accept-Language` parameter in the `header`, such as `zh` or `en`, which is not case sensitive and does not pass the default language as `zh`.
+
+> Multilingualism has been integrated into the facade and provider, supporting both `zh` and `en` languages, and
+> supporting custom extensions. Language transmission defaults to transmitting the `Accept-Language` parameter in the
+> `header`, such as `zh` or `en`, which is not case sensitive and does not pass the default language as `zh`.
+
 ## Directory Configuration
-> The storage path for translation files is `storage/scales`, the default language is `zh`, and multiple languages are separated by commas. Languages are stored in the corresponding language directory without distinguishing between subdirectories. For example, Chinese is stored in `storage/scales/zh` and can support `json` and `yaml` format files in any directory.
+
+> The storage path for translation files is `storage/scales`, the default language is `zh`, and multiple languages are
+> separated by commas. Languages are stored in the corresponding language directory without distinguishing between
+> subdirectories. For example, Chinese is stored in `storage/scales/zh` and can support `json` and `yaml` format files in
+> any directory.
+
 ```yaml
 # Translation Configuration
 i18n:
@@ -2812,6 +3149,7 @@ i18n:
 ```
 
 ## Ordinary Translation
+
 ```go
 package controller
 
@@ -2834,7 +3172,10 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 ## Template Translation
-> Template translation is supported in the translation file, such as `{{. name}}`, using `map[string]interface{}` to pass parameters.
+
+> Template translation is supported in the translation file, such as `{{. name}}`, using `map[string]any` to pass
+> parameters.
+
 ```json
 [
   {
@@ -2843,6 +3184,7 @@ func (s *TestController) Test(c *gin.Context)  {
   }
 ]
 ```
+
 ```go
 package controller
 
@@ -2859,7 +3201,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
+    trans := facade.Lang().Trans(ctx, "login.success", map[string]any{
         "name": "admin",
     }),
 	fmt.Println(trans) // Output: admin,登录成功 English Output: admin,Login Success
@@ -2867,7 +3209,12 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 ## Add Language Support
-> Add the corresponding language directory, such as `en`, in the `storage/scales` directory, and then add a translation file in the directory. The translation file supports `json` and `yaml` formats, with `id` as the unique identifier and `translation` as the translation content. Any number of translation contents can be added to the translation file. The configuration language support requires adjusting the `i18n.lang` parameter in the configuration file.
+
+> Add the corresponding language directory, such as `en`, in the `storage/scales` directory, and then add a translation
+> file in the directory. The translation file supports `json` and `yaml` formats, with `id` as the unique identifier and
+> `translation` as the translation content. Any number of translation contents can be added to the translation file. The
+> configuration language support requires adjusting the `i18n.lang` parameter in the configuration file.
+
 ```yaml
 # Translation Configuration
 i18n:
@@ -2875,17 +3222,26 @@ i18n:
   lang: "zh,en" # Default language, multiple languages separated by commas
 ```
 
-# Service Provider 
+# Service Provider
+
 > The service provider will automatically load the registration upon startup and release it upon shutdown.
+
 ## Service Provider Creation
+
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
 # Facade
+
 ## Facade Creation
+
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
 ## Facade Usage
-> The project integrates features such as logs, databases, validator, caches, and throttling by Facade. Currently, cache is used as an example. The binding of context to databases, caches, HTTP requests, and queues will be recorded in the debugging log.
+
+> The project integrates features such as logs, databases, validator, caches, and throttling by Facade. Currently, cache
+> is used as an example. The binding of context to databases, caches, HTTP requests, and queues will be recorded in the
+> debugging log.
+
 ```go
 package controller
 
@@ -2912,10 +3268,13 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 # Enum
+
 ## Enum Creation
+
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details.
 
 ## Enum Example
+
 ```go
 package enum
 
@@ -2957,6 +3316,7 @@ func (s *UserEnum) Status() *base.Enum[string] {
 ```
 
 ## Enum Usage
+
 ```go
 package v1
 
@@ -3021,8 +3381,14 @@ func (s *LoginController) Test(c *gin.Context) {
 ```
 
 # Database
-> The database is initialized through a container and bound to the context through middleware, so that database instances can be obtained wherever there is context. You can also obtain database instances separately. By default, MySQL, pgSQL, SQLite, and SQLSRV are integrated, and the default database can be configured and the database connection can be specified through the Connection method.
+
+> The database is initialized through a container and bound to the context through middleware, so that database
+> instances can be obtained wherever there is context. You can also obtain database instances separately. By default,
+> MySQL, pgSQL, SQLite, and SQLSRV are integrated, and the default database can be configured and the database connection
+> can be specified through the Connection method.
+
 ## Database Configuration
+
 ```yaml
 # Database
 databases:
@@ -3073,7 +3439,9 @@ sqlsrv:
 ```
 
 ## Database Connection
+
 > The use of context is not mandatory. If the context is not bound, SQL records will not be recorded in the log.
+
 ```go
 package controller
 
@@ -3102,7 +3470,9 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 ## Database Search
+
 > Use in conjunction with the ORM dynamic filtering example in the document.
+
 ```go
 package controller
 
@@ -3144,6 +3514,7 @@ func (s *TestController) Test(c *gin.Context) {
 }
 
 ```
+
 ```go
 package service
 
@@ -3197,6 +3568,7 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 ```
 
 # Swagger Documents
+
 ```bash
 $ go install github.com/swaggo/swag/cmd/swag@latest
 # Use

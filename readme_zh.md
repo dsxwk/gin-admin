@@ -1,140 +1,144 @@
 ## 中文 | [English](readme.md)
 
 - [项目简介](#项目简介)
-  - [项目地址](#项目地址) 
-  - [前端地址](#前端地址) 
-  - [预览截图](#预览截图) 
+    - [项目地址](#项目地址)
+    - [前端地址](#前端地址)
+    - [预览截图](#预览截图)
 - [许可证](#许可证)
 - [版本记录](#版本记录)
 - [安装说明](#安装说明)
-  - [克隆项目](#克隆项目)
-  - [初始化Go环境与依赖](#初始化Go环境与依赖)
-    - [方式一](#方式一)
-    - [方式二](#方式二)
-  - [初始化数据库](#初始化数据库)
-  - [权限同步](#权限同步)
-  - [启动](#启动)
-    - [使用air热更新](#使用air热更新)
-  - [编译](#编译)
-    - [编译项目](#编译项目)
-    - [编译命令行](#编译命令行)
+    - [克隆项目](#克隆项目)
+    - [初始化Go环境与依赖](#初始化Go环境与依赖)
+        - [方式一](#方式一)
+        - [方式二](#方式二)
+    - [初始化数据库](#初始化数据库)
+    - [权限同步](#权限同步)
+    - [启动](#启动)
+        - [使用air热更新](#使用air热更新)
+    - [编译](#编译)
+        - [编译项目](#编译项目)
+        - [编译命令行](#编译命令行)
 - [目录结构](#目录结构)
 - [启动服务](#启动服务)
-  - [air热更新](#air热更新)
+    - [air热更新](#air热更新)
 - [配置文件](#配置文件)
-  - [项目配置](#项目配置)
-  - [热更新配置](#热更新配置)
+    - [项目配置](#项目配置)
+    - [热更新配置](#热更新配置)
 - [命令行](#命令行)
-  - [获取版本](#获取版本)
-  - [命令帮助](#命令帮助)
-  - [命令列表](#命令列表)
-  - [命令创建帮助](#命令创建帮助)
-  - [命令创建](#命令创建)
-  - [命令结构](#命令结构)
-  - [命令注册](#命令注册)
-  - [帮助选项](#帮助选项)
-  - [执行命令](#执行命令)
-  - [编译执行](#编译执行)
+    - [获取版本](#获取版本)
+    - [命令帮助](#命令帮助)
+    - [命令列表](#命令列表)
+    - [命令创建帮助](#命令创建帮助)
+    - [命令创建](#命令创建)
+    - [命令结构](#命令结构)
+    - [命令注册](#命令注册)
+    - [帮助选项](#帮助选项)
+    - [执行命令](#执行命令)
+    - [编译执行](#编译执行)
 - [模型](#模型)
-  - [模型创建帮助](#模型创建帮助)
-  - [模型创建](#模型创建)
-  - [ORM动态筛选](#ORM动态筛选)
-    - [OR条件查询](#OR条件查询)
-    - [AND条件查询](#AND条件查询)
-    - [json字段查询](#json字段查询)
-    - [复杂查询](#复杂查询)
-    - [查询示例](#查询示例)
+    - [模型创建帮助](#模型创建帮助)
+    - [模型创建](#模型创建)
+    - [ORM动态筛选](#ORM动态筛选)
+        - [OR条件查询](#OR条件查询)
+        - [AND条件查询](#AND条件查询)
+        - [json字段查询](#json字段查询)
+        - [复杂查询](#复杂查询)
+        - [查询示例](#查询示例)
 - [表单验证](#表单验证)
-  - [验证创建帮助](#验证创建帮助)
-  - [验证创建](#验证创建)
-  - [验证规则](#验证规则)
-  - [验证场景](#验证场景)
-  - [提示信息](#提示信息)
-  - [字段翻译](#字段翻译)
-  - [批量验证](#批量验证)
-  - [自定义验证](#自定义验证)
-    - [全局规则](#全局规则)
-    - [局部规则](#局部规则)
-    - [临时规则](#临时规则)
-    - [验证使用](#验证使用)
-    - [在控制器中使用](#在控制器中使用)
+    - [验证创建帮助](#验证创建帮助)
+    - [验证创建](#验证创建)
+    - [验证规则](#验证规则)
+    - [验证场景](#验证场景)
+    - [提示信息](#提示信息)
+    - [字段翻译](#字段翻译)
+    - [批量验证](#批量验证)
+    - [自定义验证](#自定义验证)
+        - [全局规则](#全局规则)
+        - [局部规则](#局部规则)
+        - [临时规则](#临时规则)
+        - [验证使用](#验证使用)
+        - [在控制器中使用](#在控制器中使用)
 - [服务](#服务)
-  - [服务创建帮助](#服务创建帮助)
-  - [服务创建](#服务创建)
+    - [服务创建帮助](#服务创建帮助)
+    - [服务创建](#服务创建)
 - [控制器](#控制器)
-  - [控制器创建帮助](#控制器创建帮助)
-  - [控制器创建](#控制器创建)
+    - [控制器创建帮助](#控制器创建帮助)
+    - [控制器创建](#控制器创建)
 - [路由](#路由)
-  - [路由创建帮助](#路由创建帮助)
-  - [路由创建](#路由创建)
-  - [路由列表](#路由列表)
+    - [路由创建帮助](#路由创建帮助)
+    - [路由创建](#路由创建)
+    - [路由列表](#路由列表)
 - [中间件](#中间件)
-  - [中间件创建帮助](#中间件创建帮助)
-  - [中间件创建](#中间件创建)
-  - [限流中间件](#限流中间件)
+    - [中间件创建帮助](#中间件创建帮助)
+    - [中间件创建](#中间件创建)
+    - [限流中间件](#限流中间件)
 - [缓存](#缓存)
-  - [全局缓存](#全局缓存)
-  - [Redis缓存](#Redis缓存)
-  - [内存缓存](#内存缓存)
-  - [磁盘缓存](#磁盘缓存)
+    - [全局缓存](#全局缓存)
+    - [Redis缓存](#Redis缓存)
+    - [内存缓存](#内存缓存)
+    - [磁盘缓存](#磁盘缓存)
 - [事件](#事件)
-  - [事件创建帮助](#事件创建帮助)
-  - [事件创建](#事件创建)
+    - [事件创建帮助](#事件创建帮助)
+    - [事件创建](#事件创建)
 - [监听](#监听)
-  - [监听创建帮助](#监听创建帮助)
-  - [监听创建](#监听创建)
+    - [监听创建帮助](#监听创建帮助)
+    - [监听创建](#监听创建)
 - [队列](#队列)
-  - [队列创建帮助](#队列创建帮助)
-  - [队列创建](#队列创建)
-  - [队列使用](#队列使用)
-  - [消费者列表](#消费者列表)
-  - [生产者列表](#生产者列表)
+    - [队列创建帮助](#队列创建帮助)
+    - [队列创建](#队列创建)
+    - [队列使用](#队列使用)
+    - [消费者列表](#消费者列表)
+    - [生产者列表](#生产者列表)
 - [Job](#Job)
-  - [Job创建](#Job创建)
-  - [Job投递](#Job投递)
-  - [Job接口](#Job接口)
-  - [Job列表](#Job列表)
-  - [Job清除](#Job清除)
+    - [Job创建](#Job创建)
+    - [Job投递](#Job投递)
+    - [Job接口](#Job接口)
+    - [Job列表](#Job列表)
+    - [Job清除](#Job清除)
 - [发布事件](#发布事件)
-  - [测试事件](#测试事件)
+    - [测试事件](#测试事件)
 - [事件列表](#事件列表)
-  - [事件监听列表](#事件监听列表)
+    - [事件监听列表](#事件监听列表)
 - [响应](#响应)
-  - [成功响应](#成功响应)
-    - [成功提示](#成功提示)
-    - [成功数据](#成功数据)
-  - [失败响应](#失败响应)
-    - [失败错误码](#失败错误码)
-    - [失败提示](#失败提示)
-    - [失败数据](#失败数据)
-    - [HTTP状态码](#HTTP状态码)
+    - [成功响应](#成功响应)
+        - [成功提示](#成功提示)
+        - [成功数据](#成功数据)
+    - [失败响应](#失败响应)
+        - [失败错误码](#失败错误码)
+        - [失败提示](#失败提示)
+        - [失败数据](#失败数据)
+        - [HTTP状态码](#HTTP状态码)
 - [日志](#日志)
-  - [记录日志](#记录日志)
-  - [错误调试](#错误调试)
+    - [记录日志](#记录日志)
+    - [错误调试](#错误调试)
 - [多语言](#多语言)
-  - [目录配置](#目录配置)
-  - [常规翻译](#常规翻译)
-  - [模版翻译](#模版翻译)
-  - [添加语言](#添加语言)
+    - [目录配置](#目录配置)
+    - [常规翻译](#常规翻译)
+    - [模版翻译](#模版翻译)
+    - [添加语言](#添加语言)
 - [服务提供者](#服务提供者)
-  - [服务提供者创建](#服务提供者创建)
+    - [服务提供者创建](#服务提供者创建)
 - [门面](#门面)
-  - [门面创建](#门面创建)
-  - [门面使用](#门面使用)
+    - [门面创建](#门面创建)
+    - [门面使用](#门面使用)
 - [枚举](#枚举)
-  - [枚举创建](#枚举创建)
-  - [枚举示例](#枚举示例)
-  - [枚举使用](#枚举使用)
+    - [枚举创建](#枚举创建)
+    - [枚举示例](#枚举示例)
+    - [枚举使用](#枚举使用)
 - [数据库](#数据库)
-  - [数据库配置](#数据库配置)
-  - [数据库连接](#数据库连接)
-  - [数据库搜索](#数据库搜索)
+    - [数据库配置](#数据库配置)
+    - [数据库连接](#数据库连接)
+    - [数据库搜索](#数据库搜索)
 - [swagger文档](#swagger文档)
 
 # 项目简介
-> - 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明, 初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、`队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
+
+> - 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明,
+    初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、
+    `队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
 > - 命令行按照模型、请求验证、服务层、控制器、路由的顺序正确创建可生成可运行带swagger文档的CURD完整代码。
-> - AI智能助手支持(openai、deepseek...)
+> - `grpc服务`目录结构使用`model`、`proto`、`request`、`service`支持命令行一键生成模型、请求、proto、服务的代码,`grpc-gen`自动生成grpc代码
+> - AI智能助手支持 (openai、deepseek...)
 >   - 数据查询
 >     - **操作日志统计**: 查询今日/指定日期的 PV、UV、请求方法分布、状态码统计等
 >     - **系统配置查询**: 查询站点名称、LOGO 等系统配置项
@@ -144,28 +148,31 @@
 
 >   - CLI命令执行
 >     - **代码生成**:
->       - 创建控制器(`make:controller`)
->       - 创建模型(`make:model`)
->       - 创建服务(`make:service`)
->       - 创建验证器(`make:request`)
->       - 创建中间件(`make:middleware`)
->       - 创建路由(`make:router`)
->       - 生成 Swagger 文档(`make:docs`)
+>       - 创建控制器 (`make:controller`)
+>       - 创建模型 (`make:model`)
+>       - 创建服务 (`make:service`)
+>       - 创建验证器 (`make:request`)
+>       - 创建中间件 (`make:middleware`)
+>       - 创建路由 (`make:router`)
+>       - 生成 Swagger 文档 (`make:docs`)
 >   - **权限管理**:
->     - 同步用户权限到 Redis(`permission:sync`)
+>     - 同步用户权限到 Redis (`permission:sync`)
 >   - **查看信息**:
->     - 查看路由列表(`route:list`)
->     - 查看 Job 列表(`job:list`)
-  
+>     - 查看路由列表 (`route:list`)
+>     - 查看 Job 列表 (`job:list`)
+
 ## 项目地址
+
 - Github: https://github.com/dsxwk/gin-admin.git
 - Gitee: https://gitee.com/dsxwk/gin-admin.git
 
 ## 前端地址
+
 - Github: https://github.com/dsxwk/gin-web.git
 - Gitee: https://gitee.com/dsxwk/gin-web.git
 
 ## 预览截图
+
 ![image](docs/images/Cli_2026-08-07_16-36-40_0.png)
 ![image](docs/images/Cli_2026-08-07_16-24-03_2.png)
 ![image](docs/images/Cli_2026-08-07_16-30-09_3.png)
@@ -180,28 +187,35 @@
 ![image](docs/images/SwaggerApi_2026-08-07_16-15-15_7.png)
 
 ## Gin框架介绍
+
 > Gin是一个用Go语言编写的Web框架。它具有简单、快速、高效等特点, 被广泛应用于Go语言的Web开发中。
 
 ## Gin框架的特性
+
 - 快速: Gin框架基于标准库net/http，使用goroutine和channel实现异步处理，提高性能。
 - 简单: Gin框架提供了一系列的API和中间件，使得开发人员可以快速构建Web应用程序。
 - 高效: Gin框架使用sync.Pool来缓存对象，减少内存分配和释放，提高性能。
+
 > Golang Gin 是一个轻量级且高效的 Golang Web 框架。它具有高性能、易用性和灵活性等特点，被广泛应用于各种 Web 应用程序的开发。
 
 # 许可证
+
 - 📘 开源版: 遵循 AGPL-3.0，仅供学习、研究及非商业用途。
 - 💼 商业版: 如需闭源或商业使用，请联系作者📧  [25076778@qq.com] 获取商业授权。
 
 # 版本记录
+
 > - 最新版本 [v2.4.0](version_history_zh.md#v240)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
+
 > - 2026-08-21项目更新Golang版本为1.27.0,低版本不在兼容,调整了对泛型方法的支持安装版本必须 >= 1.27.0。
 > - 2026-06-24项目更新Golang版本为1.26.4,低版本可能存在版本差异,建议版本 >= 1.26.4。
 > - 项目基于Golang 1.25.2版本开发,低版本可能存在版本差异,建议版本 >= 1.25.2。
 
 ## 克隆项目
+
 ```bash
 $ git clone https://github.com/dsxwk/gin-admin.git
 $ cd gin-admin
@@ -209,12 +223,16 @@ $ copy dev.config.yaml.example dev.config.yaml
 ```
 
 ## 初始化Go环境与依赖
+
 ### 方式一
+
 ```bash
 $ go env -w GOPROXY=https://goproxy.cn,direct
 $ go generate ./...
 ```
+
 ### 方式二
+
 ```bash
 $ go env -w GO111MODULE=on
 $ go env -w GOPROXY=https://goproxy.cn,direct
@@ -225,116 +243,140 @@ $ go mod vendor
 ```
 
 ## 初始化数据库
+
 ```bash
 $ go run ./cmd/cli.go db:seed --init=true
 ```
 
 ## 权限同步
+
 > 同步权限数据到redis数据库,必须安装并启动redis服务
+
 ```bash
 $ go run ./cmd/cli.go permission:sync
 ```
 
 ## 启动
+
 ```bash
 $ go run main.go
 ```
+
 ### 使用air热更新
+
 ```bash
 $ go install github.com/air-verse/air@latest
 $ air
 ```
 
 ## 编译
+
 ### 编译项目
+
 ```bash
 $ go build main.go
 $ ./main
 ```
 
 ### 编译命令行
+
 ```bash
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=11
 
  SUCCESS  执行命令: demo:command --args=11
 ```
+
 # 项目目录结构
-$ tree cli,app/service
-├── app                                 # 应用程序
-│   ├── command                         # 命令
-│   ├── controller                      # 控制器
-│   ├── enum                            # 枚举
-│   ├── event                           # 事件
-│   ├── facade                          # 门面
-│   ├── job                             # 任务
-│   ├── listener                        # 监听
-│   ├── middleware                      # 中间件
-│   ├── model                           # 模型
-│   ├── provider                        # 服务提供者
-│   ├── queue                           # 消息队列(Kafka/RabbitMQ/Redis)
-│   │   ├── consumer                    # 消费者
-│   │   └── producer                    # 生产者
-│   ├── request                         # 验证器
-│   ├── service                         # 服务
-├── bootstrap                           # 初始化文件 
-├── cmd                                 # 命令行工具
-│   ├── cli.go                          # 命令行工具入口文件
-├── common                              # 公共模块
-│   ├── base                            # 基类
-│   ├── ctxkey                          # 上下文键名
-│   ├── errcode                         # 错误码
-│   ├── flag                            # 特殊符号
-│   ├── response                        # 响应
-│   ├── template                        # 模版
-├── config                              # 配置文件
-├── database                            # 数据库测试文件
-├── docs                                # 文档
-├── pkg                                 # 工具包
-│   ├── cli                             # 命令行
-│   ├── serviceprovider                 # 服务提供者相关包
-│       ├── cache                       # 缓存
-│       ├── debugger                    # 调试器
-│       ├── eventbus                    # 事件总线
-│       ├── http                        # http请求
-│       ├── lang                        # 语言包
-│       ├── logger                      # 日志
-│       ├── message                     # 消息事件
-│       ├── orm                         # orm工具
-│       ├── queue                       # 队列
-│       ├── ratelimit                   # 限流
-│       ├── request                     # 请求
-├── public                              # 静态资源目录
-├── router                              # 路由
-├── storage                             # 存储
-│   ├── cache                           # 磁盘缓存
-│   ├── logs                            # 日志
-│   ├── locales                         # 翻译文件
-│       ├── en                           # 英文翻译
-│       ├── zh                           # 中文翻译
-├── tests                               # 测试用例
-├── tmp                                 # 临时文件
-├── vendor                              # 依赖包
-├── .air.linux.toml                     # air配置文件
-├── .air.toml                           # air配置文件
-├── .gitignore                          # git忽略文件
-├── config.yaml                         # 默认配置文件
-├── dev.config.yaml                     # 本地环境配置文件
-├── go.mod                              # go mod
-├── LICENSE                             # 开源协议
-├── main.go                             # 入口文件
-├── readme.md                           # 英文文档
-├── readme_zh.md                        # 中文文档
-├── version_history.md                  # 版本记录英文文档
-└── version_history_zh.md               # 版本记录中文文档
+
 ```
+├── app # 应用程序
+│   ├── command # 命令
+│   ├── controller # 控制器
+│   ├── enum # 枚举
+│   ├── event # 事件
+│   ├── facade # 门面
+│   ├── job # 任务
+│   ├── listener # 监听
+│   ├── mcp # MCP工具
+│   ├── middleware # 中间件
+│   ├── model # 模型
+│   ├── provider # 服务提供者
+│   ├── queue # 消息队列(Kafka/RabbitMQ/Redis)
+│   │   ├── consumer # 消费者
+│   │   └── producer # 生产者
+│   ├── request # 验证器
+│   └── service # 服务
+├── bootstrap # 初始化文件
+├── cmd # 命令行工具
+│   └── cli.go # 命令行工具入口文件
+├── common # 公共模块
+│   ├── base # 基类
+│   ├── ctxkey # 上下文键名
+│   ├── errcode # 错误码
+│   ├── flag # 特殊符号
+│   ├── response # 响应
+│   └── template # 模版
+├── config # 配置文件
+├── database # 数据库测试文件
+├── docs # 文档
+├── grpc # gRPC
+│   ├── model # gRPC模型
+│   ├── proto # proto定义
+│   ├── request # gRPC请求
+│   └── service # gRPC服务
+├── pkg # 工具包
+│   ├── cli # 命令行
+│   │   ├── grpcgen # gRPC代码生成
+│   │   └── make # 生成命令
+│   ├── serviceprovider # 服务提供者相关包
+│   │   ├── cache # 缓存
+│   │   ├── debugger # 调试器
+│   │   ├── eventbus # 事件总线
+│   │   ├── grpcclient # gRPC客户端
+│   │   ├── http # http请求
+│   │   ├── lang # 语言包
+│   │   ├── logger # 日志
+│   │   ├── message # 消息事件
+│   │   ├── orm # orm工具
+│   │   ├── queue # 队列
+│   │   ├── ratelimit # 限流
+│   │   └── request # 请求
+│   └── time # 时间处理
+├── public # 静态资源目录
+├── router # 路由
+├── storage # 存储
+│   ├── cache # 磁盘缓存
+│   ├── logs # 日志
+│   └── locales # 翻译文件
+│       ├── en # 英文翻译
+│       └── zh # 中文翻译
+├── tests # 测试用例
+├── tmp # 临时文件
+├── vendor # 依赖包
+├── .air.linux.toml # air配置文件
+├── .air.toml # air配置文件
+├── .gitignore # git忽略文件
+├── config.yaml # 默认配置文件
+├── dev.config.yaml # 本地环境配置文件
+├── go.mod # go mod
+├── LICENSE # 开源协议
+├── main.go # 入口文件
+├── readme.md # 英文文档
+├── readme_zh.md # 中文文档
+├── version_history.md # 版本记录英文文档
+└── version_history_zh.md # 版本记录中文文档
+
 ```
 
 # 启动服务
+
 ```bash
 $ go run main.go
 ```
+
 ## air热更新
+
 ```bash
 $ go install github.com/air-verse/air@latest
 $ air
@@ -364,7 +406,9 @@ watching app\controller
 ```
 
 # 配置文件
+
 ## 项目配置
+
 > `config.yaml`为默认配置文件, 可自行修改。`dev.config.yaml`对应本地环境配置, 通过以下app.env文件配置环境变量来切换环境
 > ```
 > app:
@@ -372,10 +416,13 @@ watching app\controller
 > ```
 
 ## 热更新配置
+
 > `.air.toml`为Windows环境下默认配置文件, `.air.linux.toml`为Linux环境下默认配置文件。可自行根据项目整体需要自行修改。
 
 # 命令行
+
 ## 获取版本
+
 ```bash
 $ go run ./cmd/cli.go --version # -v
   ██████  ██████ ██   ██
@@ -388,6 +435,7 @@ Gin Cli v2.0.0, built with Go go1.25.2
 ```
 
 ## 命令帮助
+
 ```bash
 $ go run ./cmd/cli.go -h # --help
   ██████  ██████ ██   ██
@@ -442,6 +490,7 @@ Options:
 ```
 
 ## 命令列表
+
 ```bash
 $ go run ./cmd/cli.go --format=json # -f=json
 {
@@ -548,6 +597,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
 ```
 
 ## 命令创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:command -h # --help
   ██████  ██████ ██   ██
@@ -571,12 +621,16 @@ Options:
 ```
 
 ## 命令创建
+
 ```bash
 $ go run ./cmd/cli.go make:command --file=cronjob/demo --name=demo-test --desc=command-desc
 ```
 
 ## 命令结构
-> 生成命令后，应为`Name()` 和 `Description()` 方法定义适当的值。当在显示命令列表时，将使用这些属性。 `Name()` 方法还允许你定义命令的输入期望值。 `Execute()` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。 让我们看一个示例命令。
+
+> 生成命令后，应为`Name()` 和 `Description()` 方法定义适当的值。当在显示命令列表时，将使用这些属性。 `Name()`
+> 方法还允许你定义命令的输入期望值。 `Execute()` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。 让我们看一个示例命令。
+
 ```go
 package cronjob
 
@@ -622,7 +676,10 @@ func init() {
 ```
 
 ## 命令注册
-> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在 `./cmd/imports/import.go` 中添加导入包的路径。
+
+> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在
+> `./cmd/imports/import.go` 中添加导入包的路径。
+
 ```go
 //go:build cli
 
@@ -643,7 +700,12 @@ func main() {
 ```
 
 ## 帮助选项
-> 命令选项参数使用 `base.CommandOption` 结构体来定义。 `base.CommandOption` 结构体包含两个属性： `Flag` 和 `Description`。 `Flag` 属性用于定义命令选项的标志，可以是短标志（如 `-a`）或长标志（如 `--args`）。 `Description` 属性用于定义命令选项的描述。 `base.CommandOption` 结构体还包含一个 `Required` 属性，用于指定命令选项是否为必需的。同时该方法支持控制台 `--help` 参数，自动生成帮助信息。
+
+> 命令选项参数使用 `base.CommandOption` 结构体来定义。 `base.CommandOption` 结构体包含两个属性： `Flag` 和 `Description`。
+> `Flag` 属性用于定义命令选项的标志，可以是短标志（如 `-a`）或长标志（如 `--args`）。 `Description` 属性用于定义命令选项的描述。
+> `base.CommandOption` 结构体还包含一个 `Required` 属性，用于指定命令选项是否为必需的。同时该方法支持控制台 `--help`
+> 参数，自动生成帮助信息。
+
 ```go
 func (m *DemoCommand) Help() []base.CommandOption {
 	return []base.CommandOption{
@@ -658,6 +720,7 @@ func (m *DemoCommand) Help() []base.CommandOption {
     }
 }
 ```
+
 ```bash
 $ go run ./cmd/cli.go demo-test -h # --help
   ██████  ██████ ██   ██
@@ -679,19 +742,125 @@ Options:
 ```
 
 ## 执行命令
+
 ```bash
 $ go run ./cmd/cli.go demo:command --args=arg1
  SUCCESS  执行命令: demo:command --args=arg1
 ```
 
 ## 编译执行
+
 ```bash
 $ go build ./cmd/cli.go
 $ ./cli demo:command --args=arg1
 ```
 
+# gRPC
+
+## 生成grpc代码
+
+根据`grpc/proto/*.proto`自动生成protobuf消息和grpc服务代码:
+
+```bash
+$ go run -tags cli ./cmd grpc-gen
+```
+
+命令选项:
+
+- `--type=all` 生成消息和服务代码 (默认)
+- `--type=pb` 只生成消息代码 (`user.pb.go`)
+- `--type=grpc` 只生成服务代码 (`user_grpc.pb.go`)
+- `--file=grpc/proto/user.proto` 指定proto文件
+- `--tool-dir=.tools/bin` 插件安装目录 (自动安装)
+
+## 生成grpc模型
+
+根据数据库表生成Go模型:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:model --table=user
+```
+
+命令选项:
+
+- `--path=grpc/model` 输出目录 (默认)
+- `--connection=mysql` 数据库连接
+
+整数字段会生成`int32`,这样Postman显示数字而不是字符串。grpc服务层使用`grpc/model`下的模型。
+
+## 生成grpc proto
+
+根据数据库表生成grpc proto:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:proto --table=user
+```
+
+默认生成`Detail`、`List`、`Create`、`Update`、`Delete`五个rpc方法,整数字段使用`int32`。
+公共`EmptyResponse`定义在`grpc/proto/base.proto`中,生成的proto会自动引入。
+
+命令选项:
+
+- `--path=grpc/proto` 输出目录 (默认)
+- `--connection=mysql` 数据库连接
+
+## 生成grpc请求
+
+根据数据库表生成grpc请求:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:request --table=user
+```
+
+命令选项:
+
+- `--path=grpc/request` 输出目录 (默认)
+- `--connection=mysql` 数据库连接
+
+## 生成grpc服务
+
+根据数据库表生成grpc服务:
+
+```bash
+$ go run -tags cli ./cmd grpc-make:service --table=user
+```
+
+命令选项:
+
+- `--path=grpc/service` 输出目录 (默认)
+- `--connection=mysql` 数据库连接
+
+grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。更新请求使用`google.protobuf.Struct`接收`data`,按需转成请求结构体做自定义校验,更新时只处理显式传入的字段,和controller的map更新方式一致。
+
+## Go内部调用
+
+```go
+user, err := facade.Grpc().Service(proto.NewUserServiceClient)
+if err != nil {
+    return err
+}
+resp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
+```
+
+## Postman调用
+
+服务端使用标准protobuf编解码并开启了grpc reflection:
+
+- 服务地址: `grpc://127.0.0.1:50051`
+- 方法: `grpc.UserService/Detail`
+- 消息: `{"id": 1}`
+
+更新示例:
+
+- 方法: `grpc.UserService/Update`
+- 消息: `{"id": 1, "data": {"username": "张三", "gender": 0}}`
+
+可在Postman中导入`grpc/proto/user.proto`,或通过服务端reflection自动加载服务定义。
+
 # 模型
+
 ## 模型创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:model -h # --help
   ██████  ██████ ██   ██
@@ -716,11 +885,14 @@ Options:
 ```
 
 ## 模型创建
+
 > 支持创建同时多个模型文件, 如需创建多个模型文件, 传人的表名参数请使用逗号分隔, 如: user,menu
+
 ```bash
 $ go run ./cmd/cli.go make:model --table='user,menu' --path=api/user --camel=true --connection=mysql
 # go run ./cmd/cli.go make:model-old --table=user --path=api/user --camel=true --connection=sqlsrv
 ```
+
 ```go
 // Code generated by gorm.io/gen. DO NOT EDIT.
 // Code generated by gorm.io/gen. DO NOT EDIT.
@@ -761,40 +933,55 @@ func (*User) Connection() string {
 ```
 
 ## ORM动态筛选
-> 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]interface{}` 如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username":"admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
+
+> 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]any`
+> 如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not
+> in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not
+> exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username":
+> "admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
+
 ### OR条件查询
+
 ```http
 GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"username":["=", "test"]},{"age":["=", 18]}]}
 ```
+
 ```sql
 SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
 ```
 
 ### AND条件查询
+
 ```http
 GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"username":["=", "test"]},{"age":["=", 18]}]}
 ```
+
 ```sql
 SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
 ```
 
 ### json字段查询
+
 ```http
 GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"name":""},{"$.meta.icon":["=","ele-Collection"]}]}]}
 ```
+
 ```sql
  SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
 ```
 
 ### 复杂查询
+
 ```http
 GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"createdAt":["<","2026-01-01"]},{"not exist":{"userRoles.name":"admin"}}]},{"username":"admin"}]}
 ```
+
 ```sql
  SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
 ```
 
 ### 查询示例
+
 ```go
 package service
 
@@ -850,7 +1037,9 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 ```
 
 # 表单验证
+
 ## 验证创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:request -h # --help
   ██████  ██████ ██   ██
@@ -876,9 +1065,11 @@ Options:
 ```
 
 ## 验证创建
+
 ```bash
 $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=角色请求验证
 ```
+
 ```go
 package request
 
@@ -964,7 +1155,9 @@ func (s Roles) Translates() map[string]string {
 ```
 
 ## 验证规则
+
 > 更多规则请查看 [gookit/validate](https://github.com/gookit/validate)
+
 ```go
 package request
 
@@ -980,6 +1173,7 @@ type Roles struct {
 ```
 
 ## 验证场景
+
 ```go
 package request
 
@@ -999,6 +1193,7 @@ func (s Roles) ConfigValidation(v *validate.Validation) {
 ```
 
 ## 提示信息
+
 ```go
 package request
 
@@ -1014,6 +1209,7 @@ func (s Roles) Messages() map[string]string {
 ```
 
 ## 字段翻译
+
 ```go
 package request
 
@@ -1031,7 +1227,9 @@ func (s Roles) Translates() map[string]string {
 ```
 
 ## 批量验证
+
 > 方式1
+
 ```go
 package request
 
@@ -1107,7 +1305,9 @@ func (s UserImport) Translates() map[string]string {
     return ms
 }
 ```
+
 > 方式2
+
 ```go
 package request
 
@@ -1169,8 +1369,11 @@ func (s SystemConfigValueUpdate) Messages() map[string]string {
 ```
 
 ## 自定义验证
+
 ### 全局规则
+
 > 全局规则只需要在入口文件`main.go`中定义, 适用于所有验证器, 无需重复定义。
+
 ```go
 package main
 
@@ -1191,6 +1394,7 @@ func init() {
 ```
 
 ### 局部规则
+
 ```go
 package request
 
@@ -1202,6 +1406,7 @@ func (s User) ValidateIsEven(val any) bool {
 ```
 
 ### 临时规则
+
 ```go
 package request
 
@@ -1224,6 +1429,7 @@ func (s User) Validate(data User, scene string) error {
 ```
 
 ### 验证使用
+
 ```go
 package request
 
@@ -1233,6 +1439,7 @@ type User struct {
 ```
 
 ### 在控制器中使用
+
 ```go
 package v1
 
@@ -1302,7 +1509,9 @@ func (s *UserController) List(c *gin.Context) {
 ```
 
 # 服务
+
 ## 服务创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:service -h # --help
   ██████  ██████ ██   ██
@@ -1326,12 +1535,15 @@ Options:
 ```
 
 ## 服务创建
+
 ```bash
 $ go run ./cmd/cli.go make:service -f=user --table=user -c=mysql
 ```
 
 # 控制器
+
 ## 控制器创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:controller -h # --help
   ██████  ██████ ██   ██
@@ -1354,9 +1566,11 @@ Options:
 ```
 
 ## 控制器创建
+
 ```bash
 $ go run ./cmd/cli.go make:controller --file=v1/user --desc=用户
 ```
+
 ```go
 package v1
 
@@ -1460,7 +1674,7 @@ func (s *UserController) Create(c *gin.Context) {
 func (s *UserController) Update(c *gin.Context) {
   var (
     ctx  = c.Request.Context()
-    data map[string]interface{}
+    data map[string]any
     req  request.User
   )
 
@@ -1569,8 +1783,11 @@ func (s *UserController) Delete(c *gin.Context) {
 ```
 
 # 路由
-> `router/root.go` 文件中定义了全局路由规则可自行修改,  一般情况只需要默认即可。
+
+> `router/root.go` 文件中定义了全局路由规则可自行修改, 一般情况只需要默认即可。
+
 ## 路由创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:router -h # --help
   ██████  ██████ ██   ██
@@ -1593,9 +1810,11 @@ Options:
 ```
 
 ## 路由创建
+
 ```bash
 $ go run ./cmd/cli.go make:router --file=user --desc=用户路由
 ```
+
 ```go
 package router
 
@@ -1640,6 +1859,7 @@ func (r *UserRouter) IsAuth() bool {
 ```
 
 ## 路由列表
+
 ```bash
 $ go run ./cmd/cli.go route:list
 
@@ -1661,8 +1881,11 @@ GET      /swagger/*any                       github.com/swaggo/gin-swagger.Custo
 ```
 
 # 中间件
+
 > `middleware`目录下为中间件目录, 可自行添加中间件, 并在`router/root.go`文件中注册中间件。
+
 ## 中间件创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:middleware -h # --help
   ██████  ██████ ██   ██
@@ -1685,12 +1908,15 @@ Options:
 ```
 
 ## 中间件创建
+
 ```bash
 $ go run ./cmd/cli.go make:middleware --file=auth --desc=授权中间件
 ```
 
 ## 限流中间件
+
 > `middleware/rate_limit.go`文件中定义了全局限流中间件, 支持全局用户接口限流、ip接口限流以及全局限流。
+
 ```go
 package router
 
@@ -1751,9 +1977,14 @@ func LoadRouters(router *gin.Engine) {
 ```
 
 # 缓存
-> 默认使用 `memory` 作为缓存驱动, 支持自定义扩展。默认支持`内存缓存`、`Redis缓存`、`磁盘缓存`三种模式, 可使用全局缓存也可单独使用任意缓存。全局缓存默认只集成了`Set`、`Get`、`Delete`、`Expire`公共方法如需使用更多可以单独使用,你也可以自己集成。
+
+> 默认使用 `memory` 作为缓存驱动, 支持自定义扩展。默认支持`内存缓存`、`Redis缓存`、`磁盘缓存`三种模式,
+> 可使用全局缓存也可单独使用任意缓存。全局缓存默认只集成了`Set`、`Get`、`Delete`、`Expire`公共方法如需使用更多可以单独使用,你也可以自己集成。
+
 ## 全局缓存
+
 > 配置全局缓存可通过`yaml`配置文件中的`cache.driver`配置进行切换，也可以动态切换。
+
 ```go
 package controller
 
@@ -1807,6 +2038,7 @@ func (s *TestController) Test() {
 ```
 
 ## Redis缓存
+
 ```go
 package controller
 
@@ -1861,6 +2093,7 @@ func (s *TestController) Test() {
 ```
 
 ## 内存缓存
+
 ```go
 package controller
 
@@ -1915,6 +2148,7 @@ func (s *TestController) Test() {
 ```
 
 ## 磁盘缓存
+
 ```go
 package controller
 
@@ -1969,7 +2203,9 @@ func (s *TestController) Test() {
 ```
 
 # 事件
+
 ## 事件创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:event -h # --help
   ██████  ██████ ██   ██
@@ -1993,9 +2229,11 @@ Options:
 ```
 
 ## 事件创建
+
 ```bash
 $ go run ./cmd/cli.go make:event -f=user_login -n='user.login' -d=用户登录事件
 ```
+
 ```go
 package event
 
@@ -2018,7 +2256,9 @@ func (u UserLoginEvent) Description() string {
 ```
 
 # 监听
+
 ## 监听创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:listener -h # --help
   ██████  ██████ ██   ██
@@ -2041,9 +2281,11 @@ Options:
 ```
 
 ## 监听创建
+
 ```bash
 $ go run ./cmd/cli.go make:listener -f=user_login -e=UserLoginEvent
 ```
+
 ```go
 package listener
 
@@ -2073,9 +2315,12 @@ func init() {
 ```
 
 # 队列
-> 执行队列创建命令会根据连接类型(kafka/rabbitmq/redis)同时创建消费者和生产者. 你只需要实现`Handle`方法完善业务逻辑即可, 支持自动错误重试以及延迟队列.
+
+> 执行队列创建命令会根据连接类型 (kafka/rabbitmq/redis)同时创建消费者和生产者. 你只需要实现`Handle`方法完善业务逻辑即可,
+> 支持自动错误重试以及延迟队列.
 
 ## 队列创建帮助
+
 ```bash
 $ go run ./cmd/cli.go make:queue -h # --help
   ██████  ██████ ██   ██
@@ -2104,27 +2349,33 @@ Options:
 ## 队列创建
 
 ### Kafka
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=kafka --name=kafka_demo
 ```
+
 生成文件: `app/queue/consumer/kafka_demo.go`, `app/queue/producer/kafka_demo.go`
 
 ### RabbitMQ
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=rabbitmq --name=rabbitmq_demo
 ```
 
 ### Redis
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=redis --name=redis_demo
 ```
 
 ### 延迟队列
+
 ```bash
 $ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=true
 ```
 
-### 生成的消费者示例(Kafka)
+### 生成的消费者示例 (Kafka)
+
 ```go
 package consumer
 
@@ -2188,7 +2439,8 @@ func init() {
 }
 ```
 
-### 生成的生产者示例(Kafka)
+### 生成的生产者示例 (Kafka)
+
 ```go
 package producer
 
@@ -2239,7 +2491,9 @@ func init() {
 ```
 
 ## 队列使用
+
 > 消费者启动项目时自动注册在容器中, 生产者直接使用门面配合结构体Payload即可.
+
 ```go
 package controller
 
@@ -2269,6 +2523,7 @@ func (s *TestController) Test(ctx context.Context) {
 ```
 
 ## 消费者列表
+
 ```bash
 $ go run ./cmd/cli.go consumer:list
 
@@ -2286,6 +2541,7 @@ $ go run ./cmd/cli.go consumer:list
 ```
 
 ## 生产者列表
+
 ```bash
 $ go run ./cmd/cli.go producer:list
 
@@ -2303,12 +2559,15 @@ $ go run ./cmd/cli.go producer:list
 ```
 
 ## Job
+
 > Job 系统提供 Laravel 风格的异步任务处理, 支持 `sync`、`redis`、`kafka`、`rabbitmq` 多种驱动。
 
 ### Job创建
+
 > 同模型、控制器等使用命令行创建,具体参考之前文档。
 
 ### Job结构
+
 ```go
 package job
 
@@ -2346,6 +2605,7 @@ func init() {
 ```
 
 ### Job投递
+
 ```go
 package v1
 
@@ -2374,17 +2634,19 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### Job接口
-| 方法 | 说明 |
-|---|---|
-| `Name() string` | 任务名称(唯一标识) |
-| `Description() string` | 任务描述 |
-| `Connection() string` | 驱动: `"sync"`、`"redis"`、`"kafka"`、`"rabbitmq"` (空字符串默认 redis) |
-| `Retry() int` | 重试次数 (`0` = 执行一次) |
-| `Delay() int64` | 重试间隔时间(毫秒) |
-| `NewPayload() any` | 返回 payload 结构体指针, 用于反序列化 |
-| `Handle(payload any) error` | 业务处理逻辑, `payload` 已反序列化 |
+
+| 方法                        | 说明                                                                    |
+|-----------------------------|-------------------------------------------------------------------------|
+| `Name() string`             | 任务名称(唯一标识)                                                      |
+| `Description() string`      | 任务描述                                                                |
+| `Connection() string`       | 驱动: `"sync"`、`"redis"`、`"kafka"`、`"rabbitmq"` (空字符串默认 redis) |
+| `Retry() int`               | 重试次数 (`0` = 执行一次)                                               |
+| `Delay() int64`             | 重试间隔时间(毫秒)                                                      |
+| `NewPayload() any`          | 返回 payload 结构体指针, 用于反序列化                                   |
+| `Handle(payload any) error` | 业务处理逻辑, `payload` 已反序列化                                      |
 
 ### Job列表
+
 ```bash
 $ go run ./cmd/cli.go job:list
 ┌───────────────────────────────────────────────────────────────┐
@@ -2398,14 +2660,18 @@ $ go run ./cmd/cli.go job:list
 ```
 
 ### Job清除
+
 ```bash
 $ go run ./cmd/cli.go job:clear
 所有未消费Job已清除
 ```
+
 > 仅支持 Redis 驱动。
 
 ### 调试器
+
 Job 投递事件自动记录到调试器:
+
 ```json
 {
   "Job": [
@@ -2420,6 +2686,7 @@ Job 投递事件自动记录到调试器:
 ```
 
 # 发布事件
+
 ```go
 package v1
 
@@ -2498,7 +2765,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
   s.Response.Success(
     c, errcode.Success().WithMsg(
-      facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
+      facade.Lang().Trans(ctx, "login.success", map[string]any{
         "name": userModel.Username,
       }),
     ).WithData(LoginResponse{
@@ -2515,6 +2782,7 @@ func (s *LoginController) Login(c *gin.Context) {
 ```
 
 ## 测试事件
+
 ```bash
 $ POST /api/v1/login HTTP/1.1
 Host: 127.0.0.1:8080
@@ -2531,6 +2799,7 @@ Content-Length: 56
 ```
 
 # 事件列表
+
 ```bash
 $ go run ./cmd/cli.go event:list
 
@@ -2543,6 +2812,7 @@ $ go run ./cmd/cli.go event:list
 ```
 
 ## 事件监听列表
+
 ```bash
 $ go run ./cmd/cli.go listener:list
 
@@ -2557,7 +2827,9 @@ $ go run ./cmd/cli.go listener:list
 ```
 
 # 响应
+
 ## 成功响应
+
 ```go
 package v1
 
@@ -2577,6 +2849,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### 成功提示
+
 ```go
 package v1
 
@@ -2596,6 +2869,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### 成功数据
+
 ```go
 package v1
 
@@ -2615,6 +2889,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ## 失败响应
+
 ```go
 package v1
 
@@ -2634,6 +2909,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### 失败错误码
+
 ```go
 package v1
 
@@ -2653,6 +2929,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### 失败提示
+
 ```go
 package v1
 
@@ -2672,6 +2949,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ### 失败数据
+
 ```go
 package v1
 
@@ -2691,6 +2969,7 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ## HTTP状态码
+
 ```go
 package v1
 
@@ -2711,7 +2990,11 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 # 日志
-> 使用 `zap` 包实现日志记录，日志文件存放路径为 `storage/logs`, 默认日志级别为 `debug`, 返回错误码不为0时自动记录日志TraceId、堆栈、sql、http、redis等调用信息, 也可以直接调用日志记录也会自动记录调试信息。配置文件`yaml`中`log.access`支持是否自动记录请求日志，如若开启会自动记录请求日志。
+
+> 使用 `zap` 包实现日志记录，日志文件存放路径为 `storage/logs`, 默认日志级别为 `debug`,
+> 返回错误码不为0时自动记录日志TraceId、堆栈、sql、http、redis、grpc等调用信息, 也可以直接调用日志记录也会自动记录调试信息。配置文件
+> `yaml`中`log.access`支持是否自动记录请求日志，如若开启会自动记录请求日志。
+
 ```json
 {
   "level": "info",
@@ -2738,13 +3021,16 @@ func (s *TestController) Test(c *gin.Context) {
     "Cache": [],
     "Http": [],
     "Mq": [],
+    "Grpc": [],
     "ListenerEvent": []
   }
 }
 ```
 
 ## 记录日志
+
 > 已封装在门面中, 日志级别支持debug、info、warn、error、dPanic、panic、fatal, 默认为`debug`。
+
 ```go
 package v1
 
@@ -2764,7 +3050,10 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 ## 错误调试
-> 使用公共返回错误以及调用WithDebugger()方法时会自动记录日志TraceId、堆栈、sql、http、redis等调用信息, 可根据debug调试信息和trace堆栈信息调试, 日志文件存放路径为 `storage/logs`。
+
+> 使用公共返回错误以及调用WithDebugger ()方法时会自动记录日志TraceId、堆栈、sql、http、redis、grpc等调用信息,
+> 可根据debug调试信息和trace堆栈信息调试, 日志文件存放路径为 `storage/logs`。
+
 ```go
 package v1
 
@@ -2783,6 +3072,7 @@ func (s *TestController) Test(c *gin.Context) {
   facade.Log().WithDebugger(ctx).Error("System Error")
 }
 ```
+
 ```json
 {
   "level": "error",
@@ -2809,6 +3099,7 @@ func (s *TestController) Test(c *gin.Context) {
     "Cache": [],
     "Http": [],
     "Mq": [],
+    "Grpc": [],
     "ListenerEvent": []
   },
   "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
@@ -2816,9 +3107,15 @@ func (s *TestController) Test(c *gin.Context) {
 ```
 
 # 多语言
-> 多语言已集成在门面和容器中,语言支持 `zh` 和 `en` 两种语言, 可支持自定义扩展。语言传输默认在`header`中传输 `Accept-Language` 参数, 如 `zh` 或 `en`, 不区分大小写, 不传递默认语言为 `zh`。
+
+> 多语言已集成在门面和容器中,语言支持 `zh` 和 `en` 两种语言, 可支持自定义扩展。语言传输默认在`header`中传输
+> `Accept-Language` 参数, 如 `zh` 或 `en`, 不区分大小写, 不传递默认语言为 `zh`。
+
 ## 目录配置
-> 翻译文件存放路径为 `storage/locales`, 默认语言为 `zh`, 多个语言用逗号分隔。语言存放在对应的语言目录下不区分子目录, 如中文就放在`storage/locales/zh`下,可以支持任意目录下的`json`和`yaml`格式文件。
+
+> 翻译文件存放路径为 `storage/locales`, 默认语言为 `zh`, 多个语言用逗号分隔。语言存放在对应的语言目录下不区分子目录,
+> 如中文就放在`storage/locales/zh`下,可以支持任意目录下的`json`和`yaml`格式文件。
+
 ```yaml
 # 翻译配置
 i18n:
@@ -2827,6 +3124,7 @@ i18n:
 ```
 
 ## 常规翻译
+
 ```go
 package controller
 
@@ -2849,7 +3147,9 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 ## 模版翻译
-> 翻译文件中支持模版翻译, 如 `{{.name}}`, 使用 `map[string]interface{}` 传递参数。
+
+> 翻译文件中支持模版翻译, 如 `{{.name}}`, 使用 `map[string]any` 传递参数。
+
 ```json
 [
   {
@@ -2858,6 +3158,7 @@ func (s *TestController) Test(c *gin.Context)  {
   }
 ]
 ```
+
 ```go
 package controller
 
@@ -2874,7 +3175,7 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context)  {
     ctx := c.Request.Context()
-    trans := facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
+    trans := facade.Lang().Trans(ctx, "login.success", map[string]any{
         "name": "admin",
     }),
 	fmt.Println(trans) // 输出: admin,登录成功 英文输出: admin,Login Success
@@ -2882,7 +3183,10 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 ## 添加语言
-> 在 `storage/locales` 目录下添加对应语言目录, 如 `en`, 然后在目录下添加翻译文件, 翻译文件支持 `json` 和 `yaml` 格式, 翻译文件中 `id` 为唯一标识, `translation` 为翻译内容, 翻译文件中可以添加任意数量的翻译内容。配置语言支持需调整配置文件i18n.lang参数。
+
+> 在 `storage/locales` 目录下添加对应语言目录, 如 `en`, 然后在目录下添加翻译文件, 翻译文件支持 `json` 和 `yaml` 格式,
+> 翻译文件中 `id` 为唯一标识, `translation` 为翻译内容, 翻译文件中可以添加任意数量的翻译内容。配置语言支持需调整配置文件i18n.lang参数。
+
 ```yaml
 # 翻译配置
 i18n:
@@ -2891,16 +3195,23 @@ i18n:
 ```
 
 # 服务提供者
+
 > 服务提供者会在启动时自动加载注册，关闭时自动释放。
+
 ## 服务提供者创建
+
 > 同模型、控制器等使用命令行创建,具体参考之前文档。
 
 # 门面
+
 ## 门面创建
+
 > 同模型、控制器等使用命令行创建,具体参考之前文档。
 
 ## 门面使用
+
 > 项目以默认集成了日志、数据库、缓存、验证器、限流等门面，当前以缓存为示例。数据库、缓存、http请求、队列绑定了上下文会记录到调试日志中。
+
 ```go
 package controller
 
@@ -2927,10 +3238,13 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 # 枚举
+
 ## 枚举创建
+
 > 同模型、控制器等使用命令行创建,具体参考之前文档。
 
 ## 枚举示例
+
 ```go
 package enum
 
@@ -2972,6 +3286,7 @@ func (s *UserEnum) Status() *base.Enum[string] {
 ```
 
 ## 枚举使用
+
 ```go
 package v1
 
@@ -3036,8 +3351,11 @@ func (s *LoginController) Test(c *gin.Context) {
 ```
 
 # 数据库
+
 > 数据库通过容器服务初始化,默认集成了mysql、pgsql、sqlite、sqlsrv,可配置默认数据库以及通过Connection方法指定数据库连接。
+
 ## 数据库配置
+
 ```yaml
 # 数据库
 databases:
@@ -3088,7 +3406,9 @@ sqlsrv:
 ```
 
 ## 数据库连接
+
 > 使用上下文非必须，如果不绑定上下文则日志不会记录sql记录。
+
 ```go
 package controller
 
@@ -3117,7 +3437,9 @@ func (s *TestController) Test(c *gin.Context)  {
 ```
 
 ## 数据库搜索
+
 > 配合文档中的ORM动态筛选示例使用。
+
 ```go
 package controller
 
@@ -3159,6 +3481,7 @@ func (s *TestController) Test(c *gin.Context) {
 }
 
 ```
+
 ```go
 package service
 
@@ -3212,6 +3535,7 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 ```
 
 # swagger文档
+
 ```bash
 $ go install github.com/swaggo/swag/cmd/swag@latest
 # 使用
