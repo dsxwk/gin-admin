@@ -3,9 +3,10 @@ package tests
 import (
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/cache"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TestCacheSetGet 测试缓存设置和获取
@@ -112,13 +113,13 @@ func TestCacheDifferentTypes(t *testing.T) {
 	// 测试各种类型
 	testCases := []struct {
 		name  string
-		value interface{}
-		check func(t *testing.T, got interface{})
+		value any
+		check func(t *testing.T, got any)
 	}{
-		{"string", "hello world", func(t *testing.T, got interface{}) {
+		{"string", "hello world", func(t *testing.T, got any) {
 			require.Equal(t, "hello world", got)
 		}},
-		{"int", 12345, func(t *testing.T, got interface{}) {
+		{"int", 12345, func(t *testing.T, got any) {
 			// JSON序列化后int会变成float64
 			switch v := got.(type) {
 			case int:
@@ -131,7 +132,7 @@ func TestCacheDifferentTypes(t *testing.T) {
 				t.Fatalf("unexpected type: %T", v)
 			}
 		}},
-		{"int64", int64(12345), func(t *testing.T, got interface{}) {
+		{"int64", int64(12345), func(t *testing.T, got any) {
 			switch v := got.(type) {
 			case int64:
 				require.Equal(t, int64(12345), v)
@@ -141,14 +142,14 @@ func TestCacheDifferentTypes(t *testing.T) {
 				t.Fatalf("unexpected type: %T", v)
 			}
 		}},
-		{"float64", 3.14159, func(t *testing.T, got interface{}) {
+		{"float64", 3.14159, func(t *testing.T, got any) {
 			require.Equal(t, 3.14159, got)
 		}},
-		{"bool", true, func(t *testing.T, got interface{}) {
+		{"bool", true, func(t *testing.T, got any) {
 			require.Equal(t, true, got)
 		}},
-		{"map", map[string]interface{}{"name": "test", "value": 100}, func(t *testing.T, got interface{}) {
-			m, ok := got.(map[string]interface{})
+		{"map", map[string]any{"name": "test", "value": 100}, func(t *testing.T, got any) {
+			m, ok := got.(map[string]any)
 			require.True(t, ok)
 			require.Equal(t, "test", m["name"])
 			// map中的数字也会变成float64
@@ -161,9 +162,9 @@ func TestCacheDifferentTypes(t *testing.T) {
 				t.Fatalf("unexpected type for value: %T", v)
 			}
 		}},
-		{"slice", []int{1, 2, 3, 4, 5}, func(t *testing.T, got interface{}) {
-			// JSON序列化后slice会变成[]interface{}
-			s, ok := got.([]interface{})
+		{"slice", []int{1, 2, 3, 4, 5}, func(t *testing.T, got any) {
+			// JSON序列化后slice会变成[]any
+			s, ok := got.([]any)
 			require.True(t, ok)
 			require.Len(t, s, 5)
 			for i, v := range s {

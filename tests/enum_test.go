@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"gin/app/enum"
 	"gin/common/base"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TestUserEnum 测试用户枚举
@@ -20,9 +21,9 @@ func TestUserEnum(t *testing.T) {
 		list := gender.Get()
 		assert.Len(t, list, 3)
 		assert.Equal(t, []base.Item[int]{
-			{Value: 0, Desc: "保密"},
-			{Value: 1, Desc: "男"},
-			{Value: 2, Desc: "女"},
+			{0, "保密"},
+			{1, "男"},
+			{2, "女"},
 		}, list)
 
 		// 测试Desc方法
@@ -69,8 +70,8 @@ func TestUserEnum(t *testing.T) {
 		list := status.Get()
 		assert.Len(t, list, 2)
 		assert.Equal(t, []base.Item[string]{
-			{Value: "enable", Desc: "启用"},
-			{Value: "disable", Desc: "停用"},
+			{"enable", "启用"},
+			{"disable", "停用"},
 		}, list)
 
 		// 测试Desc方法

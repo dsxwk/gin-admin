@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"gin/common/flag"
 	"gin/pkg"
-	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
-	"github.com/spf13/pflag"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
+	"github.com/spf13/pflag"
 )
 
 type BaseCommand struct{}
@@ -196,7 +197,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 
 	switch _make {
 	case "model-old":
-	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "mcp":
+	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "mcp", "grpc_request", "grpc_service", "grpc_proto":
 		templateFile = filepath.Join(pkg.GetRootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")

@@ -16,11 +16,11 @@ const (
 )
 
 // WithValue 将值注入到context
-func WithValue(ctx context.Context, key string, value interface{}) context.Context {
+func WithValue(ctx context.Context, key string, value any) context.Context {
 	return context.WithValue(ctx, key, value)
 }
 
 // GetValue 从context获取值
-func GetValue(ctx context.Context, key string) interface{} {
+func GetValue(ctx context.Context, key string) any {
 	return ctx.Value(key)
 }

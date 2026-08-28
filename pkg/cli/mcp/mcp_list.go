@@ -5,10 +5,11 @@ import (
 	"gin/common/base"
 	"gin/pkg/cli"
 	svcmcp "gin/pkg/serviceprovider/mcp"
-	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 )
 
 // toolRow MCP工具行数据

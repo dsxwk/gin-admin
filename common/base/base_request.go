@@ -15,6 +15,6 @@ func (s *BaseRequest) WithContext(ctx context.Context) *BaseRequest {
 	return s
 }
 
-func (s *BaseRequest) Trans(ctx context.Context, messageID string, data map[string]interface{}) string {
+func (s *BaseRequest) Trans(ctx context.Context, messageID string, data map[string]any) string {
 	return facade.Lang().Trans(ctx, messageID, data)
 }

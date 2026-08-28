@@ -75,7 +75,7 @@ func (s *DictService) Create(req request.Dict) (model.Dict, error) {
 }
 
 // Update 更新
-func (s *DictService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *DictService) Update(id int64, data map[string]any) (err error) {
 	if pkg.HasKey(data, "extend") {
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}

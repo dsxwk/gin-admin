@@ -1,11 +1,11 @@
 package request
 
 type PageListValidate struct {
-	Page     int                    `form:"page" json:"page" validate:"required|int|gt:0" label:"页码"`
-	PageSize int                    `form:"pageSize" json:"pageSize" validate:"required|int|gt:0" label:"每页数量"`
-	NotPage  bool                   `form:"notPage" json:"notPage" validate:"bool" label:"不分页"`
-	Search   map[string]interface{} `form:"__search" json:"__search"`
-	Sort     map[string]interface{} `form:"__sort" json:"__sort"`
+	Page     int            `form:"page" json:"page" validate:"required|int|gt:0" label:"页码"`
+	PageSize int            `form:"pageSize" json:"pageSize" validate:"required|int|gt:0" label:"每页数量"`
+	NotPage  bool           `form:"notPage" json:"notPage" validate:"bool" label:"不分页"`
+	Search   map[string]any `form:"__search" json:"__search"`
+	Sort     map[string]any `form:"__sort" json:"__sort"`
 }
 
 // PageData 公共分页数据
@@ -19,7 +19,7 @@ type PageData struct {
 	// 每页条数
 	PageSize int `json:"pageSize"`
 	// 数据列表
-	List interface{} `json:"list"`
+	List any `json:"list"`
 }
 
 // Pagination 计算分页

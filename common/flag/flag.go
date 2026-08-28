@@ -2,6 +2,7 @@ package flag
 
 import (
 	"fmt"
+
 	"github.com/fatih/color"
 )
 
@@ -58,7 +59,7 @@ func Info() string {
 
 // Errorf 输出错误日志(前缀背景色 + 文字颜色)
 // 使用示例: flag.Errorf("%s数据库连接失败: %v", "mysql", err)
-func Errorf(format string, args ...interface{}) {
+func Errorf(format string, args ...any) {
 	_, err := errorBg.Print("  ERROR  ")
 	if err != nil {
 		return
@@ -70,7 +71,7 @@ func Errorf(format string, args ...interface{}) {
 }
 
 // Warningf 输出警告日志
-func Warningf(format string, args ...interface{}) {
+func Warningf(format string, args ...any) {
 	_, err := warningBg.Print(" WARNING ")
 	if err != nil {
 		return
@@ -82,7 +83,7 @@ func Warningf(format string, args ...interface{}) {
 }
 
 // Successf 输出成功日志
-func Successf(format string, args ...interface{}) {
+func Successf(format string, args ...any) {
 	_, err := successBg.Print(" SUCCESS ")
 	if err != nil {
 		return
@@ -94,7 +95,7 @@ func Successf(format string, args ...interface{}) {
 }
 
 // Infof 输出信息日志
-func Infof(format string, args ...interface{}) {
+func Infof(format string, args ...any) {
 	_, err := infoBg.Print("   INFO  ")
 	if err != nil {
 		return

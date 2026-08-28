@@ -2,6 +2,7 @@ package router
 
 import (
 	"gin/app/controller/v1"
+
 	"github.com/gin-gonic/gin"
 )
 

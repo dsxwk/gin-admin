@@ -10,10 +10,12 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
+	"gin/grpc/proto"
 	"gin/pkg/serviceprovider/lang"
+	"image/color"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
-	"image/color"
 )
 
 type LoginController struct {
@@ -82,7 +84,7 @@ func (s *LoginController) Login(c *gin.Context) {
 
 	s.Response.Success(
 		c, errcode.Success().WithMsg(
-			facade.Lang().Trans(ctx, "login.success", map[string]interface{}{
+			facade.Lang().Trans(ctx, "login.success", map[string]any{
 				"name": userModel.Username,
 			}),
 		).WithData(LoginResponse{
@@ -184,6 +186,9 @@ func (s *LoginController) Test(c *gin.Context) {
 	_ = facade.Job().Dispatch(ctx, "export_report", job.ExportReport{ReportType: "daily", UserID: 1})
 	_ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{UserID: 1, Action: "update"})
 
+	user, _ := facade.Grpc().Service(proto.NewUserServiceClient)
+	grpcResp, _ := user.Detail(ctx, &proto.UserRequest{Id: 1})
+
 	s.Response.Success(c, errcode.Success().WithData(map[string]any{
 		"status":         status,
 		"desc1":          desc1,
@@ -199,6 +204,7 @@ func (s *LoginController) Test(c *gin.Context) {
 		"containsValue2": containsValue2,
 		"containsDesc2":  containsDesc2,
 		"length2":        length2,
+		"grpcResp":       grpcResp,
 	}))
 }
 

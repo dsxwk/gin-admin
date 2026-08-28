@@ -7,9 +7,10 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/errcode"
 	"gin/pkg/serviceprovider/lang"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"time"
 )
 
 type Jwt struct {
@@ -59,8 +60,8 @@ func (s Jwt) Encode(id int64, accessExp int64) (string, int64, error) {
 }
 
 // Decode 解析token
-func (s Jwt) Decode(jwtToken string) (map[string]interface{}, error) {
-	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+func (s Jwt) Decode(jwtToken string) (map[string]any, error) {
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (any, error) {
 		// 验证签名方法
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf(lang.Trans(s.Ctx, "middleware.jwt.unsupportedSignatureMethod", nil)+": %v", token.Header["alg"])

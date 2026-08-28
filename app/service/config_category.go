@@ -67,7 +67,7 @@ func (s *ConfigCategoryService) Create(req request.ConfigCategory) (model.Config
 }
 
 // Update 更新
-func (s *ConfigCategoryService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *ConfigCategoryService) Update(id int64, data map[string]any) (err error) {
 	return s.Updates(&model.ConfigCategory{}, id, data)
 }
 

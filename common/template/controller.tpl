@@ -137,7 +137,7 @@ func (s *{{.Name}}Controller) Create(c *gin.Context) {
 func (s *{{.Name}}Controller) Update(c *gin.Context) {
 	var (
         ctx  = c.Request.Context()
-        data map[string]interface{}
+        data map[string]any
         req  request.{{.Name}}
     )
 

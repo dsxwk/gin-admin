@@ -8,15 +8,16 @@ import (
 	"gin/pkg/serviceprovider/debugger"
 	l "gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 	"log"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 )
 
 var (
@@ -197,7 +198,7 @@ func after(db *gorm.DB) {
 }
 
 // getSql 替换Sql中的占位符"?"为实际值
-func getSql(sql string, vars []interface{}) string {
+func getSql(sql string, vars []any) string {
 	for _, v := range vars {
 		// 将参数值格式化为字符串
 		var (

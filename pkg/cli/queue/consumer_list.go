@@ -5,10 +5,11 @@ import (
 	"gin/common/base"
 	"gin/pkg/cli"
 	"gin/pkg/serviceprovider/queue"
-	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 )
 
 type ConsumerList struct{}

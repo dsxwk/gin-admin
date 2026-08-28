@@ -4,13 +4,14 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"gin/pkg"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/goccy/go-json"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"sort"
-	"strings"
-	"time"
 )
 
 const (
@@ -29,11 +30,24 @@ func (t *DateTime) MarshalJSON() ([]byte, error) {
 	return []byte(formatted), nil
 }
 
+// UnmarshalJSON 反序列化时间
+func (t *DateTime) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" || string(data) == `""` {
+		return nil
+	}
+	tt, err := time.Parse(`"2006-01-02 15:04:05"`, string(data))
+	if err != nil {
+		return err
+	}
+	*t = DateTime(tt)
+	return nil
+}
+
 func (t DateTime) Value() (driver.Value, error) {
 	return time.Time(t), nil
 }
 
-func (t *DateTime) Scan(value interface{}) error {
+func (t *DateTime) Scan(value any) error {
 	if value == nil {
 		*t = DateTime(time.Time{})
 		return nil
@@ -77,7 +91,7 @@ type JsonValue struct {
 }
 
 // Scan 读取json
-func (j *JsonValue) Scan(value interface{}) error {
+func (j *JsonValue) Scan(value any) error {
 	if value == nil {
 		j.Data = nil
 		return nil
@@ -118,7 +132,7 @@ func (j ArrayString) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
-func (j *ArrayString) Scan(value interface{}) error {
+func (j *ArrayString) Scan(value any) error {
 	if value == nil {
 		*j = ArrayString{}
 		return nil
@@ -141,7 +155,7 @@ func (j ArrayInt64) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
-func (j *ArrayInt64) Scan(value interface{}) error {
+func (j *ArrayInt64) Scan(value any) error {
 	if value == nil {
 		*j = ArrayInt64{}
 		return nil
@@ -164,9 +178,9 @@ func (j *ArrayInt64) Scan(value interface{}) error {
 // primaryKey: 主键字段名
 // conditions: 附加的WHERE条件(可选)
 // 返回值是生成的SQL语句和对应的参数值
-// 调用示例: sql, values := BatchUpdateSql("table", data, "id", map[string]interface{}{"status": 1})
+// 调用示例: sql, values := BatchUpdateSql("table", data, "id", map[string]any{"status": 1})
 // facade.DB().Exec(sql, values...)
-func BatchUpdateSql(db *gorm.DB, model any, data []map[string]interface{}, primaryKey string, conditions map[string]interface{}) (string, []interface{}) {
+func BatchUpdateSql(db *gorm.DB, model any, data []map[string]any, primaryKey string, conditions map[string]any) (string, []any) {
 	if len(data) == 0 {
 		return "", nil
 	}
@@ -190,8 +204,8 @@ func BatchUpdateSql(db *gorm.DB, model any, data []map[string]interface{}, prima
 	}
 
 	var (
-		values []interface{}
-		ids    []interface{}
+		values []any
+		ids    []any
 	)
 
 	// db字段->原始key
@@ -295,7 +309,7 @@ func BatchUpdateSql(db *gorm.DB, model any, data []map[string]interface{}, prima
 	return sql, values
 }
 
-func firstValue(m map[string]interface{}, keys ...string) interface{} {
+func firstValue(m map[string]any, keys ...string) any {
 	for _, k := range keys {
 		if v, ok := m[k]; ok {
 			return v
@@ -347,13 +361,13 @@ func getDBName(s *schema.Schema, key string) (string, bool) {
 }
 
 // FilterFields 过滤非模型字段
-func FilterFields(db *gorm.DB, model any, raw map[string]interface{}) map[string]interface{} {
+func FilterFields(db *gorm.DB, model any, raw map[string]any) map[string]any {
 	stmt := &gorm.Statement{DB: db}
 	if err := stmt.Parse(model); err != nil {
 		return raw
 	}
 
-	filtered := make(map[string]interface{})
+	filtered := make(map[string]any)
 
 	for k, v := range raw {
 		snakeKey := lo.SnakeCase(k)

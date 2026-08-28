@@ -2,16 +2,17 @@ package errcode
 
 import (
 	"fmt"
-	"github.com/samber/lo"
 	"net/http"
 	"strconv"
+
+	"github.com/samber/lo"
 )
 
 type ErrorCode struct {
-	Code     int64       `json:"code"`     // 错误码
-	Msg      string      `json:"msg"`      // 错误描述
-	Data     interface{} `json:"data"`     // 返回数据
-	HttpCode int         `json:"HttpCode"` // http状态码
+	Code     int64  `json:"code"`     // 错误码
+	Msg      string `json:"msg"`      // 错误描述
+	Data     any    `json:"data"`     // 返回数据
+	HttpCode int    `json:"HttpCode"` // http状态码
 }
 
 // Error 实现error接口
@@ -49,7 +50,7 @@ func (e ErrorCode) WithMsg(msg string) ErrorCode {
 	return e
 }
 
-func (e ErrorCode) WithData(data interface{}) ErrorCode {
+func (e ErrorCode) WithData(data any) ErrorCode {
 	e.Data = data
 	return e
 }

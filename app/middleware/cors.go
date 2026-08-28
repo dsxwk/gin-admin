@@ -3,8 +3,9 @@ package middleware
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Cors struct {

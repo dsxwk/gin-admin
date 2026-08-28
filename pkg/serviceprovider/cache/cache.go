@@ -14,10 +14,10 @@ import (
 
 // Cache 缓存接口
 type Cache interface {
-	Set(key string, value interface{}, expire time.Duration) error // 设置缓存
-	Get(key string) (interface{}, bool)                            // 获取缓存
-	Delete(key string) error                                       // 删除缓存
-	Expire(key string) (interface{}, time.Time, bool, error)       // 获取缓存过期时间
+	Set(key string, value any, expire time.Duration) error // 设置缓存
+	Get(key string) (any, bool)                            // 获取缓存
+	Delete(key string) error                               // 删除缓存
+	Expire(key string) (any, time.Time, bool, error)       // 获取缓存过期时间
 }
 
 type CacheProxy struct {
@@ -86,14 +86,14 @@ func (p *CacheProxy) WithContext(ctx context.Context) *CacheProxy {
 	}
 }
 
-func (p *CacheProxy) Set(key string, value interface{}, expire time.Duration) error {
+func (p *CacheProxy) Set(key string, value any, expire time.Duration) error {
 	start := time.Now()
 	err := p.c.Set(key, value, expire)
 	p.publish("Set", key, value, time.Since(start))
 	return err
 }
 
-func (p *CacheProxy) Get(key string) (interface{}, bool) {
+func (p *CacheProxy) Get(key string) (any, bool) {
 	start := time.Now()
 	val, ok := p.c.Get(key)
 	p.publish("Get", key, val, time.Since(start))
@@ -107,14 +107,14 @@ func (p *CacheProxy) Delete(key string) error {
 	return err
 }
 
-func (p *CacheProxy) Expire(key string) (interface{}, time.Time, bool, error) {
+func (p *CacheProxy) Expire(key string) (any, time.Time, bool, error) {
 	start := time.Now()
 	val, exp, ok, err := p.c.Expire(key)
 	p.publish("Expire", key, val, time.Since(start))
 	return val, exp, ok, err
 }
 
-func (p *CacheProxy) publish(method, key string, val interface{}, cost time.Duration) {
+func (p *CacheProxy) publish(method, key string, val any, cost time.Duration) {
 	if p.bus != nil && p.ctx != nil {
 		traceId, ok := p.ctx.Value(ctxkey.TraceIdKey).(string)
 		if !ok || traceId == "" {

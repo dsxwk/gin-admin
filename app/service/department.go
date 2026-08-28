@@ -76,7 +76,7 @@ func (s *DepartmentService) Create(req request.Department) (model.Department, er
 }
 
 // Update 更新
-func (s *DepartmentService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *DepartmentService) Update(id int64, data map[string]any) (err error) {
 	var (
 		m  model.Department
 		db = s.DB(&m)
@@ -98,14 +98,14 @@ func (s *DepartmentService) Update(id int64, data map[string]interface{}) (err e
 	}
 
 	if pkg.HasKey(data, "deptLeaders") {
-		deptLeaders, ok := data["deptLeaders"].([]interface{})
+		deptLeaders, ok := data["deptLeaders"].([]any)
 		if !ok {
-			deptLeaders = []interface{}{}
+			deptLeaders = []any{}
 		}
 		if len(deptLeaders) > 0 {
 			var leaders []model.DepartmentLeaders
 			for _, v := range deptLeaders {
-				leaderMap, _ok := v.(map[string]interface{})
+				leaderMap, _ok := v.(map[string]any)
 				if !_ok {
 					continue
 				}

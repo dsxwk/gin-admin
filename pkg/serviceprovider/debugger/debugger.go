@@ -23,14 +23,14 @@ func (d *Debugger) Start() {
 		return
 	}
 	id1 := d.Bus.Subscribe(TopicSql, func(e SqlEvent) {
-		AddSql(e.TraceId, map[string]any{
+		Add(e.TraceId, FieldSql, map[string]any{
 			"sql":  e.Sql,
 			"rows": e.Rows,
 			"ms":   e.Ms,
 		})
 	})
 	id2 := d.Bus.Subscribe(TopicCache, func(e CacheEvent) {
-		AddCache(e.TraceId, map[string]any{
+		Add(e.TraceId, FieldCache, map[string]any{
 			"driver": e.Driver,
 			"name":   e.Name,
 			"cmd":    e.Cmd,
@@ -39,7 +39,7 @@ func (d *Debugger) Start() {
 		})
 	})
 	id3 := d.Bus.Subscribe(TopicHttp, func(e HttpEvent) {
-		AddHttp(e.TraceId, map[string]any{
+		Add(e.TraceId, FieldHttp, map[string]any{
 			"url":      e.Url,
 			"method":   e.Method,
 			"header":   e.Header,
@@ -50,7 +50,7 @@ func (d *Debugger) Start() {
 		})
 	})
 	id4 := d.Bus.Subscribe(TopicMq, func(e MqEvent) {
-		AddMq(e.TraceId, map[string]any{
+		Add(e.TraceId, FieldMq, map[string]any{
 			"driver":  e.Driver,
 			"topic":   e.Topic,
 			"message": e.Message,
@@ -60,15 +60,24 @@ func (d *Debugger) Start() {
 			"extra":   e.Extra,
 		})
 	})
-	id5 := d.Bus.Subscribe(TopicListener, func(e ListenerEvent) {
-		AddListener(e.TraceId, map[string]any{
+	id5 := d.Bus.Subscribe(TopicGrpc, func(e GrpcEvent) {
+		Add(e.TraceId, FieldGrpc, map[string]any{
+			"method":   e.Method,
+			"request":  e.Request,
+			"response": e.Response,
+			"code":     e.Code,
+			"ms":       e.Ms,
+		})
+	})
+	id6 := d.Bus.Subscribe(TopicListener, func(e ListenerEvent) {
+		Add(e.TraceId, FieldListener, map[string]any{
 			"name":  e.Name,
 			"topic": e.Description,
 			"data":  e.Data,
 		})
 	})
-	id6 := d.Bus.Subscribe(TopicJob, func(e JobEvent) {
-		AddJob(e.TraceId, map[string]any{
+	id7 := d.Bus.Subscribe(TopicJob, func(e JobEvent) {
+		Add(e.TraceId, FieldJob, map[string]any{
 			"name":       e.Name,
 			"connection": e.Connection,
 			"payload":    e.Payload,
@@ -83,8 +92,9 @@ func (d *Debugger) Start() {
 	d.subIds[TopicCache] = id2
 	d.subIds[TopicHttp] = id3
 	d.subIds[TopicMq] = id4
-	d.subIds[TopicListener] = id5
-	d.subIds[TopicJob] = id6
+	d.subIds[TopicGrpc] = id5
+	d.subIds[TopicListener] = id6
+	d.subIds[TopicJob] = id7
 }
 
 func (d *Debugger) Stop() {

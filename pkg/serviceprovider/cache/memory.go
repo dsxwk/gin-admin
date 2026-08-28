@@ -5,8 +5,9 @@ import (
 	"errors"
 	"gin/config"
 	"gin/pkg/serviceprovider/message"
-	"github.com/patrickmn/go-cache"
 	"time"
+
+	"github.com/patrickmn/go-cache"
 )
 
 // MemoryCache 内存缓存
@@ -35,7 +36,7 @@ func (m *MemoryCache) WithContext(ctx context.Context) *MemoryCache {
 	}
 }
 
-func (m *MemoryCache) Set(key string, value interface{}, expire time.Duration) error {
+func (m *MemoryCache) Set(key string, value any, expire time.Duration) error {
 	if expire == 0 {
 		expire = cache.NoExpiration
 	}
@@ -43,7 +44,7 @@ func (m *MemoryCache) Set(key string, value interface{}, expire time.Duration) e
 	return nil
 }
 
-func (m *MemoryCache) Get(key string) (interface{}, bool) {
+func (m *MemoryCache) Get(key string) (any, bool) {
 	return m.cache.Get(key)
 }
 
@@ -52,7 +53,7 @@ func (m *MemoryCache) Delete(key string) error {
 	return nil
 }
 
-func (m *MemoryCache) Expire(key string) (interface{}, time.Time, bool, error) {
+func (m *MemoryCache) Expire(key string) (any, time.Time, bool, error) {
 	value, exp, found := m.cache.GetWithExpiration(key)
 	if !found {
 		return nil, time.Time{}, false, errors.New("cache key not found")

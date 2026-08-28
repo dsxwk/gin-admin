@@ -6,8 +6,9 @@ import (
 	"gin/app/model"
 	"gin/pkg/serviceprovider/cache"
 	"gin/pkg/serviceprovider/orm"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type BaseService struct {
@@ -45,7 +46,7 @@ func (s *BaseService) DB(model Model) *gorm.DB {
 }
 
 // Search 搜索扩展方法
-func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]interface{}) *gorm.DB {
+func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]any) *gorm.DB {
 	if conditions == nil || len(conditions) == 0 {
 		return db
 	}
@@ -71,7 +72,7 @@ func (s *BaseService) Cache(cacheType ...string) *cache.CacheProxy {
 }
 
 // Updates 公共更新方法
-func (s *BaseService) Updates(m Model, id int64, data map[string]interface{}) error {
+func (s *BaseService) Updates(m Model, id int64, data map[string]any) error {
 	db := s.DB(m)
 	rows := model.FilterFields(db, m, data)
 	rows[model.UpdatedField] = time.Now()

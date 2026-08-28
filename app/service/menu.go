@@ -193,32 +193,32 @@ func (s *MenuService) Create(req request.Menu) (model.Menu, error) {
 }
 
 // Update 更新
-func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *MenuService) Update(id int64, data map[string]any) (err error) {
 	var (
 		m          model.Menu
 		db         = s.DB(&m)
-		menuAction map[string]interface{}
-		meta       map[string]interface{}
+		menuAction map[string]any
+		meta       map[string]any
 		ok         bool
 	)
 
 	if pkg.HasKey(data, "meta") {
-		meta, ok = data["meta"].(map[string]interface{})
+		meta, ok = data["meta"].(map[string]any)
 		if !ok {
 			return errors.New("meta数据格式错误")
 		}
 	}
 
 	if pkg.HasKey(data, "menuAction") {
-		menuAction, ok = data["menuAction"].(map[string]interface{})
+		menuAction, ok = data["menuAction"].(map[string]any)
 		if !ok {
 			return errors.New("菜单功能数据格式错误")
 		}
 	}
 
-	roleMenusData, ok := data["roleMenus"].([]interface{})
+	roleMenusData, ok := data["roleMenus"].([]any)
 	if !ok {
-		roleMenusData = []interface{}{}
+		roleMenusData = []any{}
 	}
 
 	tx := db.Begin()
@@ -273,7 +273,7 @@ func (s *MenuService) Update(id int64, data map[string]interface{}) (err error) 
 	if len(roleMenusData) > 0 {
 		var newRoleMenus []model.RoleMenus
 		for _, item := range roleMenusData {
-			roleMap, _ok := item.(map[string]interface{})
+			roleMap, _ok := item.(map[string]any)
 			if !_ok {
 				continue
 			}

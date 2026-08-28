@@ -7,8 +7,9 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/message"
-	"github.com/dgraph-io/badger/v4"
 	"time"
+
+	"github.com/dgraph-io/badger/v4"
 )
 
 // DiskCache 磁盘缓存
@@ -41,7 +42,7 @@ func (d *DiskCache) WithContext(ctx context.Context) *DiskCache {
 	}
 }
 
-func (d *DiskCache) Set(key string, value interface{}, expire time.Duration) error {
+func (d *DiskCache) Set(key string, value any, expire time.Duration) error {
 	valBytes, ok := value.([]byte)
 	if !ok {
 		valBytes = []byte(fmt.Sprintf("%v", value))
@@ -56,7 +57,7 @@ func (d *DiskCache) Set(key string, value interface{}, expire time.Duration) err
 	return err
 }
 
-func (d *DiskCache) Get(key string) (interface{}, bool) {
+func (d *DiskCache) Get(key string) (any, bool) {
 	var val []byte
 	err := d.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
@@ -78,7 +79,7 @@ func (d *DiskCache) Delete(key string) error {
 	})
 }
 
-func (d *DiskCache) Expire(key string) (interface{}, time.Time, bool, error) {
+func (d *DiskCache) Expire(key string) (any, time.Time, bool, error) {
 	var (
 		val        []byte
 		expireTime time.Time

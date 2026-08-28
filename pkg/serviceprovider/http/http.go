@@ -7,7 +7,6 @@ import (
 	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/message"
-	"github.com/goccy/go-json"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -16,6 +15,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/goccy/go-json"
 )
 
 const defaultTimeout = 5 * time.Second
@@ -71,12 +72,12 @@ type File struct {
 }
 
 type Option struct {
-	Headers map[string]string      // 请求头
-	Query   map[string]interface{} // query参数
-	Form    map[string]interface{} // form参数
-	Body    interface{}            // 请求体
-	Files   map[string]File        // 文件上传字段
-	Timeout time.Duration          // 超时时间
+	Headers map[string]string // 请求头
+	Query   map[string]any    // query参数
+	Form    map[string]any    // form参数
+	Body    any               // 请求体
+	Files   map[string]File   // 文件上传字段
+	Timeout time.Duration     // 超时时间
 }
 
 // Send 发送HTTP请求
@@ -306,7 +307,7 @@ func (c *Client) doFileUpload(ctx context.Context, uri string, opt *Option, requ
 }
 
 // buildURL 拼接get请求query参数
-func (c *Client) buildUrl(baseURL string, query map[string]interface{}) string {
+func (c *Client) buildUrl(baseURL string, query map[string]any) string {
 	if len(query) == 0 {
 		return baseURL
 	}
@@ -363,7 +364,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		}
 	}
 
-	var respJson interface{}
+	var respJson any
 	if len(respBodyBytes) > 0 {
 		if err = json.Unmarshal(respBodyBytes, &respJson); err != nil {
 			respJson = respBodyBytes

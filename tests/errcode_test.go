@@ -74,7 +74,7 @@ func TestErrorCode_Chaining(t *testing.T) {
 	t.Run("full chain with data", func(t *testing.T) {
 		e := errcode.NotFound().
 			WithMsg("user not found").
-			WithData(map[string]interface{}{"user_id": 123}).
+			WithData(map[string]any{"user_id": 123}).
 			WithHttpCode(http.StatusNotFound)
 
 		if e.Code != 404 {
@@ -206,7 +206,7 @@ func TestErrorCode_WithMsg(t *testing.T) {
 
 // WithData 测试
 func TestErrorCode_WithData(t *testing.T) {
-	data := map[string]interface{}{
+	data := map[string]any{
 		"field1": "value1",
 		"field2": 123,
 	}
@@ -214,7 +214,7 @@ func TestErrorCode_WithData(t *testing.T) {
 	if e.Data == nil {
 		t.Error("Data should not be nil")
 	}
-	if e.Data.(map[string]interface{})["field1"] != "value1" {
+	if e.Data.(map[string]any)["field1"] != "value1" {
 		t.Error("Data content mismatch")
 	}
 }
@@ -235,7 +235,7 @@ func TestErrorCode_Integration(t *testing.T) {
 	// 模拟 API 错误处理流程
 	err := errcode.NotFound().
 		WithMsg("user_not_found").
-		WithData(map[string]interface{}{"user_id": 12345}).
+		WithData(map[string]any{"user_id": 12345}).
 		WithHttpCode(http.StatusNotFound)
 
 	if err.Code != 404 {

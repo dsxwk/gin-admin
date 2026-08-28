@@ -7,11 +7,12 @@ import (
 	"gin/common/flag"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/message"
-	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 )
 
 type EventInfo struct {

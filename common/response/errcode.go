@@ -3,6 +3,7 @@ package response
 import (
 	"gin/common/errcode"
 	"gin/pkg/serviceprovider/logger"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,9 +13,9 @@ var (
 
 // Response 通用响应结构体
 type Response struct {
-	Code int64       `json:"code"` // 错误码
-	Msg  string      `json:"msg"`  // 提示信息
-	Data interface{} `json:"data"` // 返回数据
+	Code int64  `json:"code"` // 错误码
+	Msg  string `json:"msg"`  // 提示信息
+	Data any    `json:"data"` // 返回数据
 }
 
 func SetLogger(l *logger.Logger) {

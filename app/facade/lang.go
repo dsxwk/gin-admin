@@ -3,13 +3,14 @@ package facade
 import (
 	"context"
 	"gin/pkg/serviceprovider/lang"
+
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
 // Lang 翻译门面
 // 使用示例:
 //
-//	msg := facade.Lang().Trans(ctx, "welcome", map[string]interface{}{"name": "John"})
+//	msg := facade.Lang().Trans(ctx, "welcome", map[string]any{"name": "John"})
 //	localizer := facade.Lang().GetLocalizer("en")
 func Lang() *LangFacade {
 	return &LangFacade{}
@@ -18,7 +19,7 @@ func Lang() *LangFacade {
 type LangFacade struct{}
 
 // Trans 翻译
-func (l *LangFacade) Trans(ctx context.Context, messageID string, data map[string]interface{}) string {
+func (l *LangFacade) Trans(ctx context.Context, messageID string, data map[string]any) string {
 	return lang.Trans(ctx, messageID, data)
 }
 

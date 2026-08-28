@@ -90,6 +90,6 @@ func filterMap(data map[string]any, filter map[string]any) map[string]any {
 }
 
 // ArrayToString 将数组格式化为字符串
-func ArrayToString(array []interface{}) string {
+func ArrayToString(array []any) string {
 	return strings.Replace(strings.Trim(fmt.Sprint(array), "[]"), " ", ",", -1)
 }

@@ -3,46 +3,47 @@ package request
 import (
 	"errors"
 	"gin/common/base"
+
 	"github.com/gookit/validate"
 )
 
 // Dict 请求验证
 type Dict struct {
 	base.BaseRequest
-	ID     int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Pid    int64       `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Name   string      `json:"name" form:"name" validate:"required" label:"标识"`
-	Title  string      `json:"title" form:"title" validate:"required" label:"名称"`
-	Value  string      `json:"value" form:"value" validate:"" label:"映射值"`
-	Status int64       `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-	Sort   int64       `json:"sort" form:"sort" validate:"int" label:"排序"`
-	Extend interface{} `json:"extend" form:"extend" validate:"" label:"扩展字段"`
-	Desc   string      `json:"desc" form:"desc" validate:"" label:"字段描述"`
+	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+	Pid    int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name   string `json:"name" form:"name" validate:"required" label:"标识"`
+	Title  string `json:"title" form:"title" validate:"required" label:"名称"`
+	Value  string `json:"value" form:"value" validate:"" label:"映射值"`
+	Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort   int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Extend any    `json:"extend" form:"extend" validate:"" label:"扩展字段"`
+	Desc   string `json:"desc" form:"desc" validate:"" label:"字段描述"`
 	PageListValidate
 }
 
 // DictCreate 字典创建验证
 type DictCreate struct {
-	Pid    int64       `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Name   string      `json:"name" form:"name" validate:"required" label:"标识"`
-	Title  string      `json:"title" form:"title" validate:"required" label:"名称"`
-	Value  string      `json:"value" form:"value" validate:"required" label:"映射值"`
-	Status int64       `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-	Sort   int64       `json:"sort" form:"sort" validate:"int" label:"排序"`
-	Extend interface{} `json:"extend" form:"extend" validate:"" label:"扩展字段"`
-	Desc   string      `json:"desc" form:"desc" validate:"" label:"字段描述"`
+	Pid    int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name   string `json:"name" form:"name" validate:"required" label:"标识"`
+	Title  string `json:"title" form:"title" validate:"required" label:"名称"`
+	Value  string `json:"value" form:"value" validate:"required" label:"映射值"`
+	Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort   int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Extend any    `json:"extend" form:"extend" validate:"" label:"扩展字段"`
+	Desc   string `json:"desc" form:"desc" validate:"" label:"字段描述"`
 }
 
 // DictUpdate 字典更新验证
 type DictUpdate struct {
-	Pid    int64       `json:"pid" form:"pid" validate:"int" label:"父级id"`
-	Name   string      `json:"name" form:"name" validate:"required" label:"标识"`
-	Title  string      `json:"title" form:"title" validate:"required" label:"名称"`
-	Value  string      `json:"value" form:"value" validate:"required" label:"映射值"`
-	Status int64       `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-	Sort   int64       `json:"sort" form:"sort" validate:"int" label:"排序"`
-	Extend interface{} `json:"extend" form:"extend" validate:"" label:"扩展字段"`
-	Desc   string      `json:"desc" form:"desc" validate:"" label:"字段描述"`
+	Pid    int64  `json:"pid" form:"pid" validate:"int" label:"父级id"`
+	Name   string `json:"name" form:"name" validate:"required" label:"标识"`
+	Title  string `json:"title" form:"title" validate:"required" label:"名称"`
+	Value  string `json:"value" form:"value" validate:"required" label:"映射值"`
+	Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+	Sort   int64  `json:"sort" form:"sort" validate:"int" label:"排序"`
+	Extend any    `json:"extend" form:"extend" validate:"" label:"扩展字段"`
+	Desc   string `json:"desc" form:"desc" validate:"" label:"字段描述"`
 }
 
 // Validate 请求验证

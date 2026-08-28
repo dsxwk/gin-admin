@@ -7,6 +7,7 @@ import (
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,7 +59,7 @@ func (s Permission) hasPermission(c *gin.Context, code string) bool {
 
 	// 写入Redis缓存
 	if len(permissions) > 0 {
-		members := make([]interface{}, len(permissions))
+		members := make([]any, len(permissions))
 		for i, p := range permissions {
 			members[i] = p
 		}

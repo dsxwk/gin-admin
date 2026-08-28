@@ -3,16 +3,17 @@ package request
 import (
 	"errors"
 	"gin/common/base"
+
 	"github.com/gookit/validate"
 )
 
 // ImportRecords 请求验证
 type ImportRecords struct {
 	base.BaseRequest
-	ID   int64       `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Type int64       `json:"type" form:"type" validate:"required|int" label:"导入类型"`
-	Name string      `json:"name" form:"name" validate:"required" label:"类型名称"`
-	Data interface{} `json:"data" form:"data" validate:"required" label:"导入数据"`
+	ID   int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+	Type int64  `json:"type" form:"type" validate:"required|int" label:"导入类型"`
+	Name string `json:"name" form:"name" validate:"required" label:"类型名称"`
+	Data any    `json:"data" form:"data" validate:"required" label:"导入数据"`
 	PageListValidate
 }
 
