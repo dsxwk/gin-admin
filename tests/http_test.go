@@ -7,13 +7,14 @@ import (
 	"gin/common/ctxkey"
 	"gin/common/errcode"
 	h "gin/pkg/serviceprovider/http"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
 )
 
 // setupTestServer 创建测试服务器
@@ -38,7 +39,7 @@ func setupTestServer() *httptest.Server {
 
 	// POST JSON测试
 	r.POST("/echo", func(c *gin.Context) {
-		var body map[string]interface{}
+		var body map[string]any
 		if err := c.BindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
 			return
@@ -161,7 +162,7 @@ func TestHttpRequest(t *testing.T) {
 	resp, err := facade.Http().Send(ctx, "GET", ts.URL+"/ping", nil)
 	require.NoError(t, err)
 
-	var result map[string]interface{}
+	var result map[string]any
 	err = json.Unmarshal(resp, &result)
 	require.NoError(t, err)
 	require.Equal(t, float64(0), result["code"])
@@ -197,16 +198,16 @@ func TestHttpRequestWithQuery(t *testing.T) {
 	ctx := t.Context()
 
 	opt := &h.Option{
-		Query: map[string]interface{}{
+		Query: map[string]any{
 			"name": "张三",
 			"age":  "18",
 		},
 	}
 
 	type EchoResponse struct {
-		Code int                    `json:"code"`
-		Msg  string                 `json:"msg"`
-		Data map[string]interface{} `json:"data"`
+		Code int            `json:"code"`
+		Msg  string         `json:"msg"`
+		Data map[string]any `json:"data"`
 	}
 
 	resp, err := facade.Http().SendAsJson[EchoResponse](
@@ -231,7 +232,7 @@ func TestHttpForm(t *testing.T) {
 
 	// 使用普通表单接口
 	opt := &h.Option{
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"name":  "张三",
 			"email": "zhangsan@example.com",
 		},
@@ -262,7 +263,7 @@ func TestHttpRequestWithBody(t *testing.T) {
 
 	ctx := t.Context()
 
-	bodyData := map[string]interface{}{
+	bodyData := map[string]any{
 		"name":  "李四",
 		"email": "lisi@example.com",
 	}
@@ -276,9 +277,9 @@ func TestHttpRequestWithBody(t *testing.T) {
 	}
 
 	type EchoResponse struct {
-		Code int                    `json:"code"`
-		Msg  string                 `json:"msg"`
-		Data map[string]interface{} `json:"data"`
+		Code int            `json:"code"`
+		Msg  string         `json:"msg"`
+		Data map[string]any `json:"data"`
 	}
 
 	resp, err := facade.Http().SendAsJson[EchoResponse](
@@ -302,16 +303,16 @@ func TestHttpRequestWithForm(t *testing.T) {
 	ctx := t.Context()
 
 	opt := &h.Option{
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"name":  "王五",
 			"email": "wangwu@example.com",
 		},
 	}
 
 	type FormResponse struct {
-		Code int                    `json:"code"`
-		Msg  string                 `json:"msg"`
-		Data map[string]interface{} `json:"data"`
+		Code int            `json:"code"`
+		Msg  string         `json:"msg"`
+		Data map[string]any `json:"data"`
 	}
 
 	resp, err := facade.Http().SendAsJson[FormResponse](
@@ -358,8 +359,8 @@ func TestHttpRequestWithHeaders(t *testing.T) {
 	defer ts2.Close()
 
 	type HeaderResponse struct {
-		Code int                    `json:"code"`
-		Data map[string]interface{} `json:"data"`
+		Code int            `json:"code"`
+		Data map[string]any `json:"data"`
 	}
 
 	resp, err := facade.Http().SendAsJson[HeaderResponse](
@@ -399,7 +400,7 @@ func TestHttpRequestPostForm(t *testing.T) {
 	ctx := t.Context()
 
 	opt := &h.Option{
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"name":  "赵六",
 			"email": "zhaoliu@example.com",
 		},
@@ -408,11 +409,11 @@ func TestHttpRequestPostForm(t *testing.T) {
 	resp, err := facade.Http().Send(ctx, "POST", ts.URL+"/form", opt)
 	require.NoError(t, err)
 
-	var result map[string]interface{}
+	var result map[string]any
 	err = json.Unmarshal(resp, &result)
 	require.NoError(t, err)
 
-	data := result["data"].(map[string]interface{})
+	data := result["data"].(map[string]any)
 	require.Equal(t, "赵六", data["name"])
 	require.Equal(t, "zhaoliu@example.com", data["email"])
 }
@@ -490,7 +491,7 @@ func TestHttpUploadFile(t *testing.T) {
 				FieldName: "file",
 			},
 		},
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"description": "测试文件上传",
 		},
 		Timeout: 30 * time.Second,
@@ -534,7 +535,7 @@ func TestHttpUploadFileWithData(t *testing.T) {
 				FieldName: "file",
 			},
 		},
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"description": "使用字节数据上传",
 		},
 		Timeout: 30 * time.Second,
@@ -668,7 +669,7 @@ func TestHttpUploadFileWithRequestMethod(t *testing.T) {
 				FieldName: "file",
 			},
 		},
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"description": "使用Request方法上传",
 		},
 		Timeout: 30 * time.Second,
@@ -677,7 +678,7 @@ func TestHttpUploadFileWithRequestMethod(t *testing.T) {
 	resp, err := facade.Http().Send(ctx, "POST", ts.URL+"/upload", opt)
 	require.NoError(t, err)
 
-	var result map[string]interface{}
+	var result map[string]any
 	err = json.Unmarshal(resp, &result)
 	require.NoError(t, err)
 	require.Equal(t, float64(0), result["code"])
@@ -748,7 +749,7 @@ func TestHttpUploadFileLargeFile(t *testing.T) {
 				FieldName: "file",
 			},
 		},
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"description": "大文件上传测试",
 		},
 		Timeout: 60 * time.Second, // 大文件需要更长的超时时间
@@ -823,7 +824,7 @@ func TestHttpUploadFileAndFormData(t *testing.T) {
 				FieldName: "file",
 			},
 		},
-		Form: map[string]interface{}{
+		Form: map[string]any{
 			"description": "文件描述",
 			"user_id":     "12345",
 			"category":    "test",

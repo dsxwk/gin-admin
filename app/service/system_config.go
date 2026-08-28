@@ -49,7 +49,7 @@ func (s *SystemConfigService) List(req request.SystemConfig) (pageData request.P
 }
 
 // UpdateConfig 保存配置
-func (s *SystemConfigService) UpdateConfig(data map[string]interface{}) (err error) {
+func (s *SystemConfigService) UpdateConfig(data map[string]any) (err error) {
 	var (
 		m  model.SystemConfig
 		db = s.DB(&m)
@@ -60,8 +60,8 @@ func (s *SystemConfigService) UpdateConfig(data map[string]interface{}) (err err
 		return nil
 	}
 
-	// 先断言为[]interface{}
-	listInterface, ok := rows.([]interface{})
+	// 先断言为[]any
+	listInterface, ok := rows.([]any)
 	if !ok {
 		return errors.New("list格式错误")
 	}
@@ -69,10 +69,10 @@ func (s *SystemConfigService) UpdateConfig(data map[string]interface{}) (err err
 	if len(listInterface) == 0 {
 		return nil
 	}
-	// 转换为[]map[string]interface{}
-	list := make([]map[string]interface{}, 0, len(listInterface))
+	// 转换为[]map[string]any
+	list := make([]map[string]any, 0, len(listInterface))
 	for _, item := range listInterface {
-		mapItem, _ok := item.(map[string]interface{})
+		mapItem, _ok := item.(map[string]any)
 		if !_ok {
 			return errors.New("list 中的元素格式错误")
 		}
@@ -113,7 +113,7 @@ func (s *SystemConfigService) Create(req request.SystemConfig) (model.SystemConf
 }
 
 // Update 更新
-func (s *SystemConfigService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *SystemConfigService) Update(id int64, data map[string]any) (err error) {
 	return s.Updates(&model.SystemConfig{}, id, data)
 }
 

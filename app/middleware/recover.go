@@ -7,8 +7,9 @@ import (
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/common/errcode"
-	"github.com/gin-gonic/gin"
 	"runtime"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Recover struct {
@@ -16,14 +17,14 @@ type Recover struct {
 }
 
 type ErrData struct {
-	TraceId string      `json:"traceId"`
-	Error   interface{} `json:"error"`
-	IP      string      `json:"ip"`
-	Lang    string      `json:"lang"`
-	Path    string      `json:"path"`
-	Method  string      `json:"method"`
-	Params  interface{} `json:"params"`
-	Stack   []string    `json:"stack"`
+	TraceId string   `json:"traceId"`
+	Error   any      `json:"error"`
+	IP      string   `json:"ip"`
+	Lang    string   `json:"lang"`
+	Path    string   `json:"path"`
+	Method  string   `json:"method"`
+	Params  any      `json:"params"`
+	Stack   []string `json:"stack"`
 }
 
 // Handle recover中间件

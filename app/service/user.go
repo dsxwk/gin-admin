@@ -7,8 +7,9 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"gin/pkg"
-	"github.com/samber/lo"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 type UserService struct {
@@ -157,23 +158,23 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 }
 
 // Update 更新
-func (s *UserService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *UserService) Update(id int64, data map[string]any) (err error) {
 	var (
 		count int64
 		db    = s.DB(&model.User{})
 	)
 
-	userRolesData, ok := data["userRoles"].([]interface{})
+	userRolesData, ok := data["userRoles"].([]any)
 	if !ok {
-		userRolesData = []interface{}{}
+		userRolesData = []any{}
 	}
 
-	userDeptsData, ok := data["userDepts"].([]interface{})
+	userDeptsData, ok := data["userDepts"].([]any)
 	if !ok {
-		userDeptsData = []interface{}{}
+		userDeptsData = []any{}
 	}
 
-	mainDeptData, _ := data["mainDept"].(map[string]interface{})
+	mainDeptData, _ := data["mainDept"].(map[string]any)
 
 	// 校验用户名是否重复
 	err = db.Model(&model.User{}).Where("username = ? AND id <> ?", data["username"], id).Count(&count).Error
@@ -211,7 +212,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 		// 创建新关联
 		var newUserRoles []model.UserRoles
 		for _, item := range userRolesData {
-			roleMap, _ok := item.(map[string]interface{})
+			roleMap, _ok := item.(map[string]any)
 			if !_ok {
 				continue
 			}
@@ -242,7 +243,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 
 		var newUserDepts []model.UserDepartments
 		for _, item := range userDeptsData {
-			deptMap, _ok := item.(map[string]interface{})
+			deptMap, _ok := item.(map[string]any)
 			if !_ok {
 				continue
 			}
@@ -268,7 +269,7 @@ func (s *UserService) Update(id int64, data map[string]interface{}) (err error) 
 			// 校验主部门必须在所属部门中
 			found := false
 			for _, item := range userDeptsData {
-				deptMap, _ok := item.(map[string]interface{})
+				deptMap, _ok := item.(map[string]any)
 				if !_ok {
 					continue
 				}

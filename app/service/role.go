@@ -6,8 +6,9 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type RoleService struct {
@@ -162,7 +163,7 @@ func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
 }
 
 // Update 更新
-func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) {
+func (s *RoleService) Update(id int64, data map[string]any) (err error) {
 	var (
 		count int64
 		db    = s.DB(&model.Roles{})
@@ -177,19 +178,19 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 		return errors.New("角色名已存在")
 	}
 
-	roleMenus, ok := data["roleMenus"].([]interface{})
+	roleMenus, ok := data["roleMenus"].([]any)
 	if !ok {
-		roleMenus = []interface{}{}
+		roleMenus = []any{}
 	}
 
-	userRoles, ok := data["userRoles"].([]interface{})
+	userRoles, ok := data["userRoles"].([]any)
 	if !ok {
-		userRoles = []interface{}{}
+		userRoles = []any{}
 	}
 
-	rolePermissions, hasRolePermissions := data["rolePermissions"].([]interface{})
+	rolePermissions, hasRolePermissions := data["rolePermissions"].([]any)
 	if !hasRolePermissions {
-		rolePermissions = []interface{}{}
+		rolePermissions = []any{}
 	}
 
 	tx := db.Begin()
@@ -216,7 +217,7 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 		// 创建新关联
 		var newUserRoles []model.UserRoles
 		for _, item := range userRoles {
-			userRoleMap, _ok := item.(map[string]interface{})
+			userRoleMap, _ok := item.(map[string]any)
 			if !_ok {
 				continue
 			}
@@ -251,7 +252,7 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 		// 创建新关联
 		var newRoleMenus []model.RoleMenus
 		for _, item := range roleMenus {
-			roleMap, _ok := item.(map[string]interface{})
+			roleMap, _ok := item.(map[string]any)
 			if !_ok {
 				continue
 			}
@@ -283,7 +284,7 @@ func (s *RoleService) Update(id int64, data map[string]interface{}) (err error) 
 
 		var newRolePermissions []model.RolePermissions
 		for _, item := range rolePermissions {
-			roleMap, _ok := item.(map[string]interface{})
+			roleMap, _ok := item.(map[string]any)
 			if !_ok {
 				continue
 			}
@@ -455,7 +456,7 @@ func (s *RoleService) SyncAllUserPermissions() error {
 		redisKey := fmt.Sprintf("permission:user:%d", userID)
 		pipe.Del(s.Ctx, redisKey)
 		if len(keys) > 0 {
-			members := make([]interface{}, len(keys))
+			members := make([]any, len(keys))
 			for i, k := range keys {
 				members[i] = k
 			}
@@ -492,7 +493,7 @@ func (s *RoleService) rebuildUserPermissions(db *gorm.DB, userID int64) error {
 	_ = redisCache.Delete(key)
 
 	if len(permissions) > 0 {
-		members := make([]interface{}, len(permissions))
+		members := make([]any, len(permissions))
 		for i, p := range permissions {
 			members[i] = p.Key
 		}

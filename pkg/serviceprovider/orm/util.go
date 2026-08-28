@@ -1,10 +1,11 @@
 package orm
 
 import (
-	"github.com/samber/lo"
-	"gorm.io/gorm/schema"
 	"regexp"
 	"strings"
+
+	"github.com/samber/lo"
+	"gorm.io/gorm/schema"
 )
 
 var (

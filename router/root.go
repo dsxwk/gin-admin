@@ -9,10 +9,11 @@ import (
 	_ "gin/docs"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/mcp"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"net/http"
 )
 
 var (
@@ -58,7 +59,7 @@ func LoadRouters(router *gin.Engine) {
 			if mcpPath == "" {
 				mcpPath = "/mcp"
 			}
-			router.POST(mcpPath, mcpHandler.ServeHTTP)
+			router.POST(mcpPath, gin.WrapH(mcpHandler))
 		}
 	}
 }

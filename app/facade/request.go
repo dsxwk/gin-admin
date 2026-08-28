@@ -2,6 +2,7 @@ package facade
 
 import (
 	"gin/pkg/serviceprovider/request"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/validate"
 )
@@ -42,7 +43,7 @@ func (r RequestFacade) Bind(ctx *gin.Context, v any) error {
 }
 
 // Validate 验证请求数据
-func (r RequestFacade) Validate(data interface{}, scene string) error {
+func (r RequestFacade) Validate(data any, scene string) error {
 	return request.NewClient().Validate(data, scene)
 }
 
@@ -52,16 +53,16 @@ func (r RequestFacade) BindValidate(ctx *gin.Context, v any, scene string) error
 }
 
 // ValidateWithMessages 验证并自定义错误消息
-func (r RequestFacade) ValidateWithMessages(data interface{}, scene string, messages map[string]string) error {
+func (r RequestFacade) ValidateWithMessages(data any, scene string, messages map[string]string) error {
 	return request.NewClient().ValidateWithMessages(data, scene, messages)
 }
 
 // ValidateWithTranslates 验证并自定义字段翻译
-func (r RequestFacade) ValidateWithTranslates(data interface{}, scene string, translates map[string]string) error {
+func (r RequestFacade) ValidateWithTranslates(data any, scene string, translates map[string]string) error {
 	return request.NewClient().ValidateWithTranslates(data, scene, translates)
 }
 
 // GetValidator 获取验证器实例
-func (r RequestFacade) GetValidator(data interface{}, scene string) *validate.Validation {
+func (r RequestFacade) GetValidator(data any, scene string) *validate.Validation {
 	return request.NewClient().GetValidator(data, scene)
 }

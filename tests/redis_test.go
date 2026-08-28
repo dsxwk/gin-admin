@@ -6,10 +6,11 @@ import (
 	"gin/app/queue/consumer"
 	_ "gin/app/queue/producer"
 	"gin/common/ctxkey"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestRedisQueuePublish Redis队列消息发布和消费
@@ -195,13 +196,13 @@ func TestRedisCacheDataTypes(t *testing.T) {
 	testCases := []struct {
 		name  string
 		key   string
-		value interface{}
+		value any
 	}{
 		{"string", "test:type:string", "hello"},
 		{"int", "test:type:int", 12345},
 		{"float", "test:type:float", 3.14159},
 		{"bool", "test:type:bool", true},
-		{"map", "test:type:map", map[string]interface{}{"name": "test", "count": 100}},
+		{"map", "test:type:map", map[string]any{"name": "test", "count": 100}},
 		{"slice", "test:type:slice", []string{"a", "b", "c"}},
 	}
 

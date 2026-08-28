@@ -4,12 +4,13 @@ import (
 	"gin/app/middleware"
 	"gin/common/errcode"
 	"gin/common/response"
-	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 )
 
 func TestTimeoutMiddleware(t *testing.T) {

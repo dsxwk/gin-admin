@@ -5,14 +5,15 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"github.com/fatih/color"
-	"github.com/goccy/go-json"
-	"github.com/mattn/go-runewidth"
-	"github.com/samber/lo"
 	"os"
 	"runtime"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/goccy/go-json"
+	"github.com/mattn/go-runewidth"
+	"github.com/samber/lo"
 )
 
 var (
@@ -250,7 +251,7 @@ func printJSON() {
 		})
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"version":  "Gin Cli " + facade.Config().App.CliVersion,
 		"commands": list,
 	}

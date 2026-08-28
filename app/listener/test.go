@@ -4,20 +4,17 @@ import (
 	"fmt"
 	"gin/app/event"
 	"gin/pkg/serviceprovider/eventbus"
-	"github.com/goccy/go-json"
 	"time"
 )
 
 type TestListener struct{}
 
 func (l *TestListener) Handle(e event.UserLoginEvent) {
-	data, _ := json.Marshal(e)
-
 	fmt.Printf(
-		"收到事件: %s 描述: %s 数据: %s 时间: %s\n",
+		"收到事件: %s 描述: %s 数据: %T 时间: %s\n",
 		e.Name(),
 		e.Description(),
-		data,
+		e,
 		time.Now().Format("2006-01-02 15:04:05"),
 	)
 }

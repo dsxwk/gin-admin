@@ -2,10 +2,11 @@ package ratelimit
 
 import (
 	"context"
-	"golang.org/x/time/rate"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 // 每个key对应一个令牌桶

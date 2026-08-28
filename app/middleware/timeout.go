@@ -5,8 +5,9 @@ import (
 	"errors"
 	"gin/common/base"
 	"gin/common/errcode"
-	"github.com/gin-gonic/gin"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 const SkipTimeoutKey = "_skip_timeout"

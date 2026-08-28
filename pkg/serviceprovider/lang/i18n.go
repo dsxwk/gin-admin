@@ -8,14 +8,15 @@ import (
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/logger"
-	"github.com/goccy/go-json"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/goccy/go-json"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -94,7 +95,7 @@ func loadLangDir(langCode, dir string) {
 }
 
 // Trans 翻译
-func Trans(ctx context.Context, messageID string, data map[string]interface{}) string {
+func Trans(ctx context.Context, messageID string, data map[string]any) string {
 	langCode := getLangFromContext(ctx)
 	localizer, ok := Localizers[langCode]
 	if !ok {

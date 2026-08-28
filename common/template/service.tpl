@@ -69,7 +69,7 @@ func (s *{{.Name}}Service) Create(req request.{{.Name}}) (model.{{.Name}}, error
 }
 
 // Update 更新
-func (s *{{.Name}}Service) Update(id int64, data map[string]interface{}) (err error) {
+func (s *{{.Name}}Service) Update(id int64, data map[string]any) (err error) {
     return s.Updates(&model.{{.Name}}{}, id, data)
 }
 

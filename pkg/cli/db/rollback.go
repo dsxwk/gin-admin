@@ -7,6 +7,7 @@ import (
 	"gin/database"
 	"gin/database/migrations"
 	"gin/pkg/cli"
+
 	"github.com/fatih/color"
 )
 

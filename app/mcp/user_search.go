@@ -34,10 +34,7 @@ func (t *UserSearch) Call(ctx context.Context, args map[string]any) (any, error)
 
 	limit := 20
 	if l, ok := args["limit"].(float64); ok && l > 0 {
-		limit = int(l)
-		if limit > 100 {
-			limit = 100
-		}
+		limit = min(int(l), 100)
 	}
 
 	var users []model.User

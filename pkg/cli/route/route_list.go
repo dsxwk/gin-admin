@@ -6,10 +6,11 @@ import (
 	"gin/pkg"
 	"gin/pkg/cli"
 	"gin/router"
-	"github.com/fatih/color"
-	"github.com/gin-gonic/gin"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/gin-gonic/gin"
 )
 
 type RouteList struct{}

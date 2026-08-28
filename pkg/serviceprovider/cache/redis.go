@@ -7,9 +7,10 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/message"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/goccy/go-json"
-	"time"
 )
 
 type RedisHook struct {
@@ -141,7 +142,7 @@ func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {
 	}
 }
 
-func (r *RedisCache) Set(key string, value interface{}, expire time.Duration) error {
+func (r *RedisCache) Set(key string, value any, expire time.Duration) error {
 	var valStr string
 
 	// 根据类型处理值
@@ -173,14 +174,14 @@ func (r *RedisCache) Set(key string, value interface{}, expire time.Duration) er
 	return nil
 }
 
-func (r *RedisCache) Get(key string) (interface{}, bool) {
+func (r *RedisCache) Get(key string) (any, bool) {
 	val, err := r.client.Get(r.ctx, key).Result()
 	if err != nil {
 		return nil, false
 	}
 
 	// 尝试解析JSON
-	var result interface{}
+	var result any
 	if err = json.Unmarshal([]byte(val), &result); err == nil {
 		// 如果是JSON对象或数组,返回解析后的结果
 		return result, true
@@ -208,7 +209,7 @@ func (r *RedisCache) Exists(key string) (int64, error) {
 	return result, nil
 }
 
-func (r *RedisCache) SAdd(key string, members ...interface{}) error {
+func (r *RedisCache) SAdd(key string, members ...any) error {
 	err := r.client.SAdd(r.ctx, key, members...).Err()
 	if err != nil {
 		return fmt.Errorf("error SAdd Redis set: %v", err)
@@ -216,7 +217,7 @@ func (r *RedisCache) SAdd(key string, members ...interface{}) error {
 	return nil
 }
 
-func (r *RedisCache) SIsMember(key string, member interface{}) (bool, error) {
+func (r *RedisCache) SIsMember(key string, member any) (bool, error) {
 	result, err := r.client.SIsMember(r.ctx, key, member).Result()
 	if err != nil {
 		return false, fmt.Errorf("error SIsMember Redis set: %v", err)
@@ -224,7 +225,7 @@ func (r *RedisCache) SIsMember(key string, member interface{}) (bool, error) {
 	return result, nil
 }
 
-func (r *RedisCache) Expire(key string) (interface{}, time.Time, bool, error) {
+func (r *RedisCache) Expire(key string) (any, time.Time, bool, error) {
 	// Redis不支持使用相同的API获取到期时间,因此必须使用TTL
 	ttl, err := r.client.TTL(r.ctx, key).Result()
 	if err != nil {
@@ -279,7 +280,7 @@ func (r *RedisCache) UnLock(key string, value string) error {
 }
 
 // Publish 发布
-func (r *RedisCache) Publish(channel string, message interface{}) error {
+func (r *RedisCache) Publish(channel string, message any) error {
 	var (
 		payload string
 	)

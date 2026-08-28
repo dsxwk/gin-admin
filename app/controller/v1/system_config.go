@@ -7,6 +7,7 @@ import (
 	"gin/common/base"
 	"gin/common/errcode"
 	"gin/pkg/serviceprovider/lang"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-viper/mapstructure/v2"
@@ -65,7 +66,7 @@ func (s *SystemConfigController) List(c *gin.Context) {
 func (s *SystemConfigController) UpdateConfig(c *gin.Context) {
 	var (
 		ctx  = c.Request.Context()
-		data map[string]interface{}
+		data map[string]any
 		req  request.SystemConfigUpdates
 	)
 
@@ -182,7 +183,7 @@ func (s *SystemConfigController) Create(c *gin.Context) {
 func (s *SystemConfigController) Update(c *gin.Context) {
 	var (
 		ctx  = c.Request.Context()
-		data map[string]interface{}
+		data map[string]any
 		req  request.SystemConfig
 	)
 
