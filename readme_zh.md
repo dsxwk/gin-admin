@@ -205,7 +205,7 @@
 
 # 版本记录
 
-> - 最新版本 [v2.4.0](version_history_zh.md#v240)
+> - 最新版本 [v3.0.0](version_history_zh.md#v300)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明

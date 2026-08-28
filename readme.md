@@ -216,7 +216,7 @@
 
 # Version History
 
-> - Latest Version [v2.4.0](version_history.md#v240)
+> - Latest Version [v3.0.0](version_history.md#v300)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
