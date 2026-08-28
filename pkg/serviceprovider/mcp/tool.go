@@ -19,3 +19,34 @@ type AuthTool interface {
 type UserContextCall interface {
 	CallWithUser(ctx context.Context, userId int64, args map[string]any) (any, error)
 }
+
+// ToolCaller 工具调用器,返回handled表示已处理该工具
+type ToolCaller func(ctx context.Context, userId int64, tool Tool, args map[string]any) (result any, handled bool, err error)
+
+var toolCallers []ToolCaller
+
+// RegisterToolCaller 注册工具调用器
+func RegisterToolCaller(caller ToolCaller) {
+	toolCallers = append(toolCallers, caller)
+}
+
+// CallTool 调用工具,支持带用户上下文的工具
+func CallTool(ctx context.Context, userId int64, tool Tool, args map[string]any) (any, error) {
+	for _, caller := range toolCallers {
+		result, handled, err := caller(ctx, userId, tool, args)
+		if handled {
+			return result, err
+		}
+	}
+	return tool.Call(ctx, args)
+}
+
+func init() {
+	RegisterToolCaller(func(ctx context.Context, userId int64, tool Tool, args map[string]any) (any, bool, error) {
+		if uc, ok := tool.(UserContextCall); ok {
+			result, err := uc.CallWithUser(ctx, userId, args)
+			return result, true, err
+		}
+		return nil, false, nil
+	})
+}
