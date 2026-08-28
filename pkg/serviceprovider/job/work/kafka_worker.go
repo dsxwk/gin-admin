@@ -7,10 +7,11 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/job"
-	"github.com/goccy/go-json"
-	"github.com/segmentio/kafka-go"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
+	"github.com/segmentio/kafka-go"
 )
 
 const JobKafkaTopic = "job"

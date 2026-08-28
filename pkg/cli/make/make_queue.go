@@ -5,11 +5,12 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/samber/lo"
 )
 
 type MakeQueue struct {
@@ -97,7 +98,7 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 	exchange := queueName + "_exchange"
 	routing := queueName
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Package":     "consumer",
 		"Name":        camelName,
 		"LowerName":   lowerName,

@@ -5,10 +5,11 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 )
 
 type EventList struct{}

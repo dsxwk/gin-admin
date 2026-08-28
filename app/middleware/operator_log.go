@@ -5,8 +5,9 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/ctxkey"
-	"github.com/gin-gonic/gin"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type OperatorLog struct {

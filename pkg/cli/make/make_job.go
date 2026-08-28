@@ -6,11 +6,12 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/samber/lo"
 )
 
 type MakeJob struct {
@@ -79,7 +80,7 @@ func (m *MakeJob) Execute(values map[string]string) {
 
 	camelName := lo.PascalCase(name)
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Name":        name,
 		"CamelName":   camelName,
 		"Connection":  conn,

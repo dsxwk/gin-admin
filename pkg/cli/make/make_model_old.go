@@ -7,13 +7,14 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
-	"gorm.io/gen"
-	"gorm.io/gorm"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/samber/lo"
+	"gorm.io/gen"
+	"gorm.io/gorm"
 )
 
 type MakeModelOld struct {

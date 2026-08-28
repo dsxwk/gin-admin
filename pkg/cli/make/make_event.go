@@ -4,11 +4,12 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
 	"html/template"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/samber/lo"
 )
 
 type MakeEvent struct {

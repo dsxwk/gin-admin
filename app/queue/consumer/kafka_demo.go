@@ -7,8 +7,9 @@ import (
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
-	"github.com/segmentio/kafka-go"
 	"time"
+
+	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDemoConsumer Kafka普通消费者

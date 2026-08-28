@@ -6,8 +6,9 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/job"
-	"github.com/rabbitmq/amqp091-go"
 	"time"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 const (

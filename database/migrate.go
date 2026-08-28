@@ -2,6 +2,7 @@ package database
 
 import (
 	"gin/app/model"
+
 	"gorm.io/gorm"
 )
 

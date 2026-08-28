@@ -8,11 +8,12 @@ import (
 	"gin/common/flag"
 	"gin/pkg/serviceprovider/debugger"
 	jsjob "gin/pkg/serviceprovider/job"
+	"sync"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/segmentio/kafka-go"
-	"sync"
-	"time"
 )
 
 const JobKafkaTopic = "job"

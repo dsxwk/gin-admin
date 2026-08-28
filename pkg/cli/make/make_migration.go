@@ -5,10 +5,11 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 type MakeMigration struct {

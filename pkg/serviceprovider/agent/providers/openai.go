@@ -7,10 +7,11 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/agent"
 	"gin/pkg/serviceprovider/mcp"
-	"github.com/goccy/go-json"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/goccy/go-json"
 )
 
 // OpenAICompat OpenAI兼容Provider,支持所有OpenAI兼容API

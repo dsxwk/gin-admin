@@ -5,10 +5,11 @@ import (
 	"gin/app/facade"
 	"gin/app/job"
 	"gin/common/ctxkey"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestJobDispatchSync 同步Job投递(立即执行)

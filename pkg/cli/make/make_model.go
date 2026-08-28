@@ -7,13 +7,14 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
-	"gorm.io/gorm"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/samber/lo"
+	"gorm.io/gorm"
 )
 
 // MakeModel 模型生成命令

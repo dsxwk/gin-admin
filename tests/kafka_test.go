@@ -6,10 +6,11 @@ import (
 	"gin/app/queue/consumer"
 	_ "gin/app/queue/producer"
 	"gin/common/ctxkey"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestKafkaPublish Kafka普通消息发布和消费

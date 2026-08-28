@@ -7,11 +7,12 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
-	"github.com/samber/lo"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/samber/lo"
 )
 
 type MakeRequest struct {
@@ -344,7 +345,7 @@ func (m *MakeRequest) getGoType(dbType string) string {
 		return "[]byte"
 	// json
 	case t == "json", t == "jsonb":
-		return "interface{}"
+		return "any"
 	}
 
 	return "string"

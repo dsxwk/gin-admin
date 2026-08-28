@@ -8,8 +8,9 @@ import (
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/job"
-	"github.com/go-redis/redis/v8"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 const (

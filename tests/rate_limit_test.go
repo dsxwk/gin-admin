@@ -4,13 +4,14 @@ import (
 	"gin/app/middleware"
 	"gin/common/errcode"
 	"gin/common/response"
-	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"net/http"
 	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 )
 
 func TestRateLimitMiddleware(t *testing.T) {
