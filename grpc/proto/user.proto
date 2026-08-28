@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package grpc;
+
+import "google/protobuf/struct.proto";
+import "grpc/proto/base.proto";
+
+option go_package = "gin/grpc/proto;proto";
+
+message UserRoleItem {
+  int32 roleId = 1;
+  string name = 2;
+}
+
+message DeptItem {
+  int32 departmentId = 1;
+}
+
+// 请求消息
+message UserRequest {
+  int32 id = 1;
+}
+
+message UserListRequest {
+  int32 page = 1;
+  int32 pageSize = 2;
+  bool notPage = 3;
+  google.protobuf.Struct search = 4;
+  google.protobuf.Struct sort = 5;
+}
+
+message UserCreateRequest {
+  string username = 1;
+  string fullName = 2;
+  string nickname = 3;
+  int32 gender = 4;
+  string password = 5;
+  int32 age = 6;
+  repeated UserRoleItem userRoles = 7;
+  DeptItem mainDept = 8;
+  repeated DeptItem userDepts = 9;
+}
+
+message UserUpdateRequest {
+  int32 id = 1;
+  google.protobuf.Struct data = 2;
+}
+
+message UserBatchDeleteRequest {
+  repeated int32 ids = 1;
+}
+
+message UserRole {
+  int32 id = 1;
+  int32 userId = 2;
+  int32 roleId = 3;
+  string name = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message UserDepartment {
+  int32 id = 1;
+  int32 userId = 2;
+  int32 departmentId = 3;
+  int32 isMain = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message User {
+  int32 id = 1;
+  string avatar = 2;
+  string username = 3;
+  string fullName = 4;
+  string email = 5;
+  string nickname = 6;
+  int32 gender = 7;
+  int32 age = 8;
+  int32 status = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+  repeated UserRole userRoles = 12;
+  UserDepartment mainDept = 13;
+  repeated UserDepartment userDepts = 14;
+}
+
+message UserListResponse {
+  int32 total = 1;
+  int32 page = 2;
+  int32 pageSize = 3;
+  repeated User list = 4;
+}
+
+// 服务定义
+service UserService {
+  rpc Detail(UserRequest) returns (User);
+  rpc List(UserListRequest) returns (UserListResponse);
+  rpc Create(UserCreateRequest) returns (User);
+  rpc Update(UserUpdateRequest) returns (User);
+  rpc Delete(UserRequest) returns (EmptyResponse);
+  rpc BatchDelete(UserBatchDeleteRequest) returns (EmptyResponse);
+}

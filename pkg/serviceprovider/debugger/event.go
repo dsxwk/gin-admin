@@ -5,6 +5,7 @@ const (
 	TopicCache    = "debug:cache"
 	TopicHttp     = "debug:http"
 	TopicMq       = "debug:mq"
+	TopicGrpc     = "debug:grpc"
 	TopicListener = "debug:listener"
 	TopicJob      = "debug:job"
 )
@@ -41,14 +42,24 @@ type HttpEvent struct {
 
 // MqEvent 消息队列事件
 type MqEvent struct {
-	TraceId string                 // tranceId
-	Driver  string                 // kafka rabbitmq redis-stream
-	Topic   string                 // topic queue stream
-	Message string                 // 消息内容
-	Key     string                 // 用于Kafka
-	Group   string                 // 消费组
-	Ms      float64                // 耗时ms
-	Extra   map[string]interface{} // 扩展信息
+	TraceId string         // tranceId
+	Driver  string         // kafka rabbitmq redis-stream
+	Topic   string         // topic queue stream
+	Message string         // 消息内容
+	Key     string         // 用于Kafka
+	Group   string         // 消费组
+	Ms      float64        // 耗时ms
+	Extra   map[string]any // 扩展信息
+}
+
+// GrpcEvent grpc事件
+type GrpcEvent struct {
+	TraceId  string
+	Method   string
+	Request  any
+	Response any
+	Code     string
+	Ms       float64
 }
 
 // ListenerEvent 监听事件

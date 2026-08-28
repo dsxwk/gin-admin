@@ -11,6 +11,7 @@ type TraceData struct {
 	Cache         []map[string]any `json:"Cache"`
 	Http          []map[string]any `json:"Http"`
 	Mq            []map[string]any `json:"Mq"`
+	Grpc          []map[string]any `json:"Grpc"`
 	ListenerEvent []map[string]any `json:"ListenerEvent"`
 	Job           []map[string]any `json:"Job"`
 }
@@ -25,6 +26,19 @@ var Store = &TraceStore{
 	store: make(map[string]*TraceData),
 }
 
+// TraceField 追踪字段类型
+type TraceField string
+
+const (
+	FieldSql      TraceField = "Sql"
+	FieldCache    TraceField = "Cache"
+	FieldHttp     TraceField = "Http"
+	FieldMq       TraceField = "Mq"
+	FieldGrpc     TraceField = "Grpc"
+	FieldListener TraceField = "Listener"
+	FieldJob      TraceField = "Job"
+)
+
 // Get 获取追踪数据,不存在时创建并存储
 func (ts *TraceStore) Get(traceId string) *TraceData {
 	ts.mu.Lock()
@@ -34,14 +48,7 @@ func (ts *TraceStore) Get(traceId string) *TraceData {
 		return data
 	}
 
-	data := &TraceData{
-		Sql:           make([]map[string]any, 0),
-		Cache:         make([]map[string]any, 0),
-		Http:          make([]map[string]any, 0),
-		Mq:            make([]map[string]any, 0),
-		ListenerEvent: make([]map[string]any, 0),
-		Job:           make([]map[string]any, 0),
-	}
+	data := newTraceData()
 	ts.store[traceId] = data
 	return data
 }
@@ -60,6 +67,19 @@ func (ts *TraceStore) Delete(traceId string) {
 	delete(ts.store, traceId)
 }
 
+// newTraceData 创建空的追踪数据
+func newTraceData() *TraceData {
+	return &TraceData{
+		Sql:           make([]map[string]any, 0),
+		Cache:         make([]map[string]any, 0),
+		Http:          make([]map[string]any, 0),
+		Mq:            make([]map[string]any, 0),
+		Grpc:          make([]map[string]any, 0),
+		ListenerEvent: make([]map[string]any, 0),
+		Job:           make([]map[string]any, 0),
+	}
+}
+
 // addTraceField 通用方法:获取或创建TraceData,并对指定字段追加数据
 func addTraceField(traceId string, data map[string]any, fieldFn func(d *TraceData) *[]map[string]any) {
 	if traceId == "" {
@@ -69,14 +89,7 @@ func addTraceField(traceId string, data map[string]any, fieldFn func(d *TraceDat
 	Store.mu.Lock()
 	d, ok := Store.store[traceId]
 	if !ok {
-		d = &TraceData{
-			Sql:           make([]map[string]any, 0),
-			Cache:         make([]map[string]any, 0),
-			Http:          make([]map[string]any, 0),
-			Mq:            make([]map[string]any, 0),
-			ListenerEvent: make([]map[string]any, 0),
-			Job:           make([]map[string]any, 0),
-		}
+		d = newTraceData()
 		Store.store[traceId] = d
 	}
 	Store.mu.Unlock()
@@ -86,32 +99,21 @@ func addTraceField(traceId string, data map[string]any, fieldFn func(d *TraceDat
 	d.mu.Unlock()
 }
 
-// AddSql 记录sql调试信息
-func AddSql(traceId string, data map[string]any) {
-	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Sql })
+var traceFieldMap = map[TraceField]func(d *TraceData) *[]map[string]any{
+	FieldSql:      func(d *TraceData) *[]map[string]any { return &d.Sql },
+	FieldCache:    func(d *TraceData) *[]map[string]any { return &d.Cache },
+	FieldHttp:     func(d *TraceData) *[]map[string]any { return &d.Http },
+	FieldMq:       func(d *TraceData) *[]map[string]any { return &d.Mq },
+	FieldGrpc:     func(d *TraceData) *[]map[string]any { return &d.Grpc },
+	FieldListener: func(d *TraceData) *[]map[string]any { return &d.ListenerEvent },
+	FieldJob:      func(d *TraceData) *[]map[string]any { return &d.Job },
 }
 
-// AddCache 记录缓存调试信息
-func AddCache(traceId string, data map[string]any) {
-	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Cache })
-}
-
-// AddHttp 记录http调试信息
-func AddHttp(traceId string, data map[string]any) {
-	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Http })
-}
-
-// AddMq 记录mq调试信息
-func AddMq(traceId string, data map[string]any) {
-	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Mq })
-}
-
-// AddListener 记录监听调试信息
-func AddListener(traceId string, data map[string]any) {
-	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.ListenerEvent })
-}
-
-// AddJob 记录Job调试信息
-func AddJob(traceId string, data map[string]any) {
-	addTraceField(traceId, data, func(d *TraceData) *[]map[string]any { return &d.Job })
+// Add 记录调试信息
+func Add(traceId string, field TraceField, data map[string]any) {
+	fieldFn, ok := traceFieldMap[field]
+	if !ok {
+		return
+	}
+	addTraceField(traceId, data, fieldFn)
 }

@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package grpc;
+
+option go_package = "gin/grpc/proto;proto";
+
+// 公共响应消息
+message EmptyResponse {}

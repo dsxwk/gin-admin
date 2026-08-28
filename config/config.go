@@ -3,12 +3,13 @@ package config
 import (
 	"fmt"
 	"gin/common/flag"
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 )
 
 // Config 配置
@@ -24,6 +25,7 @@ type Config struct {
 	OperatorRecord OperatorRecord `mapstructure:"operator-record" yaml:"operator-record"`
 	Mcp            Mcp            `mapstructure:"mcp" yaml:"mcp"`
 	Agent          Agent          `mapstructure:"agent" yaml:"agent"`
+	Grpc           Grpc           `mapstructure:"grpc" yaml:"grpc"`
 }
 
 var (
@@ -128,7 +130,7 @@ func GetRootPath() string {
 }
 
 // Get 获取配置项
-func (c *Config) Get(key string) interface{} {
+func (c *Config) Get(key string) any {
 	return vp.Get(key)
 }
 
@@ -148,7 +150,7 @@ func (c *Config) GetBool(key string) bool {
 }
 
 // Set 更新配置项(通用方法)
-func (c *Config) Set(key string, value interface{}) error {
+func (c *Config) Set(key string, value any) error {
 	mu.Lock()
 	defer mu.Unlock()
 

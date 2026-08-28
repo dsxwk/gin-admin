@@ -9,6 +9,7 @@ import (
 	_ "gin/app/queue/producer"
 	_ "gin/pkg/cli/db"
 	_ "gin/pkg/cli/event"
+	_ "gin/pkg/cli/grpc"
 	_ "gin/pkg/cli/job"
 	_ "gin/pkg/cli/jwt"
 	_ "gin/pkg/cli/make"
