@@ -2,6 +2,7 @@
 /.idea
 /.vscode
 /.gocache
+/.tools
 /vendor
 /storage/cache
 /storage/logs
