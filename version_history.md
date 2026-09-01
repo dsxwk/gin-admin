@@ -1,5 +1,8 @@
 # Version History
 
+## v3.0.1
+> - Add method permission control to gRPC and update all package versions
+
 ## v3.0.0
 
 > - MCP tool optimization, code formatting, and database file backup 
