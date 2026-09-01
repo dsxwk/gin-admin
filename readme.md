@@ -216,7 +216,7 @@
 
 # Version History
 
-> - Latest Version [v3.0.0](version_history.md#v300)
+> - Latest Version [v3.0.1](version_history.md#v301)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -849,12 +849,16 @@ Options:
 
 - `--path=grpc/service` Output directory (default)
 - `--connection=mysql` Database connection
+- `--auth=true` Require authentication (default, use `--auth=false` to disable)
 
 The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc-gen`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
 
 ### Call From Go
 
+gRPC services implement `AuthMethods() map[string]bool` to control each RPC method individually; methods not listed do not require authentication. For methods that require auth, the server validates the JWT and puts the user ID into the context. Use `facade.Grpc().WithToken(ctx, token)` for internal calls:
+
 ```go
+ctx := facade.Grpc().WithToken(ctx, token)
 user, err := facade.Grpc().Service(proto.NewUserServiceClient)
 if err != nil {
     return err
@@ -868,6 +872,7 @@ The server uses the standard protobuf codec and enables gRPC reflection.
 
 - Server URL: `grpc://127.0.0.1:50051`
 - Method: `grpc.UserService/Detail`
+- Metadata: `authorization: Bearer <token>` (only for services that require auth)
 - Message: `{"id": 1}`
 
 Update example:

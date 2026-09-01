@@ -23,12 +23,24 @@ func init() {
     client.Register(func(s *grpclib.Server) {
         proto.Register{{.Name}}ServiceServer(s, {{.Name}}Service{})
     })
+    client.RegisterAuth("grpc.{{.Name}}Service", {{.Name}}Service{})
 }
 
 // {{.Name}}Service {{.Description}}grpc服务
 type {{.Name}}Service struct {
     base.BaseService
     proto.Unimplemented{{.Name}}ServiceServer
+}
+
+// AuthMethods 方法鉴权配置
+func ({{.Name}}Service) AuthMethods() map[string]bool {
+    return map[string]bool{
+        "Detail": {{.Auth}},
+        "List":   {{.Auth}},
+        "Create": {{.Auth}},
+        "Update": {{.Auth}},
+        "Delete": {{.Auth}},
+    }
 }
 
 // List {{.Description}}列表

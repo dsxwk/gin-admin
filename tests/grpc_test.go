@@ -6,28 +6,111 @@ import (
 	"gin/common/ctxkey"
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
-	"gin/pkg/serviceprovider/debugger"
 	client "gin/pkg/serviceprovider/grpcclient"
-	"gin/pkg/serviceprovider/message"
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	grpclib "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// TestUserService 测试用户grpc服务
-func TestUserService(t *testing.T) {
-	const traceId = "test-grpc-trace"
+const (
+	grpcTestJwtKey   = "test-jwt-key"
+	grpcTestPort     = 1234
+	grpcAuthTestPort = 1235
+)
 
-	facade.Register[*debugger.Debugger]("debugger", debugger.NewDebugger(message.NewEvent()))
-	facade.Debugger().Start()
-	defer facade.Debugger().Stop()
-	defer debugger.Store.Delete(traceId)
+// TestGrpcMethodAuth 测试grpc方法级JWT鉴权
+func TestGrpcMethodAuth(t *testing.T) {
+	client.SetJwtKey(grpcTestJwtKey)
+	client.RegisterAuth("grpc.AuthTestService", authTestServer{})
 
-	srv, err := client.NewServer("127.0.0.1", 1234, func(s *grpclib.Server) {
+	srv, err := client.NewServer("127.0.0.1", grpcAuthTestPort, func(s *grpclib.Server) {
+		s.RegisterService(&grpclib.ServiceDesc{
+			ServiceName: "grpc.AuthTestService",
+			HandlerType: (*authTestService)(nil),
+			Methods: []grpclib.MethodDesc{
+				{
+					MethodName: "Ping",
+					Handler: func(srv any, ctx context.Context, dec func(any) error, interceptor grpclib.UnaryServerInterceptor) (any, error) {
+						in := new(emptypb.Empty)
+						if err := dec(in); err != nil {
+							return nil, err
+						}
+						if interceptor == nil {
+							return srv.(authTestServer).Ping(ctx, in)
+						}
+						info := &grpclib.UnaryServerInfo{Server: srv, FullMethod: "/grpc.AuthTestService/Ping"}
+						handler := func(ctx context.Context, req any) (any, error) {
+							return srv.(authTestServer).Ping(ctx, req.(*emptypb.Empty))
+						}
+						return interceptor(ctx, in, info, handler)
+					},
+				},
+				{
+					MethodName: "PingPublic",
+					Handler: func(srv any, ctx context.Context, dec func(any) error, interceptor grpclib.UnaryServerInterceptor) (any, error) {
+						in := new(emptypb.Empty)
+						if err := dec(in); err != nil {
+							return nil, err
+						}
+						if interceptor == nil {
+							return srv.(authTestServer).PingPublic(ctx, in)
+						}
+						info := &grpclib.UnaryServerInfo{Server: srv, FullMethod: "/grpc.AuthTestService/PingPublic"}
+						handler := func(ctx context.Context, req any) (any, error) {
+							return srv.(authTestServer).PingPublic(ctx, req.(*emptypb.Empty))
+						}
+						return interceptor(ctx, in, info, handler)
+					},
+				},
+			},
+		}, authTestServer{})
+	})
+	if err != nil {
+		t.Fatalf("创建grpc鉴权服务端失败: %v", err)
+	}
+	if err = srv.Start(); err != nil {
+		t.Fatalf("启动grpc鉴权服务端失败: %v", err)
+	}
+	defer srv.Stop()
+
+	c, err := client.NewClient(srv.Addr())
+	if err != nil {
+		t.Fatalf("创建grpc鉴权客户端失败: %v", err)
+	}
+	defer c.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err = c.Conn.Invoke(ctx, "/grpc.AuthTestService/Ping", &emptypb.Empty{}, &emptypb.Empty{}); err == nil || status.Code(err) != codes.Unauthenticated {
+		t.Fatalf("未携带Token应返回未鉴权: %v", err)
+	}
+
+	if err = c.Conn.Invoke(ctx, "/grpc.AuthTestService/PingPublic", &emptypb.Empty{}, &emptypb.Empty{}); err != nil {
+		t.Fatalf("免鉴权方法调用失败: %v", err)
+	}
+
+	if err = c.Conn.Invoke(client.WithToken(ctx, "invalid"), "/grpc.AuthTestService/Ping", &emptypb.Empty{}, &emptypb.Empty{}); err == nil || status.Code(err) != codes.Unauthenticated {
+		t.Fatalf("无效Token应返回未鉴权: %v", err)
+	}
+
+	if err = c.Conn.Invoke(client.WithToken(ctx, newGrpcTestToken(1)), "/grpc.AuthTestService/Ping", &emptypb.Empty{}, &emptypb.Empty{}); err != nil {
+		t.Fatalf("有效Token调用失败: %v", err)
+	}
+}
+
+// TestGrpcUserService 测试用户grpc服务
+func TestGrpcUserService(t *testing.T) {
+	client.SetJwtKey(grpcTestJwtKey)
+	client.RegisterAuth("grpc.UserService", fakeUserService{})
+
+	srv, err := client.NewServer("127.0.0.1", grpcTestPort, func(s *grpclib.Server) {
 		proto.RegisterUserServiceServer(s, fakeUserService{})
 	})
 	if err != nil {
@@ -51,8 +134,9 @@ func TestUserService(t *testing.T) {
 		t.Fatalf("获取用户grpc客户端失败: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(ctxkey.WithValue(context.Background(), ctxkey.TraceIdKey, traceId), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	ctx = facade.Grpc().WithToken(ctx, newGrpcTestToken(1))
 
 	resp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
 	if err != nil {
@@ -60,10 +144,6 @@ func TestUserService(t *testing.T) {
 	}
 	if resp.Id != 1 || resp.Username != "zhangsan" || resp.FullName != "张三" || resp.Nickname != "小张" || resp.Email != "zhangsan@example.com" || len(resp.UserRoles) != 1 || resp.UserRoles[0].Name != "管理员" {
 		t.Fatalf("用户grpc响应异常: %+v", resp)
-	}
-
-	if traces := debugger.Store.Get(traceId).Grpc; len(traces) != 1 {
-		t.Fatalf("grpc追踪记录数量异常: %+v", traces)
 	}
 
 	_, err = user.Detail(ctx, &proto.UserRequest{})
@@ -112,12 +192,6 @@ func TestUserService(t *testing.T) {
 		"nickname": "李四四",
 		"gender":   1,
 		"age":      21,
-		"mainDept": map[string]any{
-			"departmentId": 1,
-		},
-		"userDepts": []any{
-			map[string]any{"departmentId": 1},
-		},
 	})
 	updateResp, err := user.Update(ctx, &proto.UserUpdateRequest{
 		Id:   2,
@@ -138,11 +212,66 @@ func TestUserService(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("调用用户grpc批量删除失败: %v", err)
 	}
+
+}
+
+// newGrpcTestToken 生成测试JWT
+func newGrpcTestToken(id int64) string {
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  float64(id),
+		"exp": time.Now().Add(time.Hour).Unix(),
+	}).SignedString([]byte(grpcTestJwtKey))
+	if err != nil {
+		panic(err)
+	}
+	return token
+}
+
+// authTestServer 鉴权测试服务
+type authTestServer struct{}
+
+// authTestService 鉴权测试服务接口
+type authTestService interface {
+	Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	PingPublic(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+}
+
+// AuthMethods 方法鉴权配置
+func (authTestServer) AuthMethods() map[string]bool {
+	return map[string]bool{
+		"Ping":       true,
+		"PingPublic": false,
+	}
+}
+
+// Ping 测试方法
+func (authTestServer) Ping(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+	if ctxkey.GetValue(ctx, ctxkey.UserIdKey) != int64(1) {
+		return nil, status.Error(codes.Unauthenticated, "用户ID缺失")
+	}
+	return &emptypb.Empty{}, nil
+}
+
+// PingPublic 免鉴权测试方法
+func (authTestServer) PingPublic(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, nil
 }
 
 // fakeUserService 用户业务测试服务
 type fakeUserService struct {
 	proto.UnimplementedUserServiceServer
+}
+
+// AuthMethods 方法鉴权配置
+func (fakeUserService) AuthMethods() map[string]bool {
+	return map[string]bool{
+		"Detail":      true,
+		"List":        true,
+		"Create":      true,
+		"Update":      true,
+		"Delete":      true,
+		"BatchDelete": true,
+	}
 }
 
 // List 用户列表

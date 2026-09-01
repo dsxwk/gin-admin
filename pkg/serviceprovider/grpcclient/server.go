@@ -25,7 +25,7 @@ func NewServer(host string, port int, registrars ...ServiceRegistrar) (*Server, 
 	}
 
 	s := grpclib.NewServer(
-		grpclib.ChainUnaryInterceptor(unaryServerInterceptor),
+		grpclib.ChainUnaryInterceptor(authUnaryServerInterceptor, unaryServerInterceptor),
 	)
 	reflection.Register(s)
 	for _, register := range Registrars() {

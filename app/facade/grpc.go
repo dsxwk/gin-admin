@@ -1,6 +1,7 @@
 package facade
 
 import (
+	"context"
 	"fmt"
 	"gin/pkg/serviceprovider/grpcclient"
 
@@ -18,6 +19,11 @@ func Grpc() GrpcFacade {
 
 type GrpcFacade struct {
 	client *grpcclient.Client
+}
+
+// WithToken 在上下文中携带JWT
+func (g GrpcFacade) WithToken(ctx context.Context, token string) context.Context {
+	return grpcclient.WithToken(ctx, token)
 }
 
 // Client 获取grpc客户端

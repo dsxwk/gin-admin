@@ -60,6 +60,17 @@ func (s *Context) GetStartTime() string {
 	return getString(s.Ctx, ctxkey.StartTimeKey)
 }
 
+// GetUserId 获取当前用户ID
+func (s *Context) GetUserId() int64 {
+	if s.Ctx == nil {
+		return 0
+	}
+	if v, ok := s.Ctx.Value(ctxkey.UserIdKey).(int64); ok {
+		return v
+	}
+	return 0
+}
+
 // 防止panic
 func getString(c context.Context, key string) string {
 	if c == nil {

@@ -205,7 +205,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.0.0](version_history_zh.md#v300)
+> - 最新版本 [v3.0.1](version_history_zh.md#v301)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -829,12 +829,16 @@ $ go run -tags cli ./cmd grpc-make:service --table=user
 
 - `--path=grpc/service` 输出目录 (默认)
 - `--connection=mysql` 数据库连接
+- `--auth=true` 是否需要鉴权 (默认, `--auth=false` 关闭)
 
 grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。更新请求使用`google.protobuf.Struct`接收`data`,按需转成请求结构体做自定义校验,更新时只处理显式传入的字段,和controller的map更新方式一致。
 
 ## Go内部调用
 
+需要鉴权的grpc服务在服务类中实现`AuthMethods() map[string]bool`,按RPC方法名单独控制是否需要JWT,未配置的方法默认不鉴权。需要鉴权的方法服务端会校验JWT并将用户ID写入上下文。内部调用时通过`facade.Grpc().WithToken(ctx, token)`携带Token:
+
 ```go
+ctx := facade.Grpc().WithToken(ctx, token)
 user, err := facade.Grpc().Service(proto.NewUserServiceClient)
 if err != nil {
     return err
@@ -848,6 +852,7 @@ resp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
 
 - 服务地址: `grpc://127.0.0.1:50051`
 - 方法: `grpc.UserService/Detail`
+- 元数据: `authorization: Bearer <token>` (需要鉴权的服务)
 - 消息: `{"id": 1}`
 
 更新示例:

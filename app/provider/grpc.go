@@ -48,6 +48,7 @@ func (p *GrpcProvider) Boot(app serviceprovider.App) {
 		return
 	}
 
+	grpcclient.SetJwtKey(cfg.Jwt.Key)
 	srv, err := grpcclient.NewServer(cfg.Grpc.Host, cfg.Grpc.Port)
 	if err != nil {
 		flag.Errorf("grpc服务启动失败: %v", err)

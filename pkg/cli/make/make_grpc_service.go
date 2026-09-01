@@ -68,6 +68,15 @@ func (m *MakeGrpcService) Help() []base.CommandOption {
 			"数据库连接",
 			false,
 		},
+		{
+			base.Flag{
+				Short:   "a",
+				Long:    "auth",
+				Default: "true",
+			},
+			"是否需要鉴权, 默认true",
+			false,
+		},
 	}
 }
 
@@ -79,6 +88,7 @@ func (m *MakeGrpcService) Execute(values map[string]string) {
 	}
 
 	conn := values["connection"]
+	auth := m.StringToBool(values["auth"])
 	db := facade.DB(conn)
 	for _, table := range strings.Split(values["table"], ",") {
 		table = strings.TrimSpace(table)
@@ -86,12 +96,12 @@ func (m *MakeGrpcService) Execute(values map[string]string) {
 			continue
 		}
 		flag.Infof("开始生成grpc服务: %s", table)
-		m.generateService(db, table, outDir)
+		m.generateService(db, table, outDir, auth)
 	}
 }
 
 // generateService 根据表结构生成grpc服务
-func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string) {
+func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, auth bool) {
 	columns, err := GetColumnInfo(db, table)
 	if err != nil {
 		flag.Errorf("获取表字段失败: %s", err.Error())
@@ -138,6 +148,7 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string) {
 		ProtoFields         string
 		RequestCreateFields string
 		UpdateJsonFields    string
+		Auth                bool
 	}{
 		Package:             filepath.Base(outDir),
 		Name:                name,
@@ -147,6 +158,7 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string) {
 		ProtoFields:         buildGrpcModelProtoFields(fields, hasCreated, hasUpdated, lo.CamelCase(table)),
 		RequestCreateFields: buildGrpcRequestFields(fields, lo.CamelCase(table)),
 		UpdateJsonFields:    buildGrpcUpdateJsonFields(fields),
+		Auth:                auth,
 	}
 
 	file := filepath.Join(outDir, table+".go")
