@@ -26,6 +26,13 @@ var (
 	dbInstancesMu sync.RWMutex
 )
 
+const (
+	defaultMaxIdleConns    = 20
+	defaultMaxOpenConns    = 200
+	defaultConnMaxLifetime = 3 * time.Minute
+	defaultConnMaxIdleTime = 1 * time.Minute
+)
+
 // Connection 连接数据库
 func Connection(driver string, cfg *config.Config) *gorm.DB {
 	conf = cfg
@@ -72,10 +79,11 @@ func Connection(driver string, cfg *config.Config) *gorm.DB {
 	}
 
 	// 设置连接池参数(ConnMaxLifetime小于MySQLwait_timeout,避免僵尸连接)
-	sqlDB.SetMaxIdleConns(20)
-	sqlDB.SetMaxOpenConns(200)
-	sqlDB.SetConnMaxLifetime(3 * time.Minute)
-	sqlDB.SetConnMaxIdleTime(1 * time.Minute)
+	maxIdleConns, maxOpenConns, connMaxLifetime, connMaxIdleTime := connectionPoolSettings(cfg)
+	sqlDB.SetMaxIdleConns(maxIdleConns)
+	sqlDB.SetMaxOpenConns(maxOpenConns)
+	sqlDB.SetConnMaxLifetime(connMaxLifetime)
+	sqlDB.SetConnMaxIdleTime(connMaxIdleTime)
 
 	// 测试Ping
 	if err = sqlDB.Ping(); err != nil {
@@ -90,6 +98,32 @@ func Connection(driver string, cfg *config.Config) *gorm.DB {
 	dbInstances[driver] = db
 	dbInstancesMu.Unlock()
 	return db
+}
+
+// connectionPoolSettings 获取连接池参数,未配置时使用默认值
+func connectionPoolSettings(cfg *config.Config) (int, int, time.Duration, time.Duration) {
+	pool := cfg.Databases.Pool
+	maxIdleConns := pool.MaxIdleConns
+	if maxIdleConns <= 0 {
+		maxIdleConns = defaultMaxIdleConns
+	}
+
+	maxOpenConns := pool.MaxOpenConns
+	if maxOpenConns <= 0 {
+		maxOpenConns = defaultMaxOpenConns
+	}
+
+	connMaxLifetime := pool.ConnMaxLifetime
+	if connMaxLifetime <= 0 {
+		connMaxLifetime = defaultConnMaxLifetime
+	}
+
+	connMaxIdleTime := pool.ConnMaxIdleTime
+	if connMaxIdleTime <= 0 {
+		connMaxIdleTime = defaultConnMaxIdleTime
+	}
+
+	return maxIdleConns, maxOpenConns, connMaxLifetime, connMaxIdleTime
 }
 
 // ResetConnection 重置数据库连接,关闭旧连接并重建

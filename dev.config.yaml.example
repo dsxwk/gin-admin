@@ -15,6 +15,16 @@ databases:
   disable-soft-delete: true # 是否禁用软删除
   # 慢查询的时间,超过这个时间会记录到日志中
   slow-query-duration: 3s # 3秒(time.Duration)
+    # 连接池
+    pool:
+      # 最大空闲连接数
+      max-idle-conns: 20
+      # 最大打开连接数
+      max-open-conns: 200
+      # 连接最大存活时间
+      conn-max-lifetime: 3m
+      # 连接最大空闲时间
+      conn-max-idle-time: 1m
   # Mysql数据库
   mysql:
     driver: mysql
@@ -154,10 +164,6 @@ agent:
       api-key: ""
       base-url: "https://api.openai.com/v1"
       model: "gpt-4o"
-    moonshot:
-      api-key: ""
-      base-url: "https://api.moonshot.cn/v1"
-      model: "moonshot-v1-8k"
     custom:
       api-key: ""
       base-url: "http://localhost:11434/v1"

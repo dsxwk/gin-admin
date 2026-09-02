@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin/app/model"
 	"gin/common/base"
+	"sync"
 	"time"
 
 	"github.com/shirou/gopsutil/v4/cpu"
@@ -96,17 +97,25 @@ func (s *DashboardService) Cards() (cards []DashboardCard, err error) {
 
 // countCard 统计单个卡片 total=历史总量对比 today=今日创建数对比
 func (s *DashboardService) countCard(title string, m base.Model, mode string) DashboardCard {
-	var today, yesterday int64
+	var row struct {
+		Today     int64 `gorm:"column:today"`
+		Yesterday int64 `gorm:"column:yesterday"`
+	}
 	db := s.DB(m)
 
 	if mode == "today" {
-		db.Model(m).Where("created_at >= CURDATE()").Count(&today)
-		db.Model(m).Where("created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE()").Count(&yesterday)
+		db.Model(m).Select(`
+			COALESCE(SUM(CASE WHEN created_at >= CURDATE() THEN 1 ELSE 0 END),0) as today,
+			COALESCE(SUM(CASE WHEN created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE() THEN 1 ELSE 0 END),0) as yesterday
+		`).Scan(&row)
 	} else {
-		db.Model(m).Count(&today)
-		db.Model(m).Where("created_at < CURDATE()").Count(&yesterday)
+		db.Model(m).Select(`
+			COUNT(*) as today,
+			COALESCE(SUM(CASE WHEN created_at < CURDATE() THEN 1 ELSE 0 END),0) as yesterday
+		`).Scan(&row)
 	}
 
+	today, yesterday := row.Today, row.Yesterday
 	change := today - yesterday
 	var (
 		changePercent float64
@@ -174,59 +183,44 @@ func (s *DashboardService) Statistics() (stat OperatorLogStatistics, err error) 
 		Group("status_code").
 		Find(&stat.StatusCodeStats)
 
-	// 今日PV
-	db.Model(&m).
-		Where("created_at >= CURDATE()").
-		Count(&stat.Summary.TodayPV)
+	// 今日昨日PV/UV/平均耗时汇总
+	type SummaryRow struct {
+		TodayPV          int64   `gorm:"column:today_pv"`
+		YesterdayPV      int64   `gorm:"column:yesterday_pv"`
+		TodayUV          int64   `gorm:"column:today_uv"`
+		YesterdayUV      int64   `gorm:"column:yesterday_uv"`
+		AvgCost          float64 `gorm:"column:avg_cost"`
+		YesterdayAvgCost float64 `gorm:"column:yesterday_avg_cost"`
+	}
+	var summaryRow SummaryRow
+	db.Model(&m).Select(`
+		COALESCE(SUM(CASE WHEN created_at >= CURDATE() THEN 1 ELSE 0 END),0) as today_pv,
+		COALESCE(SUM(CASE WHEN created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE() THEN 1 ELSE 0 END),0) as yesterday_pv,
+		COUNT(DISTINCT CASE WHEN created_at >= CURDATE() AND user_id > 0 THEN user_id END) as today_uv,
+		COUNT(DISTINCT CASE WHEN created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE() AND user_id > 0 THEN user_id END) as yesterday_uv,
+		COALESCE(AVG(CASE WHEN created_at >= CURDATE() THEN cost_ms END),0) as avg_cost,
+		COALESCE(AVG(CASE WHEN created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE() THEN cost_ms END),0) as yesterday_avg_cost
+	`).Scan(&summaryRow)
 
-	// 昨日PV
-	db.Model(&m).
-		Where("created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE()").
-		Count(&stat.Summary.YesterdayPV)
+	stat.Summary.TodayPV = summaryRow.TodayPV
+	stat.Summary.YesterdayPV = summaryRow.YesterdayPV
+	stat.Summary.TodayUV = summaryRow.TodayUV
+	stat.Summary.YesterdayUV = summaryRow.YesterdayUV
+	stat.Summary.AvgCost = summaryRow.AvgCost
+	stat.Summary.YesterdayAvgCost = summaryRow.YesterdayAvgCost
 
 	// PV变化
 	if stat.Summary.YesterdayPV > 0 {
 		stat.Summary.PvChange = float64(stat.Summary.TodayPV-stat.Summary.YesterdayPV) / float64(stat.Summary.YesterdayPV) * 100
 	}
 
-	// 今日UV
-	db.Model(&m).
-		Select("COUNT(DISTINCT user_id)").
-		Where("created_at >= CURDATE() AND user_id > 0").
-		Scan(&stat.Summary.TodayUV)
-
-	// 昨日UV
-	db.Model(&m).
-		Select("COUNT(DISTINCT user_id)").
-		Where("created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE() AND user_id > 0").
-		Scan(&stat.Summary.YesterdayUV)
-
 	// UV变化
 	if stat.Summary.YesterdayUV > 0 {
 		stat.Summary.UvChange = float64(stat.Summary.TodayUV-stat.Summary.YesterdayUV) / float64(stat.Summary.YesterdayUV) * 100
 	}
 
-	// 今日平均响应时间
-	type AvgRow struct {
-		AvgCost float64 `gorm:"column:avg_cost"`
-	}
-	var avgRow AvgRow
-	db.Model(&m).
-		Select("COALESCE(AVG(cost_ms), 0) as avg_cost").
-		Where("created_at >= CURDATE()").
-		Scan(&avgRow)
-	stat.Summary.AvgCost = avgRow.AvgCost
-
-	// 昨日平均响应时间
-	var yesterdayAvg AvgRow
-	db.Model(&m).
-		Select("COALESCE(AVG(cost_ms), 0) as avg_cost").
-		Where("created_at >= CURDATE() - INTERVAL 1 DAY AND created_at < CURDATE()").
-		Scan(&yesterdayAvg)
-	stat.Summary.YesterdayAvgCost = yesterdayAvg.AvgCost
-
-	if yesterdayAvg.AvgCost > 0 {
-		stat.Summary.CostChange = stat.Summary.AvgCost - yesterdayAvg.AvgCost
+	if stat.Summary.YesterdayAvgCost > 0 {
+		stat.Summary.CostChange = stat.Summary.AvgCost - stat.Summary.YesterdayAvgCost
 	}
 
 	// 峰值时段
@@ -292,8 +286,22 @@ type SystemResource struct {
 	Net    NetInfo    `json:"net"`
 }
 
-// SystemResourceInfo 获取系统资源(按需采集)
+const systemResourceCacheTTL = time.Second
+
+var (
+	systemResourceCache SystemResource
+	systemResourceAt    time.Time
+	systemResourceMu    sync.Mutex
+)
+
+// SystemResourceInfo 获取系统资源(带短缓存)
 func SystemResourceInfo() SystemResource {
+	systemResourceMu.Lock()
+	defer systemResourceMu.Unlock()
+	if !systemResourceAt.IsZero() && time.Since(systemResourceAt) < systemResourceCacheTTL {
+		return systemResourceCache
+	}
+
 	var res SystemResource
 
 	// CPU使用率
@@ -322,6 +330,8 @@ func SystemResourceInfo() SystemResource {
 	res.Net.Total = "-"
 	res.Net.Available = "-"
 
+	systemResourceCache = res
+	systemResourceAt = time.Now()
 	return res
 }
 

@@ -1,9 +1,20 @@
 package orm
 
 import (
+	"reflect"
+	"sync"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
+
+type schemaConfigCache struct {
+	mu         sync.Mutex
+	cacheStore sync.Map
+	schemas    map[reflect.Type]*schema.Schema
+}
+
+var schemaCache sync.Map
 
 // Builder 查询构建器
 type Builder struct {
@@ -11,16 +22,58 @@ type Builder struct {
 	schema *schema.Schema
 }
 
+// getSchema 获取模型Schema(带缓存)
+func getSchema(db *gorm.DB, model any) (*schema.Schema, error) {
+	cfg := db.Config
+	actual, _ := schemaCache.LoadOrStore(cfg, &schemaConfigCache{
+		schemas: make(map[reflect.Type]*schema.Schema),
+	})
+	c := actual.(*schemaConfigCache)
+
+	modelType := reflect.TypeOf(model)
+	if modelType != nil {
+		for modelType.Kind() == reflect.Ptr || modelType.Kind() == reflect.Slice || modelType.Kind() == reflect.Array {
+			modelType = modelType.Elem()
+		}
+	}
+
+	if modelType != nil {
+		c.mu.Lock()
+		if s, ok := c.schemas[modelType]; ok {
+			c.mu.Unlock()
+			return s, nil
+		}
+		c.mu.Unlock()
+	}
+
+	s, err := schema.Parse(model, &c.cacheStore, db.NamingStrategy)
+	if err != nil {
+		return nil, err
+	}
+
+	if modelType != nil {
+		c.mu.Lock()
+		if existing, ok := c.schemas[modelType]; ok {
+			c.mu.Unlock()
+			return existing, nil
+		}
+		c.schemas[modelType] = s
+		c.mu.Unlock()
+	}
+
+	return s, nil
+}
+
 // New 创建查询构建器
 func New(db *gorm.DB, model any) (*Builder, error) {
-	stmt := &gorm.Statement{DB: db}
-	if err := stmt.Parse(model); err != nil {
+	s, err := getSchema(db, model)
+	if err != nil {
 		return nil, err
 	}
 
 	return &Builder{
 		db:     db.Model(model),
-		schema: stmt.Schema,
+		schema: s,
 	}, nil
 }
 
@@ -285,12 +338,16 @@ $.meta.icon
 
 // BuildCondition 构建查询条件
 func BuildCondition(db *gorm.DB, model any, search map[string]any) (string, []any, error) {
-	builder, err := New(db, model)
+	if len(search) == 0 {
+		return "", nil, nil
+	}
+
+	s, err := getSchema(db, model)
 	if err != nil {
 		return "", nil, err
 	}
 
-	return builder.Build(search)
+	return parse(s, search)
 }
 
 // ApplyCondition 应用查询条件
