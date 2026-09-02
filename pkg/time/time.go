@@ -136,21 +136,22 @@ func (c Time) EndOfMonth() Time {
 	return Time{t: firstNext.Add(-time.Nanosecond)}
 }
 
-// 格式转换
+var formatReplacer = strings.NewReplacer(
+	"Y", "2006",
+	"y", "06",
+	"m", "01",
+	"n", "1",
+	"d", "02",
+	"j", "2",
+	"H", "15",
+	"G", "15",
+	"h", "03",
+	"g", "3",
+	"i", "04",
+	"s", "05",
+)
+
+// convertFormat 格式转换
 func convertFormat(format string) string {
-	replacer := strings.NewReplacer(
-		"Y", "2006",
-		"y", "06",
-		"m", "01",
-		"n", "1",
-		"d", "02",
-		"j", "2",
-		"H", "15",
-		"G", "15",
-		"h", "03",
-		"g", "3",
-		"i", "04",
-		"s", "05",
-	)
-	return replacer.Replace(format)
+	return formatReplacer.Replace(format)
 }

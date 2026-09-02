@@ -21,16 +21,6 @@ func InArray[T comparable](val T, arr []T) bool {
 	return false
 }
 
-// InArrayFast 检查数组中是否存在某个值(高性能适合多次查找场景)
-func InArrayFast[T comparable](val T, arr []T) bool {
-	m := make(map[T]struct{}, len(arr))
-	for _, v := range arr {
-		m[v] = struct{}{}
-	}
-	_, ok := m[val]
-	return ok
-}
-
 // ArrayFilter 过滤切片,保留满足条件的元素
 func ArrayFilter[T any](arr []T, fn func(T) bool) []T {
 	res := make([]T, 0)
