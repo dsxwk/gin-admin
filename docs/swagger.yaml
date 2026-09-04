@@ -4,7 +4,7 @@ definitions:
       code:
         example: 400
         type: integer
-      data: { }
+      data: {}
       msg:
         example: Invalid arguments
         type: string
@@ -14,7 +14,7 @@ definitions:
       code:
         example: 0
         type: integer
-      data: { }
+      data: {}
       msg:
         example: Success
         type: string
@@ -24,7 +24,7 @@ definitions:
       code:
         example: 500
         type: integer
-      data: { }
+      data: {}
       msg:
         example: Internal server error
         type: string
@@ -116,7 +116,7 @@ definitions:
   model.Department:
     properties:
       children:
-        items: { }
+        items: {}
         type: array
       createdAt:
         type: string
@@ -155,7 +155,7 @@ definitions:
   model.Dict:
     properties:
       children:
-        items: { }
+        items: {}
         type: array
       createdAt:
         type: string
@@ -201,13 +201,13 @@ definitions:
     type: object
   model.JsonValue:
     properties:
-      data: { }
+      data: {}
     type: object
   model.Menu:
     properties:
       children:
         description: 子节点
-        items: { }
+        items: {}
         type: array
       createdAt:
         description: 创建时间
@@ -217,11 +217,11 @@ definitions:
         type: integer
       menuAction:
         allOf:
-          - $ref: '#/definitions/model.MenuActions'
+        - $ref: '#/definitions/model.MenuActions'
         description: 菜单功能
       meta:
         allOf:
-          - $ref: '#/definitions/model.MenuMeta'
+        - $ref: '#/definitions/model.MenuMeta'
         description: 菜单元数据
       name:
         description: 路由名称
@@ -561,7 +561,7 @@ definitions:
       sessionId:
         type: integer
     required:
-      - question
+    - question
     type: object
   request.ArticleCreate:
     properties:
@@ -573,13 +573,13 @@ definitions:
         type: integer
       isPublish:
         type: integer
-      tag: { }
+      tag: {}
       title:
         type: string
     required:
-      - content
-      - tag
-      - title
+    - content
+    - tag
+    - title
     type: object
   request.ArticleUpdate:
     properties:
@@ -591,13 +591,13 @@ definitions:
         type: integer
       isPublish:
         type: integer
-      tag: { }
+      tag: {}
       title:
         type: string
     required:
-      - content
-      - tag
-      - title
+    - content
+    - tag
+    - title
     type: object
   request.CheckCaptcha:
     properties:
@@ -606,22 +606,22 @@ definitions:
       code:
         type: string
     required:
-      - captchaId
-      - code
+    - captchaId
+    - code
     type: object
   request.ConfigCategoryCreate:
     properties:
       name:
         type: string
     required:
-      - name
+    - name
     type: object
   request.ConfigCategoryUpdate:
     properties:
       name:
         type: string
     required:
-      - name
+    - name
     type: object
   request.DepartmentCreate:
     properties:
@@ -634,7 +634,7 @@ definitions:
       status:
         type: integer
     required:
-      - name
+    - name
     type: object
   request.DepartmentUpdate:
     properties:
@@ -647,7 +647,7 @@ definitions:
       status:
         type: integer
     required:
-      - name
+    - name
     type: object
   request.Dept:
     properties:
@@ -658,7 +658,7 @@ definitions:
     properties:
       desc:
         type: string
-      extend: { }
+      extend: {}
       name:
         type: string
       pid:
@@ -672,15 +672,15 @@ definitions:
       value:
         type: string
     required:
-      - name
-      - title
-      - value
+    - name
+    - title
+    - value
     type: object
   request.DictUpdate:
     properties:
       desc:
         type: string
-      extend: { }
+      extend: {}
       name:
         type: string
       pid:
@@ -694,9 +694,9 @@ definitions:
       value:
         type: string
     required:
-      - name
-      - title
-      - value
+    - name
+    - title
+    - value
     type: object
   request.MenuCreate:
     properties:
@@ -721,7 +721,7 @@ definitions:
       type:
         type: integer
     required:
-      - name
+    - name
     type: object
   request.MenuUpdate:
     properties:
@@ -744,7 +744,7 @@ definitions:
       type:
         type: integer
     required:
-      - name
+    - name
     type: object
   request.Meta:
     properties:
@@ -773,18 +773,18 @@ definitions:
       transKey:
         type: string
     required:
-      - component
-      - icon
-      - path
-      - title
+    - component
+    - icon
+    - path
+    - title
     type: object
   request.OperatorLog:
     properties:
       __search:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       __sort:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       id:
         type: integer
@@ -801,7 +801,7 @@ definitions:
       pageSize:
         type: integer
     required:
-      - ids
+    - ids
     type: object
   request.PageData:
     properties:
@@ -851,7 +851,7 @@ definitions:
       roleId:
         type: integer
     required:
-      - name
+    - name
     type: object
   request.RolePermission:
     properties:
@@ -896,10 +896,10 @@ definitions:
       type:
         type: integer
     required:
-      - defaultValue
-      - key
-      - name
-      - optionValue
+    - defaultValue
+    - key
+    - name
+    - optionValue
     type: object
   request.SystemConfigUpdate:
     properties:
@@ -916,10 +916,10 @@ definitions:
       type:
         type: integer
     required:
-      - defaultValue
-      - key
-      - name
-      - optionValue
+    - defaultValue
+    - key
+    - name
+    - optionValue
     type: object
   request.SystemConfigUpdates:
     properties:
@@ -928,7 +928,7 @@ definitions:
           $ref: '#/definitions/request.SystemConfigValueUpdate'
         type: array
     required:
-      - list
+    - list
     type: object
   request.SystemConfigValueUpdate:
     properties:
@@ -946,7 +946,7 @@ definitions:
           type: integer
         type: array
     required:
-      - ids
+    - ids
     type: object
   request.UserCreate:
     properties:
@@ -967,12 +967,12 @@ definitions:
       username:
         type: string
     required:
-      - fullName
-      - mainDept
-      - nickname
-      - password
-      - userDepts
-      - username
+    - fullName
+    - mainDept
+    - nickname
+    - password
+    - userDepts
+    - username
     type: object
   request.UserImport:
     properties:
@@ -1000,9 +1000,9 @@ definitions:
       username:
         type: string
     required:
-      - fullName
-      - nickname
-      - password
+    - fullName
+    - nickname
+    - password
     type: object
   request.UserLogin:
     properties:
@@ -1017,17 +1017,17 @@ definitions:
         example: admin
         type: string
     required:
-      - captchaId
-      - code
-      - password
-      - username
+    - captchaId
+    - code
+    - password
+    - username
     type: object
   request.UserPassword:
     properties:
       password:
         type: string
     required:
-      - password
+    - password
     type: object
   request.UserRoles:
     properties:
@@ -1057,11 +1057,11 @@ definitions:
       username:
         type: string
     required:
-      - fullName
-      - mainDept
-      - nickname
-      - userDepts
-      - username
+    - fullName
+    - mainDept
+    - nickname
+    - userDepts
+    - username
     type: object
   service.CPUInfo:
     properties:
@@ -1245,43 +1245,43 @@ paths:
     get:
       description: 部门列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.Department'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Department'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1292,31 +1292,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 部门管理
+      - 部门管理
     post:
       description: 部门创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.DepartmentCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DepartmentCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Department'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Department'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1327,21 +1327,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 部门管理
+      - 部门管理
   /api/department/{id}:
     delete:
       description: 部门删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -1357,30 +1357,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 部门管理
+      - 部门管理
     get:
       description: 部门详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Department'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Department'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1391,26 +1391,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 部门管理
+      - 部门管理
     put:
       description: 部门更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.DepartmentUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DepartmentUpdate'
       responses:
         "200":
           description: 成功
@@ -1426,22 +1426,22 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 部门管理
+      - 部门管理
   /api/v1/agent/ask:
     post:
       description: AI Agent对话接口,自动调用MCP工具,数据持久化到数据库
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 对话参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.AgentAsk'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 对话参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.AgentAsk'
       responses:
         "200":
           description: 成功
@@ -1449,33 +1449,33 @@ paths:
             $ref: '#/definitions/errcode.SuccessResponse'
       summary: AI对话
       tags:
-        - AI助手
+      - AI助手
   /api/v1/agent/history:
     get:
       description: 获取指定会话的历史消息记录
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 会话ID
-          in: query
-          name: sessionId
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 会话ID
+        in: query
+        name: sessionId
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    items:
-                      $ref: '#/definitions/model.AgentMessage'
-                    type: array
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.AgentMessage'
+                  type: array
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1486,76 +1486,76 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 会话历史记录
       tags:
-        - AI助手
+      - AI助手
   /api/v1/agent/sessions:
     get:
       description: 获取当前用户的会话列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    items:
-                      $ref: '#/definitions/model.AgentSession'
-                    type: array
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.AgentSession'
+                  type: array
+              type: object
         "500":
           description: 系统错误
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 会话列表
       tags:
-        - AI助手
+      - AI助手
   /api/v1/article:
     get:
       description: 文章列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.Article'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Article'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1566,31 +1566,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 文章管理
+      - 文章管理
     post:
       description: 文章创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.ArticleCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ArticleCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Article'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Article'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1601,21 +1601,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 文章管理
+      - 文章管理
   /api/v1/article/{id}:
     delete:
       description: 文章删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -1631,30 +1631,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 文章管理
+      - 文章管理
     get:
       description: 文章详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Article'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Article'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1665,26 +1665,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 文章管理
+      - 文章管理
     put:
       description: 文章更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.ArticleUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ArticleUpdate'
       responses:
         "200":
           description: 成功
@@ -1700,98 +1700,98 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 文章管理
+      - 文章管理
   /api/v1/captcha:
     get:
       consumes:
-        - application/json
+      - application/json
       description: 获取验证码
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: 成功返回" Example({"code":0,"msg":"Success","data":[]})
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/v1.CaptchaResponse'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.CaptchaResponse'
+              type: object
         "500":
           description: 系统错误" Example({"code":500,"msg":"系统错误","data":[]})
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 获取验证码
       tags:
-        - 登录相关
+      - 登录相关
     post:
       description: 校验验证码
       parameters:
-        - description: 验证码校验参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.CheckCaptcha'
+      - description: 验证码校验参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CheckCaptcha'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/v1.Token'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.Token'
+              type: object
         "400":
           description: 参数错误
           schema:
             $ref: '#/definitions/errcode.ArgsErrorResponse'
       summary: 校验验证码
       tags:
-        - 登录相关
+      - 登录相关
   /api/v1/config-category:
     get:
       description: 配置分类列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.ConfigCategory'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.ConfigCategory'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1802,31 +1802,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 配置分类管理
+      - 配置分类管理
     post:
       description: 配置分类创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.ConfigCategoryCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ConfigCategoryCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.ConfigCategory'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ConfigCategory'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1837,21 +1837,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 配置分类管理
+      - 配置分类管理
   /api/v1/config-category/{id}:
     delete:
       description: 配置分类删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -1867,30 +1867,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 配置分类管理
+      - 配置分类管理
     get:
       description: 配置分类详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.ConfigCategory'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ConfigCategory'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -1901,26 +1901,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 配置分类管理
+      - 配置分类管理
     put:
       description: 配置分类更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.ConfigCategoryUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ConfigCategoryUpdate'
       responses:
         "200":
           description: 成功
@@ -1936,128 +1936,128 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 配置分类管理
+      - 配置分类管理
   /api/v1/dashboard/cards:
     get:
       description: 仪表盘卡片统计 用户数/角色数/菜单数/文章数/今日日志/字典项/系统配置/导入记录
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    items:
-                      $ref: '#/definitions/service.DashboardCard'
-                    type: array
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/service.DashboardCard'
+                  type: array
+              type: object
         "500":
           description: 系统错误
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 卡片统计
       tags:
-        - 仪表盘管理
+      - 仪表盘管理
   /api/v1/dashboard/statistics:
     get:
       description: 操作日志统计 方法统计/耗时分布/小时请求量/状态码/PV/UV/平均响应/峰值时段
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/service.OperatorLogStatistics'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.OperatorLogStatistics'
+              type: object
         "500":
           description: 系统错误
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 操作日志统计
       tags:
-        - 仪表盘管理
+      - 仪表盘管理
   /api/v1/dashboard/system-resource:
     get:
       description: 系统资源监控 CPU/内存/磁盘/带宽
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/service.SystemResource'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.SystemResource'
+              type: object
         "500":
           description: 系统错误
           schema:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 系统资源
       tags:
-        - 仪表盘管理
+      - 仪表盘管理
   /api/v1/dict:
     get:
       description: 字典列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.Dict'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Dict'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2068,31 +2068,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 字典管理
+      - 字典管理
     post:
       description: 字典创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.DictCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DictCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Dict'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Dict'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2103,21 +2103,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 字典管理
+      - 字典管理
   /api/v1/dict/{id}:
     delete:
       description: 字典删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -2133,30 +2133,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 字典管理
+      - 字典管理
     get:
       description: 字典详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Dict'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Dict'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2167,26 +2167,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 字典管理
+      - 字典管理
     put:
       description: 字典更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.DictUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DictUpdate'
       responses:
         "200":
           description: 成功
@@ -2202,48 +2202,48 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 字典管理
+      - 字典管理
   /api/v1/import-records:
     get:
       description: 导入记录
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.ImportRecords'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.ImportRecords'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2254,21 +2254,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 导入管理
+      - 导入管理
   /api/v1/import-records/{id}:
     delete:
       description: 记录删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -2284,31 +2284,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 导入管理
+      - 导入管理
   /api/v1/login:
     post:
       consumes:
-        - application/json
+      - application/json
       description: 用户账号密码登录
       parameters:
-        - description: 登录参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.UserLogin'
+      - description: 登录参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserLogin'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/v1.LoginResponse'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.LoginResponse'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2319,43 +2319,43 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 账号密码登录
       tags:
-        - 登录相关
+      - 登录相关
   /api/v1/menu:
     get:
       description: 菜单列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.Menu'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Menu'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2366,31 +2366,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 菜单管理
+      - 菜单管理
     post:
       description: 创建菜单
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.MenuCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.MenuCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/request.MenuCreate'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/request.MenuCreate'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2401,21 +2401,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建菜单
       tags:
-        - 菜单管理
+      - 菜单管理
   /api/v1/menu/{id}:
     delete:
       description: 菜单删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 菜单ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -2431,30 +2431,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 菜单删除
       tags:
-        - 菜单管理
+      - 菜单管理
     get:
       description: 菜单详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 菜单ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.User'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2465,26 +2465,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 菜单管理
+      - 菜单管理
     put:
       description: 更新菜单
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 菜单ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.MenuUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.MenuUpdate'
       responses:
         "200":
           description: 成功
@@ -2500,52 +2500,52 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建菜单
       tags:
-        - 菜单管理
+      - 菜单管理
   /api/v1/operator-log:
     get:
       description: 操作日志列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
-        - description: 搜索条件(JSON)
-          in: query
-          name: __search
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
+      - description: 搜索条件(JSON)
+        in: query
+        name: __search
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.OperatorLog'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.OperatorLog'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2556,21 +2556,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 操作日志管理
+      - 操作日志管理
   /api/v1/operator-log/{id}:
     delete:
       description: 操作日志删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -2586,30 +2586,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 操作日志管理
+      - 操作日志管理
     get:
       description: 操作日志详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.OperatorLog'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.OperatorLog'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2620,22 +2620,22 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 操作日志管理
+      - 操作日志管理
   /api/v1/operator-log/batch-delete:
     post:
       description: 操作日志批量删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 批量删除参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.OperatorLog'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 批量删除参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.OperatorLog'
       responses:
         "200":
           description: 成功
@@ -2651,48 +2651,48 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 批量删除
       tags:
-        - 操作日志管理
+      - 操作日志管理
   /api/v1/permission:
     get:
       description: 用户列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.Permission'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Permission'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2703,30 +2703,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 用户管理
+      - 用户管理
   /api/v1/refresh-token:
     post:
       consumes:
-        - application/json
+      - application/json
       description: 刷新token
       parameters:
-        - description: 刷新Token
-          in: header
-          name: token
-          required: true
-          type: string
+      - description: 刷新Token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/v1.Token'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.Token'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2737,48 +2737,48 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 刷新token
       tags:
-        - 登录相关
+      - 登录相关
   /api/v1/role:
     get:
       description: 角色列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.Roles'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.Roles'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2789,31 +2789,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 角色管理
+      - 角色管理
     post:
       description: 角色创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.RoleCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.RoleCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Roles'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Roles'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2824,21 +2824,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 角色管理
+      - 角色管理
   /api/v1/role/{id}:
     delete:
       description: 角色删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 角色ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -2854,30 +2854,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 角色管理
+      - 角色管理
     get:
       description: 角色详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 角色ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.Roles'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Roles'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2888,26 +2888,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 角色管理
+      - 角色管理
     put:
       description: 角色更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 角色ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.RoleUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.RoleUpdate'
       responses:
         "200":
           description: 成功
@@ -2923,32 +2923,32 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 角色管理
+      - 角色管理
   /api/v1/role/{id}/menu:
     get:
       description: 角色菜单
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 角色ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    items: { }
-                    type: array
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  items: {}
+                  type: array
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -2959,48 +2959,48 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 角色菜单
       tags:
-        - 菜单管理
+      - 菜单管理
   /api/v1/system-config:
     get:
       description: 系统配置列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
-        - description: 是否不分页
-          in: query
-          name: notPage
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      - description: 是否不分页
+        in: query
+        name: notPage
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.SystemConfig'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.SystemConfig'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3011,31 +3011,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 系统配置管理
+      - 系统配置管理
     post:
       description: 系统配置创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.SystemConfigCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemConfigCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.SystemConfig'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SystemConfig'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3046,21 +3046,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 系统配置管理
+      - 系统配置管理
   /api/v1/system-config/{id}:
     delete:
       description: 系统配置删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -3076,30 +3076,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 系统配置管理
+      - 系统配置管理
     get:
       description: 系统配置详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.SystemConfig'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SystemConfig'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3110,26 +3110,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 系统配置管理
+      - 系统配置管理
     put:
       description: 系统配置更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.SystemConfigUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemConfigUpdate'
       responses:
         "200":
           description: 成功
@@ -3145,64 +3145,64 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 系统配置管理
+      - 系统配置管理
   /api/v1/test:
     post:
       consumes:
-        - application/json
+      - application/json
       description: 测试
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    additionalProperties: { }
-                    type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  additionalProperties: {}
+                  type: object
+              type: object
       summary: 测试
       tags:
-        - 登录相关
+      - 登录相关
   /api/v1/user:
     get:
       description: 用户列表
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 页码
-          in: query
-          name: page
-          required: true
-          type: string
-        - description: 分页大小
-          in: query
-          name: pageSize
-          required: true
-          type: string
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: string
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    allOf:
-                      - $ref: '#/definitions/request.PageData'
-                      - properties:
-                          list:
-                            items:
-                              $ref: '#/definitions/model.User'
-                            type: array
-                        type: object
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/request.PageData'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.User'
+                        type: array
+                    type: object
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3213,31 +3213,31 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 列表
       tags:
-        - 用户管理
+      - 用户管理
     post:
       description: 用户创建
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 创建参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.UserCreate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 创建参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserCreate'
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.User'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3248,21 +3248,21 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 创建
       tags:
-        - 用户管理
+      - 用户管理
   /api/v1/user/{id}:
     delete:
       description: 用户删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 用户ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
@@ -3278,30 +3278,30 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 删除
       tags:
-        - 用户管理
+      - 用户管理
     get:
       description: 用户详情
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 用户ID
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             allOf:
-              - $ref: '#/definitions/errcode.SuccessResponse'
-              - properties:
-                  data:
-                    $ref: '#/definitions/model.User'
-                type: object
+            - $ref: '#/definitions/errcode.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
         "400":
           description: 参数错误
           schema:
@@ -3312,26 +3312,26 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 详情
       tags:
-        - 用户管理
+      - 用户管理
     put:
       description: 用户更新
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 用户ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.UserUpdate'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserUpdate'
       responses:
         "200":
           description: 成功
@@ -3347,27 +3347,27 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新
       tags:
-        - 用户管理
+      - 用户管理
   /api/v1/user/{id}/password:
     put:
       description: 更新密码
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 用户ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: 更新参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.UserPassword'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserPassword'
       responses:
         "200":
           description: 成功
@@ -3383,22 +3383,22 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 更新密码
       tags:
-        - 用户管理
+      - 用户管理
   /api/v1/user/batch-delete:
     post:
       description: 用户批量删除
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 批量删除参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.UserBatchDelete'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 批量删除参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserBatchDelete'
       responses:
         "200":
           description: 成功
@@ -3414,22 +3414,22 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 批量删除
       tags:
-        - 用户管理
+      - 用户管理
   /api/v1/user/import:
     post:
       description: 批量导入用户
       parameters:
-        - description: 认证Token
-          in: header
-          name: token
-          required: true
-          type: string
-        - description: 导入参数
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/request.UserImport'
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 导入参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserImport'
       responses:
         "200":
           description: 成功
@@ -3445,5 +3445,5 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 批量导入
       tags:
-        - 用户管理
+      - 用户管理
 swagger: "2.0"

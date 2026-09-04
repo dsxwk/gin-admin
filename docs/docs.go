@@ -4713,11 +4713,11 @@ const docTemplate = `{
             "properties": {
                 "__search": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "__sort": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "id": {
                     "type": "integer"
