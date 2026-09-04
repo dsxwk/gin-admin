@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 28/08/2026 15:13:08
+ Date: 04/09/2026 14:16:37
 */
 
 SET NAMES utf8mb4;
@@ -38,7 +38,7 @@ CREATE TABLE `agent_message`  (
   INDEX `idx_session_id`(`session_id`) USING BTREE,
   INDEX `idx_tool_call_id`(`tool_call_id`) USING BTREE,
   INDEX `idx_created_at`(`created_at`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI消息详情表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI消息详情表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of agent_message
@@ -96,7 +96,7 @@ CREATE TABLE `agent_session`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_created_at`(`created_at`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI会话主表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI会话主表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of agent_session
@@ -144,7 +144,7 @@ CREATE TABLE `category`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
@@ -460,7 +460,7 @@ CREATE TABLE `migrations`  (
   `created_at` datetime(3) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `migration`(`migration`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of migrations
@@ -489,7 +489,7 @@ CREATE TABLE `operator_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_trace_id`(`trace_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 56 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of operator_log
@@ -519,6 +519,36 @@ INSERT INTO `operator_log` VALUES (22, '127.0.0.1', 'GET', '/api/v1/role', 'zh',
 INSERT INTO `operator_log` VALUES (23, '127.0.0.1', 'GET', '/api/v1/role', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"10\"}', 1, '1f78d107-31be-46fd-9880-b7515b22e545', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36', 34.0000, '2026-08-04 16:28:09', '2026-08-04 16:28:09', NULL);
 INSERT INTO `operator_log` VALUES (24, '127.0.0.1', 'POST', '/api/v1/user', 'zh', '{\"age\": 30, \"email\": \"test321@qq.com\", \"avatar\": \"\", \"gender\": 1, \"status\": 1, \"fullName\": \"测试321\", \"nickname\": \"测试321\", \"password\": \"123456\", \"username\": \"测试321\", \"userRoles\": [{\"name\": \"test\", \"roleId\": 2, \"userId\": 0}]}', 1, 'bd1a589e-a21a-4168-a953-f86622c1a036', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36', 168.0000, '2026-08-04 16:28:39', '2026-08-04 16:28:39', NULL);
 INSERT INTO `operator_log` VALUES (25, '127.0.0.1', 'GET', '/api/v1/user', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, 'fa7263d3-0b85-4bbf-88b1-06972036b36c', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36 Edg/100.0.1185.36', 27.0000, '2026-08-04 16:28:39', '2026-08-04 16:28:39', NULL);
+INSERT INTO `operator_log` VALUES (26, '127.0.0.1', 'GET', '/api/v1/captcha', 'zh', '{}', 0, 'adec937d-573f-4e13-b4ea-2f91e8db5a31', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 2.0000, '2026-09-02 14:39:58', '2026-09-02 14:39:58', NULL);
+INSERT INTO `operator_log` VALUES (27, '127.0.0.1', 'POST', '/api/v1/login', 'zh', '{\"code\": \"\", \"password\": \"123456\", \"username\": \"admin\", \"captchaId\": \"6Vd717N7xAeFqx6rJvB2\", \"captchaImage\": \"data:image/png;base64,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\"}', 0, '5b5c87c6-001f-4d29-bd06-ec85a00954ce', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 63.0000, '2026-09-02 14:40:00', '2026-09-02 14:40:00', NULL);
+INSERT INTO `operator_log` VALUES (28, '127.0.0.1', 'GET', '/api/v1/role/1/menu', 'zh', '{}', 1, 'e40a5941-ac2b-4058-9652-ecd8336df7bf', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 133.0000, '2026-09-02 14:40:01', '2026-09-02 14:40:01', NULL);
+INSERT INTO `operator_log` VALUES (29, '127.0.0.1', 'GET', '/api/v1/dashboard/statistics', 'zh', '{}', 1, '03cffbc3-6d5a-488c-98b5-7f529b11b605', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 24.0000, '2026-09-02 14:40:01', '2026-09-02 14:40:01', NULL);
+INSERT INTO `operator_log` VALUES (30, '127.0.0.1', 'GET', '/api/v1/operator-log', 'zh', '{\"page\": \"1\", \"pageSize\": \"7\"}', 1, 'c9cefff4-67f9-4ad3-a52f-f0db36db9c10', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 30.0000, '2026-09-02 14:40:01', '2026-09-02 14:40:01', NULL);
+INSERT INTO `operator_log` VALUES (31, '127.0.0.1', 'GET', '/api/v1/dashboard/cards', 'zh', '{}', 1, 'b14af54b-c083-4dae-8bdc-b69af50cde21', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 38.0000, '2026-09-02 14:40:01', '2026-09-02 14:40:01', NULL);
+INSERT INTO `operator_log` VALUES (32, '127.0.0.1', 'GET', '/api/v1/dashboard/system-resource', 'zh', '{}', 1, '6b96144e-9d6f-496d-a341-b416980d3263', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 48.0000, '2026-09-02 14:40:01', '2026-09-02 14:40:01', NULL);
+INSERT INTO `operator_log` VALUES (33, '127.0.0.1', 'GET', '/api/v1/role/1/menu', 'zh', '{}', 1, 'b0750e35-bc3d-4b98-9f7a-e196cc061483', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 14.0000, '2026-09-02 14:40:10', '2026-09-02 14:40:10', NULL);
+INSERT INTO `operator_log` VALUES (34, '127.0.0.1', 'GET', '/api/v1/operator-log', 'zh', '{\"page\": \"1\", \"pageSize\": \"7\"}', 1, '31fef693-ec02-4b5d-9d6d-490ec6cbff3e', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 14.0000, '2026-09-02 14:40:10', '2026-09-02 14:40:10', NULL);
+INSERT INTO `operator_log` VALUES (35, '127.0.0.1', 'GET', '/api/v1/dashboard/cards', 'zh', '{}', 1, 'b49d0e93-6dd5-4338-8b72-f94b3104feec', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 23.0000, '2026-09-02 14:40:10', '2026-09-02 14:40:10', NULL);
+INSERT INTO `operator_log` VALUES (36, '127.0.0.1', 'GET', '/api/v1/dashboard/statistics', 'zh', '{}', 1, '82e21f2c-af2d-45f7-81d2-e79f89882f6c', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 35.0000, '2026-09-02 14:40:10', '2026-09-02 14:40:10', NULL);
+INSERT INTO `operator_log` VALUES (37, '127.0.0.1', 'GET', '/api/v1/dashboard/system-resource', 'zh', '{}', 1, 'dad994ca-b14d-4805-952d-ecac362e3969', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 44.0000, '2026-09-02 14:40:10', '2026-09-02 14:40:10', NULL);
+INSERT INTO `operator_log` VALUES (38, '127.0.0.1', 'GET', '/api/v1/department', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"100\"}', 1, 'b09d9ae2-b8ed-413d-a2bd-7a6c6e327f11', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 6.0000, '2026-09-02 14:40:16', '2026-09-02 14:40:16', NULL);
+INSERT INTO `operator_log` VALUES (39, '127.0.0.1', 'GET', '/api/v1/menu', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"10\"}', 1, '22df9ed9-5302-47c3-b34a-8c5b82b1ccb3', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 7.0000, '2026-09-02 14:40:27', '2026-09-02 14:40:27', NULL);
+INSERT INTO `operator_log` VALUES (40, '127.0.0.1', 'GET', '/api/v1/role', 'zh', '{\"page\": \"1\", \"notPage\": \"false\", \"pageSize\": \"10\"}', 1, 'b53b09b4-e002-4f3c-8754-ec8a2113dab1', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 10.0000, '2026-09-02 14:40:28', '2026-09-02 14:40:28', NULL);
+INSERT INTO `operator_log` VALUES (41, '127.0.0.1', 'GET', '/api/v1/user', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '20108d71-e08b-458a-afca-3da695006e92', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 6.0000, '2026-09-02 14:40:34', '2026-09-02 14:40:34', NULL);
+INSERT INTO `operator_log` VALUES (42, '127.0.0.1', 'GET', '/api/v1/role', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '2b901ab4-faa9-4ebb-b238-98f6467d7204', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 4.0000, '2026-09-02 14:40:38', '2026-09-02 14:40:38', NULL);
+INSERT INTO `operator_log` VALUES (43, '127.0.0.1', 'GET', '/api/v1/dict', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"10\"}', 1, 'a88b8c2d-39c6-477d-b13a-d206560f9b30', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 2.0000, '2026-09-02 14:40:40', '2026-09-02 14:40:40', NULL);
+INSERT INTO `operator_log` VALUES (44, '127.0.0.1', 'GET', '/api/v1/config-category', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '9d2a3b9e-0d10-444b-8b40-5bec1251a619', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 2.0000, '2026-09-02 14:40:43', '2026-09-02 14:40:43', NULL);
+INSERT INTO `operator_log` VALUES (45, '127.0.0.1', 'GET', '/api/v1/config-category', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"100\"}', 1, 'b407a90c-6568-4e28-bbc6-d729f8614552', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 2.0000, '2026-09-02 14:40:44', '2026-09-02 14:40:44', NULL);
+INSERT INTO `operator_log` VALUES (46, '127.0.0.1', 'GET', '/api/v1/system-config', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, 'a8e0d098-e9b9-46be-b145-1dcd806c4e02', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 3.0000, '2026-09-02 14:40:44', '2026-09-02 14:40:44', NULL);
+INSERT INTO `operator_log` VALUES (47, '127.0.0.1', 'GET', '/api/v1/system-config', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"100\"}', 1, 'c303a4f3-74db-4fff-86d6-708d3b9cfc59', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 3.0000, '2026-09-02 14:40:45', '2026-09-02 14:40:45', NULL);
+INSERT INTO `operator_log` VALUES (48, '127.0.0.1', 'GET', '/api/v1/article', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '00ed7642-3c6f-43f2-b9d1-f6cb603e6250', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 3.0000, '2026-09-02 14:40:47', '2026-09-02 14:40:47', NULL);
+INSERT INTO `operator_log` VALUES (49, '127.0.0.1', 'GET', '/api/v1/operator-log', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '49c6c6f9-d54c-4d03-8027-2cc353d33914', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 2.0000, '2026-09-02 14:40:49', '2026-09-02 14:40:49', NULL);
+INSERT INTO `operator_log` VALUES (50, '127.0.0.1', 'GET', '/api/v1/role', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '08c4854d-2530-49be-b7ad-7dd163ba28e5', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 4.0000, '2026-09-02 14:41:01', '2026-09-02 14:41:01', NULL);
+INSERT INTO `operator_log` VALUES (51, '127.0.0.1', 'GET', '/api/v1/menu', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"10\"}', 1, '3bd44a6e-eb6b-4fec-9727-43ffbc49fca8', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 8.0000, '2026-09-02 14:41:04', '2026-09-02 14:41:04', NULL);
+INSERT INTO `operator_log` VALUES (52, '127.0.0.1', 'GET', '/api/v1/permission', 'zh', '{\"page\": \"1\", \"notPage\": \"true\", \"pageSize\": \"100\"}', 1, 'f1a159c9-eed5-4abf-9851-c565d6fee02b', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 3.0000, '2026-09-02 14:41:04', '2026-09-02 14:41:04', NULL);
+INSERT INTO `operator_log` VALUES (53, '127.0.0.1', 'GET', '/api/v1/role/1', 'zh', '{}', 1, '93a7e0a3-3ecd-48f9-8750-ff4491de111c', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 126.0000, '2026-09-02 14:41:04', '2026-09-02 14:41:04', NULL);
+INSERT INTO `operator_log` VALUES (54, '127.0.0.1', 'PUT', '/api/v1/role/1', 'zh', '{\"id\": 1, \"desc\": \"超级管理员\", \"name\": \"admin\", \"status\": 1, \"roleMenus\": [{\"name\": \"admin\", \"menuId\": 72, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 1, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 2, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 67, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 68, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 69, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 70, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 71, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 3, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 58, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 24, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 25, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 27, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 4, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 54, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 56, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 61, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 62, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 32, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 33, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 34, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 60, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 35, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 5, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 37, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 38, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 39, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 6, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 40, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 41, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 59, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 42, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 20, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 23, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 52, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 53, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 51, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 21, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 48, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 49, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 50, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 22, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 10, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 44, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 43, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 45, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 63, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 66, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 64, \"roleId\": 1}, {\"name\": \"admin\", \"menuId\": 65, \"roleId\": 1}], \"userRoles\": [{\"name\": \"admin\", \"roleId\": 1, \"userId\": 1}, {\"name\": \"admin\", \"roleId\": 1, \"userId\": 10}], \"rolePermissions\": [{\"roleId\": 1, \"permissionId\": 1}, {\"roleId\": 1, \"permissionId\": 3}, {\"roleId\": 1, \"permissionId\": 38}, {\"roleId\": 1, \"permissionId\": 19}, {\"roleId\": 1, \"permissionId\": 8}, {\"roleId\": 1, \"permissionId\": 6}, {\"roleId\": 1, \"permissionId\": 15}, {\"roleId\": 1, \"permissionId\": 39}, {\"roleId\": 1, \"permissionId\": 20}, {\"roleId\": 1, \"permissionId\": 17}, {\"roleId\": 1, \"permissionId\": 12}, {\"roleId\": 1, \"permissionId\": 16}, {\"roleId\": 1, \"permissionId\": 18}, {\"roleId\": 1, \"permissionId\": 21}, {\"roleId\": 1, \"permissionId\": 10}, {\"roleId\": 1, \"permissionId\": 28}, {\"roleId\": 1, \"permissionId\": 40}, {\"roleId\": 1, \"permissionId\": 2}, {\"roleId\": 1, \"permissionId\": 23}, {\"roleId\": 1, \"permissionId\": 9}, {\"roleId\": 1, \"permissionId\": 33}, {\"roleId\": 1, \"permissionId\": 25}, {\"roleId\": 1, \"permissionId\": 43}, {\"roleId\": 1, \"permissionId\": 42}, {\"roleId\": 1, \"permissionId\": 24}, {\"roleId\": 1, \"permissionId\": 31}, {\"roleId\": 1, \"permissionId\": 32}, {\"roleId\": 1, \"permissionId\": 34}, {\"roleId\": 1, \"permissionId\": 35}, {\"roleId\": 1, \"permissionId\": 26}, {\"roleId\": 1, \"permissionId\": 7}, {\"roleId\": 1, \"permissionId\": 4}, {\"roleId\": 1, \"permissionId\": 11}, {\"roleId\": 1, \"permissionId\": 27}, {\"roleId\": 1, \"permissionId\": 37}, {\"roleId\": 1, \"permissionId\": 13}, {\"roleId\": 1, \"permissionId\": 29}, {\"roleId\": 1, \"permissionId\": 41}, {\"roleId\": 1, \"permissionId\": 14}, {\"roleId\": 1, \"permissionId\": 30}, {\"roleId\": 1, \"permissionId\": 5}, {\"roleId\": 1, \"permissionId\": 36}, {\"roleId\": 1, \"permissionId\": 22}, {\"roleId\": 1, \"permissionId\": 73}, {\"roleId\": 1, \"permissionId\": 68}, {\"roleId\": 1, \"permissionId\": 74}, {\"roleId\": 1, \"permissionId\": 77}, {\"roleId\": 1, \"permissionId\": 70}, {\"roleId\": 1, \"permissionId\": 71}, {\"roleId\": 1, \"permissionId\": 64}, {\"roleId\": 1, \"permissionId\": 75}, {\"roleId\": 1, \"permissionId\": 76}, {\"roleId\": 1, \"permissionId\": 69}, {\"roleId\": 1, \"permissionId\": 72}, {\"roleId\": 1, \"permissionId\": 65}, {\"roleId\": 1, \"permissionId\": 67}, {\"roleId\": 1, \"permissionId\": 78}, {\"roleId\": 1, \"permissionId\": 66}]}', 1, '8c48a3c4-5e21-4bf9-89b9-eb78b9bc115f', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 130.0000, '2026-09-02 14:42:27', '2026-09-02 14:42:27', NULL);
+INSERT INTO `operator_log` VALUES (55, '127.0.0.1', 'GET', '/api/v1/role', 'zh', '{\"page\": \"1\", \"pageSize\": \"10\"}', 1, '5bbb0706-88a0-4bb5-be29-df4d5487df5b', 200, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36', 9.0000, '2026-09-02 14:42:27', '2026-09-02 14:42:27', NULL);
 
 -- ----------------------------
 -- Table structure for permission
@@ -535,7 +565,7 @@ CREATE TABLE `permission`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_key`(`key`) USING BTREE,
   INDEX `idx_key`(`key`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 64 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 79 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of permission
@@ -583,21 +613,21 @@ INSERT INTO `permission` VALUES (40, 'DELETE:/api/v1/import-records/:id', 'DELET
 INSERT INTO `permission` VALUES (41, 'DELETE:/api/v1/user/:id', 'DELETE', '/api/v1/user/:id', '2026-07-21 12:39:57', '2026-07-21 12:39:57', NULL);
 INSERT INTO `permission` VALUES (42, 'GET:/api/v1/role', 'GET', '/api/v1/role', '2026-07-21 12:39:57', '2026-07-21 12:39:57', NULL);
 INSERT INTO `permission` VALUES (43, 'GET:/api/v1/permission', 'GET', '/api/v1/permission', '2026-07-21 13:33:14', '2026-07-21 13:33:14', NULL);
-INSERT INTO `permission` VALUES (44, 'GET:/api/v1/operator-log/:id', 'GET', '/api/v1/operator-log/:id', '2026-07-27 11:01:52', '2026-07-27 11:01:52', NULL);
-INSERT INTO `permission` VALUES (45, 'POST:/api/v1/operator-log/batch-delete', 'POST', '/api/v1/operator-log/batch-delete', '2026-07-27 11:01:52', '2026-07-27 11:01:52', NULL);
-INSERT INTO `permission` VALUES (46, 'GET:/api/v1/operator-log', 'GET', '/api/v1/operator-log', '2026-07-27 11:01:52', '2026-07-27 11:01:52', NULL);
-INSERT INTO `permission` VALUES (47, 'DELETE:/api/v1/operator-log/:id', 'DELETE', '/api/v1/operator-log/:id', '2026-07-27 11:01:52', '2026-07-27 11:01:52', NULL);
-INSERT INTO `permission` VALUES (52, 'GET:/api/v1/dashboard/statistics', 'GET', '/api/v1/dashboard/statistics', '2026-08-04 16:04:29', '2026-08-04 16:04:29', NULL);
-INSERT INTO `permission` VALUES (53, 'GET:/api/v1/dashboard/system-resource', 'GET', '/api/v1/dashboard/system-resource', '2026-08-04 16:04:29', '2026-08-04 16:04:29', NULL);
-INSERT INTO `permission` VALUES (54, 'GET:/api/v1/dashboard/cards', 'GET', '/api/v1/dashboard/cards', '2026-08-04 16:04:29', '2026-08-04 16:04:29', NULL);
-INSERT INTO `permission` VALUES (55, 'POST:/api/v1/department', 'POST', '/api/v1/department', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
-INSERT INTO `permission` VALUES (56, 'PUT:/api/v1/department/:id', 'PUT', '/api/v1/department/:id', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
-INSERT INTO `permission` VALUES (57, 'GET:/api/v1/department/:id', 'GET', '/api/v1/department/:id', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
-INSERT INTO `permission` VALUES (58, 'DELETE:/api/v1/department/:id', 'DELETE', '/api/v1/department/:id', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
-INSERT INTO `permission` VALUES (59, 'GET:/api/v1/department', 'GET', '/api/v1/department', '2026-08-06 15:07:45', '2026-08-06 15:07:45', NULL);
-INSERT INTO `permission` VALUES (60, 'POST:/api/v1/agent/ask', 'POST', '/api/v1/agent/ask', '2026-08-12 15:04:41', '2026-08-12 15:04:41', NULL);
-INSERT INTO `permission` VALUES (62, 'GET:/api/v1/agent/history', 'GET', '/api/v1/agent/history', '2026-08-13 10:10:15', '2026-08-13 10:10:15', NULL);
-INSERT INTO `permission` VALUES (63, 'GET:/api/v1/agent/sessions', 'GET', '/api/v1/agent/sessions', '2026-08-13 10:23:51', '2026-08-13 10:23:51', NULL);
+INSERT INTO `permission` VALUES (64, 'POST:/api/v1/department', 'POST', '/api/v1/department', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (65, 'GET:/api/v1/dashboard/cards', 'GET', '/api/v1/dashboard/cards', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (66, 'POST:/api/v1/agent/ask', 'POST', '/api/v1/agent/ask', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (67, 'GET:/api/v1/agent/sessions', 'GET', '/api/v1/agent/sessions', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (68, 'DELETE:/api/v1/operator-log/:id', 'DELETE', '/api/v1/operator-log/:id', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (69, 'GET:/api/v1/dashboard/system-resource', 'GET', '/api/v1/dashboard/system-resource', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (70, 'PUT:/api/v1/department/:id', 'PUT', '/api/v1/department/:id', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (71, 'DELETE:/api/v1/department/:id', 'DELETE', '/api/v1/department/:id', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (72, 'GET:/api/v1/dashboard/statistics', 'GET', '/api/v1/dashboard/statistics', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (73, 'GET:/api/v1/operator-log', 'GET', '/api/v1/operator-log', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (74, 'GET:/api/v1/operator-log/:id', 'GET', '/api/v1/operator-log/:id', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (75, 'GET:/api/v1/department/:id', 'GET', '/api/v1/department/:id', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (76, 'GET:/api/v1/department', 'GET', '/api/v1/department', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (77, 'POST:/api/v1/operator-log/batch-delete', 'POST', '/api/v1/operator-log/batch-delete', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
+INSERT INTO `permission` VALUES (78, 'GET:/api/v1/agent/history', 'GET', '/api/v1/agent/history', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
 
 -- ----------------------------
 -- Table structure for role_menus
@@ -613,7 +643,7 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 868 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 918 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
@@ -623,56 +653,56 @@ INSERT INTO `role_menus` VALUES (304, 2, 27, 'test', '2026-07-20 14:19:04', '202
 INSERT INTO `role_menus` VALUES (305, 2, 2, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `role_menus` VALUES (306, 2, 3, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `role_menus` VALUES (666, 2, 1, 'test', '2026-08-04 17:15:38', '2026-08-04 17:15:38', NULL);
-INSERT INTO `role_menus` VALUES (818, 1, 1, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (819, 1, 2, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (820, 1, 67, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (821, 1, 68, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (822, 1, 69, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (823, 1, 70, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (824, 1, 71, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (825, 1, 3, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (826, 1, 58, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (827, 1, 24, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (828, 1, 25, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (829, 1, 27, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (830, 1, 4, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (831, 1, 54, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (832, 1, 56, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (833, 1, 61, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (834, 1, 62, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (835, 1, 32, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (836, 1, 33, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (837, 1, 34, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (838, 1, 60, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (839, 1, 35, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (840, 1, 5, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (841, 1, 37, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (842, 1, 38, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (843, 1, 39, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (844, 1, 6, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (845, 1, 40, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (846, 1, 41, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (847, 1, 59, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (848, 1, 42, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (849, 1, 20, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (850, 1, 23, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (851, 1, 51, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (852, 1, 52, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (853, 1, 53, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (854, 1, 21, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (855, 1, 48, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (856, 1, 49, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (857, 1, 50, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (858, 1, 22, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (859, 1, 10, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (860, 1, 43, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (861, 1, 44, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (862, 1, 45, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (863, 1, 63, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (864, 1, 65, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (865, 1, 64, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (866, 1, 66, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_menus` VALUES (867, 1, 72, 'admin', '2026-08-13 10:38:41', '2026-08-13 10:38:41', NULL);
+INSERT INTO `role_menus` VALUES (868, 1, 72, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (869, 1, 1, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (870, 1, 2, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (871, 1, 67, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (872, 1, 68, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (873, 1, 69, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (874, 1, 70, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (875, 1, 71, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (876, 1, 3, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (877, 1, 58, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (878, 1, 24, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (879, 1, 25, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (880, 1, 27, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (881, 1, 4, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (882, 1, 54, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (883, 1, 56, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (884, 1, 61, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (885, 1, 62, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (886, 1, 32, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (887, 1, 33, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (888, 1, 34, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (889, 1, 60, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (890, 1, 35, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (891, 1, 5, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (892, 1, 37, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (893, 1, 38, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (894, 1, 39, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (895, 1, 6, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (896, 1, 40, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (897, 1, 41, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (898, 1, 59, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (899, 1, 42, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (900, 1, 20, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (901, 1, 23, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (902, 1, 52, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (903, 1, 53, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (904, 1, 51, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (905, 1, 21, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (906, 1, 48, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (907, 1, 49, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (908, 1, 50, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (909, 1, 22, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (910, 1, 10, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (911, 1, 44, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (912, 1, 43, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (913, 1, 45, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (914, 1, 63, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (915, 1, 66, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (916, 1, 64, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (917, 1, 65, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 
 -- ----------------------------
 -- Table structure for role_permissions
@@ -686,72 +716,72 @@ CREATE TABLE `role_permissions`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 626 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 684 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_permissions
 -- ----------------------------
-INSERT INTO `role_permissions` VALUES (562, 1, 60, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (563, 1, 62, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (564, 1, 1, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (565, 1, 3, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (566, 1, 38, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (567, 1, 19, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (568, 1, 8, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (569, 1, 6, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (570, 1, 15, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (571, 1, 39, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (572, 1, 20, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (573, 1, 17, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (574, 1, 54, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (575, 1, 52, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (576, 1, 53, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (577, 1, 59, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (578, 1, 55, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (579, 1, 58, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (580, 1, 57, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (581, 1, 56, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (582, 1, 12, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (583, 1, 16, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (584, 1, 18, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (585, 1, 21, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (586, 1, 10, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (587, 1, 28, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (588, 1, 40, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (589, 1, 2, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (590, 1, 23, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (591, 1, 9, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (592, 1, 33, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (593, 1, 25, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (594, 1, 46, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (595, 1, 47, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (596, 1, 44, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (597, 1, 45, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (598, 1, 43, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (599, 1, 42, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (600, 1, 24, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (601, 1, 31, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (602, 1, 32, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (603, 1, 34, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (604, 1, 35, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (605, 1, 26, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (606, 1, 7, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (607, 1, 4, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (608, 1, 11, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (609, 1, 27, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (610, 1, 37, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (611, 1, 13, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (612, 1, 29, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (613, 1, 41, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (614, 1, 14, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (615, 1, 30, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (616, 1, 5, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (617, 1, 36, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (618, 1, 22, '2026-08-13 10:24:45', NULL);
-INSERT INTO `role_permissions` VALUES (619, 1, 63, '2026-08-13 10:24:45', NULL);
 INSERT INTO `role_permissions` VALUES (623, 2, 62, '2026-08-13 14:06:50', NULL);
 INSERT INTO `role_permissions` VALUES (624, 2, 63, '2026-08-13 14:06:50', NULL);
 INSERT INTO `role_permissions` VALUES (625, 2, 60, '2026-08-13 14:06:50', NULL);
+INSERT INTO `role_permissions` VALUES (626, 1, 1, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (627, 1, 3, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (628, 1, 38, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (629, 1, 19, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (630, 1, 8, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (631, 1, 6, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (632, 1, 15, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (633, 1, 39, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (634, 1, 20, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (635, 1, 17, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (636, 1, 12, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (637, 1, 16, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (638, 1, 18, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (639, 1, 21, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (640, 1, 10, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (641, 1, 28, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (642, 1, 40, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (643, 1, 2, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (644, 1, 23, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (645, 1, 9, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (646, 1, 33, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (647, 1, 25, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (648, 1, 43, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (649, 1, 42, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (650, 1, 24, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (651, 1, 31, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (652, 1, 32, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (653, 1, 34, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (654, 1, 35, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (655, 1, 26, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (656, 1, 7, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (657, 1, 4, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (658, 1, 11, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (659, 1, 27, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (660, 1, 37, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (661, 1, 13, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (662, 1, 29, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (663, 1, 41, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (664, 1, 14, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (665, 1, 30, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (666, 1, 5, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (667, 1, 36, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (668, 1, 22, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (669, 1, 73, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (670, 1, 68, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (671, 1, 74, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (672, 1, 77, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (673, 1, 70, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (674, 1, 71, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (675, 1, 64, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (676, 1, 75, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (677, 1, 76, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (678, 1, 69, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (679, 1, 72, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (680, 1, 65, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (681, 1, 67, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (682, 1, 78, '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_permissions` VALUES (683, 1, 66, '2026-09-02 14:42:26', NULL);
 
 -- ----------------------------
 -- Table structure for roles
@@ -771,7 +801,7 @@ CREATE TABLE `roles`  (
 -- ----------------------------
 -- Records of roles
 -- ----------------------------
-INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2026-08-13 10:24:45', NULL);
+INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2026-09-02 14:42:26', NULL);
 INSERT INTO `roles` VALUES (2, 'test', '测试', 1, '2025-05-28 10:47:22', '2026-07-20 14:19:04', NULL);
 
 -- ----------------------------
@@ -900,7 +930,7 @@ CREATE TABLE `user_roles`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 66 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_roles
@@ -908,7 +938,7 @@ CREATE TABLE `user_roles`  (
 INSERT INTO `user_roles` VALUES (35, 2, 2, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `user_roles` VALUES (55, 61, 2, 'test', '2026-08-04 16:28:39', '2026-08-04 16:28:39', NULL);
 INSERT INTO `user_roles` VALUES (58, 10, 2, 'test', '2026-08-07 16:06:05', '2026-08-07 16:06:05', NULL);
-INSERT INTO `user_roles` VALUES (64, 1, 1, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
-INSERT INTO `user_roles` VALUES (65, 10, 1, 'admin', '2026-08-13 10:24:45', '2026-08-13 10:24:45', NULL);
+INSERT INTO `user_roles` VALUES (66, 1, 1, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `user_roles` VALUES (67, 10, 1, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
