@@ -1,5 +1,12 @@
 # Version History
 
+## v3.1.0
+> - Optimize database connection pool as a configuration item
+> - Optimize query builder and toolkit functions
+> - Optimize public response and related post-adjustment
+> - Fix the issue where the command to automatically generate documentation using Swagger fails due to the repair of the gRPC model
+> - Update the readme document and the database backup file
+
 ## v3.0.1
 > - Add method permission control to gRPC and update all package versions
 
