@@ -1,8 +1,8 @@
 package request
 
 import (
-	"errors"
 	"gin/common/base"
+	"gin/common/errcode"
 	"gin/pkg"
 
 	"github.com/gookit/validate"
@@ -90,7 +90,7 @@ type UserBatchDelete struct {
 func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }
@@ -145,7 +145,7 @@ func (s User) Translates() map[string]string {
 func (s UserImport) Validate(data UserImport, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }

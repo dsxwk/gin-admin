@@ -6,7 +6,6 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/serviceprovider/lang"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,18 +33,16 @@ func (s *PermissionController) List(c *gin.Context) {
 		req request.Permission
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	res, err := s.service.List(req)
+	res, err := s.service.List(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 

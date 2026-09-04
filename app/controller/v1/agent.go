@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"gin/app/facade"
 	"gin/app/request"
 	"gin/app/service"
@@ -31,17 +32,15 @@ func (s *AgentController) Ask(c *gin.Context) {
 		req request.AgentAsk
 	)
 
-	s.service.WithContext(ctx)
-
 	if err := facade.Request().BindValidate(c, &req, "Ask"); err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
 	// 解析提供商信息
 	providerName, modelName, ok := facade.AgentProvider(req.Provider)
 	if !ok {
-		s.Response.Error(c, errcode.SystemError().WithMsg("Agent未启用或配置错误"))
+		s.Response.Error(c, errors.New("agent未启用或配置错误"))
 		return
 	}
 
@@ -57,24 +56,24 @@ func (s *AgentController) Ask(c *gin.Context) {
 			title = string([]rune(title)[:200])
 		}
 		var err error
-		sessionId, err = s.service.CreateSession(userId, title, providerName, modelName, traceId)
+		sessionId, err = s.service.CreateSession(ctx, userId, title, providerName, modelName, traceId)
 		if err != nil {
-			s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+			s.Response.Error(c, err)
 			return
 		}
 	}
 
 	// 加载历史消息
-	history, err := s.service.LoadHistory(sessionId)
+	history, err := s.service.LoadHistory(ctx, sessionId)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
 	// 构建Agent并注入会话记录器
 	a := facade.Agent(providerName)
 	if a == nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg("Agent未启用或配置错误"))
+		s.Response.Error(c, errors.New("agent未启用或配置错误"))
 		return
 	}
 	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手")).
@@ -85,7 +84,7 @@ func (s *AgentController) Ask(c *gin.Context) {
 
 	result, err := a.Ask(req.Question)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -107,12 +106,11 @@ func (s *AgentController) Ask(c *gin.Context) {
 // @Router /api/v1/agent/sessions [get]
 func (s *AgentController) Sessions(c *gin.Context) {
 	ctx := c.Request.Context()
-	s.service.WithContext(ctx)
 
 	userId := s.GetUserId(c)
-	sessions, err := s.service.ListSessions(userId)
+	sessions, err := s.service.ListSessions(ctx, userId)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -135,16 +133,14 @@ func (s *AgentController) History(c *gin.Context) {
 		req request.AgentAsk
 	)
 
-	s.service.WithContext(ctx)
-
 	if err := facade.Request().BindValidate(c, &req, "History"); err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	messages, err := s.service.History(req.SessionId)
+	messages, err := s.service.History(ctx, req.SessionId)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 

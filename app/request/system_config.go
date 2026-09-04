@@ -1,9 +1,10 @@
 package request
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"gin/common/base"
+	"gin/common/errcode"
 
 	"github.com/gookit/validate"
 )
@@ -51,6 +52,7 @@ type SystemConfigValueUpdate struct {
 
 // SystemConfigUpdates 系统配置批量更新验证
 type SystemConfigUpdates struct {
+	base.BaseRequest
 	List []SystemConfigValueUpdate `json:"list" validate:"required" label:"配置列表"`
 }
 
@@ -58,21 +60,23 @@ type SystemConfigUpdates struct {
 func (s SystemConfig) Validate(data SystemConfig, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }
 
 // Validate 系统配置批量更新请求验证
-func (s SystemConfigUpdates) Validate() error {
+func (s SystemConfigUpdates) Validate(ctx context.Context) error {
+	s.SetContext(ctx)
+
 	if len(s.List) == 0 {
-		return errors.New("配置列表不能为空")
+		return errcode.ArgsError().WithMsg("配置列表不能为空")
 	}
 
 	for i, item := range s.List {
 		v := validate.Struct(item)
 		if !v.Validate() {
-			return fmt.Errorf("list[%d]项 %s", i, v.Errors.One())
+			return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]项 %s", i, v.Errors.One()))
 		}
 	}
 

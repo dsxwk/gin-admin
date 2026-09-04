@@ -6,7 +6,6 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/serviceprovider/lang"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -35,18 +34,16 @@ func (s *MenuController) List(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	res, err := s.service.List(req)
+	res, err := s.service.List(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -69,20 +66,18 @@ func (s *MenuController) RoleMenu(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(ctx)
-
 	req.RoleId = facade.Request().Path[string](c, "id", "0")
 
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "RoleMenu")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	res, err := s.service.RoleMenu(req)
+	res, err := s.service.RoleMenu(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -105,20 +100,18 @@ func (s *MenuController) Detail(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Detail")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	m, err := s.service.Detail(req.ID)
+	m, err := s.service.Detail(ctx, req.ID)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -141,18 +134,16 @@ func (s *MenuController) Create(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Create")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	m, err := s.service.Create(req)
+	m, err := s.service.Create(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -177,29 +168,27 @@ func (s *MenuController) Update(c *gin.Context) {
 		req  request.Menu
 	)
 
-	s.service.WithContext(ctx)
-
 	err := c.ShouldBindBodyWith(&data, binding.JSON)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 	err = mapstructure.Decode(data, &req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
 	req.ID = facade.Request().Path[int64](c, "id", 0)
-	err = req.Validate(req, "Update")
+	err = facade.Request().Validate(c, &req, "Update")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.Update(req.ID, data)
+	err = s.service.Update(ctx, req.ID, data)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -222,20 +211,18 @@ func (s *MenuController) Delete(c *gin.Context) {
 		req request.Menu
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.Delete(req.ID)
+	err = s.service.Delete(ctx, req.ID)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 

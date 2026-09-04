@@ -6,7 +6,6 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/serviceprovider/lang"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -35,18 +34,16 @@ func (s *UserController) List(c *gin.Context) {
 		req request.User
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	res, err := s.service.List(req)
+	res, err := s.service.List(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -69,18 +66,16 @@ func (s *UserController) Create(c *gin.Context) {
 		req request.User
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Create")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	user, err := s.service.Create(req)
+	user, err := s.service.Create(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -105,30 +100,28 @@ func (s *UserController) Update(c *gin.Context) {
 		req  request.User
 	)
 
-	s.service.WithContext(ctx)
-
 	err := c.ShouldBindBodyWith(&data, binding.JSON)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
 	err = mapstructure.Decode(data, &req)
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
 	req.ID = facade.Request().Path[int64](c, "id", 0)
-	err = req.Validate(req, "Update")
+	err = facade.Request().Validate(c, &req, "Update")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.Update(req.ID, data)
+	err = s.service.Update(ctx, req.ID, data)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -151,20 +144,18 @@ func (s *UserController) Detail(c *gin.Context) {
 		req request.User
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Detail")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	m, err := s.service.Detail(req.ID)
+	m, err := s.service.Detail(ctx, req.ID)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -187,20 +178,18 @@ func (s *UserController) Delete(c *gin.Context) {
 		req request.User
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.Delete(req.ID)
+	err = s.service.Delete(ctx, req.ID)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -223,18 +212,16 @@ func (s *UserController) Import(c *gin.Context) {
 		req request.UserImport
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Import")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	result, err := s.service.Import(s.GetUserId(c), req)
+	result, err := s.service.Import(ctx, s.GetUserId(c), req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -257,18 +244,16 @@ func (s *UserController) BatchDelete(c *gin.Context) {
 		req request.User
 	)
 
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "BatchDelete")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.BatchDelete(req.IDs)
+	err = s.service.BatchDelete(ctx, req.IDs)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -293,22 +278,20 @@ func (s *UserController) Password(c *gin.Context) {
 		userPass request.UserPassword
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Password")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
 	userPass.Password = req.Password
 
-	err = s.service.Password(req.ID, userPass)
+	err = s.service.Password(ctx, req.ID, userPass)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 

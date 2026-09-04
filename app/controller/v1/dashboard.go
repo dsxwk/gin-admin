@@ -24,11 +24,10 @@ type DashboardController struct {
 // @Router /api/v1/dashboard/cards [get]
 func (s *DashboardController) Cards(c *gin.Context) {
 	ctx := c.Request.Context()
-	s.service.WithContext(ctx)
 
-	res, err := s.service.Cards()
+	res, err := s.service.Cards(ctx)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 	s.Response.Success(c, errcode.Success().WithData(res))
@@ -44,11 +43,10 @@ func (s *DashboardController) Cards(c *gin.Context) {
 // @Router /api/v1/dashboard/statistics [get]
 func (s *DashboardController) Statistics(c *gin.Context) {
 	ctx := c.Request.Context()
-	s.service.WithContext(ctx)
 
-	res, err := s.service.Statistics()
+	res, err := s.service.Statistics(ctx)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 	s.Response.Success(c, errcode.Success().WithData(res))
@@ -63,6 +61,7 @@ func (s *DashboardController) Statistics(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/dashboard/system-resource [get]
 func (s *DashboardController) SystemResource(c *gin.Context) {
-	res := s.service.SystemResource()
+	ctx := c.Request.Context()
+	res := s.service.SystemResource(ctx)
 	s.Response.Success(c, errcode.Success().WithData(res))
 }

@@ -1,8 +1,8 @@
 package request
 
 import (
-	"errors"
 	"gin/common/base"
+	"gin/common/errcode"
 
 	"github.com/gookit/validate"
 )
@@ -20,7 +20,7 @@ type OperatorLog struct {
 func (s OperatorLog) Validate(data OperatorLog, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }

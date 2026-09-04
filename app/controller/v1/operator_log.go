@@ -6,7 +6,6 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/common/errcode"
-	"gin/pkg/serviceprovider/lang"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,17 +34,15 @@ func (s *OperatorLogController) List(c *gin.Context) {
 		req request.OperatorLog
 	)
 
-	s.service.WithContext(ctx)
-
 	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	res, err := s.service.List(req)
+	res, err := s.service.List(ctx, req)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -68,19 +65,17 @@ func (s *OperatorLogController) Detail(c *gin.Context) {
 		req request.OperatorLog
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	err := facade.Request().BindValidate(c, &req, "Detail")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	m, err := s.service.Detail(req.ID)
+	m, err := s.service.Detail(ctx, req.ID)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -103,17 +98,15 @@ func (s *OperatorLogController) Delete(c *gin.Context) {
 		req request.OperatorLog
 	)
 
-	s.service.WithContext(ctx)
-
 	req.ID = facade.Request().Path[int64](c, "id", 0)
 
 	err := facade.Request().BindValidate(c, &req, "Delete")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.Delete(req.ID)
+	err = s.service.Delete(ctx, req.ID)
 	if err != nil {
 		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
 		return
@@ -138,17 +131,15 @@ func (s *OperatorLogController) BatchDelete(c *gin.Context) {
 		req request.OperatorLog
 	)
 
-	s.service.WithContext(ctx)
-
 	err := facade.Request().BindValidate(c, &req, "BatchDelete")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	err = s.service.BatchDelete(req.IDs)
+	err = s.service.BatchDelete(ctx, req.IDs)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 

@@ -107,7 +107,7 @@ func Trans(ctx context.Context, messageID string, data map[string]any) string {
 		TemplateData: data,
 	})
 	if err != nil {
-		log.Debug(pkg.Sprintf("缺少翻译: %s (%s)", messageID, langCode))
+		// log.Debug(pkg.Sprintf("缺少翻译: %s (%s)", messageID, langCode))
 		return messageID
 	}
 	return msg

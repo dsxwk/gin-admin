@@ -1,7 +1,7 @@
 package request
 
 import (
-	"errors"
+	"gin/common/errcode"
 
 	"github.com/gookit/validate"
 )
@@ -67,7 +67,7 @@ type DeptItem struct {
 func (s UserRequest) Validate(data UserRequest, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }
@@ -182,7 +182,7 @@ func (s UserBatchDeleteRequest) Translates() map[string]string {
 func validateRequest(data any, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }

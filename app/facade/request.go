@@ -43,8 +43,8 @@ func (r RequestFacade) Bind(ctx *gin.Context, v any) error {
 }
 
 // Validate 验证请求数据
-func (r RequestFacade) Validate(data any, scene string) error {
-	return request.NewClient().Validate(data, scene)
+func (r RequestFacade) Validate(ctx *gin.Context, data any, scene string) error {
+	return request.NewClient().Validate(ctx.Request.Context(), data, scene)
 }
 
 // BindValidate 绑定参数并验证

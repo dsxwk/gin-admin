@@ -1,8 +1,9 @@
 package request
 
 import (
-	"errors"
+	"context"
 	"fmt"
+	"gin/common/errcode"
 	"strconv"
 	"strings"
 
@@ -138,16 +139,29 @@ func (c Client) Bind(ctx *gin.Context, v any) error {
 	return nil
 }
 
+type requestContextSetter interface {
+	SetContext(context.Context)
+}
+
+// setRequestContext 设置请求上下文
+func setRequestContext(ctx context.Context, data any) {
+	if setter, ok := data.(requestContextSetter); ok {
+		setter.SetContext(ctx)
+	}
+}
+
 // BindValidate 绑定参数并验证
 func (c Client) BindValidate(ctx *gin.Context, v any, scene string) error {
 	if err := c.Bind(ctx, v); err != nil {
-		return err
+		return errcode.ArgsError().WithMsg(err.Error())
 	}
+	setRequestContext(ctx.Request.Context(), v)
+
 	// 场景为空不验证
 	if scene == "" {
 		return nil
 	}
-	return c.Validate(v, scene)
+	return c.validate(v, scene)
 }
 
 // ValidateWithMessages 验证并自定义错误消息
@@ -155,7 +169,7 @@ func (c Client) ValidateWithMessages(data any, scene string, messages map[string
 	v := validate.Struct(data, scene)
 	v.WithMessages(messages)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }
@@ -165,7 +179,7 @@ func (c Client) ValidateWithTranslates(data any, scene string, translates map[st
 	v := validate.Struct(data, scene)
 	v.WithTranslates(translates)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }
@@ -175,11 +189,17 @@ func (c Client) GetValidator(data any, scene string) *validate.Validation {
 	return validate.Struct(data, scene)
 }
 
-// Validate 通用验证函数
-func (c Client) Validate(data any, scene string) error {
+// Validate 通用验证函数,自动注入请求上下文
+func (c Client) Validate(ctx context.Context, data any, scene string) error {
+	setRequestContext(ctx, data)
+	return c.validate(data, scene)
+}
+
+// validate 执行验证
+func (c Client) validate(data any, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }

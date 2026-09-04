@@ -11,7 +11,6 @@ import (
 	"gin/common/base"
 	"gin/common/errcode"
 	"gin/grpc/proto"
-	"gin/pkg/serviceprovider/lang"
 	"image/color"
 
 	"github.com/gin-gonic/gin"
@@ -45,8 +44,8 @@ type CaptchaResponse struct {
 // @Tags 登录相关
 // @Summary 账号密码登录
 // @Description 用户账号密码登录
-// @Accept json
-// @Produce json
+// @Accept JSON
+// @Produce JSON
 // @Param data body request.UserLogin true "登录参数"
 // @Success 200 {object} errcode.SuccessResponse{data=LoginResponse} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
@@ -58,13 +57,10 @@ func (s *LoginController) Login(c *gin.Context) {
 		req request.Login
 	)
 
-	req.WithContext(ctx)
-	s.service.WithContext(ctx)
-
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "Login")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -76,9 +72,9 @@ func (s *LoginController) Login(c *gin.Context) {
 		}
 	}
 
-	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
+	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -103,8 +99,8 @@ func (s *LoginController) Login(c *gin.Context) {
 // @Tags 登录相关
 // @Summary 刷新token
 // @Description 刷新token
-// @Accept json
-// @Produce json
+// @Accept JSON
+// @Produce JSON
 // @Param token header string true "刷新Token"
 // @Success 200 {object} errcode.SuccessResponse{data=Token} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
@@ -116,21 +112,18 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 		req request.Login
 	)
 
-	req.WithContext(ctx)
-	s.service.WithContext(ctx)
-
 	token := c.Request.Header.Get("token")
 	req.RefreshToken.Token = token
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "RefreshToken")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := s.service.RefreshToken(token)
+	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err := s.service.RefreshToken(ctx, token)
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -146,8 +139,8 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 // @Tags 登录相关
 // @Summary 测试
 // @Description 测试
-// @Accept json
-// @Produce json
+// @Accept JSON
+// @Produce JSON
 // @Success 200 {object} errcode.SuccessResponse{data=map[string]any{}} "成功"
 // @Router /api/v1/test [post]
 func (s *LoginController) Test(c *gin.Context) {
@@ -190,7 +183,7 @@ func (s *LoginController) Test(c *gin.Context) {
 	ctx = facade.Grpc().WithToken(ctx, facade.Request().GetHeader[string](c, "token", ""))
 	grpcResp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -239,8 +232,8 @@ func (s *LoginController) generateCharset() string {
 // @Tags 登录相关
 // @Summary 获取验证码
 // @Description 获取验证码
-// @Accept json
-// @Produce json
+// @Accept JSON
+// @Produce JSON
 // @Success 200 {object} errcode.SuccessResponse{data=CaptchaResponse} "成功返回" Example({"code":0,"msg":"Success","data":[]})
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误" Example({"code":500,"msg":"系统错误","data":[]})
 // @Router /api/v1/captcha [get]
@@ -261,7 +254,7 @@ func (s *LoginController) GetCaptcha(c *gin.Context) {
 	// 生成验证码
 	id, b64s, _, err := base64Captcha.NewCaptcha(driver, base64Captcha.DefaultMemStore).Generate()
 	if err != nil {
-		s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -288,7 +281,7 @@ func (s *LoginController) CheckCaptcha(c *gin.Context) {
 	// 绑定参数并验证
 	err := facade.Request().BindValidate(c, &req, "CheckCaptcha")
 	if err != nil {
-		s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+		s.Response.Error(c, err)
 		return
 	}
 
