@@ -12,7 +12,6 @@ import (
 )
 
 type BaseService struct {
-	Context
 }
 
 type Model interface {
@@ -24,25 +23,20 @@ type HasConnection interface {
 	Connection() string
 }
 
-func (s *BaseService) WithContext(ctx context.Context) *BaseService {
-	s.Set(ctx)
-	return s
-}
-
 // getDB 获取数据库连接(带连接名判断)
-func (s *BaseService) getDB(model Model) *gorm.DB {
+func (s *BaseService) getDB(ctx context.Context, model Model) *gorm.DB {
 	if connModel, ok := model.(HasConnection); ok {
 		conn := connModel.Connection()
 		if conn != "" {
-			return facade.DB(conn).WithContext(s.Ctx)
+			return facade.DB(conn).WithContext(ctx)
 		}
 	}
-	return facade.DB().WithContext(s.Ctx)
+	return facade.DB().WithContext(ctx)
 }
 
 // DB 获取数据库连接
-func (s *BaseService) DB(model Model) *gorm.DB {
-	return s.getDB(model)
+func (s *BaseService) DB(ctx context.Context, model Model) *gorm.DB {
+	return s.getDB(ctx, model)
 }
 
 // Search 搜索扩展方法
@@ -62,18 +56,18 @@ func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]any) 
 	return db
 }
 
-// Cache 获取缓存实例,自动注入请求上下文
+// Cache 获取缓存实例并绑定请求上下文
 // 使用示例:
 //
-//	s.Cache().Set("key", value, 5*time.Minute)
-//	s.Cache("redis").Get("key")
-func (s *BaseService) Cache(cacheType ...string) *cache.CacheProxy {
-	return facade.Cache(cacheType...).WithContext(s.Ctx)
+//	s.Cache(ctx).Set("key", value, 5*time.Minute)
+//	s.Cache(ctx, "redis").Get("key")
+func (s *BaseService) Cache(ctx context.Context, cacheType ...string) *cache.CacheProxy {
+	return facade.Cache(cacheType...).WithContext(ctx)
 }
 
 // Updates 公共更新方法
-func (s *BaseService) Updates(m Model, id int64, data map[string]any) error {
-	db := s.DB(m)
+func (s *BaseService) Updates(ctx context.Context, m Model, id int64, data map[string]any) error {
+	db := s.DB(ctx, m)
 	rows := model.FilterFields(db, m, data)
 	rows[model.UpdatedField] = time.Now()
 	return db.Model(m).Where("id = ?", id).Updates(rows).Error

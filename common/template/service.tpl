@@ -1,6 +1,7 @@
 package {{.Package}}
 
 import (
+    "context"
     "gin/app/model"
     "gin/app/request"
     "gin/common/base"
@@ -11,11 +12,11 @@ type {{.Name}}Service struct {
 }
 
 // List 列表
-func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageData, err error) {
+func (s *{{.Name}}Service) List(ctx context.Context, req request.{{.Name}}) (pageData request.PageData, err error) {
     var (
         m      model.{{.Name}}
         models []model.{{.Name}}
-        db     = s.DB(&m)
+        db     = s.DB(ctx, &m)
     )
 
     // 搜索
@@ -48,10 +49,10 @@ func (s *{{.Name}}Service) List(req request.{{.Name}}) (pageData request.PageDat
 }
 
 // Create 创建
-func (s *{{.Name}}Service) Create(req request.{{.Name}}) (model.{{.Name}}, error) {
+func (s *{{.Name}}Service) Create(ctx context.Context, req request.{{.Name}}) (model.{{.Name}}, error) {
     var (
         m  model.{{.Name}}
-        db = s.DB(&m)
+        db = s.DB(ctx, &m)
     )
     {{if .HasFields}}
     m = model.{{.Name}}{
@@ -69,14 +70,14 @@ func (s *{{.Name}}Service) Create(req request.{{.Name}}) (model.{{.Name}}, error
 }
 
 // Update 更新
-func (s *{{.Name}}Service) Update(id int64, data map[string]any) (err error) {
-    return s.Updates(&model.{{.Name}}{}, id, data)
+func (s *{{.Name}}Service) Update(ctx context.Context, id int64, data map[string]any) (err error) {
+    return s.Updates(ctx, &model.{{.Name}}{}, id, data)
 }
 
 // Detail 详情
-func (s *{{.Name}}Service) Detail(id int64) (m model.{{.Name}}, err error) {
+func (s *{{.Name}}Service) Detail(ctx context.Context, id int64) (m model.{{.Name}}, err error) {
     var (
-        db = s.DB(&m)
+        db = s.DB(ctx, &m)
     )
 
     err = db.Model(&m).First(&m, id).Error
@@ -88,10 +89,10 @@ func (s *{{.Name}}Service) Detail(id int64) (m model.{{.Name}}, err error) {
 }
 
 // Delete 删除
-func (s *{{.Name}}Service) Delete(id int64) (err error) {
+func (s *{{.Name}}Service) Delete(ctx context.Context, id int64) (err error) {
     var (
         m  model.{{.Name}}
-        db = s.DB(&m)
+        db = s.DB(ctx, &m)
     )
 
     err = db.Model(&m).Delete(&m, id).Error

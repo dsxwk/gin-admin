@@ -24,9 +24,8 @@ func (s *PermissionSync) Help() []base.CommandOption {
 
 func (s *PermissionSync) Execute(values map[string]string) {
 	svc := service.RoleService{}
-	svc.Set(context.Background())
 
-	if err := svc.SyncAllUserPermissions(); err != nil {
+	if err := svc.SyncAllUserPermissions(context.Background()); err != nil {
 		flag.Errorf("权限同步失败: %v", err)
 		return
 	}

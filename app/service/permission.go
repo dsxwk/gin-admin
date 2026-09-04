@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"gin/app/model"
 	"gin/app/request"
@@ -13,11 +14,11 @@ type PermissionService struct {
 }
 
 // List 权限列表
-func (s *PermissionService) List(req request.Permission) (pageData request.PageData, err error) {
+func (s *PermissionService) List(ctx context.Context, req request.Permission) (pageData request.PageData, err error) {
 	var (
 		m      model.Permission
 		models []model.Permission
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -51,7 +52,7 @@ func (s *PermissionService) List(req request.Permission) (pageData request.PageD
 
 // SyncRoutePermissions 同步路由权限
 // permissionKeys METHOD:PATH (如 GET:/api/v1/user)
-func (s *PermissionService) SyncRoutePermissions(permissionKeys []string) error {
+func (s *PermissionService) SyncRoutePermissions(ctx context.Context, permissionKeys []string) error {
 	if len(permissionKeys) == 0 {
 		return nil
 	}
@@ -59,7 +60,7 @@ func (s *PermissionService) SyncRoutePermissions(permissionKeys []string) error 
 	var (
 		m      model.Permission
 		models []model.Permission
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 解析路由Key
@@ -108,10 +109,10 @@ func (s *PermissionService) SyncRoutePermissions(permissionKeys []string) error 
 }
 
 // SetRolePermissions 为指定角色设置权限,permissionKeys为空时授予全部权限
-func (s *PermissionService) SetRolePermissions(operatorId int64, roleName string, permissionKeys []string) (int, error) {
+func (s *PermissionService) SetRolePermissions(ctx context.Context, operatorId int64, roleName string, permissionKeys []string) (int, error) {
 	var (
 		role model.Roles
-		db   = s.DB(&model.Permission{})
+		db   = s.DB(ctx, &model.Permission{})
 	)
 
 	// 查找角色
@@ -162,8 +163,7 @@ func (s *PermissionService) SetRolePermissions(operatorId int64, roleName string
 
 	// 同步Redis权限缓存
 	roleService := RoleService{}
-	roleService.WithContext(s.Ctx)
-	_ = roleService.SyncAllUserPermissions()
+	_ = roleService.SyncAllUserPermissions(ctx)
 
 	return len(data), nil
 }

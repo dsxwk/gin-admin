@@ -1,6 +1,9 @@
 package agent
 
-import "gin/pkg/serviceprovider/mcp"
+import (
+	"context"
+	"gin/pkg/serviceprovider/mcp"
+)
 
 // ChatResult 对话结果
 type ChatResult struct {
@@ -46,7 +49,7 @@ type MessageRecord struct {
 
 // Recorder 会话记录器接口
 type Recorder interface {
-	RecordMessage(sessionId int64, record MessageRecord) error
+	RecordMessage(ctx context.Context, sessionId int64, record MessageRecord) error
 }
 
 // Provider 模型提供商接口

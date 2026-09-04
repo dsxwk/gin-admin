@@ -10,8 +10,8 @@ type Context struct {
 	Ctx context.Context `swaggerignore:"true"`
 }
 
-// Set 设置ctx
-func (s *Context) Set(ctx context.Context) {
+// SetContext 设置上下文
+func (s *Context) SetContext(ctx context.Context) {
 	s.Ctx = ctx
 }
 

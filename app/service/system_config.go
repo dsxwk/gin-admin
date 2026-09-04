@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"gin/app/model"
 	"gin/app/request"
@@ -12,11 +13,11 @@ type SystemConfigService struct {
 }
 
 // List 列表
-func (s *SystemConfigService) List(req request.SystemConfig) (pageData request.PageData, err error) {
+func (s *SystemConfigService) List(ctx context.Context, req request.SystemConfig) (pageData request.PageData, err error) {
 	var (
 		m      model.SystemConfig
 		models []model.SystemConfig
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -49,10 +50,10 @@ func (s *SystemConfigService) List(req request.SystemConfig) (pageData request.P
 }
 
 // UpdateConfig 保存配置
-func (s *SystemConfigService) UpdateConfig(data map[string]any) (err error) {
+func (s *SystemConfigService) UpdateConfig(ctx context.Context, data map[string]any) (err error) {
 	var (
 		m  model.SystemConfig
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	rows, ok := data["list"]
@@ -89,10 +90,10 @@ func (s *SystemConfigService) UpdateConfig(data map[string]any) (err error) {
 }
 
 // Create 创建
-func (s *SystemConfigService) Create(req request.SystemConfig) (model.SystemConfig, error) {
+func (s *SystemConfigService) Create(ctx context.Context, req request.SystemConfig) (model.SystemConfig, error) {
 	var (
 		m  model.SystemConfig
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	m = model.SystemConfig{
@@ -113,14 +114,14 @@ func (s *SystemConfigService) Create(req request.SystemConfig) (model.SystemConf
 }
 
 // Update 更新
-func (s *SystemConfigService) Update(id int64, data map[string]any) (err error) {
-	return s.Updates(&model.SystemConfig{}, id, data)
+func (s *SystemConfigService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
+	return s.Updates(ctx, &model.SystemConfig{}, id, data)
 }
 
 // Detail 详情
-func (s *SystemConfigService) Detail(id int64) (m model.SystemConfig, err error) {
+func (s *SystemConfigService) Detail(ctx context.Context, id int64) (m model.SystemConfig, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Preload("ConfigCategory").First(&m, id).Error
@@ -132,10 +133,10 @@ func (s *SystemConfigService) Detail(id int64) (m model.SystemConfig, err error)
 }
 
 // Delete 删除
-func (s *SystemConfigService) Delete(id int64) (err error) {
+func (s *SystemConfigService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.SystemConfig
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Delete(&m, id).Error

@@ -1,8 +1,8 @@
 package request
 
 import (
-	"errors"
 	"gin/common/base"
+	"gin/common/errcode"
 
 	"github.com/gookit/validate"
 )
@@ -44,7 +44,7 @@ type ArticleUpdate struct {
 func (s Article) Validate(data Article, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/common/base"
 	"gin/pkg/serviceprovider/agent"
@@ -15,7 +16,7 @@ type AgentService struct {
 }
 
 // CreateSession 创建会话
-func (s *AgentService) CreateSession(userId int64, title, provider, modelName, traceId string) (int64, error) {
+func (s *AgentService) CreateSession(ctx context.Context, userId int64, title, provider, modelName, traceId string) (int64, error) {
 	session := model.AgentSession{
 		UserId:   userId,
 		Title:    title,
@@ -24,7 +25,7 @@ func (s *AgentService) CreateSession(userId int64, title, provider, modelName, t
 		TraceId:  traceId,
 	}
 
-	db := s.DB(&session)
+	db := s.DB(ctx, &session)
 	if err := db.Model(&session).Create(&session).Error; err != nil {
 		return 0, err
 	}
@@ -32,16 +33,16 @@ func (s *AgentService) CreateSession(userId int64, title, provider, modelName, t
 }
 
 // GetSession 获取会话
-func (s *AgentService) GetSession(id int64) (session model.AgentSession, err error) {
-	db := s.DB(&session)
+func (s *AgentService) GetSession(ctx context.Context, id int64) (session model.AgentSession, err error) {
+	db := s.DB(ctx, &session)
 	err = db.Model(&session).First(&session, id).Error
 	return session, err
 }
 
 // ListSessions 获取用户会话列表
-func (s *AgentService) ListSessions(userId int64) (sessions []model.AgentSession, err error) {
+func (s *AgentService) ListSessions(ctx context.Context, userId int64) (sessions []model.AgentSession, err error) {
 	var session model.AgentSession
-	db := s.DB(&session)
+	db := s.DB(ctx, &session)
 	err = db.Model(&session).Where("user_id = ?", userId).Order("id DESC").Find(&sessions).Error
 	if err != nil {
 		return nil, err
@@ -50,10 +51,10 @@ func (s *AgentService) ListSessions(userId int64) (sessions []model.AgentSession
 }
 
 // RecordMessage 记录消息(实现agent.Recorder接口)
-func (s *AgentService) RecordMessage(sessionId int64, record agent.MessageRecord) error {
+func (s *AgentService) RecordMessage(ctx context.Context, sessionId int64, record agent.MessageRecord) error {
 	var (
 		m  model.AgentMessage
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	msg := model.AgentMessage{
@@ -87,11 +88,11 @@ func (s *AgentService) RecordMessage(sessionId int64, record agent.MessageRecord
 }
 
 // findMessages 查询会话消息(公用底层查询)
-func (s *AgentService) findMessages(sessionId int64) ([]model.AgentMessage, error) {
+func (s *AgentService) findMessages(ctx context.Context, sessionId int64) ([]model.AgentMessage, error) {
 	var (
 		m        model.AgentMessage
 		messages []model.AgentMessage
-		db       = s.DB(&m)
+		db       = s.DB(ctx, &m)
 	)
 
 	err := db.Model(&m).Where("session_id = ?", sessionId).Order("id ASC").Find(&messages).Error
@@ -102,8 +103,8 @@ func (s *AgentService) findMessages(sessionId int64) ([]model.AgentMessage, erro
 }
 
 // LoadHistory 加载会话历史(转换为agent消息供模型使用)
-func (s *AgentService) LoadHistory(sessionId int64) ([]agent.Message, error) {
-	messages, err := s.findMessages(sessionId)
+func (s *AgentService) LoadHistory(ctx context.Context, sessionId int64) ([]agent.Message, error) {
+	messages, err := s.findMessages(ctx, sessionId)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +117,8 @@ func (s *AgentService) LoadHistory(sessionId int64) ([]agent.Message, error) {
 }
 
 // History 获取会话历史记录
-func (s *AgentService) History(sessionId int64) ([]model.AgentMessage, error) {
-	return s.findMessages(sessionId)
+func (s *AgentService) History(ctx context.Context, sessionId int64) ([]model.AgentMessage, error) {
+	return s.findMessages(ctx, sessionId)
 }
 
 // toAgentMessage 转换数据库消息为agent消息

@@ -10,7 +10,7 @@ type BaseRequest struct {
 }
 
 func (s *BaseRequest) WithContext(ctx context.Context) *BaseRequest {
-	s.Set(ctx)
+	s.SetContext(ctx)
 
 	return s
 }

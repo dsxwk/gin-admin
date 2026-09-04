@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"gin/app/model"
 	"gin/app/request"
@@ -15,11 +16,11 @@ type MenuService struct {
 }
 
 // List 列表
-func (s *MenuService) List(req request.Menu) (pageData request.PageData, err error) {
+func (s *MenuService) List(ctx context.Context, req request.Menu) (pageData request.PageData, err error) {
 	var (
 		m      model.Menu
 		models []model.Menu
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -57,11 +58,11 @@ func (s *MenuService) List(req request.Menu) (pageData request.PageData, err err
 }
 
 // RoleMenu 角色菜单
-func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error) {
+func (s *MenuService) RoleMenu(ctx context.Context, req request.Menu) (tree []pkg.TreeNode, err error) {
 	var (
 		m      model.Menu
 		models []model.Menu
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	roleIds := strings.Split(req.RoleId, ",")
@@ -84,9 +85,9 @@ func (s *MenuService) RoleMenu(req request.Menu) (tree []pkg.TreeNode, err error
 }
 
 // Detail 详情
-func (s *MenuService) Detail(menuId int64) (m model.Menu, err error) {
+func (s *MenuService) Detail(ctx context.Context, menuId int64) (m model.Menu, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).
@@ -104,13 +105,13 @@ func (s *MenuService) Detail(menuId int64) (m model.Menu, err error) {
 }
 
 // Create 新增菜单
-func (s *MenuService) Create(req request.Menu) (model.Menu, error) {
+func (s *MenuService) Create(ctx context.Context, req request.Menu) (model.Menu, error) {
 	var (
 		m          model.Menu
 		meta       model.MenuMeta
 		menuAction model.MenuActions
 		roleMenus  []model.RoleMenus
-		db         = s.DB(&m)
+		db         = s.DB(ctx, &m)
 	)
 
 	m = model.Menu{
@@ -193,10 +194,10 @@ func (s *MenuService) Create(req request.Menu) (model.Menu, error) {
 }
 
 // Update 更新
-func (s *MenuService) Update(id int64, data map[string]any) (err error) {
+func (s *MenuService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
 	var (
 		m          model.Menu
-		db         = s.DB(&m)
+		db         = s.DB(ctx, &m)
 		menuAction map[string]any
 		meta       map[string]any
 		ok         bool
@@ -297,10 +298,10 @@ func (s *MenuService) Update(id int64, data map[string]any) (err error) {
 }
 
 // Delete 删除
-func (s *MenuService) Delete(menuId int64) (err error) {
+func (s *MenuService) Delete(ctx context.Context, menuId int64) (err error) {
 	var (
 		menuActionIds []int64
-		db            = s.DB(&model.Menu{})
+		db            = s.DB(ctx, &model.Menu{})
 		roleMenu      model.RoleMenus
 		menuMeta      model.MenuMeta
 		menuAction    model.MenuActions

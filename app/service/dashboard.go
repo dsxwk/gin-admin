@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"gin/app/model"
 	"gin/common/base"
@@ -80,28 +81,28 @@ type DashboardService struct {
 }
 
 // Cards 仪表盘卡片统计
-func (s *DashboardService) Cards() (cards []DashboardCard, err error) {
+func (s *DashboardService) Cards(ctx context.Context) (cards []DashboardCard, err error) {
 	cards = make([]DashboardCard, 0, 8)
 
-	cards = append(cards, s.countCard("用户数", &model.User{}, "total"))
-	cards = append(cards, s.countCard("角色数", &model.Roles{}, "total"))
-	cards = append(cards, s.countCard("菜单数", &model.Menu{}, "total"))
-	cards = append(cards, s.countCard("文章数", &model.Article{}, "total"))
-	cards = append(cards, s.countCard("今日日志", &model.OperatorLog{}, "today"))
-	cards = append(cards, s.countCard("字典项", &model.Dict{}, "total"))
-	cards = append(cards, s.countCard("系统配置", &model.SystemConfig{}, "total"))
-	cards = append(cards, s.countCard("导入批次", &model.ImportRecords{}, "total"))
+	cards = append(cards, s.countCard(ctx, "用户数", &model.User{}, "total"))
+	cards = append(cards, s.countCard(ctx, "角色数", &model.Roles{}, "total"))
+	cards = append(cards, s.countCard(ctx, "菜单数", &model.Menu{}, "total"))
+	cards = append(cards, s.countCard(ctx, "文章数", &model.Article{}, "total"))
+	cards = append(cards, s.countCard(ctx, "今日日志", &model.OperatorLog{}, "today"))
+	cards = append(cards, s.countCard(ctx, "字典项", &model.Dict{}, "total"))
+	cards = append(cards, s.countCard(ctx, "系统配置", &model.SystemConfig{}, "total"))
+	cards = append(cards, s.countCard(ctx, "导入批次", &model.ImportRecords{}, "total"))
 
 	return cards, nil
 }
 
 // countCard 统计单个卡片 total=历史总量对比 today=今日创建数对比
-func (s *DashboardService) countCard(title string, m base.Model, mode string) DashboardCard {
+func (s *DashboardService) countCard(ctx context.Context, title string, m base.Model, mode string) DashboardCard {
 	var row struct {
 		Today     int64 `gorm:"column:today"`
 		Yesterday int64 `gorm:"column:yesterday"`
 	}
-	db := s.DB(m)
+	db := s.DB(ctx, m)
 
 	if mode == "today" {
 		db.Model(m).Select(`
@@ -146,10 +147,10 @@ func (s *DashboardService) countCard(title string, m base.Model, mode string) Da
 }
 
 // Statistics 操作日志仪表盘统计
-func (s *DashboardService) Statistics() (stat OperatorLogStatistics, err error) {
+func (s *DashboardService) Statistics(ctx context.Context) (stat OperatorLogStatistics, err error) {
 	var (
 		m  model.OperatorLog
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	// 请求方法统计
@@ -246,7 +247,7 @@ func (s *DashboardService) Statistics() (stat OperatorLogStatistics, err error) 
 }
 
 // SystemResource 系统资源
-func (s *DashboardService) SystemResource() SystemResource {
+func (s *DashboardService) SystemResource(ctx context.Context) SystemResource {
 	return SystemResourceInfo()
 }
 

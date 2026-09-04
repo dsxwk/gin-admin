@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -12,11 +13,11 @@ type DictService struct {
 }
 
 // List 列表
-func (s *DictService) List(req request.Dict) (pageData request.PageData, err error) {
+func (s *DictService) List(ctx context.Context, req request.Dict) (pageData request.PageData, err error) {
 	var (
 		m      model.Dict
 		models []model.Dict
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -49,10 +50,10 @@ func (s *DictService) List(req request.Dict) (pageData request.PageData, err err
 }
 
 // Create 创建
-func (s *DictService) Create(req request.Dict) (model.Dict, error) {
+func (s *DictService) Create(ctx context.Context, req request.Dict) (model.Dict, error) {
 	var (
 		m  model.Dict
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	m = model.Dict{
@@ -75,17 +76,17 @@ func (s *DictService) Create(req request.Dict) (model.Dict, error) {
 }
 
 // Update 更新
-func (s *DictService) Update(id int64, data map[string]any) (err error) {
+func (s *DictService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
 	if pkg.HasKey(data, "extend") {
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}
-	return s.Updates(&model.Dict{}, id, data)
+	return s.Updates(ctx, &model.Dict{}, id, data)
 }
 
 // Detail 详情
-func (s *DictService) Detail(id int64) (m model.Dict, err error) {
+func (s *DictService) Detail(ctx context.Context, id int64) (m model.Dict, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).First(&m, id).Error
@@ -97,10 +98,10 @@ func (s *DictService) Detail(id int64) (m model.Dict, err error) {
 }
 
 // Delete 删除
-func (s *DictService) Delete(id int64) (err error) {
+func (s *DictService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.Dict
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Delete(&m, id).Error

@@ -51,10 +51,8 @@ func (s UserService) List(ctx context.Context, req *proto.UserListRequest) (*pro
 	if err := dto.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.WithContext(ctx)
-
 	var m []model.User
-	db := s.DB(&model.User{}).Model(&m)
+	db := s.DB(ctx, &model.User{}).Model(&m)
 
 	db = s.Search(db, m, dto.Search).
 		Model(&m).
@@ -98,10 +96,8 @@ func (s UserService) Detail(ctx context.Context, req *proto.UserRequest) (*proto
 	if err := dto.Validate(dto, "Detail"); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.WithContext(ctx)
-
 	var m model.User
-	db := s.DB(&model.User{}).Model(&m).
+	db := s.DB(ctx, &model.User{}).Model(&m).
 		Preload("UserRoles").
 		Preload("MainDept", "is_main = ?", 1).
 		Preload("MainDept.Dept").
@@ -123,9 +119,7 @@ func (s UserService) Create(ctx context.Context, req *proto.UserCreateRequest) (
 	if err := dto.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.WithContext(ctx)
-
-	db := s.DB(&model.User{})
+	db := s.DB(ctx, &model.User{})
 
 	var count int64
 	if err := db.Model(&model.User{}).Where("username = ?", dto.Username).Count(&count).Error; err != nil {
@@ -212,8 +206,6 @@ func (s UserService) Update(ctx context.Context, req *proto.UserUpdateRequest) (
 	if req.GetData() == nil {
 		return nil, status.Error(codes.InvalidArgument, "更新数据不能为空")
 	}
-	s.WithContext(ctx)
-
 	data := structToMap(req.GetData())
 	var dto grpcrequest.UserUpdateRequest
 	if err := mapstructure.Decode(data, &dto); err != nil {
@@ -224,7 +216,7 @@ func (s UserService) Update(ctx context.Context, req *proto.UserUpdateRequest) (
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	db := s.DB(&model.User{})
+	db := s.DB(ctx, &model.User{})
 
 	var count int64
 	if err := db.Model(&model.User{}).Where("username = ? AND id <> ?", dto.Username, dto.Id).Count(&count).Error; err != nil {
@@ -319,10 +311,8 @@ func (s UserService) Delete(ctx context.Context, req *proto.UserRequest) (*proto
 	if err := dto.Validate(dto, "Delete"); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.WithContext(ctx)
-
 	var m model.User
-	if err := s.DB(&model.User{}).Model(&m).Delete(&m, dto.Id).Error; err != nil {
+	if err := s.DB(ctx, &model.User{}).Model(&m).Delete(&m, dto.Id).Error; err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &proto.EmptyResponse{}, nil
@@ -334,10 +324,8 @@ func (s UserService) BatchDelete(ctx context.Context, req *proto.UserBatchDelete
 	if err := dto.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	s.WithContext(ctx)
-
 	var m model.User
-	if err := s.DB(&model.User{}).Model(&m).Delete(&m, dto.Ids).Error; err != nil {
+	if err := s.DB(ctx, &model.User{}).Model(&m).Delete(&m, dto.Ids).Error; err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &proto.EmptyResponse{}, nil

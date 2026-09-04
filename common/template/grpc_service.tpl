@@ -49,10 +49,8 @@ func (s {{.Name}}Service) List(ctx context.Context, req *proto.{{.Name}}ListRequ
     if err := dto.Validate(); err != nil {
         return nil, status.Error(codes.InvalidArgument, err.Error())
     }
-    s.WithContext(ctx)
-
     var m []model.{{.Name}}
-    db := s.DB(&model.{{.Name}}{}).Model(&m)
+    db := s.DB(ctx, &model.{{.Name}}{}).Model(&m)
 
     db = s.Search(db, m, dto.Search).Model(&m)
 
@@ -90,10 +88,8 @@ func (s {{.Name}}Service) Detail(ctx context.Context, req *proto.{{.Name}}Reques
     if err := dto.Validate(dto, "Detail"); err != nil {
         return nil, status.Error(codes.InvalidArgument, err.Error())
     }
-    s.WithContext(ctx)
-
     var m model.{{.Name}}
-    db := s.DB(&model.{{.Name}}{}).Model(&m).First(&m, dto.Id)
+    db := s.DB(ctx, &model.{{.Name}}{}).Model(&m).First(&m, dto.Id)
     if err := db.Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, status.Error(codes.NotFound, "{{.Description}}不存在")
@@ -109,12 +105,10 @@ func (s {{.Name}}Service) Create(ctx context.Context, req *proto.{{.Name}}Create
     if err := dto.Validate(); err != nil {
         return nil, status.Error(codes.InvalidArgument, err.Error())
     }
-    s.WithContext(ctx)
-
     m := model.{{.Name}}{
 {{.CreateFields}}
     }
-    if err := s.DB(&model.{{.Name}}{}).Model(&m).Create(&m).Error; err != nil {
+    if err := s.DB(ctx, &model.{{.Name}}{}).Model(&m).Create(&m).Error; err != nil {
         return nil, status.Error(codes.Internal, err.Error())
     }
     return toProto{{.Name}}(&m), nil
@@ -125,8 +119,6 @@ func (s {{.Name}}Service) Update(ctx context.Context, req *proto.{{.Name}}Update
     if req.GetData() == nil {
         return nil, status.Error(codes.InvalidArgument, "更新数据不能为空")
     }
-    s.WithContext(ctx)
-
     data := {{.Var}}StructToMap(req.GetData())
     var dto grpcrequest.{{.Name}}UpdateRequest
     if err := mapstructure.Decode(data, &dto); err != nil {
@@ -137,7 +129,7 @@ func (s {{.Name}}Service) Update(ctx context.Context, req *proto.{{.Name}}Update
         return nil, status.Error(codes.InvalidArgument, err.Error())
     }
 
-    db := s.DB(&model.{{.Name}}{})
+    db := s.DB(ctx, &model.{{.Name}}{})
     rows := model.FilterFields(db, model.{{.Name}}{}, data)
 {{.UpdateJsonFields}}
     rows[model.UpdatedField] = time.Now()
@@ -153,10 +145,8 @@ func (s {{.Name}}Service) Delete(ctx context.Context, req *proto.{{.Name}}Reques
     if err := dto.Validate(dto, "Delete"); err != nil {
         return nil, status.Error(codes.InvalidArgument, err.Error())
     }
-    s.WithContext(ctx)
-
     var m model.{{.Name}}
-    if err := s.DB(&model.{{.Name}}{}).Model(&m).Delete(&m, dto.Id).Error; err != nil {
+    if err := s.DB(ctx, &model.{{.Name}}{}).Model(&m).Delete(&m, dto.Id).Error; err != nil {
         return nil, status.Error(codes.Internal, err.Error())
     }
     return &proto.EmptyResponse{}, nil

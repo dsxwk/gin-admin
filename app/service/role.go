@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"gin/app/model"
@@ -16,11 +17,11 @@ type RoleService struct {
 }
 
 // List 列表
-func (s *RoleService) List(req request.Roles) (pageData request.PageData, err error) {
+func (s *RoleService) List(ctx context.Context, req request.Roles) (pageData request.PageData, err error) {
 	var (
 		m      model.Roles
 		models []model.Roles
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -57,9 +58,9 @@ func (s *RoleService) List(req request.Roles) (pageData request.PageData, err er
 }
 
 // Detail 详情
-func (s *RoleService) Detail(id int64) (m model.Roles, err error) {
+func (s *RoleService) Detail(ctx context.Context, id int64) (m model.Roles, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).
@@ -76,10 +77,10 @@ func (s *RoleService) Detail(id int64) (m model.Roles, err error) {
 }
 
 // Create 创建
-func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
+func (s *RoleService) Create(ctx context.Context, req request.Roles) (m model.Roles, err error) {
 	var (
 		count           int64
-		db              = s.DB(&m)
+		db              = s.DB(ctx, &m)
 		roleMenus       []model.RoleMenus
 		userRoles       []model.UserRoles
 		rolePermissions []model.RolePermissions
@@ -156,17 +157,17 @@ func (s *RoleService) Create(req request.Roles) (m model.Roles, err error) {
 
 	// 同步权限到Redis permission:user:{userId}
 	if req.RolePermissions != nil {
-		_ = s.syncRolePermissionsToRedis(m.ID)
+		_ = s.syncRolePermissionsToRedis(ctx, m.ID)
 	}
 
 	return m, nil
 }
 
 // Update 更新
-func (s *RoleService) Update(id int64, data map[string]any) (err error) {
+func (s *RoleService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
 	var (
 		count int64
-		db    = s.DB(&model.Roles{})
+		db    = s.DB(ctx, &model.Roles{})
 	)
 
 	// 校验角色名是否重复
@@ -195,7 +196,7 @@ func (s *RoleService) Update(id int64, data map[string]any) (err error) {
 
 	tx := db.Begin()
 
-	rows := model.FilterFields(s.DB(&model.Roles{}), model.Roles{}, data)
+	rows := model.FilterFields(s.DB(ctx, &model.Roles{}), model.Roles{}, data)
 	rows[model.UpdatedField] = time.Now()
 
 	err = tx.Model(&model.Roles{}).Where("id = ?", id).Updates(rows).Error
@@ -308,17 +309,17 @@ func (s *RoleService) Update(id int64, data map[string]any) (err error) {
 
 	// 同步权限到Redis permission:user:{userId}
 	if hasRolePermissions {
-		_ = s.syncRolePermissionsToRedis(id)
+		_ = s.syncRolePermissionsToRedis(ctx, id)
 	}
 
 	return nil
 }
 
 // Delete 删除
-func (s *RoleService) Delete(id int64) (err error) {
+func (s *RoleService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.Roles
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	// 该角色的用户(事务前查询,事务后会删掉关联)
@@ -370,15 +371,15 @@ func (s *RoleService) Delete(id int64) (err error) {
 
 	// 重建受影响用户的Redis权限集合
 	for _, userID := range userIDs {
-		_ = s.rebuildUserPermissions(db, userID)
+		_ = s.rebuildUserPermissions(ctx, db, userID)
 	}
 
 	return nil
 }
 
 // syncRolePermissionsToRedis 将角色的权限同步到其所有用户的Redis集合
-func (s *RoleService) syncRolePermissionsToRedis(roleID int64) error {
-	db := s.DB(&model.Roles{})
+func (s *RoleService) syncRolePermissionsToRedis(ctx context.Context, roleID int64) error {
+	db := s.DB(ctx, &model.Roles{})
 
 	// 查询该角色的所有用户
 	var userRoles []model.UserRoles
@@ -401,7 +402,7 @@ func (s *RoleService) syncRolePermissionsToRedis(roleID int64) error {
 
 	// 为每个用户重建权限集合
 	for _, userID := range userIDs {
-		if err := s.rebuildUserPermissions(db, userID); err != nil {
+		if err := s.rebuildUserPermissions(ctx, db, userID); err != nil {
 			return err
 		}
 	}
@@ -416,8 +417,8 @@ type userPermissionRow struct {
 }
 
 // SyncAllUserPermissions 全量同步所有用户权限到Redis(仅同步role_permissions表中已有的权限)
-func (s *RoleService) SyncAllUserPermissions() error {
-	db := s.DB(&model.Roles{})
+func (s *RoleService) SyncAllUserPermissions(ctx context.Context) error {
+	db := s.DB(ctx, &model.Roles{})
 
 	// 查所有有角色的用户
 	var allUserIDs []int64
@@ -450,26 +451,26 @@ func (s *RoleService) SyncAllUserPermissions() error {
 	}
 
 	// Redis Pipeline 批量写入
-	redisCache := s.Cache("redis").Redis()
+	redisCache := s.Cache(ctx, "redis").Redis()
 	pipe := redisCache.Pipeline()
 	for userID, keys := range userPerms {
 		redisKey := fmt.Sprintf("permission:user:%d", userID)
-		pipe.Del(s.Ctx, redisKey)
+		pipe.Del(ctx, redisKey)
 		if len(keys) > 0 {
 			members := make([]any, len(keys))
 			for i, k := range keys {
 				members[i] = k
 			}
-			pipe.SAdd(s.Ctx, redisKey, members...)
+			pipe.SAdd(ctx, redisKey, members...)
 		}
 	}
 
-	_, err := pipe.Exec(s.Ctx)
+	_, err := pipe.Exec(ctx)
 	return err
 }
 
 // rebuildUserPermissions 重建单个用户的Redis权限集合
-func (s *RoleService) rebuildUserPermissions(db *gorm.DB, userID int64) error {
+func (s *RoleService) rebuildUserPermissions(ctx context.Context, db *gorm.DB, userID int64) error {
 	var (
 		m           model.Permission
 		permissions []model.Permission
@@ -488,7 +489,7 @@ func (s *RoleService) rebuildUserPermissions(db *gorm.DB, userID int64) error {
 	}
 
 	key := fmt.Sprintf("permission:user:%d", userID)
-	redisCache := s.Cache("redis").Redis()
+	redisCache := s.Cache(ctx, "redis").Redis()
 
 	_ = redisCache.Delete(key)
 

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/app/service"
@@ -69,6 +70,6 @@ func SyncPermissionRoutes() {
 	permissionKeys := GenerateAuthPermissionKeys()
 	if len(permissionKeys) > 0 {
 		svc := service.PermissionService{}
-		_ = svc.SyncRoutePermissions(permissionKeys)
+		_ = svc.SyncRoutePermissions(context.Background(), permissionKeys)
 	}
 }

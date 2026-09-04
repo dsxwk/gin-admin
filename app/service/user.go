@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"gin/app/enum"
 	"gin/app/model"
@@ -17,10 +18,10 @@ type UserService struct {
 }
 
 // List 列表
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
 	var (
 		m  []model.User
-		db = s.DB(&model.User{})
+		db = s.DB(ctx, &model.User{})
 	)
 
 	// 搜索
@@ -59,11 +60,11 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 }
 
 // Create 创建
-func (s *UserService) Create(req request.User) (m model.User, err error) {
+func (s *UserService) Create(ctx context.Context, req request.User) (m model.User, err error) {
 	var (
 		count     int64
 		userRoles []model.UserRoles
-		db        = s.DB(&model.User{})
+		db        = s.DB(ctx, &model.User{})
 	)
 
 	// 校验用户名是否重复
@@ -158,10 +159,10 @@ func (s *UserService) Create(req request.User) (m model.User, err error) {
 }
 
 // Update 更新
-func (s *UserService) Update(id int64, data map[string]any) (err error) {
+func (s *UserService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
 	var (
 		count int64
-		db    = s.DB(&model.User{})
+		db    = s.DB(ctx, &model.User{})
 	)
 
 	userRolesData, ok := data["userRoles"].([]any)
@@ -190,7 +191,7 @@ func (s *UserService) Update(id int64, data map[string]any) (err error) {
 	rows := model.FilterFields(db, model.User{}, data)
 	rows[model.UpdatedField] = time.Now()
 
-	tx := s.DB(&model.User{}).Begin()
+	tx := s.DB(ctx, &model.User{}).Begin()
 
 	err = tx.Model(&model.User{}).Where("id = ?", id).Updates(rows).Error
 	if err != nil {
@@ -298,9 +299,9 @@ func (s *UserService) Update(id int64, data map[string]any) (err error) {
 }
 
 // Detail 详情
-func (s *UserService) Detail(id int64) (m model.User, err error) {
+func (s *UserService) Detail(ctx context.Context, id int64) (m model.User, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).
@@ -318,10 +319,10 @@ func (s *UserService) Detail(id int64) (m model.User, err error) {
 }
 
 // Delete 删除
-func (s *UserService) Delete(id int64) (err error) {
+func (s *UserService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.User
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Delete(&m, id).Error
@@ -333,10 +334,10 @@ func (s *UserService) Delete(id int64) (err error) {
 }
 
 // BatchDelete 批量删除
-func (s *UserService) BatchDelete(ids []int64) (err error) {
+func (s *UserService) BatchDelete(ctx context.Context, ids []int64) (err error) {
 	var (
 		m  model.User
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Delete(&m, ids).Error
@@ -348,8 +349,8 @@ func (s *UserService) BatchDelete(ids []int64) (err error) {
 }
 
 // Import 批量导入用户
-func (s *UserService) Import(createdUser int64, req request.UserImport) (request.UserImport, error) {
-	db := s.DB(&model.User{})
+func (s *UserService) Import(ctx context.Context, createdUser int64, req request.UserImport) (request.UserImport, error) {
+	db := s.DB(ctx, &model.User{})
 
 	// 收集所有用户名和邮箱
 	usernames := make([]string, 0, len(req.Data))
@@ -441,10 +442,10 @@ func (s *UserService) Import(createdUser int64, req request.UserImport) (request
 }
 
 // Password 更新密码
-func (s *UserService) Password(id int64, user request.UserPassword) error {
+func (s *UserService) Password(ctx context.Context, id int64, user request.UserPassword) error {
 	var (
 		m  model.User
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	user.Password = pkg.BcryptHash(user.Password)

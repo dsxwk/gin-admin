@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -11,11 +12,11 @@ type OperatorLogService struct {
 }
 
 // List 列表
-func (s *OperatorLogService) List(req request.OperatorLog) (pageData request.PageData, err error) {
+func (s *OperatorLogService) List(ctx context.Context, req request.OperatorLog) (pageData request.PageData, err error) {
 	var (
 		m      model.OperatorLog
 		models []model.OperatorLog
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -48,8 +49,8 @@ func (s *OperatorLogService) List(req request.OperatorLog) (pageData request.Pag
 }
 
 // Detail 详情
-func (s *OperatorLogService) Detail(id int64) (m model.OperatorLog, err error) {
-	db := s.DB(&m)
+func (s *OperatorLogService) Detail(ctx context.Context, id int64) (m model.OperatorLog, err error) {
+	db := s.DB(ctx, &m)
 	err = db.Model(&m).Preload("User").First(&m, id).Error
 	if err != nil {
 		return m, err
@@ -58,10 +59,10 @@ func (s *OperatorLogService) Detail(id int64) (m model.OperatorLog, err error) {
 }
 
 // Delete 删除
-func (s *OperatorLogService) Delete(id int64) (err error) {
+func (s *OperatorLogService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.OperatorLog
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 	err = db.Model(&m).Delete(&m, id).Error
 	if err != nil {
@@ -71,10 +72,10 @@ func (s *OperatorLogService) Delete(id int64) (err error) {
 }
 
 // BatchDelete 批量删除
-func (s *OperatorLogService) BatchDelete(ids []int64) (err error) {
+func (s *OperatorLogService) BatchDelete(ctx context.Context, ids []int64) (err error) {
 	var (
 		m  model.OperatorLog
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 	err = db.Model(&m).Delete(&m, ids).Error
 	if err != nil {

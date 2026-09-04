@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -11,11 +12,11 @@ type ImportRecordsService struct {
 }
 
 // List 列表
-func (s *ImportRecordsService) List(req request.ImportRecords) (pageData request.PageData, err error) {
+func (s *ImportRecordsService) List(ctx context.Context, req request.ImportRecords) (pageData request.PageData, err error) {
 	var (
 		m      model.ImportRecords
 		models []model.ImportRecords
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -48,10 +49,10 @@ func (s *ImportRecordsService) List(req request.ImportRecords) (pageData request
 }
 
 // Delete 删除
-func (s *ImportRecordsService) Delete(id int64) (err error) {
+func (s *ImportRecordsService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.ImportRecords
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Delete(&m, id).Error

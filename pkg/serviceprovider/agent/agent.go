@@ -175,7 +175,7 @@ func (a *Agent) record(record MessageRecord) {
 	if a.recorder == nil || a.sessionId == 0 {
 		return
 	}
-	_ = a.recorder.RecordMessage(a.sessionId, record)
+	_ = a.recorder.RecordMessage(a.ctx, a.sessionId, record)
 }
 
 // buildMessages 构建消息列表

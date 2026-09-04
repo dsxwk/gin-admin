@@ -1,12 +1,14 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"gin/app/event"
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/app/model"
 	"gin/common/base"
+	"gin/common/errcode"
 	"gin/pkg"
 
 	"gorm.io/gorm"
@@ -17,9 +19,9 @@ type LoginService struct {
 }
 
 // Login 登录
-func (s *LoginService) Login(username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
+func (s *LoginService) Login(ctx context.Context, username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
 	var (
-		db   = s.DB(&m)
+		db   = s.DB(ctx, &m)
 		conf = facade.Config()
 	)
 
@@ -28,26 +30,26 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 		Where("username = ?", username).
 		First(&m).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("login.accountErr"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+			return errcode.NotFound().WithMsg("login.accountErr"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 		}
 	}
 
 	check := pkg.BcryptCheck(password, m.Password)
 	if !check {
-		return errors.New("login.pwdErr"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+		return errcode.ArgsError().WithMsg("login.pwdErr"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
 	if m.Status == 2 {
-		return errors.New("login.accountDisabled"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+		return errcode.ArgsError().WithMsg("login.accountDisabled"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
 	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = middleware.Jwt{}.WithRefresh(m.ID, conf.Jwt.Exp, conf.Jwt.RefreshExp)
 	if err != nil {
-		return errors.New(err.Error()), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+		return err, m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
 	// 发布事件
-	facade.Event().Publish[event.UserLoginEvent](s.Ctx, event.UserLoginEvent{
+	facade.Event().Publish[event.UserLoginEvent](ctx, event.UserLoginEvent{
 		UserId:   m.ID,
 		Username: m.Username,
 	})
@@ -56,7 +58,7 @@ func (s *LoginService) Login(username, password string) (err error, m model.User
 }
 
 // RefreshToken 刷新token
-func (s *LoginService) RefreshToken(token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
+func (s *LoginService) RefreshToken(ctx context.Context, token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
 	var (
 		conf = facade.Config()
 	)
@@ -64,7 +66,7 @@ func (s *LoginService) RefreshToken(token string) (accessToken, refreshToken str
 	j := middleware.Jwt{}
 	claims, err := j.Decode(token)
 	if err != nil || claims["typ"] != "refresh" {
-		return accessToken, refreshToken, tExp, rExp, errors.New("login.invalidToken")
+		return accessToken, refreshToken, tExp, rExp, errcode.ArgsError().WithMsg("login.invalidToken")
 	}
 
 	uid := int64(claims["id"].(float64))

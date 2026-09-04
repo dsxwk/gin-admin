@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -12,11 +13,11 @@ type ArticleService struct {
 }
 
 // List 列表
-func (s *ArticleService) List(req request.Article) (pageData request.PageData, err error) {
+func (s *ArticleService) List(ctx context.Context, req request.Article) (pageData request.PageData, err error) {
 	var (
 		m      model.Article
 		models []model.Article
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -49,10 +50,10 @@ func (s *ArticleService) List(req request.Article) (pageData request.PageData, e
 }
 
 // Create 创建
-func (s *ArticleService) Create(createdUser int64, req request.Article) (model.Article, error) {
+func (s *ArticleService) Create(ctx context.Context, createdUser int64, req request.Article) (model.Article, error) {
 	var (
 		m  model.Article
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	m = model.Article{
@@ -74,17 +75,17 @@ func (s *ArticleService) Create(createdUser int64, req request.Article) (model.A
 }
 
 // Update 更新
-func (s *ArticleService) Update(id int64, data map[string]any) (err error) {
+func (s *ArticleService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
 	if pkg.HasKey(data, "tag") {
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}
-	return s.Updates(&model.Article{}, id, data)
+	return s.Updates(ctx, &model.Article{}, id, data)
 }
 
 // Detail 详情
-func (s *ArticleService) Detail(id int64) (m model.Article, err error) {
+func (s *ArticleService) Detail(ctx context.Context, id int64) (m model.Article, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).First(&m, id).Error
@@ -96,10 +97,10 @@ func (s *ArticleService) Detail(id int64) (m model.Article, err error) {
 }
 
 // Delete 删除
-func (s *ArticleService) Delete(id int64) (err error) {
+func (s *ArticleService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.Article
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).Delete(&m, id).Error

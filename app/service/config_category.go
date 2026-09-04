@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -11,11 +12,11 @@ type ConfigCategoryService struct {
 }
 
 // List 列表
-func (s *ConfigCategoryService) List(req request.ConfigCategory) (pageData request.PageData, err error) {
+func (s *ConfigCategoryService) List(ctx context.Context, req request.ConfigCategory) (pageData request.PageData, err error) {
 	var (
 		m      model.ConfigCategory
 		models []model.ConfigCategory
-		db     = s.DB(&m)
+		db     = s.DB(ctx, &m)
 	)
 
 	// 搜索
@@ -48,10 +49,10 @@ func (s *ConfigCategoryService) List(req request.ConfigCategory) (pageData reque
 }
 
 // Create 创建
-func (s *ConfigCategoryService) Create(req request.ConfigCategory) (model.ConfigCategory, error) {
+func (s *ConfigCategoryService) Create(ctx context.Context, req request.ConfigCategory) (model.ConfigCategory, error) {
 	var (
 		m  model.ConfigCategory
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	m = model.ConfigCategory{
@@ -67,14 +68,14 @@ func (s *ConfigCategoryService) Create(req request.ConfigCategory) (model.Config
 }
 
 // Update 更新
-func (s *ConfigCategoryService) Update(id int64, data map[string]any) (err error) {
-	return s.Updates(&model.ConfigCategory{}, id, data)
+func (s *ConfigCategoryService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
+	return s.Updates(ctx, &model.ConfigCategory{}, id, data)
 }
 
 // Detail 详情
-func (s *ConfigCategoryService) Detail(id int64) (m model.ConfigCategory, err error) {
+func (s *ConfigCategoryService) Detail(ctx context.Context, id int64) (m model.ConfigCategory, err error) {
 	var (
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	err = db.Model(&m).First(&m, id).Error
@@ -86,10 +87,10 @@ func (s *ConfigCategoryService) Detail(id int64) (m model.ConfigCategory, err er
 }
 
 // Delete 删除
-func (s *ConfigCategoryService) Delete(id int64) (err error) {
+func (s *ConfigCategoryService) Delete(ctx context.Context, id int64) (err error) {
 	var (
 		m  model.ConfigCategory
-		db = s.DB(&m)
+		db = s.DB(ctx, &m)
 	)
 
 	tx := db.Begin()

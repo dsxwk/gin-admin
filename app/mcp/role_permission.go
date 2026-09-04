@@ -49,8 +49,7 @@ func (t *RolePermission) CallWithUser(ctx context.Context, userId int64, args ma
 	}
 
 	svc := service.PermissionService{}
-	svc.WithContext(ctx)
-	count, err := svc.SetRolePermissions(userId, role, permissions)
+	count, err := svc.SetRolePermissions(ctx, userId, role, permissions)
 	if err != nil {
 		return map[string]any{"error": err.Error()}, nil
 	}
