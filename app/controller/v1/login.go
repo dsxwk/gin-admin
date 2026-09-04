@@ -41,11 +41,11 @@ type CaptchaResponse struct {
 }
 
 // Login 登录
-// @Tags 登录相关
+// @Tags 登录相关swagger自动
 // @Summary 账号密码登录
 // @Description 用户账号密码登录
-// @Accept JSON
-// @Produce JSON
+// @Accept json
+// @Produce json
 // @Param data body request.UserLogin true "登录参数"
 // @Success 200 {object} errcode.SuccessResponse{data=LoginResponse} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
@@ -99,8 +99,8 @@ func (s *LoginController) Login(c *gin.Context) {
 // @Tags 登录相关
 // @Summary 刷新token
 // @Description 刷新token
-// @Accept JSON
-// @Produce JSON
+// @Accept json
+// @Produce json
 // @Param token header string true "刷新Token"
 // @Success 200 {object} errcode.SuccessResponse{data=Token} "成功"
 // @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
@@ -139,8 +139,8 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 // @Tags 登录相关
 // @Summary 测试
 // @Description 测试
-// @Accept JSON
-// @Produce JSON
+// @Accept json
+// @Produce json
 // @Success 200 {object} errcode.SuccessResponse{data=map[string]any{}} "成功"
 // @Router /api/v1/test [post]
 func (s *LoginController) Test(c *gin.Context) {
@@ -232,8 +232,8 @@ func (s *LoginController) generateCharset() string {
 // @Tags 登录相关
 // @Summary 获取验证码
 // @Description 获取验证码
-// @Accept JSON
-// @Produce JSON
+// @Accept json
+// @Produce json
 // @Success 200 {object} errcode.SuccessResponse{data=CaptchaResponse} "成功返回" Example({"code":0,"msg":"Success","data":[]})
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误" Example({"code":500,"msg":"系统错误","data":[]})
 // @Router /api/v1/captcha [get]
