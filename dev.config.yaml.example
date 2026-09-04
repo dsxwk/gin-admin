@@ -168,3 +168,9 @@ agent:
       api-key: ""
       base-url: "http://localhost:11434/v1"
       model: "qwen2.5:7b"
+
+# grpc服务配置
+grpc:
+  enabled: true # 是否启用grpc服务
+  host: 127.0.0.1 # 监听地址
+  port: 50051 # 监听端口
