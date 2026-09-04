@@ -205,7 +205,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.0.1](version_history_zh.md#v301)
+> - 最新版本 [v3.1.0](version_history_zh.md#v310)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -991,6 +991,7 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 package service
 
 import (
+    "context"
     "errors"
     "gin/app/model"
     "gin/app/request"
@@ -1005,10 +1006,10 @@ type UserService struct {
 }
 
 // List 列表
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
     var (
         m  []model.User
-        db = s.DB(&model.User{})
+        db = s.DB(ctx, &model.User{})
     )
   
     // 搜索
@@ -1079,8 +1080,8 @@ $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=角色请�
 package request
 
 import (
-  "errors"
   "gin/common/base"
+  "gin/common/errcode"
   "github.com/gookit/validate"
 )
 
@@ -1113,7 +1114,7 @@ type RoleUpdate struct {
 func (s Roles) Validate(data Roles, scene string) error {
   v := validate.Struct(data, scene)
   if !v.Validate(scene) {
-    return errors.New(v.Errors.One())
+    return errcode.ArgsError().WithMsg(v.Errors.One())
   }
   return nil
 }
@@ -1239,8 +1240,8 @@ func (s Roles) Translates() map[string]string {
 package request
 
 import (
-	"errors"
 	"gin/pkg"
+	"gin/common/errcode"
 	"github.com/gookit/validate"
 )
 
@@ -1265,7 +1266,7 @@ type UserImportItem struct {
 func (s UserImport) Validate(data UserImport, scene string) error {
     v := validate.Struct(data, scene)
     if !v.Validate(scene) {
-        return errors.New(v.Errors.One())
+        return errcode.ArgsError().WithMsg(v.Errors.One())
     }
     return nil
 }
@@ -1317,7 +1318,7 @@ func (s UserImport) Translates() map[string]string {
 package request
 
 import (
-    "errors"
+	"gin/common/errcode"
     "fmt"
     "github.com/gookit/validate"
 )
@@ -1337,13 +1338,13 @@ type SystemConfigUpdates struct {
 // Validate 系统配置批量更新请求验证
 func (s SystemConfigUpdates) Validate() error {
     if len(s.List) == 0 {
-        return errors.New("配置列表不能为空")
+        return errcode.ArgsError().WithMsg("配置列表不能为空")
     }
 
     for i, item := range s.List {
         v := validate.Struct(item)
         if !v.Validate() {
-            return fmt.Errorf("list[%d]项 %s", i, v.Errors.One())
+            return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]项 %s", i, v.Errors.One()))
         }
     }
 
@@ -1415,6 +1416,10 @@ func (s User) ValidateIsEven(val any) bool {
 ```go
 package request
 
+import (
+	"gin/common/errcode"
+)
+
 // Validate 请求验证
 func (s User) Validate(data User, scene string) error {
 	v := validate.Struct(data, scene)
@@ -1426,7 +1431,7 @@ func (s User) Validate(data User, scene string) error {
         return num%2 == 0
     })
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 
 	return nil
@@ -1444,6 +1449,8 @@ type User struct {
 ```
 
 ### 在控制器中使用
+
+> `BindValidate`一步完成参数绑定和验证,`Validate`只做验证。两者都会把请求ctx自动注入`BaseRequest`,翻译和验证消息可以直接使用请求上下文。
 
 ```go
 package v1
@@ -1480,32 +1487,30 @@ func (s *UserController) List(c *gin.Context) {
         req request.User
     )
 
-    s.service.WithContext(ctx)
-
     // 方式1
     /*err := c.ShouldBind(&req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }
 
     // 验证
-    err = req.Validate(req, "List")
+    err = facade.Request().Validate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }*/
     // 方式2
     // 绑定参数并验证
     err := facade.Request().BindValidate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }
 
-    res, err := s.service.List(req)
+    res, err := s.service.List(ctx, req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
+        s.Response.Error(c, err)
         return
     }
 
@@ -1514,6 +1519,8 @@ func (s *UserController) List(c *gin.Context) {
 ```
 
 # 服务
+
+> Service方法统一把`ctx`作为第一个参数,并显式传给`s.DB(ctx,model)`、`s.Cache(ctx,...)`、事件发布以及跨Service调用。`BaseService`不再保存请求上下文,共享的Service对象在并发请求下不会互相覆盖。
 
 ## 服务创建帮助
 
@@ -1546,6 +1553,8 @@ $ go run ./cmd/cli.go make:service -f=user --table=user -c=mysql
 ```
 
 # 控制器
+
+> 控制器通过`ctx := c.Request.Context()`取得请求上下文,并显式传给每个Service方法,不再调用`service.WithContext(ctx)`。请求验证使用`facade.Request().BindValidate`或`facade.Request().Validate`,会自动把请求ctx注入到Request中用于翻译。
 
 ## 控制器创建帮助
 
@@ -1613,18 +1622,16 @@ func (s *UserController) List(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "List")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  res, err := s.service.List(req)
+  res, err := s.service.List(ctx, req)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1647,18 +1654,16 @@ func (s *UserController) Create(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Create")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  user, err := s.service.Create(req)
+  user, err := s.service.Create(ctx, req)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1683,30 +1688,28 @@ func (s *UserController) Update(c *gin.Context) {
     req  request.User
   )
 
-  s.service.WithContext(ctx)
-
   err := c.ShouldBindBodyWith(&data, binding.JSON)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
   err = mapstructure.Decode(data, &req)
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
   req.ID = facade.Request().Path[int64](c, "id", 0)
-  err = req.Validate(req, "Update")
+  err = facade.Request().Validate(c, &req, "Update")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  err = s.service.Update(req.ID, data)
+  err = s.service.Update(ctx, req.ID, data)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1729,20 +1732,18 @@ func (s *UserController) Detail(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   req.ID = facade.Request().Path[int64](c, "id", 0)
 
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Detail")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  m, err := s.service.Detail(req.ID)
+  m, err := s.service.Detail(ctx, req.ID)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1765,20 +1766,18 @@ func (s *UserController) Delete(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   req.ID = facade.Request().Path[int64](c, "id", 0)
 
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Delete")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  err = s.service.Delete(req.ID)
+  err = s.service.Delete(ctx, req.ID)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
@@ -2741,8 +2740,6 @@ func (s *LoginController) Login(c *gin.Context) {
     req request.Login
   )
 
-  s.service.WithContext(ctx)
-
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Login")
   if err != nil {
@@ -2750,13 +2747,7 @@ func (s *LoginController) Login(c *gin.Context) {
     return
   }
 
-  userModel, err := s.service.Login(req.Username, req.Password)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
-    return
-  }
-
-  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
+  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
   if err != nil {
     s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
     return
@@ -3461,13 +3452,11 @@ type UserController struct {
     service service.UserService
 }
 
-func (s *TestController) Test(c *gin.Context) {
+func (s *UserController) Test(c *gin.Context) {
     var (
         ctx = c.Request.Context()
 		req request.User
 	)
-  
-    s.service.WithContext(ctx)
   
     // 绑定并验证参数
     err := facade.Request().BindValidate(c, &req, "List")
@@ -3476,7 +3465,7 @@ func (s *TestController) Test(c *gin.Context) {
         return
     }
   
-    res, err := s.service.List(req)
+    res, err := s.service.List(ctx, req)
     if err != nil {
         s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
         return
@@ -3491,6 +3480,7 @@ func (s *TestController) Test(c *gin.Context) {
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -3501,10 +3491,10 @@ type UserService struct {
 }
 
 // List 列表
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
     var (
         m  []model.User
-        db = s.DB(&model.User{})
+        db = s.DB(ctx, &model.User{})
     )
   
     // 搜索
@@ -3544,7 +3534,7 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 ```bash
 $ go install github.com/swaggo/swag/cmd/swag@latest
 # 使用
-$ swag init -g main.go # --exclude cli,app/service
+$ swag init -g main.go --exclude grpc # --exclude cli,app/service
 # 或使用
 $ go run ./cmd/cli.go make:docs
 2025/10/23 16:26:42 Generate swagger docs....

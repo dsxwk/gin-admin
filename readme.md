@@ -216,7 +216,7 @@
 
 # Version History
 
-> - Latest Version [v3.0.1](version_history.md#v301)
+> - Latest Version [v3.1.0](version_history.md#v310)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -1014,6 +1014,7 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 package service
 
 import (
+  "context"
   "errors"
   "gin/app/model"
   "gin/app/request"
@@ -1028,10 +1029,10 @@ type UserService struct {
 }
 
 // List user-list
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
   var (
     m  []model.User
-    db = s.DB(&model.User{})
+    db = s.DB(ctx, &model.User{})
   )
 
   // Search
@@ -1102,63 +1103,63 @@ $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-reques
 package request
 
 import (
-  "errors"
-  "gin/common/base"
-  "github.com/gookit/validate"
+    "gin/common/base"
+	"gin/common/errcode"
+    "github.com/gookit/validate"
 )
 
 // Roles role-request-validation
 type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
-  Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
-  PageListValidate
+    base.BaseRequest
+    ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+    Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
+    Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
+    Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+    PageListValidate
 }
 
 func (s Roles) Validate(data Roles, scene string) error {
-  v := validate.Struct(data, scene)
-  if !v.Validate(scene) {
-    return errors.New(v.Errors.One())
-  }
-  return nil
+    v := validate.Struct(data, scene)
+    if !v.Validate(scene) {
+        return errcode.ArgsError().WithMsg(v.Errors.One())
+    }
+    return nil
 }
 
 // ConfigValidation Configuration-Validation
 // - Define validation scenes
 // - You can also add verification settings
 func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "Create": []string{"Name", "Desc", "Status"},
-    "Update": []string{"ID", "Name", "Desc", "Status"},
-    "Detail": []string{"ID"},
-    "Delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
+    scenes := validate.SValues{
+        "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+        "Create": []string{"Name", "Desc", "Status"},
+        "Update": []string{"ID", "Name", "Desc", "Status"},
+        "Detail": []string{"ID"},
+        "Delete": []string{"ID"},
+    }
+    v.WithScenes(scenes)
 }
 
 // Messages messages
 func (s Roles) Messages() map[string]string {
-  return validate.MS{
-    "required":    "Field {field} Required",
-    "int":         "Field {field} Must be an integer",
-    "Page.gt":     "Field {field} Must be greater than 0",
-    "PageSize.gt": "Field {field} Must be greater than 0",
-  }
+    return validate.MS{
+        "required":    "Field {field} Required",
+        "int":         "Field {field} Must be an integer",
+        "Page.gt":     "Field {field} Must be greater than 0",
+        "PageSize.gt": "Field {field} Must be greater than 0",
+    }
 }
 
 // Translates translate
 func (s Roles) Translates() map[string]string {
-  return validate.MS{
-    "ID":       "ID",
-    "Name":     "Role Name",
-    "Desc":     "Role Description",
-    "Status":   "Status 1=Enable 2=Disable",
-    "Page":     "Page",
-    "PageSize": "Page Size",
-  }
+    return validate.MS{
+        "ID":       "ID",
+        "Name":     "Role Name",
+        "Desc":     "Role Description",
+        "Status":   "Status 1=Enable 2=Disable",
+        "Page":     "Page",
+        "PageSize": "Page Size",
+    }
 }
 ```
 
@@ -1242,8 +1243,8 @@ func (s Roles) Translates() map[string]string {
 package request
 
 import (
-	"errors"
 	"gin/pkg"
+	"gin/common/errcode"
 	"github.com/gookit/validate"
 )
 
@@ -1268,7 +1269,7 @@ type UserImportItem struct {
 func (s UserImport) Validate(data UserImport, scene string) error {
     v := validate.Struct(data, scene)
     if !v.Validate(scene) {
-        return errors.New(v.Errors.One())
+        return errcode.ArgsError().WithMsg(v.Errors.One())
     }
     return nil
 }
@@ -1320,7 +1321,7 @@ func (s UserImport) Translates() map[string]string {
 package request
 
 import (
-    "errors"
+	"gin/common/errcode"
     "fmt"
     "github.com/gookit/validate"
 )
@@ -1340,13 +1341,13 @@ type SystemConfigUpdates struct {
 // Validate System configuration batch update request verification
 func (s SystemConfigUpdates) Validate() error {
     if len(s.List) == 0 {
-        return errors.New("The configuration list cannot be empty")
+        return errcode.ArgsError().WithMsg("The configuration list cannot be empty")
     }
 
     for i, item := range s.List {
         v := validate.Struct(item)
         if !v.Validate() {
-            return fmt.Errorf("list[%d]item %s", i, v.Errors.One())
+            return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]item %s", i, v.Errors.One()))
         }
     }
 
@@ -1419,6 +1420,10 @@ func (s User) ValidateIsEven(val any) bool {
 ```go
 package request
 
+import (
+	"gin/common/errcode"
+)
+
 // Validate Request-Validation
 func (s User) Validate(data User, scene string) error {
     v := validate.Struct(data, scene)
@@ -1430,7 +1435,7 @@ func (s User) Validate(data User, scene string) error {
         return num%2 == 0
     })
 	if !v.Validate(scene) {
-		return errors.New(v.Errors.One())
+		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 
     return nil
@@ -1448,6 +1453,8 @@ type User struct {
 ```
 
 ### Used In The Controller
+
+> `BindValidate` binds query/body and validates in one step. `Validate` only validates. Both accept the request context and automatically inject it into `BaseRequest`, so translation and validation messages can use the request context.
 
 ```go
 package v1
@@ -1484,32 +1491,30 @@ func (s *UserController) List(c *gin.Context) {
         req request.User
     )
 
-    s.service.WithContext(ctx)
-
     // Method One
     /*err := c.ShouldBind(&req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }
 
     // Validator
-    err = req.Validate(req, "List")
+    err = facade.Request().Validate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }*/
     // Method Two
     // Bind And Validate
     err := facade.Request().BindValidate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }
 
-    res, err := s.service.List(req)
+    res, err := s.service.List(ctx, req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
+        s.Response.Error(c, err)
         return
     }
 
@@ -1518,6 +1523,8 @@ func (s *UserController) List(c *gin.Context) {
 ```
 
 # Service
+
+> Service methods take `ctx` as the first parameter and pass it explicitly to `s.DB(ctx, model)`, `s.Cache(ctx, ...)`, event publishing, and cross-service calls. `BaseService` no longer stores a request context, so shared service objects are safe under concurrent requests.
 
 ## Service Creation Help
 
@@ -1550,6 +1557,8 @@ $ go run ./cmd/cli.go make:service -f=user --table=user -c=mysql
 ```
 
 # Controller
+
+> Controllers obtain `ctx := c.Request.Context()` and pass it to every service method. Do not call `service.WithContext(ctx)` anymore. Request validation via `facade.Request().BindValidate` or `facade.Request().Validate` automatically injects the request context into the request struct for translation.
 
 ## Controller Creation Help
 
@@ -1617,18 +1626,16 @@ func (s *UserController) List(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "List")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  res, err := s.service.List(req)
+  res, err := s.service.List(ctx, req)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1651,18 +1658,16 @@ func (s *UserController) Create(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Create")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  user, err := s.service.Create(req)
+  user, err := s.service.Create(ctx, req)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1687,30 +1692,28 @@ func (s *UserController) Update(c *gin.Context) {
     req  request.User
   )
 
-  s.service.WithContext(ctx)
-
   err := c.ShouldBindBodyWith(&data, binding.JSON)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
   err = mapstructure.Decode(data, &req)
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
   req.ID = facade.Request().Path[int64](c, "id", 0)
-  err = req.Validate(req, "Update")
+  err = facade.Request().Validate(c, &req, "Update")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  err = s.service.Update(req.ID, data)
+  err = s.service.Update(ctx, req.ID, data)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1733,20 +1736,18 @@ func (s *UserController) Detail(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   req.ID = facade.Request().Path[int64](c, "id", 0)
 
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Detail")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  m, err := s.service.Detail(req.ID)
+  m, err := s.service.Detail(ctx, req.ID)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
@@ -1769,20 +1770,18 @@ func (s *UserController) Delete(c *gin.Context) {
     req request.User
   )
 
-  s.service.WithContext(ctx)
-
   req.ID = facade.Request().Path[int64](c, "id", 0)
 
   // 绑定参数并验证
   err := facade.Request().BindValidate(c, &req, "Delete")
   if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
-  err = s.service.Delete(req.ID)
+  err = s.service.Delete(ctx, req.ID)
   if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(err.Error()))
+    s.Response.Error(c, err)
     return
   }
 
@@ -2760,8 +2759,6 @@ func (s *LoginController) Login(c *gin.Context) {
     req request.Login
   )
 
-  s.service.WithContext(ctx)
-
   // Bind And Validate
   err := facade.Request().BindValidate(c, &req, "Login")
   if err != nil {
@@ -2769,13 +2766,7 @@ func (s *LoginController) Login(c *gin.Context) {
     return
   }
 
-  userModel, err := s.service.Login(req.Username, req.Password)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
-    return
-  }
-
-  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(req.Username, req.Password)
+  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
   if err != nil {
     s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
     return
@@ -3494,13 +3485,11 @@ type UserController struct {
     service service.UserService
 }
 
-func (s *TestController) Test(c *gin.Context) {
+func (s *UserController) Test(c *gin.Context) {
     var (
         ctx = c.Request.Context()
 		req request.User
 	)
-  
-    s.service.WithContext(ctx)
   
     // Bind and validate parameters
     err := facade.Request().BindValidate(c, &req, "List")
@@ -3509,7 +3498,7 @@ func (s *TestController) Test(c *gin.Context) {
         return
     }
   
-    res, err := s.service.List(req)
+    res, err := s.service.List(ctx, req)
     if err != nil {
         s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
         return
@@ -3524,6 +3513,7 @@ func (s *TestController) Test(c *gin.Context) {
 package service
 
 import (
+	"context"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -3534,10 +3524,10 @@ type UserService struct {
 }
 
 // List
-func (s *UserService) List(req request.User) (pageData request.PageData, err error) {
+func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
     var (
         m  []model.User
-        db = s.DB(&model.User{})
+        db = s.DB(ctx, &model.User{})
     )
   
     // Search 
@@ -3577,7 +3567,7 @@ func (s *UserService) List(req request.User) (pageData request.PageData, err err
 ```bash
 $ go install github.com/swaggo/swag/cmd/swag@latest
 # Use
-$ swag init -g main.go # --exclude cli,app/service
+$ swag init -g main.go --exclude grpc # --exclude cli,app/service
 # Or Use
 $ go run ./cmd/cli.go make:docs
 2025/10/23 16:26:42 Generate swagger docs....
