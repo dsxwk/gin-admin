@@ -1,9 +1,9 @@
 package request
 
 import (
-	"gin/app/errcode"
-
 	"github.com/gookit/validate"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // UserRequest 用户请求
@@ -67,7 +67,7 @@ type DeptItem struct {
 func (s UserRequest) Validate(data UserRequest, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
+		return status.Error(codes.InvalidArgument, v.Errors.One())
 	}
 	return nil
 }
@@ -182,7 +182,7 @@ func (s UserBatchDeleteRequest) Translates() map[string]string {
 func validateRequest(data any, scene string) error {
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
+		return status.Error(codes.InvalidArgument, v.Errors.One())
 	}
 	return nil
 }

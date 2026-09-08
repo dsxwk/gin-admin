@@ -1,9 +1,9 @@
 package {{.Package}}
 
 import (
-    "gin/app/errcode"
-
     "github.com/gookit/validate"
+    "google.golang.org/grpc/codes"
+    "google.golang.org/grpc/status"
 )
 
 // {{.Name}}Request {{.Description}}请求
@@ -44,7 +44,7 @@ type {{.Name}}BatchDeleteRequest struct {
 func (s {{.Name}}Request) Validate(data {{.Name}}Request, scene string) error {
     v := validate.Struct(data, scene)
     if !v.Validate(scene) {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
+        return status.Error(codes.InvalidArgument, v.Errors.One())
     }
     return nil
 }
@@ -71,7 +71,7 @@ func (s {{.Name}}Request) Translates() map[string]string {
 func (s {{.Name}}ListRequest) Validate() error {
     v := validate.Struct(s, "List")
     if !v.Validate("List") {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
+        return status.Error(codes.InvalidArgument, v.Errors.One())
     }
     return nil
 }
@@ -97,7 +97,7 @@ func (s {{.Name}}ListRequest) Translates() map[string]string {
 func (s {{.Name}}CreateRequest) Validate() error {
     v := validate.Struct(s, "Create")
     if !v.Validate("Create") {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
+        return status.Error(codes.InvalidArgument, v.Errors.One())
     }
     return nil
 }
@@ -127,7 +127,7 @@ func (s {{.Name}}CreateRequest) Translates() map[string]string {
 func (s {{.Name}}UpdateRequest) Validate() error {
     v := validate.Struct(s, "Update")
     if !v.Validate("Update") {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
+        return status.Error(codes.InvalidArgument, v.Errors.One())
     }
     return nil
 }
@@ -158,7 +158,7 @@ func (s {{.Name}}UpdateRequest) Translates() map[string]string {
 func (s {{.Name}}BatchDeleteRequest) Validate() error {
     v := validate.Struct(s, "BatchDelete")
     if !v.Validate("BatchDelete") {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
+        return status.Error(codes.InvalidArgument, v.Errors.One())
     }
     return nil
 }
