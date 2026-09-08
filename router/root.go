@@ -5,10 +5,9 @@ import (
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/app/service"
-	"gin/common/errcode"
-	"gin/common/response"
 	_ "gin/docs"
 	"gin/pkg"
+	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/mcp"
 	"net/http"
 
@@ -46,7 +45,7 @@ func LoadRouters(router *gin.Engine) {
 	// 全局限流:rateLimitMiddleware.Handle() 用户限流:rateLimitMiddleware.UserRateLimit(1, 1) ip限流:rateLimitMiddleware.IpRateLimit(1, 1)
 	// 健康检查
 	public.GET("/ping", rateLimitMiddleware.IpRateLimit(1, 1), func(c *gin.Context) {
-		response.Response{}.Success(c, errcode.NewError(0, "pong"))
+		facade.Response().Success(c, errcode.NewError(0, "pong"))
 	})
 
 	// 自动注册

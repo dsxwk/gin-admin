@@ -1,8 +1,7 @@
-package response
+package errcode
 
 import (
 	"errors"
-	"gin/common/errcode"
 	"gin/pkg/serviceprovider/lang"
 	"gin/pkg/serviceprovider/logger"
 	"net/http"
@@ -35,7 +34,7 @@ func (r Response) json(c *gin.Context, httpCode int) {
 // Success 返回成功响应,可传ErrorCode
 func (r Response) Success(c *gin.Context, e error) {
 	var (
-		ec  errcode.ErrorCode
+		ec  ErrorCode
 		ctx = c.Request.Context()
 	)
 	if e != nil && errors.As(e, &ec) {
@@ -44,7 +43,7 @@ func (r Response) Success(c *gin.Context, e error) {
 			r.Msg = ec.Msg
 			r.Msg = lang.Trans(ctx, ec.Msg, nil)
 		} else {
-			r.Msg = errcode.Success().Msg
+			r.Msg = Success().Msg
 			r.Msg = lang.Trans(ctx, r.Msg, nil)
 		}
 		if ec.Data == nil {
@@ -66,7 +65,7 @@ func (r Response) Success(c *gin.Context, e error) {
 		r.Msg = e.Error()
 		r.Msg = lang.Trans(ctx, r.Msg, nil)
 	} else {
-		r.Msg = errcode.Success().Msg
+		r.Msg = Success().Msg
 		r.Msg = lang.Trans(ctx, r.Msg, nil)
 	}
 	r.Data = []any{}
@@ -76,7 +75,7 @@ func (r Response) Success(c *gin.Context, e error) {
 // Error 返回失败响应,可传ErrorCode
 func (r Response) Error(c *gin.Context, e error) {
 	var (
-		ec  errcode.ErrorCode
+		ec  ErrorCode
 		ctx = c.Request.Context()
 	)
 	// ErrorCode类型
@@ -87,7 +86,7 @@ func (r Response) Error(c *gin.Context, e error) {
 			r.Msg = lang.Trans(ctx, r.Msg, nil)
 			log.WithDebugger(ctx).Error(r.Msg)
 		} else {
-			r.Msg = errcode.Success().Msg
+			r.Msg = Success().Msg
 			r.Msg = lang.Trans(ctx, r.Msg, nil)
 			log.WithDebugger(ctx).Error(r.Msg)
 		}
@@ -105,7 +104,7 @@ func (r Response) Error(c *gin.Context, e error) {
 	}
 
 	// 普通error
-	r.Code = errcode.SystemError().Code
+	r.Code = SystemError().Code
 	if e != nil {
 		r.Msg = e.Error()
 		r.Msg = lang.Trans(ctx, r.Msg, nil)
@@ -113,7 +112,7 @@ func (r Response) Error(c *gin.Context, e error) {
 			log.WithDebugger(ctx).Error(r.Msg)
 		}
 	} else {
-		r.Msg = errcode.SystemError().Msg
+		r.Msg = SystemError().Msg
 		r.Msg = lang.Trans(ctx, r.Msg, nil)
 		if log != nil {
 			log.WithDebugger(ctx).Error(r.Msg)

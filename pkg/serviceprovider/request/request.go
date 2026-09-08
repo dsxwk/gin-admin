@@ -3,7 +3,7 @@ package request
 import (
 	"context"
 	"fmt"
-	"gin/common/errcode"
+	"gin/pkg/errcode"
 	"strconv"
 	"strings"
 

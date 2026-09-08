@@ -1,7 +1,7 @@
 package {{.Package}}
 
 import (
-    "gin/common/errcode"
+    "gin/app/errcode"
 
     "github.com/gookit/validate"
 )

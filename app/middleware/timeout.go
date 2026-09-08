@@ -3,8 +3,8 @@ package middleware
 import (
 	"context"
 	"errors"
+	"gin/app/errcode"
 	"gin/common/base"
-	"gin/common/errcode"
 	"time"
 
 	"github.com/gin-gonic/gin"

@@ -2319,7 +2319,7 @@ paths:
             $ref: '#/definitions/errcode.SystemErrorResponse'
       summary: 账号密码登录
       tags:
-      - 登录相关
+      - 登录相关swagger自动
   /api/v1/menu:
     get:
       description: 菜单列表

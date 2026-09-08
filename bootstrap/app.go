@@ -7,9 +7,9 @@ import (
 	"gin/app/facade"
 	_ "gin/bootstrap/import"
 	"gin/common/flag"
-	"gin/common/response"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider"
 	"gin/router"
 	"net"
@@ -61,7 +61,7 @@ func setupEngine() *gin.Engine {
 	r := gin.New()
 
 	conf := facade.Config()
-	response.SetLogger(facade.Log())
+	errcode.SetLogger(facade.Log())
 
 	// 设置运行模式
 	gin.SetMode(conf.App.Mode)

@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"errors"
+	"gin/app/errcode"
 	"gin/app/event"
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/errcode"
 	"gin/pkg"
 
 	"gorm.io/gorm"
@@ -21,8 +21,10 @@ type LoginService struct {
 // Login 登录
 func (s *LoginService) Login(ctx context.Context, username, password string) (err error, m model.User, accessToken, refreshToken string, tokenExpire, refreshTokenExpire int64) {
 	var (
-		db   = s.DB(ctx, &m)
-		conf = facade.Config()
+		db       = s.DB(ctx, &m)
+		conf     = facade.Config()
+		loginErr errcode.LoginErrCode
+		jwt      middleware.Jwt
 	)
 
 	if err = db.Model(&m).
@@ -30,20 +32,20 @@ func (s *LoginService) Login(ctx context.Context, username, password string) (er
 		Where("username = ?", username).
 		First(&m).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errcode.NotFound().WithMsg("login.accountErr"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+			return loginErr.AccountError(), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 		}
 	}
 
 	check := pkg.BcryptCheck(password, m.Password)
 	if !check {
-		return errcode.ArgsError().WithMsg("login.pwdErr"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+		return loginErr.PwdError(), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
 	if m.Status == 2 {
-		return errcode.ArgsError().WithMsg("login.accountDisabled"), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
+		return loginErr.AccountDisabled(), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
 
-	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = middleware.Jwt{}.WithRefresh(m.ID, conf.Jwt.Exp, conf.Jwt.RefreshExp)
+	accessToken, refreshToken, tokenExpire, refreshTokenExpire, err = jwt.WithRefresh(m.ID, conf.Jwt.Exp, conf.Jwt.RefreshExp)
 	if err != nil {
 		return err, m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}
@@ -60,16 +62,17 @@ func (s *LoginService) Login(ctx context.Context, username, password string) (er
 // RefreshToken 刷新token
 func (s *LoginService) RefreshToken(ctx context.Context, token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
 	var (
-		conf = facade.Config()
+		conf     = facade.Config()
+		loginErr errcode.LoginErrCode
+		jwt      middleware.Jwt
 	)
 
-	j := middleware.Jwt{}
-	claims, err := j.Decode(token)
+	claims, err := jwt.Decode(token)
 	if err != nil || claims["typ"] != "refresh" {
-		return accessToken, refreshToken, tExp, rExp, errcode.ArgsError().WithMsg("login.invalidToken")
+		return accessToken, refreshToken, tExp, rExp, loginErr.InvalidToken()
 	}
 
 	uid := int64(claims["id"].(float64))
 
-	return j.WithRefresh(uid, conf.Jwt.Exp, conf.Jwt.RefreshExp)
+	return jwt.WithRefresh(uid, conf.Jwt.Exp, conf.Jwt.RefreshExp)
 }

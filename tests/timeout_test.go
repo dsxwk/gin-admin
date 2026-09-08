@@ -1,9 +1,9 @@
 package tests
 
 import (
+	"gin/app/facade"
 	"gin/app/middleware"
-	"gin/common/errcode"
-	"gin/common/response"
+	"gin/pkg/errcode"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,13 +23,13 @@ func TestTimeoutMiddleware(t *testing.T) {
 	// 慢接口(3秒)
 	r.GET("/slow", func(c *gin.Context) {
 		time.Sleep(3 * time.Second)
-		response.Response{}.Success(c, errcode.Success())
+		facade.Response().Success(c, errcode.Success())
 	})
 
 	// 快接口(1秒)
 	r.GET("/fast", func(c *gin.Context) {
 		time.Sleep(1 * time.Second)
-		response.Response{}.Success(c, errcode.Success())
+		facade.Response().Success(c, errcode.Success())
 	})
 
 	t.Run("timeout case", func(t *testing.T) {
@@ -37,7 +37,7 @@ func TestTimeoutMiddleware(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
-		var resp response.Response
+		var resp errcode.Response
 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
 
 		if resp.Code != 504 {
@@ -51,7 +51,7 @@ func TestTimeoutMiddleware(t *testing.T) {
 
 		r.ServeHTTP(w, req)
 
-		var resp response.Response
+		var resp errcode.Response
 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
 
 		if resp.Code != 0 {

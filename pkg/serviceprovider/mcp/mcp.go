@@ -2,9 +2,9 @@ package mcp
 
 import (
 	"errors"
-	"gin/common/errcode"
-	"gin/common/response"
+	"gin/app/errcode"
 	"gin/config"
+	errCode "gin/pkg/errcode"
 	"io"
 	"net/http"
 	"strings"
@@ -158,7 +158,7 @@ func (h *Handler) writeResult(w http.ResponseWriter, id any, result any) {
 }
 
 // writeErrorCode 写入JSONRPC错误响应
-func (h *Handler) writeErrorCode(w http.ResponseWriter, id any, e errcode.ErrorCode) {
+func (h *Handler) writeErrorCode(w http.ResponseWriter, id any, e errCode.ErrorCode) {
 	writeJson(w, JsonRpcResponse{
 		Jsonrpc: "2.0",
 		Id:      id,
@@ -177,7 +177,7 @@ func writeJson(w http.ResponseWriter, data any) {
 }
 
 // writeHttpError 写入HTTP级错误,格式与controller响应一致
-func writeHttpError(w http.ResponseWriter, e errcode.ErrorCode) {
+func writeHttpError(w http.ResponseWriter, e errCode.ErrorCode) {
 	w.Header().Set("Content-Type", "application/json")
 	if e.HttpCode == 0 {
 		e.HttpCode = http.StatusInternalServerError
@@ -187,7 +187,7 @@ func writeHttpError(w http.ResponseWriter, e errcode.ErrorCode) {
 	if e.Data != nil {
 		data = e.Data
 	}
-	_ = json.NewEncoder(w).Encode(response.Response{Code: e.Code, Msg: e.Msg, Data: data})
+	_ = json.NewEncoder(w).Encode(errCode.Response{Code: e.Code, Msg: e.Msg, Data: data})
 }
 
 // bearerToken 从请求头解析Token

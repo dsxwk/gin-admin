@@ -125,6 +125,9 @@
     - [Enum Creation](#Enum-Creation)
     - [Enum Example](#Enum-Example)
     - [Enum Usage](#Enum-Usage)
+- [Errcode](#Errcode)
+    - [Errcode Creation](#Errcode-Creation)
+    - [Errcode Usage](#Errcode-Usage)
 - [Database](#Database)
     - [Database Configuration](#Database-Configuration)
     - [Database Connection](#Database-Connection)
@@ -159,6 +162,7 @@
 >       - Request creation (`make:request`)
 >       - Middleware creation (`make:middleware`)
 >       - Router creation (`make:router`)
+>       - Errcode creation (`make:errcode`)
 >       - Generate Swagger document (`make:docs`)
 >   - **Permission Management**:
 >     - Synchronize user permissions to Redis (`permission:sync`)
@@ -304,81 +308,81 @@ $ ./cli demo:command --args=11
 # Directory Structure
 
 ```
-├── app                                 # Application
-│   ├── command                         # Command
-│   ├── controller                      # Controller
-│   ├── enum                            # Enum
-│   ├── event                           # Event
-│   ├── facade                          # Facade
-│   ├── job                             # Job
-│   ├── listener                        # Listener
-│   ├── mcp                             # MCP Tool
-│   ├── middleware                      # Middleware
-│   ├── model                           # Model
-│   ├── provider                        # Provider
-│   ├── queue                           # Queue(Kafka/RabbitMQ/Redis)
-│   │   ├── consumer                    # Consumer
-│   │   └── producer                    # Producer
-│   ├── request                         # Validator
-│   └── service                         # Service
-├── bootstrap                           # Bootstrap
-├── cmd                                 # Command Script Tool
-│   └── cli.go                          # Entry File
-├── common                              # Common Module
-│   ├── base                            # Base
-│   ├── ctxkey                          # Context Key
-│   ├── errcode                         # Errcode
-│   ├── flag                            # Flag
-│   ├── response                        # Response
-│   └── template                        # Template
-├── config                              # Config File
-├── database                            # Database Test File
-├── docs                                # Swagger Doc
-├── grpc                                # gRPC
-│   ├── model                           # gRPC Model
-│   ├── proto                           # Proto Definition
-│   ├── request                         # gRPC Request
-│   └── service                         # gRPC Service
-├── pkg                                 # Package
-│   ├── cli                             # Command
-│   │   ├── grpcgen                     # gRPC Code Generator
-│   │   └── make                        # Make Command
-│   ├── serviceprovider                 # Service Providers Package
-│   │   ├── cache                       # Cache
-│   │   ├── debugger                    # Debugger
-│   │   ├── eventbus                    # Event Bus
-│   │   ├── grpcclient                  # gRPC Client
-│   │   ├── http                        # Http Request
-│   │   ├── lang                        # Language
-│   │   ├── logger                      # Logger
-│   │   ├── message                     # Message Event
-│   │   ├── orm                         # Orm Tool
-│   │   ├── queue                       # Queue
-│   │   ├── ratelimit                   # Rate Limit
-│   │   └── request                     # Request
-│   └── time                            # Time Processing
-├── public                              # Static Resources
-├── router                              # Router
-├── storage                             # Storage
-│   ├── cache                           # Disk Cache
-│   ├── logs                            # Logs
-│   └── locales                         # Translation
-│       ├── en                          # English Translation
-│       └── zh                          # Chinese Translation
-├── tests                               # Test Case
-├── vendor                              # Vendor
-├── .air.linux.toml                     # Air Configuration File
-├── .air.toml                           # Air Configuration File
-├── .gitignore                          # Gitignore
-├── config.yaml                         # Default Configuration File
-├── dev.config.yaml                     # Local Environment Configuration File
-├── go.mod                              # go mod
-├── LICENSE                             # LICENSE
-├── main.go                             # Entry File
-├── readme.md                           # English Document
-├── readme_zh.md                        # Chinese Document
-├── version_history.md                  # Version History English Document
-└── version_history_zh.md               # Version History Chinese Document
+├── app                         # Application
+│   ├── command                 # Command
+│   ├── controller              # Controller
+│   ├── enum                    # Enum
+│   ├── errcode                 # Errcode
+│   ├── event                   # Event
+│   ├── facade                  # Facade
+│   ├── job                     # Job
+│   ├── listener                # Listener
+│   ├── mcp                     # MCP Tool
+│   ├── middleware              # Middleware
+│   ├── model                   # Model
+│   ├── provider                # Provider
+│   ├── queue                   # Queue(Kafka/RabbitMQ/Redis)
+│   │   ├── consumer            # Consumer
+│   │   └── producer            # Producer
+│   ├── request                 # Validator
+│   └── service                 # Service
+├── bootstrap                   # Bootstrap
+├── cmd                         # Command Script Tool
+│   └── cli.go                  # Entry File
+├── common                      # Common Module
+│   ├── base                    # Base
+│   ├── ctxkey                  # Context Key
+│   ├── flag                    # Flag
+│   └── template                # Template
+├── config                      # Config File
+├── database                    # Database Test File
+├── docs                        # Swagger Doc
+├── grpc                        # gRPC
+│   ├── model                   # gRPC Model
+│   ├── proto                   # Proto Definition
+│   ├── request                 # gRPC Request
+│   └── service                 # gRPC Service
+├── pkg                         # Package
+│   ├── cli                     # Command
+│   │   ├── grpcgen             # gRPC Code Generator
+│   │   └── make                # Make Command
+│   ├── errcode                 # Errcode
+│   ├── serviceprovider         # Service Providers Package
+│   │   ├── cache               # Cache
+│   │   ├── debugger            # Debugger
+│   │   ├── eventbus            # Event Bus
+│   │   ├── grpcclient          # gRPC Client
+│   │   ├── http                # Http Request
+│   │   ├── lang                # Language
+│   │   ├── logger              # Logger
+│   │   ├── message             # Message Event
+│   │   ├── orm                 # Orm Tool
+│   │   ├── queue               # Queue
+│   │   ├── ratelimit           # Rate Limit
+│   │   └── request             # Request
+│   └── time                    # Time Processing
+├── public                      # Static Resources
+├── router                      # Router
+├── storage                     # Storage
+│   ├── cache                   # Disk Cache
+│   ├── logs                    # Logs
+│   └── locales                 # Translation
+│       ├── en                  # English Translation
+│       └── zh                  # Chinese Translation
+├── tests                       # Test Case
+├── vendor                      # Vendor
+├── .air.linux.toml             # Air Configuration File
+├── .air.toml                   # Air Configuration File
+├── .gitignore                  # Gitignore
+├── config.yaml                 # Default Configuration File
+├── dev.config.yaml             # Local Environment Configuration File
+├── go.mod                      # go mod
+├── LICENSE                     # LICENSE
+├── main.go                     # Entry File
+├── readme.md                   # English Document
+├── readme_zh.md                # Chinese Document
+├── version_history.md          # Version History English Document
+└── version_history_zh.md       # Version History Chinese Document
 ```
 
 # Start Service
@@ -480,6 +484,7 @@ listener:
 make:
   make:command     Command Creation
   make:controller  Controller Creation
+  make:errcode     Errcode Creation
   make:event       Event Creation
   make:facade      Facade Creation
   make:listener    Listener Creation
@@ -545,6 +550,10 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "Controller Creation",
       "name": "make:controller"
+    },
+    {
+      "description": "Errcode Creation",
+      "name": "make:errcode"
     },
     {
       "description": "Event Creation",
@@ -1103,8 +1112,9 @@ $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-reques
 package request
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-	"gin/common/errcode"
+    
     "github.com/gookit/validate"
 )
 
@@ -1243,8 +1253,9 @@ func (s Roles) Translates() map[string]string {
 package request
 
 import (
+	"gin/app/errcode"
 	"gin/pkg"
-	"gin/common/errcode"
+    
 	"github.com/gookit/validate"
 )
 
@@ -1321,9 +1332,10 @@ func (s UserImport) Translates() map[string]string {
 package request
 
 import (
-	"gin/common/errcode"
-    "fmt"
-    "github.com/gookit/validate"
+	"fmt"
+    "gin/app/errcode"
+	
+	"github.com/gookit/validate"
 )
 
 // SystemConfigValueUpdate Batch update of system configuration
@@ -1421,7 +1433,7 @@ func (s User) ValidateIsEven(val any) bool {
 package request
 
 import (
-	"gin/common/errcode"
+	"gin/app/errcode"
 )
 
 // Validate Request-Validation
@@ -1460,18 +1472,19 @@ type User struct {
 package v1
 
 import (
-  "gin/app/facade"
-  "gin/app/model"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
+    "gin/app/errcode"
+    "gin/app/facade"
+    "gin/app/model"
+    "gin/app/request"
+    "gin/app/service"
+    "gin/common/base"
+    
+    "github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-  base.BaseController
-  service service.UserService
+    base.BaseController
+    service service.UserService
 }
 
 // List User-List
@@ -1593,97 +1606,98 @@ $ go run ./cmd/cli.go make:controller --file=v1/user --desc=user
 package v1
 
 import (
-  "gin/app/facade"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "gin/pkg/serviceprovider/lang"
-  "github.com/gin-gonic/gin"
-  "github.com/gin-gonic/gin/binding"
-  "github.com/go-viper/mapstructure/v2"
+	"gin/app/errcode"
+    "gin/app/facade"
+    "gin/app/request"
+    "gin/app/service"
+    "gin/common/base"
+    "gin/pkg/serviceprovider/lang"
+    
+    "github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin/binding"
+    "github.com/go-viper/mapstructure/v2"
 )
 
 type UserController struct {
-  base.BaseController
-  service service.UserService
+    base.BaseController
+    service service.UserService
 }
 
-// List 列表
-// @Tags 用户管理
-// @Summary 列表
-// @Description 用户列表
-// @Param token header string true "认证Token"
-// @Param page query string true "页码"
-// @Param pageSize query string true "分页大小"
-// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// List User List
+// @Tags User
+// @Summary List
+// @Description User List
+// @Param token header string true "Authentication Token"
+// @Param page query string true "Page"
+// @Param pageSize query string true "Page Size"
+// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "Success"
+// @Failure 400 {object} errcode.ArgsErrorResponse "Arguments Error"
+// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+	var (
+		ctx = c.Request.Context()
+		req request.User
+	)
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "List")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	// Bind parameters and validate
+    err := facade.Request().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  res, err := s.service.List(ctx, req)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    res, err := s.service.List(ctx, req)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(res))
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 
-// Create 创建
-// @Tags 用户管理
-// @Summary 创建
-// @Description 用户创建
-// @Param token header string true "认证Token"
-// @Param data body request.UserCreate true "创建参数"
-// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// Create User Create
+// @Tags User
+// @Summary User
+// @Description User Create
+// @Param token header string true "Authentication Token"
+// @Param data body request.UserCreate true "Create Params"
+// @Success 200 {object} errcode.SuccessResponse{data=model.User} "Success"
+// @Failure 400 {object} errcode.ArgsErrorResponse "Arguments Error"
+// @Failure 500 {object} errcode.SystemErrorResponse "Syetem Error"
 // @Router /api/v1/user [post]
 func (s *UserController) Create(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+	var (
+		ctx = c.Request.Context()
+		req request.User
+	)
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "Create")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	// Bind parameters and validate
+    err := facade.Request().BindValidate(c, &req, "Create")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  user, err := s.service.Create(ctx, req)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    user, err := s.service.Create(ctx, req)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(user))
+    s.Response.Success(c, errcode.Success().WithData(user))
 }
 
-// Update 更新
-// @Tags 用户管理
-// @Summary 更新
-// @Description 用户更新
-// @Param token header string true "认证Token"
-// @Param id path int true "用户ID"
-// @Param data body request.UserUpdate true "更新参数"
-// @Success 200 {object} errcode.SuccessResponse "成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// Update User Update
+// @Tags User
+// @Summary Update
+// @Description User Update
+// @Param token header string true "Authentication Token"
+// @Param id path int true "User ID"
+// @Param data body request.UserUpdate true "Update Params"
+// @Success 200 {object} errcode.SuccessResponse "Success"
+// @Failure 400 {object} errcode.ArgsErrorResponse "Arguments Error"
+// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user/{id} [put]
 func (s *UserController) Update(c *gin.Context) {
   var (
@@ -1720,49 +1734,49 @@ func (s *UserController) Update(c *gin.Context) {
   s.Response.Success(c, errcode.Success().WithData(data))
 }
 
-// Detail 详情
-// @Tags 用户管理
-// @Summary 详情
-// @Description 用户详情
-// @Param token header string true "认证Token"
-// @Param id path int true "用户ID"
-// @Success 200 {object} errcode.SuccessResponse{data=model.User} "成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// Detail User Detail
+// @Tags User
+// @Summary Detail
+// @Description User Detail
+// @Param token header string true "Authentication Token"
+// @Param id path int true "User ID"
+// @Success 200 {object} errcode.SuccessResponse{data=model.User} "Success"
+// @Failure 400 {object} errcode.ArgsErrorResponse "Arguments Error"
+// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user/{id} [get]
 func (s *UserController) Detail(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+	var (
+		ctx = c.Request.Context()
+		req request.User
+	)
+	
+    req.ID = facade.Request().Path[int64](c, "id", 0)
 
-  req.ID = facade.Request().Path[int64](c, "id", 0)
+    // Bind parameters and validate
+    err := facade.Request().BindValidate(c, &req, "Detail")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "Detail")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    m, err := s.service.Detail(ctx, req.ID)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  m, err := s.service.Detail(ctx, req.ID)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
-
-  s.Response.Success(c, errcode.Success().WithData(m))
+    s.Response.Success(c, errcode.Success().WithData(m))
 }
 
-// Delete 删除
-// @Tags 用户管理
-// @Summary 删除
-// @Description 用户删除
-// @Param token header string true "认证Token"
-// @Param id path int true "用户ID"
-// @Success 200 {object} errcode.SuccessResponse "成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
+// Delete User Delete
+// @Tags User
+// @Summary Delete
+// @Description User Delete
+// @Param token header string true "Authentication Token"
+// @Param id path int true "User ID"
+// @Success 200 {object} errcode.SuccessResponse "Success"
+// @Failure 400 {object} errcode.ArgsErrorResponse "Arguments Error"
+// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user/{id} [delete]
 func (s *UserController) Delete(c *gin.Context) {
   var (
@@ -1772,7 +1786,7 @@ func (s *UserController) Delete(c *gin.Context) {
 
   req.ID = facade.Request().Path[int64](c, "id", 0)
 
-  // 绑定参数并验证
+  // Bind parameters and validate
   err := facade.Request().BindValidate(c, &req, "Delete")
   if err != nil {
     s.Response.Error(c, err)
@@ -1828,41 +1842,42 @@ $ go run ./cmd/cli.go make:router --file=user --desc=User-Routing
 package router
 
 import (
-  "gin/app/controller/v1"
-  "github.com/gin-gonic/gin"
+    "gin/app/controller/v1"
+  
+    "github.com/gin-gonic/gin"
 )
 
 // UserRouter User Router
 type UserRouter struct{}
 
 func init() {
-  Register(&UserRouter{})
+    Register(&UserRouter{})
 }
 
 // RegisterRoutes Register Routes
 func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
-  var (
-    user v1.UserController
-  )
+    var (
+        user v1.UserController
+    )
 
-  router := routerGroup.Group("api/v1")
-  {
-    // List
-    router.GET("/user", user.List)
-    // Create
-    router.POST("/user", user.Create)
-    // Update
-    router.PUT("/user/:id", user.Update)
-    // Delete
-    router.DELETE("/user/:id", user.Delete)
-    // Detail
-    router.GET("/user/:id", user.Detail)
-  }
+    router := routerGroup.Group("api/v1/user")
+    {
+        // List
+        router.GET("", user.List)
+        // Create
+        router.POST("", user.Create)
+        // Update
+        router.PUT("/:id", user.Update)
+        // Delete
+        router.DELETE("/:id", user.Delete)
+        // Detail
+        router.GET("/:id", user.Detail)
+    }
 }
 
 // IsAuth Is need auth
 func (r *UserRouter) IsAuth() bool {
-  return true
+    return true
 }
 
 ```
@@ -1872,9 +1887,7 @@ func (r *UserRouter) IsAuth() bool {
 ```bash
 $ go run ./cmd/cli.go route:list
 
----------------------------------------------------------
 Method   Path                                Handler
----------------------------------------------------------
 POST     /api/v1/login                       gin/app/controller/v1.(*LoginController).Login
 GET      /api/v1/user                        gin/app/controller/v1.(*UserController).List
 POST     /api/v1/user                        gin/app/controller/v1.(*UserController).Create
@@ -1885,7 +1898,6 @@ GET      /ping                               gin/router.LoadRouters
 GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
 HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
 GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
----------------------------------------------------------
 A total of 10 routes
 ```
 
@@ -1931,7 +1943,10 @@ $ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middlewar
 package router
 
 import (
+	"gin/app/facade"
     "gin/app/middleware"
+	"gin/pkg/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -1944,11 +1959,11 @@ func LoadRouters(router *gin.Engine) {
     r := group.Group("")
     {
         r.GET("/global-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
+			facade.Response().Success(c, errcode.NewError(0, "global test1"))
         })
 
         r.GET("/global-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
+			facade.Response().Success(c, errcode.NewError(0, "global test2"))
         })
     }
 
@@ -1960,11 +1975,11 @@ func LoadRouters(router *gin.Engine) {
 	r1 := userGroup.Group("")
 	{
 		r1.GET("/test1", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "user test1"))
+			facade.Response().Success(c, errcode.NewError(0, "user test1"))
 		})
 
 		r1.GET("/test2", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "user test2"))
+			facade.Response().Success(c, errcode.NewError(0, "user test2"))
 		})
     }
 
@@ -1976,11 +1991,11 @@ func LoadRouters(router *gin.Engine) {
 	r2 := ipGroup.Group("")
 	{
 		r2.GET("/test1", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
+			facade.Response().Success(c, errcode.NewError(0, "ip test1"))
 		})
 
 		r2.GET("/test2", func(c *gin.Context) {
-			response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
+			facade.Response().Success(c, errcode.NewError(0, "ip test2"))
 		})
     }
 }
@@ -2715,12 +2730,13 @@ Job dispatch events are automatically recorded in the debugger:
 package v1
 
 import (
+	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
-	"gin/common/errcode"
+    
 	"github.com/gin-gonic/gin"
 )
 
@@ -2849,8 +2865,9 @@ Total 1 event 2 listeners
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2869,8 +2886,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2889,8 +2907,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2909,8 +2928,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2929,8 +2949,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2949,8 +2970,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2969,8 +2991,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2989,10 +3012,11 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+	"net/http"
+    
     "github.com/gin-gonic/gin"
-    "net/http"
 )
 
 type TestController struct {
@@ -3120,7 +3144,7 @@ func (s *TestController) Test(c *gin.Context) {
     "Grpc": [],
     "ListenerEvent": []
   },
-  "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
+  "stackTrace": "gin/app/errcode.Error\n\tE:/www/dsx/www-go/gin/app/errcode/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
 }
 ```
 
@@ -3317,10 +3341,11 @@ func (s *UserEnum) Status() *base.Enum[string] {
 package v1
 
 import (
-  "gin/app/enum"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
+    "gin/app/enum"
+	"gin/app/errcode"
+    "gin/common/base"
+    
+    "github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
@@ -3373,6 +3398,41 @@ func (s *LoginController) Test(c *gin.Context) {
 		"containsDesc2":  containsDesc2,
 		"length2":        length2,
 	}))
+}
+```
+
+# Errcode
+
+## Errcode Creation
+
+> Create models, controllers, etc. using the command line, refer to the previous documentation for details.
+
+```bash
+$ go run ./cmd/cli.go make:errcode --file=user --prefix=200
+```
+
+> The generated file is `app/errcode/user_errcode.go`, containing the `UserErrCodePrefix` prefix constant and the
+> `UserErrCode` error code struct. Add error code methods according to the actual business after generation. If
+> `--prefix` is not passed, the next available error code prefix will be used automatically.
+
+## Errcode Usage
+
+```go
+package service
+
+import (
+	"context"
+	"gin/app/errcode"
+)
+
+type UserService struct{}
+
+func (s *UserService) Detail(ctx context.Context, id int64) error {
+	var (
+		userErr errcode.UserErrCode
+	)
+	// todo query user
+	return userErr.ExampleError()
 }
 ```
 

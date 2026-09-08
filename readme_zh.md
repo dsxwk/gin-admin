@@ -125,6 +125,9 @@
     - [枚举创建](#枚举创建)
     - [枚举示例](#枚举示例)
     - [枚举使用](#枚举使用)
+- [错误码](#错误码)
+    - [错误码创建](#错误码创建)
+    - [错误码使用](#错误码使用)
 - [数据库](#数据库)
     - [数据库配置](#数据库配置)
     - [数据库连接](#数据库连接)
@@ -154,6 +157,7 @@
 >       - 创建验证器 (`make:request`)
 >       - 创建中间件 (`make:middleware`)
 >       - 创建路由 (`make:router`)
+>       - 创建错误码 (`make:errcode`)
 >       - 生成 Swagger 文档 (`make:docs`)
 >   - **权限管理**:
 >     - 同步用户权限到 Redis (`permission:sync`)
@@ -290,82 +294,82 @@ $ ./cli demo:command --args=11
 # 项目目录结构
 
 ```
-├── app # 应用程序
-│   ├── command # 命令
-│   ├── controller # 控制器
-│   ├── enum # 枚举
-│   ├── event # 事件
-│   ├── facade # 门面
-│   ├── job # 任务
-│   ├── listener # 监听
-│   ├── mcp # MCP工具
-│   ├── middleware # 中间件
-│   ├── model # 模型
-│   ├── provider # 服务提供者
-│   ├── queue # 消息队列(Kafka/RabbitMQ/Redis)
-│   │   ├── consumer # 消费者
-│   │   └── producer # 生产者
-│   ├── request # 验证器
-│   └── service # 服务
-├── bootstrap # 初始化文件
-├── cmd # 命令行工具
-│   └── cli.go # 命令行工具入口文件
-├── common # 公共模块
-│   ├── base # 基类
-│   ├── ctxkey # 上下文键名
-│   ├── errcode # 错误码
-│   ├── flag # 特殊符号
-│   ├── response # 响应
-│   └── template # 模版
-├── config # 配置文件
-├── database # 数据库测试文件
-├── docs # 文档
-├── grpc # gRPC
-│   ├── model # gRPC模型
-│   ├── proto # proto定义
-│   ├── request # gRPC请求
-│   └── service # gRPC服务
-├── pkg # 工具包
-│   ├── cli # 命令行
-│   │   ├── grpcgen # gRPC代码生成
-│   │   └── make # 生成命令
-│   ├── serviceprovider # 服务提供者相关包
-│   │   ├── cache # 缓存
-│   │   ├── debugger # 调试器
-│   │   ├── eventbus # 事件总线
-│   │   ├── grpcclient # gRPC客户端
-│   │   ├── http # http请求
-│   │   ├── lang # 语言包
-│   │   ├── logger # 日志
-│   │   ├── message # 消息事件
-│   │   ├── orm # orm工具
-│   │   ├── queue # 队列
-│   │   ├── ratelimit # 限流
-│   │   └── request # 请求
-│   └── time # 时间处理
-├── public # 静态资源目录
-├── router # 路由
-├── storage # 存储
-│   ├── cache # 磁盘缓存
-│   ├── logs # 日志
-│   └── locales # 翻译文件
-│       ├── en # 英文翻译
-│       └── zh # 中文翻译
-├── tests # 测试用例
-├── tmp # 临时文件
-├── vendor # 依赖包
-├── .air.linux.toml # air配置文件
-├── .air.toml # air配置文件
-├── .gitignore # git忽略文件
-├── config.yaml # 默认配置文件
-├── dev.config.yaml # 本地环境配置文件
-├── go.mod # go mod
-├── LICENSE # 开源协议
-├── main.go # 入口文件
-├── readme.md # 英文文档
-├── readme_zh.md # 中文文档
-├── version_history.md # 版本记录英文文档
-└── version_history_zh.md # 版本记录中文文档
+├── app                       # 应用程序
+│   ├── command               # 命令
+│   ├── controller            # 控制器
+│   ├── enum                  # 枚举
+│   ├── errcode               # 错误码
+│   ├── event                 # 事件
+│   ├── facade                # 门面
+│   ├── job                   # 任务
+│   ├── listener              # 监听
+│   ├── mcp                   # MCP工具
+│   ├── middleware            # 中间件
+│   ├── model                 # 模型
+│   ├── provider              # 服务提供者
+│   ├── queue                 # 消息队列(Kafka/RabbitMQ/Redis)
+│   │   ├── consumer          # 消费者
+│   │   └── producer          # 生产者
+│   ├── request               # 验证器
+│   └── service               # 服务
+├── bootstrap                 # 初始化文件
+├── cmd                       # 命令行工具
+│   └── cli.go                # 命令行工具入口文件
+├── common                    # 公共模块
+│   ├── base                  # 基类
+│   ├── ctxkey                # 上下文键名
+│   ├── flag                  # 特殊符号
+│   └── template              # 模版
+├── config                    # 配置文件
+├── database                  # 数据库测试文件
+├── docs                      # 文档
+├── grpc                      # gRPC
+│   ├── model                 # gRPC模型
+│   ├── proto                 # proto定义
+│   ├── request               # gRPC请求
+│   └── service               # gRPC服务
+├── pkg                       # 工具包
+│   ├── cli                   # 命令行
+│   │   ├── grpcgen           # gRPC代码生成
+│   │   └── make              # 生成命令
+│   ├── errcode               # 错误码
+│   ├── serviceprovider       # 服务提供者相关包
+│   │   ├── cache             # 缓存
+│   │   ├── debugger          # 调试器
+│   │   ├── eventbus          # 事件总线
+│   │   ├── grpcclient        # gRPC客户端
+│   │   ├── http              # http请求
+│   │   ├── lang              # 语言包
+│   │   ├── logger            # 日志
+│   │   ├── message           # 消息事件
+│   │   ├── orm               # orm工具
+│   │   ├── queue             # 队列
+│   │   ├── ratelimit         # 限流
+│   │   └── request           # 请求
+│   └── time                  # 时间处理
+├── public                    # 静态资源目录
+├── router                    # 路由
+├── storage                   # 存储
+│   ├── cache                 # 磁盘缓存
+│   ├── logs                  # 日志
+│   └── locales               # 翻译文件
+│       ├── en                # 英文翻译
+│       └── zh                # 中文翻译
+├── tests                     # 测试用例
+├── tmp                       # 临时文件
+├── vendor                    # 依赖包
+├── .air.linux.toml           # air配置文件
+├── .air.toml                 # air配置文件
+├── .gitignore                # git忽略文件
+├── config.yaml               # 默认配置文件
+├── dev.config.yaml           # 本地环境配置文件
+├── go.mod                    # go mod
+├── LICENSE                   # 开源协议
+├── main.go                   # 入口文件
+├── readme.md                 # 英文文档
+├── readme_zh.md              # 中文文档
+├── version_history.md        # 版本记录英文文档
+└── version_history_zh.md     # 版本记录中文文档
 
 ```
 
@@ -465,6 +469,7 @@ listener:
 make:
   make:command     命令创建
   make:controller  控制器创建
+  make:errcode     错误码创建
   make:event       创建事件
   make:facade      创建门面
   make:listener    创建监听
@@ -530,6 +535,10 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "控制器创建",
       "name": "make:controller"
+    },
+    {
+      "description": "错误码创建",
+      "name": "make:errcode"
     },
     {
       "description": "创建事件",
@@ -1080,82 +1089,83 @@ $ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=角色请�
 package request
 
 import (
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gookit/validate"
+	"gin/app/errcode"
+    "gin/common/base"
+    
+    "github.com/gookit/validate"
 )
 
 // Roles 请求验证
 type Roles struct {
-  base.BaseRequest
-  ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-  Desc   string `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-  PageListValidate
+    base.BaseRequest
+    ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+    Name   string `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+    Desc   string `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
+    Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+    PageListValidate
 }
 
 // RoleCreate 角色创建验证
 type RoleCreate struct {
-  Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-  Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
-  Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+    Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+    Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
+    Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
 }
 
 // RoleUpdate 角色更新验证
 type RoleUpdate struct {
-  ID     int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-  Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
-  Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+    ID     int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
+    Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
+    Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
+    Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
 }
 
 // Validate 请求验证
 func (s Roles) Validate(data Roles, scene string) error {
-  v := validate.Struct(data, scene)
-  if !v.Validate(scene) {
-    return errcode.ArgsError().WithMsg(v.Errors.One())
-  }
-  return nil
+    v := validate.Struct(data, scene)
+    if !v.Validate(scene) {
+        return errcode.ArgsError().WithMsg(v.Errors.One())
+    }
+    return nil
 }
 
 // ConfigValidation 配置验证
 // - 定义验证场景
 // - 也可以添加验证设置
 func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "Create": []string{"Name", "Desc", "Status"},
-    "Update": []string{"ID", "Name", "Desc", "Status"},
-    "Detail": []string{"ID"},
-    "Delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
+    scenes := validate.SValues{
+        "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+        "Create": []string{"Name", "Desc", "Status"},
+        "Update": []string{"ID", "Name", "Desc", "Status"},
+        "Detail": []string{"ID"},
+        "Delete": []string{"ID"},
+    }
+    v.WithScenes(scenes)
 }
 
 // Messages 验证器错误消息
 func (s Roles) Messages() map[string]string {
-  return validate.MS{
-    "required":                     "字段 {field} 必填",
-    "int":                          "字段 {field} 必须为整数",
-    "gt":                           "字段 {field} 必须大于 0",
-    "minLen":                       "{field} 长度不能少于 {min} 个字符",
-    "maxLen":                       "{field} 长度不能超过 {max} 个字符",
-    "PageListValidate.Page.gt":     "页码必须大于 0",
-    "PageListValidate.PageSize.gt": "每页数量必须大于 0",
-  }
+    return validate.MS{
+        "required":                     "字段 {field} 必填",
+        "int":                          "字段 {field} 必须为整数",
+        "gt":                           "字段 {field} 必须大于 0",
+        "minLen":                       "{field} 长度不能少于 {min} 个字符",
+        "maxLen":                       "{field} 长度不能超过 {max} 个字符",
+        "PageListValidate.Page.gt":     "页码必须大于 0",
+        "PageListValidate.PageSize.gt": "每页数量必须大于 0",
+    }
 }
 
 // Translates 字段翻译
 func (s Roles) Translates() map[string]string {
-  return validate.MS{
-    "ID":                        "ID",
-    "Name":                      "角色名称",
-    "Desc":                      "角色描述",
-    "Status":                    "状态 1=启用 2=停用",
-    "PageListValidate.Page":     "页码",
-    "PageListValidate.PageSize": "每页数量",
-  }
+    return validate.MS{
+        "ID":                        "ID",
+        "Name":                      "角色名称",
+        "Desc":                      "角色描述",
+        "Status":                    "状态 1=启用 2=停用",
+        "PageListValidate.Page":     "页码",
+        "PageListValidate.PageSize": "每页数量",
+    }
 }
 
 ```
@@ -1169,12 +1179,12 @@ package request
 
 // Roles 角色请求验证
 type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"角色名称"`
-  Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"角色描述"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-  PageListValidate
+    base.BaseRequest
+    ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+    Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"角色名称"`
+    Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"角色描述"`
+    Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
+    PageListValidate
 }
 ```
 
@@ -1187,14 +1197,14 @@ package request
 // - 定义验证场景
 // - 也可以添加验证设置
 func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "Create": []string{"Name", "Desc", "Status"},
-    "Update": []string{"ID", "Name", "Desc", "Status"},
-    "Detail": []string{"ID"},
-    "Delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
+    scenes := validate.SValues{
+        "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+        "Create": []string{"Name", "Desc", "Status"},
+        "Update": []string{"ID", "Name", "Desc", "Status"},
+        "Detail": []string{"ID"},
+        "Delete": []string{"ID"},
+    }
+    v.WithScenes(scenes)
 }
 ```
 
@@ -1240,8 +1250,9 @@ func (s Roles) Translates() map[string]string {
 package request
 
 import (
+	"gin/app/errcode"
 	"gin/pkg"
-	"gin/common/errcode"
+    
 	"github.com/gookit/validate"
 )
 
@@ -1318,8 +1329,9 @@ func (s UserImport) Translates() map[string]string {
 package request
 
 import (
-	"gin/common/errcode"
-    "fmt"
+	"fmt"
+	"gin/app/errcode"
+    
     "github.com/gookit/validate"
 )
 
@@ -1417,7 +1429,7 @@ func (s User) ValidateIsEven(val any) bool {
 package request
 
 import (
-	"gin/common/errcode"
+	"gin/app/errcode"
 )
 
 // Validate 请求验证
@@ -1456,18 +1468,19 @@ type User struct {
 package v1
 
 import (
-  "gin/app/facade"
-  "gin/app/model"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
+	"gin/app/errcode"
+    "gin/app/facade"
+    "gin/app/model"
+    "gin/app/request"
+    "gin/app/service"
+    "gin/common/base"
+    
+    "github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-  base.BaseController
-  service service.UserService
+    base.BaseController
+    service service.UserService
 }
 
 // List 列表
@@ -1589,20 +1602,21 @@ $ go run ./cmd/cli.go make:controller --file=v1/user --desc=用户
 package v1
 
 import (
-  "gin/app/facade"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "gin/pkg/serviceprovider/lang"
-  "github.com/gin-gonic/gin"
-  "github.com/gin-gonic/gin/binding"
-  "github.com/go-viper/mapstructure/v2"
+	"gin/app/errcode"
+    "gin/app/facade"
+    "gin/app/request"
+    "gin/app/service"
+    "gin/common/base"
+    "gin/pkg/serviceprovider/lang"
+    
+    "github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin/binding"
+    "github.com/go-viper/mapstructure/v2"
 )
 
 type UserController struct {
-  base.BaseController
-  service service.UserService
+    base.BaseController
+    service service.UserService
 }
 
 // List 列表
@@ -1617,25 +1631,25 @@ type UserController struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "List")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    // 绑定参数并验证
+    err := facade.Request().BindValidate(c, &req, "List")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  res, err := s.service.List(ctx, req)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    res, err := s.service.List(ctx, req)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(res))
+    s.Response.Success(c, errcode.Success().WithData(res))
 }
 
 // Create 创建
@@ -1649,25 +1663,25 @@ func (s *UserController) List(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user [post]
 func (s *UserController) Create(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "Create")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    // 绑定参数并验证
+    err := facade.Request().BindValidate(c, &req, "Create")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  user, err := s.service.Create(ctx, req)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    user, err := s.service.Create(ctx, req)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(user))
+    s.Response.Success(c, errcode.Success().WithData(user))
 }
 
 // Update 更新
@@ -1682,38 +1696,38 @@ func (s *UserController) Create(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user/{id} [put]
 func (s *UserController) Update(c *gin.Context) {
-  var (
-    ctx  = c.Request.Context()
-    data map[string]any
-    req  request.User
-  )
+    var (
+        ctx  = c.Request.Context()
+        data map[string]any
+        req  request.User
+    )
 
-  err := c.ShouldBindBodyWith(&data, binding.JSON)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    err := c.ShouldBindBodyWith(&data, binding.JSON)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  err = mapstructure.Decode(data, &req)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    err = mapstructure.Decode(data, &req)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  req.ID = facade.Request().Path[int64](c, "id", 0)
-  err = facade.Request().Validate(c, &req, "Update")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    req.ID = facade.Request().Path[int64](c, "id", 0)
+    err = facade.Request().Validate(c, &req, "Update")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  err = s.service.Update(ctx, req.ID, data)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    err = s.service.Update(ctx, req.ID, data)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  s.Response.Success(c, errcode.Success().WithData(data))
+    s.Response.Success(c, errcode.Success().WithData(data))
 }
 
 // Detail 详情
@@ -1727,27 +1741,27 @@ func (s *UserController) Update(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user/{id} [get]
 func (s *UserController) Detail(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
 
-  req.ID = facade.Request().Path[int64](c, "id", 0)
+    req.ID = facade.Request().Path[int64](c, "id", 0)
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "Detail")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+    // 绑定参数并验证
+    err := facade.Request().BindValidate(c, &req, "Detail")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  m, err := s.service.Detail(ctx, req.ID)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
-
-  s.Response.Success(c, errcode.Success().WithData(m))
+    m, err := s.service.Detail(ctx, req.ID)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
+    
+    s.Response.Success(c, errcode.Success().WithData(m))
 }
 
 // Delete 删除
@@ -1761,27 +1775,27 @@ func (s *UserController) Detail(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/user/{id} [delete]
 func (s *UserController) Delete(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.User
+    )
 
-  req.ID = facade.Request().Path[int64](c, "id", 0)
-
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "Delete")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
-
-  err = s.service.Delete(ctx, req.ID)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
-
-  s.Response.Success(c, errcode.Success())
+    req.ID = facade.Request().Path[int64](c, "id", 0)
+    
+    // 绑定参数并验证
+    err := facade.Request().BindValidate(c, &req, "Delete")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
+    
+    err = s.service.Delete(ctx, req.ID)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
+    
+    s.Response.Success(c, errcode.Success())
 }
 
 ```
@@ -1925,7 +1939,10 @@ $ go run ./cmd/cli.go make:middleware --file=auth --desc=授权中间件
 package router
 
 import (
+	"gin/app/facade"
     "gin/app/middleware"
+	"gin/pkg/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -1938,11 +1955,11 @@ func LoadRouters(router *gin.Engine) {
 	r := group.Group("") 
 	{
         r.GET("/global-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test1"))
+			facade.Response().Success(c, errcode.NewError(0, "global test1"))
         })
 
         r.GET("/global-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "global test2"))
+			facade.Response().Success(c, errcode.NewError(0, "global test2"))
         })
     }
 
@@ -1954,11 +1971,11 @@ func LoadRouters(router *gin.Engine) {
 	r1 := userGroup.Group("")
 	{
 		r1.GET("/user-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "user test1"))
+			facade.Response().Success(c, errcode.NewError(0, "user test1"))
         })
 
         r1.GET("/user-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "user test2"))
+			facade.Response().Success(c, errcode.NewError(0, "user test2"))
         })
     }
 
@@ -1970,11 +1987,11 @@ func LoadRouters(router *gin.Engine) {
 	r2 := ipGroup.Group("")
 	{
 		r2.GET("/ip-test1", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "ip test1"))
+			facade.Response().Success(c, errcode.NewError(0, "ip test1"))
         })
 
         r2.GET("/ip-test2", func(c *gin.Context) {
-            response.Response{}.Success(c, errcode.NewError(0, "ip test2"))
+			facade.Response().Success(c, errcode.NewError(0, "ip test2"))
 		})
     }
 }
@@ -2695,14 +2712,15 @@ Job 投递事件自动记录到调试器:
 package v1
 
 import (
-  "gin/app/event"
-  "gin/app/facade"
-  "gin/app/model"
-  "gin/app/request"
-  "gin/app/service"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
+	"gin/app/errcode"
+    "gin/app/event"
+    "gin/app/facade"
+    "gin/app/model"
+    "gin/app/request"
+    "gin/app/service"
+    "gin/common/base"
+    
+    "github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
@@ -2735,45 +2753,45 @@ type LoginResponse struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
 // @Router /api/v1/login [post]
 func (s *LoginController) Login(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.Login
-  )
+    var (
+        ctx = c.Request.Context()
+        req request.Login
+    )
 
-  // 绑定参数并验证
-  err := facade.Request().BindValidate(c, &req, "Login")
-  if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-    return
-  }
+    // 绑定参数并验证
+    err := facade.Request().BindValidate(c, &req, "Login")
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
-    return
-  }
+    err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
+    if err != nil {
+        s.Response.Error(c, err)
+        return
+    }
 
-  // 发布事件
-  facade.Event().Publish[event.UserLoginEvent](ctx, event.UserLoginEvent{
-    UserId:   userModel.ID,
-    Username: userModel.Username,
-  })
+    // 发布事件
+    facade.Event().Publish[event.UserLoginEvent](ctx, event.UserLoginEvent{
+        UserId:   userModel.ID,
+        Username: userModel.Username,
+    })
 
-  s.Response.Success(
-    c, errcode.Success().WithMsg(
-      facade.Lang().Trans(ctx, "login.success", map[string]any{
-        "name": userModel.Username,
-      }),
-    ).WithData(LoginResponse{
-      Token{
-        AccessToken:        accessToken,
-        RefreshToken:       refreshToken,
-        TokenExpire:        tokenExpire,
-        RefreshTokenExpire: refreshTokenExpire,
-      },
-      userModel,
-    }),
-  )
+    s.Response.Success(
+        c, errcode.Success().WithMsg(
+            facade.Lang().Trans(ctx, "login.success", map[string]any{
+                "name": userModel.Username,
+            }),
+        ).WithData(LoginResponse{
+            Token{
+                AccessToken:        accessToken,
+                RefreshToken:       refreshToken,
+                TokenExpire:        tokenExpire,
+                RefreshTokenExpire: refreshTokenExpire,
+            },
+            userModel,
+        }),
+    )
 }
 ```
 
@@ -2800,9 +2818,9 @@ Content-Length: 56
 $ go run ./cmd/cli.go event:list
 
 ┌────────────────────────────────────────────────────────────┐
-│ 事件名称               描述                                  │
+│ 事件名称               描述                                 │
 ├────────────────────────────────────────────────────────────┤
-│ user.login            用户登录事件                           │
+│ user.login            用户登录事件                          │
 └────────────────────────────────────────────────────────────┘
 总计 1 个事件
 ```
@@ -2813,9 +2831,9 @@ $ go run ./cmd/cli.go event:list
 $ go run ./cmd/cli.go listener:list
 
 ┌────────────────────────────────────────────────────────────┐
-│ 事件名称               描述                                  │
+│ 事件名称               描述                                 │
 ├────────────────────────────────────────────────────────────┤
-│ user.login             用户登录事件                          │
+│ user.login             用户登录事件                         │
 │                      ├─ *listener.TestListener             │
 │                      └─ *listener.UserLoginListener        │
 └────────────────────────────────────────────────────────────┘
@@ -2830,8 +2848,9 @@ $ go run ./cmd/cli.go listener:list
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2850,8 +2869,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2870,8 +2890,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2890,8 +2911,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2910,8 +2932,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2930,8 +2953,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2950,8 +2974,9 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+    
     "github.com/gin-gonic/gin"
 )
 
@@ -2970,10 +2995,11 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
+	"gin/app/errcode"
     "gin/common/base"
-    "gin/common/errcode"
+	"net/http"
+    
     "github.com/gin-gonic/gin"
-    "net/http"
 )
 
 type TestController struct {
@@ -3098,7 +3124,7 @@ func (s *TestController) Test(c *gin.Context) {
     "Grpc": [],
     "ListenerEvent": []
   },
-  "stackTrace": "gin/common/response.Error\n\tE:/www/dsx/www-go/gin/common/response/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
+  "stackTrace": "gin/app/errcode.Error\n\tE:/www/dsx/www-go/gin/app/errcode/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
 }
 ```
 
@@ -3287,15 +3313,16 @@ func (s *UserEnum) Status() *base.Enum[string] {
 package v1
 
 import (
-  "gin/app/enum"
-  "gin/common/base"
-  "gin/common/errcode"
-  "github.com/gin-gonic/gin"
+    "gin/app/enum"
+	"gin/app/errcode"
+    "gin/common/base"
+    
+    "github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
-  base.BaseController
-  service service.LoginService
+    base.BaseController
+    service service.LoginService
 }
 
 // Test 测试
@@ -3343,6 +3370,40 @@ func (s *LoginController) Test(c *gin.Context) {
 		"containsDesc2":  containsDesc2,
 		"length2":        length2,
 	}))
+}
+```
+
+# 错误码
+
+## 错误码创建
+
+> 同模型、控制器等使用命令行创建,具体参考之前文档。
+
+```bash
+$ go run ./cmd/cli.go make:errcode --file=user --prefix=200
+```
+
+> 生成文件为 `app/errcode/user_errcode.go`,包含 `UserErrCodePrefix` 前缀常量和 `UserErrCode` 错误码结构体,生成后按实际业务补充错误码方法即可。`--prefix`
+> 不传时自动取当前下一个可用错误码前缀。
+
+## 错误码使用
+
+```go
+package service
+
+import (
+	"context"
+	"gin/app/errcode"
+)
+
+type UserService struct{}
+
+func (s *UserService) Detail(ctx context.Context, id int64) error {
+	var (
+		userErr errcode.UserErrCode
+	)
+	// todo 查询用户
+	return userErr.ExampleError()
 }
 ```
 

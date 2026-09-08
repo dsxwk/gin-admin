@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
-	"github.com/samber/lo"
 )
 
 type ErrorCode struct {
@@ -27,16 +25,11 @@ func (e ErrorCode) WithPrefix(prefix int64) ErrorCode {
 	return e
 }
 
-func NewError(code int64, msg string, httpCode ...int) ErrorCode {
-	httpCodeValue := lo.FirstOr(httpCode, http.StatusOK)
-	if httpCodeValue == 0 {
-		httpCodeValue = http.StatusOK
-	}
-
+func NewError(code int64, msg string) ErrorCode {
 	return ErrorCode{
 		Code:     code,
 		Msg:      msg,
-		HttpCode: httpCodeValue,
+		HttpCode: http.StatusOK,
 	}
 }
 
@@ -61,69 +54,37 @@ func (e ErrorCode) WithHttpCode(httpCode int) ErrorCode {
 }
 
 func Success() ErrorCode {
-	return ErrorCode{Code: 0, Msg: "Success", HttpCode: http.StatusOK}
+	return NewError(0, "Success").WithHttpCode(http.StatusOK)
 }
 
 func Redirect() ErrorCode {
-	return ErrorCode{
-		Code:     301,
-		Msg:      "Redirect",
-		HttpCode: http.StatusMovedPermanently,
-	}
+	return NewError(301, "Redirect").WithHttpCode(http.StatusMovedPermanently)
 }
 
 func ArgsError() ErrorCode {
-	return ErrorCode{
-		Code:     400,
-		Msg:      "Invalid arguments",
-		HttpCode: http.StatusBadRequest,
-	}
+	return NewError(400, "Bad Request").WithHttpCode(http.StatusBadRequest)
 }
 
 func Unauthorized() ErrorCode {
-	return ErrorCode{
-		Code:     401,
-		Msg:      "Unauthorized",
-		HttpCode: http.StatusUnauthorized,
-	}
+	return NewError(401, "Unauthorized").WithHttpCode(http.StatusUnauthorized)
 }
 
 func Forbidden() ErrorCode {
-	return ErrorCode{
-		Code:     403,
-		Msg:      "Forbidden",
-		HttpCode: http.StatusForbidden,
-	}
+	return NewError(403, "Forbidden").WithHttpCode(http.StatusForbidden)
 }
 
 func NotFound() ErrorCode {
-	return ErrorCode{
-		Code:     404,
-		Msg:      "Resource not found",
-		HttpCode: http.StatusNotFound,
-	}
+	return NewError(404, "Resource Not Found").WithHttpCode(http.StatusNotFound)
 }
 
 func RateLimitError() ErrorCode {
-	return ErrorCode{
-		Code:     429,
-		Msg:      "Rate limit exceeded",
-		HttpCode: http.StatusTooManyRequests,
-	}
+	return NewError(429, "Too Many Requests").WithHttpCode(http.StatusTooManyRequests)
 }
 
 func SystemError() ErrorCode {
-	return ErrorCode{
-		Code:     500,
-		Msg:      "Internal server error",
-		HttpCode: http.StatusInternalServerError,
-	}
+	return NewError(500, "System Internal Error").WithHttpCode(http.StatusInternalServerError)
 }
 
 func TimeoutError() ErrorCode {
-	return ErrorCode{
-		Code:     504,
-		Msg:      "Request Timeout",
-		HttpCode: http.StatusGatewayTimeout,
-	}
+	return NewError(504, "Gateway Timeout").WithHttpCode(http.StatusGatewayTimeout)
 }

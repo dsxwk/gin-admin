@@ -2,8 +2,7 @@ package tests
 
 import (
 	"gin/app/middleware"
-	"gin/common/errcode"
-	"gin/common/response"
+	"gin/pkg/errcode"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -24,7 +23,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 	r.Use(rateLimitMiddleware.IpRateLimit(1, 1))
 
 	r.GET("/test", func(c *gin.Context) {
-		response.Response{}.Success(c, errcode.Success())
+		errcode.Response{}.Success(c, errcode.Success())
 	})
 
 	t.Run("limit trigger", func(t *testing.T) {
@@ -33,7 +32,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		w1 := httptest.NewRecorder()
 		r.ServeHTTP(w1, req1)
 
-		var resp response.Response
+		var resp errcode.Response
 		if err := json.Unmarshal(w1.Body.Bytes(), &resp); err != nil {
 			t.Fatalf("failed to unmarshal response: %v", err)
 		}
@@ -64,7 +63,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
-		var resp response.Response
+		var resp errcode.Response
 		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 			t.Fatalf("failed to unmarshal response: %v", err)
 		}
@@ -95,7 +94,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 
 				r.ServeHTTP(w, req)
 
-				var resp response.Response
+				var resp errcode.Response
 				if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 					t.Errorf("failed to unmarshal response: %v", err)
 					return

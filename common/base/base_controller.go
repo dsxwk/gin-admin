@@ -2,13 +2,13 @@ package base
 
 import (
 	"gin/common/ctxkey"
-	"gin/common/response"
+	"gin/pkg/errcode"
 
 	"github.com/gin-gonic/gin"
 )
 
 type BaseController struct {
-	Response response.Response
+	Response errcode.Response
 }
 
 // GetUserId 获取当前登录用户id

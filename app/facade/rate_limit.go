@@ -2,9 +2,8 @@ package facade
 
 import (
 	"context"
+	"gin/app/errcode"
 	"gin/common/ctxkey"
-	"gin/common/errcode"
-	"gin/common/response"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/ratelimit"
 	"time"
@@ -45,7 +44,7 @@ func globalRateLimit() gin.HandlerFunc {
 			return
 		}
 		if !userStore.AllowGlobal() {
-			response.Response{}.Error(c, errcode.RateLimitError())
+			Response().Error(c, errcode.RateLimitError())
 			return
 		}
 		c.Next()
@@ -61,7 +60,7 @@ func ipRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 		}
 		key := c.ClientIP() + ":" + c.FullPath()
 		if !ipStore.AllowKey(key, r, burst) {
-			response.Response{}.Error(c, errcode.RateLimitError())
+			Response().Error(c, errcode.RateLimitError())
 			return
 		}
 		c.Next()
@@ -83,7 +82,7 @@ func userRateLimit(r rate.Limit, burst int) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 100*time.Millisecond)
 		defer cancel()
 		if err := userStore.WaitKey(ctx, key, r, burst); err != nil {
-			response.Response{}.Error(c, errcode.RateLimitError())
+			Response().Error(c, errcode.RateLimitError())
 			return
 		}
 		c.Next()

@@ -3,9 +3,9 @@ package tests
 import (
 	"context"
 	"encoding/json"
+	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/common/ctxkey"
-	"gin/common/errcode"
 	h "gin/pkg/serviceprovider/http"
 	"net/http"
 	"net/http/httptest"

@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"fmt"
+	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/ctxkey"
-	"gin/common/errcode"
 
 	"github.com/gin-gonic/gin"
 )

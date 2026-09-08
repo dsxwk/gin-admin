@@ -1,8 +1,8 @@
 package request
 
 import (
+	"gin/app/errcode"
 	"gin/common/base"
-	"gin/common/errcode"
 
 	"github.com/gookit/validate"
 )

@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"gin/common/errcode"
+	"gin/pkg/errcode"
 	"net/http"
 	"testing"
 )
@@ -115,7 +115,7 @@ func TestErrorCode_Error(t *testing.T) {
 // NewError 测试
 func TestNewError(t *testing.T) {
 	t.Run("with httpCode", func(t *testing.T) {
-		e := errcode.NewError(400, "Bad Request", 400)
+		e := errcode.NewError(400, "Bad Request").WithHttpCode(400)
 		if e.Code != 400 {
 			t.Errorf("expected code 400, got %d", e.Code)
 		}
@@ -141,7 +141,7 @@ func TestNewError(t *testing.T) {
 	})
 
 	t.Run("with zero httpCode", func(t *testing.T) {
-		e := errcode.NewError(400, "Bad Request", 0)
+		e := errcode.NewError(400, "Bad Request")
 		if e.HttpCode != http.StatusOK {
 			t.Errorf("expected httpCode %d, got %d", http.StatusOK, e.HttpCode)
 		}
@@ -159,12 +159,12 @@ func TestBuiltInErrors(t *testing.T) {
 	}{
 		{"Success", errcode.Success(), 0, "Success", http.StatusOK},
 		{"Redirect", errcode.Redirect(), 301, "Redirect", http.StatusMovedPermanently},
-		{"ArgsError", errcode.ArgsError(), 400, "Invalid arguments", http.StatusBadRequest},
+		{"ArgsError", errcode.ArgsError(), 400, "Bad Request", http.StatusBadRequest},
 		{"Unauthorized", errcode.Unauthorized(), 401, "Unauthorized", http.StatusUnauthorized},
-		{"NotFound", errcode.NotFound(), 404, "Resource not found", http.StatusNotFound},
-		{"RateLimitError", errcode.RateLimitError(), 429, "Rate limit exceeded", http.StatusTooManyRequests},
-		{"SystemError", errcode.SystemError(), 500, "Internal server error", http.StatusInternalServerError},
-		{"TimeoutError", errcode.TimeoutError(), 504, "Request Timeout", http.StatusGatewayTimeout},
+		{"NotFound", errcode.NotFound(), 404, "Resource Not Found", http.StatusNotFound},
+		{"RateLimitError", errcode.RateLimitError(), 429, "Too Many Requests", http.StatusTooManyRequests},
+		{"SystemError", errcode.SystemError(), 500, "System Internal Error", http.StatusInternalServerError},
+		{"TimeoutError", errcode.TimeoutError(), 504, "Gateway Timeout", http.StatusGatewayTimeout},
 	}
 
 	for _, tt := range tests {
@@ -261,14 +261,14 @@ func TestErrorCode_Concurrency(t *testing.T) {
 		e := errcode.NewError(1, "test")
 		done := make(chan bool)
 
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			go func() {
 				_ = e.WithPrefix(1000)
 				done <- true
 			}()
 		}
 
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			<-done
 		}
 

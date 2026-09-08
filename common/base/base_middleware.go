@@ -1,8 +1,8 @@
 package base
 
-import "gin/common/response"
+import "gin/pkg/errcode"
 
 type BaseMiddleware struct {
 	Context
-	Response response.Response
+	Response errcode.Response
 }

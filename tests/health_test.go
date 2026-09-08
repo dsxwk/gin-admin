@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"gin/common/errcode"
+	"gin/app/errcode"
 	"gin/router"
 	"net/http"
 	"net/http/httptest"

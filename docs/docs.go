@@ -1703,7 +1703,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "登录相关"
+                    "登录相关swagger自动"
                 ],
                 "summary": "账号密码登录",
                 "parameters": [

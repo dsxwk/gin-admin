@@ -3,7 +3,7 @@ package tests
 import (
 	"gin/app/facade"
 	"gin/common/flag"
-	"gin/common/response"
+	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider"
 	"os"
 	"testing"
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	response.SetLogger(facade.Log())
+	errcode.SetLogger(facade.Log())
 
 	// 运行测试
 	code := m.Run()

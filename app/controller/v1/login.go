@@ -2,6 +2,7 @@ package v1
 
 import (
 	"gin/app/enum"
+	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/app/job"
 	"gin/app/model"
@@ -9,7 +10,6 @@ import (
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
-	"gin/common/errcode"
 	"gin/grpc/proto"
 	"image/color"
 
