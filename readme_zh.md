@@ -209,7 +209,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.1.0](version_history_zh.md#v310)
+> - 最新版本 [v3.1.1](version_history_zh.md#v311)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -848,11 +848,11 @@ grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/u
 
 ```go
 ctx := facade.Grpc().WithToken(ctx, token)
-user, err := facade.Grpc().Service(proto.NewUserServiceClient)
+userGrpc, err := facade.Grpc().Service(proto.NewUserServiceClient)
 if err != nil {
     return err
 }
-resp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
+resp, err := userGrpc.Detail(ctx, &proto.UserRequest{Id: 1})
 ```
 
 ## Postman调用

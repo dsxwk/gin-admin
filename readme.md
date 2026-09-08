@@ -220,7 +220,7 @@
 
 # Version History
 
-> - Latest Version [v3.1.0](version_history.md#v310)
+> - Latest Version [v3.1.1](version_history.md#v311)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -868,11 +868,11 @@ gRPC services implement `AuthMethods() map[string]bool` to control each RPC meth
 
 ```go
 ctx := facade.Grpc().WithToken(ctx, token)
-user, err := facade.Grpc().Service(proto.NewUserServiceClient)
+userGrpc, err := facade.Grpc().Service(proto.NewUserServiceClient)
 if err != nil {
     return err
 }
-resp, err := user.Detail(ctx, &proto.UserRequest{Id: 1})
+resp, err := userGrpc.Detail(ctx, &proto.UserRequest{Id: 1})
 ```
 
 ### Call From Postman
