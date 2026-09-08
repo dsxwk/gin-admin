@@ -1,5 +1,11 @@
 # Version History
 
+## v3.1.1
+> - Optimize the error code and public response
+> - Add command line error code generation
+> - Update the template for generating gRPC authentication requests
+> - Update the readme document and version history
+
 ## v3.1.0
 > - Optimize database connection pool as a configuration item
 > - Optimize query builder and toolkit functions
