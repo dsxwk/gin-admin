@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 )
 
 type OperatorLog struct {
@@ -37,11 +38,13 @@ func (s OperatorLog) Handle() gin.HandlerFunc {
 			traceId, _ := ctx.Value(ctxkey.TraceIdKey).(string)
 			lang, _ := ctx.Value(ctxkey.LangKey).(string)
 			params := ctx.Value(ctxkey.ParamsKey)
+			header, _ := json.Marshal(c.Request.Header)
 
 			// 构建操作日志
 			log := model.OperatorLog{
 				Ip:         c.ClientIP(),
 				Method:     c.Request.Method,
+				Header:     string(header),
 				Uri:        c.Request.URL.Path,
 				Lang:       lang,
 				Params:     &model.JsonValue{Data: params},

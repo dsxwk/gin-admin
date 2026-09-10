@@ -7,6 +7,7 @@ type OperatorLog struct {
 	ID         int64      `gorm:"column:id;primaryKey;autoIncrement;not null;type:int(10) unsigned;comment:ID" json:"id" form:"id"`
 	Ip         string     `gorm:"column:ip;not null;type:varchar(50);comment:ip地址" json:"ip" form:"ip"`
 	Method     string     `gorm:"column:method;not null;type:varchar(20);comment:请求方式" json:"method" form:"method"`
+	Header     string     `gorm:"column:header;not null;type:text;comment:请求头" json:"header" form:"header"`
 	Uri        string     `gorm:"column:uri;not null;type:varchar(500);comment:路由地址" json:"uri" form:"uri"`
 	Lang       string     `gorm:"column:lang;not null;type:varchar(20);comment:语言" json:"lang" form:"lang"`
 	Params     *JsonValue `gorm:"column:params;type:json;comment:请求参数" json:"params" form:"params"`
