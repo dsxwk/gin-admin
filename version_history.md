@@ -1,5 +1,8 @@
 # Version History
 
+## v3.1.3
+> - 更新配置文件JWT秘钥示例
+
 ## v3.1.2
 > - Add and update Es configuration
 > - Add Es and create it through the Es command line

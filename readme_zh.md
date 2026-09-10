@@ -219,7 +219,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.1.2](version_history_zh.md#v312)
+> - 最新版本 [v3.1.3](version_history_zh.md#v313)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
