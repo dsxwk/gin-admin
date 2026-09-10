@@ -1,5 +1,10 @@
 # Version History
 
+## v3.1.2
+> - Add and update Es configuration
+> - Add Es and create it through the Es command line
+> - Add request header records to the operation log and perform database backup
+
 ## v3.1.1
 > - Optimize the error code and public response
 > - Add command line error code generation
