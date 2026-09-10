@@ -84,6 +84,16 @@ func (d *Debugger) Start() {
 			"ms":         e.Ms,
 		})
 	})
+	id8 := d.Bus.Subscribe(TopicEs, func(e EsEvent) {
+		Add(e.TraceId, FieldEs, map[string]any{
+			"action":   e.Action,
+			"index":    e.Index,
+			"request":  e.Request,
+			"response": e.Response,
+			"code":     e.Code,
+			"ms":       e.Ms,
+		})
+	})
 
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -95,6 +105,7 @@ func (d *Debugger) Start() {
 	d.subIds[TopicGrpc] = id5
 	d.subIds[TopicListener] = id6
 	d.subIds[TopicJob] = id7
+	d.subIds[TopicEs] = id8
 }
 
 func (d *Debugger) Stop() {

@@ -14,6 +14,7 @@ type TraceData struct {
 	Grpc          []map[string]any `json:"Grpc"`
 	ListenerEvent []map[string]any `json:"ListenerEvent"`
 	Job           []map[string]any `json:"Job"`
+	Es            []map[string]any `json:"Es"`
 }
 
 // TraceStore 追踪存储
@@ -37,6 +38,7 @@ const (
 	FieldGrpc     TraceField = "Grpc"
 	FieldListener TraceField = "Listener"
 	FieldJob      TraceField = "Job"
+	FieldEs       TraceField = "Es"
 )
 
 // Get 获取追踪数据,不存在时创建并存储
@@ -77,6 +79,7 @@ func newTraceData() *TraceData {
 		Grpc:          make([]map[string]any, 0),
 		ListenerEvent: make([]map[string]any, 0),
 		Job:           make([]map[string]any, 0),
+		Es:            make([]map[string]any, 0),
 	}
 }
 
@@ -107,6 +110,7 @@ var traceFieldMap = map[TraceField]func(d *TraceData) *[]map[string]any{
 	FieldGrpc:     func(d *TraceData) *[]map[string]any { return &d.Grpc },
 	FieldListener: func(d *TraceData) *[]map[string]any { return &d.ListenerEvent },
 	FieldJob:      func(d *TraceData) *[]map[string]any { return &d.Job },
+	FieldEs:       func(d *TraceData) *[]map[string]any { return &d.Es },
 }
 
 // Add 记录调试信息

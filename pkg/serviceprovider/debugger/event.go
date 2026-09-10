@@ -8,6 +8,7 @@ const (
 	TopicGrpc     = "debug:grpc"
 	TopicListener = "debug:listener"
 	TopicJob      = "debug:job"
+	TopicEs       = "debug:es"
 )
 
 // SqlEvent Sql事件
@@ -60,6 +61,17 @@ type GrpcEvent struct {
 	Response any
 	Code     string
 	Ms       float64
+}
+
+// EsEvent ES事件
+type EsEvent struct {
+	TraceId  string  // traceId
+	Action   string  // 操作
+	Index    string  // 索引
+	Request  any     // 请求
+	Response any     // 响应
+	Code     string  // 状态
+	Ms       float64 // 耗时
 }
 
 // ListenerEvent 监听事件

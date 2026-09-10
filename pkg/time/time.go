@@ -149,6 +149,7 @@ var formatReplacer = strings.NewReplacer(
 	"g", "3",
 	"i", "04",
 	"s", "05",
+	"P", "-07:00",
 )
 
 // convertFormat 格式转换

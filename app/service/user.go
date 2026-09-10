@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"gin/app/enum"
+	"gin/app/es"
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -11,10 +13,38 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"gorm.io/gorm"
 )
 
 type UserService struct {
 	base.BaseService
+}
+
+// syncEsDocument 同步用户ES文档
+func (s *UserService) syncEsDocument(ctx context.Context, db *gorm.DB, id int64) error {
+	if !facade.Config().Es.Enabled {
+		return nil
+	}
+
+	var m model.User
+	err := db.WithContext(ctx).
+		Model(&m).
+		Preload("UserRoles").
+		Preload("MainDept", "is_main = ?", enum.DepartmentMainYes).
+		Preload("MainDept.Dept").
+		Preload("UserDepts").
+		Preload("UserDepts.Dept").
+		First(&m, id).Error
+	if err != nil {
+		return err
+	}
+
+	search := new(es.UserSearch)
+	if err = search.EnsureIndex(ctx); err != nil {
+		return err
+	}
+
+	return search.Save(ctx, &m)
 }
 
 // List 列表
@@ -82,10 +112,9 @@ func (s *UserService) Create(ctx context.Context, req request.User) (m model.Use
 		Nickname: req.Nickname,
 		Gender:   req.Gender,
 		Age:      req.Age,
+		// 处理密码
+		Password: pkg.BcryptHash(req.Password),
 	}
-
-	// 处理密码
-	m.Password = pkg.BcryptHash(req.Password)
 
 	tx := db.Begin()
 
@@ -151,6 +180,12 @@ func (s *UserService) Create(ctx context.Context, req request.User) (m model.Use
 				return m, err
 			}
 		}
+	}
+
+	err = s.syncEsDocument(ctx, tx, m.ID)
+	if err != nil {
+		tx.Rollback()
+		return m, err
 	}
 
 	tx.Commit()
@@ -293,6 +328,13 @@ func (s *UserService) Update(ctx context.Context, id int64, data map[string]any)
 			}
 		}
 	}
+
+	err = s.syncEsDocument(ctx, tx, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	tx.Commit()
 
 	return nil
@@ -321,14 +363,26 @@ func (s *UserService) Detail(ctx context.Context, id int64) (m model.User, err e
 // Delete 删除
 func (s *UserService) Delete(ctx context.Context, id int64) (err error) {
 	var (
-		m  model.User
-		db = s.DB(ctx, &m)
+		m model.User
 	)
 
-	err = db.Model(&m).Delete(&m, id).Error
+	tx := s.DB(ctx, &m).Begin()
+
+	err = tx.Model(&m).Delete(&m, id).Error
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	if facade.Config().Es.Enabled {
+		err = new(es.UserSearch).Delete(ctx, id)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	tx.Commit()
 
 	return nil
 }
@@ -336,14 +390,29 @@ func (s *UserService) Delete(ctx context.Context, id int64) (err error) {
 // BatchDelete 批量删除
 func (s *UserService) BatchDelete(ctx context.Context, ids []int64) (err error) {
 	var (
-		m  model.User
-		db = s.DB(ctx, &m)
+		m model.User
 	)
 
-	err = db.Model(&m).Delete(&m, ids).Error
+	tx := s.DB(ctx, &m).Begin()
+
+	err = tx.Model(&m).Delete(&m, ids).Error
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	if facade.Config().Es.Enabled {
+		search := new(es.UserSearch)
+		for _, id := range ids {
+			err = search.Delete(ctx, id)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	tx.Commit()
 
 	return nil
 }
