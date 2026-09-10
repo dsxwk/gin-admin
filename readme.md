@@ -35,6 +35,14 @@
     - [Help Options](#Help-Options)
     - [Execute Command](#Execute-Command)
     - [Compile And Execute Commands](#Compile-And-Execute-Commands)
+- [gRPC](#gRPC)
+    - [Generate gRPC Code](#Generate-gRPC-Code)
+    - [Generate gRPC Model](#Generate-gRPC-Model)
+    - [Generate gRPC Proto](#Generate-gRPC-Proto)
+    - [Generate gRPC Request](#Generate-gRPC-Request)
+    - [Generate gRPC Service](#Generate-gRPC-Service)
+    - [Call From Go](#Call-From-Go)
+    - [Call From Postman](#Call-From-Postman)
 - [Model](#Model)
     - [Model Creation Help](#Model-Creation-Help)
     - [Model Creation](#Model-Creation)
@@ -95,6 +103,8 @@
     - [Job Interface](#Job-Interface)
     - [Job List](#Job-List)
     - [Job Clear](#Job-Clear)
+- [Es](#Es)
+    - [Es Creation](#Es-Creation)
 - [Publish Event](#Publish-Event)
     - [Event Test](#Event-Test)
 - [Event List](#Event-List)
@@ -139,7 +149,7 @@
 > - A lightweight framework developed based on the Golang language framework `Go Gin`, out of the box, inspired by
     mainstream PHP frameworks such as `Laravel` and `ThinkPHP`. The project architecture directory has a clear
     hierarchy, which is a blessing for beginners. The framework integrates `facede`, `provider`, `jwt`, `log`,
-    `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command` and other
+    `middleware`, `cache`, `validator`, `event`, `routing`, `queue(kafka、rabbitmq)`、 `redis`、 `Command`、`Elasticsearch` and other
     technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
 > - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of
     model, request validation, service, controller, and routing.
@@ -220,7 +230,7 @@
 
 # Version History
 
-> - Latest Version [v3.1.1](version_history.md#v311)
+> - Latest Version [v3.1.2](version_history.md#v312)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -485,6 +495,7 @@ make:
   make:command     Command Creation
   make:controller  Controller Creation
   make:errcode     Errcode Creation
+  make:es          ES Search Creation
   make:event       Event Creation
   make:facade      Facade Creation
   make:listener    Listener Creation
@@ -554,6 +565,10 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "Errcode Creation",
       "name": "make:errcode"
+    },
+    {
+      "description": "ES Search Creation",
+      "name": "make:es"
     },
     {
       "description": "Event Creation",
@@ -784,14 +799,14 @@ $ go build ./cmd/cli.go
 $ ./cli demo:command --args=arg1
 ```
 
-## gRPC
+# gRPC
 
-### Generate gRPC Code
+## Generate gRPC Code
 
 Generate protobuf message and gRPC service code from `grpc/proto/*.proto`:
 
 ```bash
-$ go run -tags cli ./cmd grpc-gen
+$ go run ./cmd/cli.go grpc-gen
 ```
 
 Options:
@@ -802,12 +817,12 @@ Options:
 - `--file=grpc/proto/user.proto` Generate the specified proto file
 - `--tool-dir=.tools/bin` Plugin directory (installed automatically)
 
-### Generate Model
+## Generate gRPC Model
 
 Generate a Go model from a database table:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:model --table=user
+$ go run ./cmd/cli.go grpc-make:model --table=user
 ```
 
 Options:
@@ -817,12 +832,12 @@ Options:
 
 Integer columns are generated as `int32`, so Postman displays numbers instead of strings. The gRPC service layer uses the models under `grpc/model`.
 
-### Generate Proto
+## Generate gRPC Proto
 
 Generate a gRPC proto file from a database table:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:proto --table=user
+$ go run ./cmd/cli.go grpc-make:proto --table=user
 ```
 
 It generates the `Detail`, `List`, `Create`, `Update`, and `Delete` rpc methods by default, with integer fields as `int32`.
@@ -833,12 +848,12 @@ Options:
 - `--path=grpc/proto` Output directory (default)
 - `--connection=mysql` Database connection
 
-### Generate Request
+## Generate gRPC Request
 
 Generate a gRPC request from a database table:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:request --table=user
+$ go run ./cmd/cli.go grpc-make:request --table=user
 ```
 
 Options:
@@ -846,12 +861,12 @@ Options:
 - `--path=grpc/request` Output directory (default)
 - `--connection=mysql` Database connection
 
-### Generate Service
+## Generate gRPC Service
 
 Generate a gRPC service from a database table:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:service --table=user
+$ go run ./cmd/cli.go grpc-make:service --table=user
 ```
 
 Options:
@@ -862,7 +877,7 @@ Options:
 
 The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc-gen`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
 
-### Call From Go
+## Call From Go
 
 gRPC services implement `AuthMethods() map[string]bool` to control each RPC method individually; methods not listed do not require authentication. For methods that require auth, the server validates the JWT and puts the user ID into the context. Use `facade.Grpc().WithToken(ctx, token)` for internal calls:
 
@@ -875,7 +890,7 @@ if err != nil {
 resp, err := userGrpc.Detail(ctx, &proto.UserRequest{Id: 1})
 ```
 
-### Call From Postman
+## Call From Postman
 
 The server uses the standard protobuf codec and enables gRPC reflection.
 
@@ -2723,6 +2738,23 @@ Job dispatch events are automatically recorded in the debugger:
   ]
 }
 ```
+
+# Es
+
+## Es Creation
+
+Generate Es based on the database table:
+
+```bash
+$ go run ./cmd/cli.go make:es --table=user
+```
+
+command options:
+
+- `--table=user`             Table Name
+- `--path=grpc/model`        Output directory(default)
+- `--connection=mysql`       Database connection
+- `--exclude=password,token` Exclude field
 
 # Publish Event
 

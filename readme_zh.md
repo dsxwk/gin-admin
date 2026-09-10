@@ -35,6 +35,14 @@
     - [帮助选项](#帮助选项)
     - [执行命令](#执行命令)
     - [编译执行](#编译执行)
+- [gRPC](#gRPC)
+    - [生成grpc代码](#生成grpc代码)
+    - [生成grpc模型](#生成grpc模型)
+    - [生成grpc proto](#生成grpc-proto)
+    - [生成grpc请求](#生成grpc请求)
+    - [生成grpc服务](#生成grpc服务)
+    - [grpc内部调用](#grpc内部调用)
+    - [Postman调用](#Postman调用)
 - [模型](#模型)
     - [模型创建帮助](#模型创建帮助)
     - [模型创建](#模型创建)
@@ -95,6 +103,8 @@
     - [Job接口](#Job接口)
     - [Job列表](#Job列表)
     - [Job清除](#Job清除)
+- [Es](#Es)
+    - [Es创建](#Es创建)
 - [发布事件](#发布事件)
     - [测试事件](#测试事件)
 - [事件列表](#事件列表)
@@ -138,7 +148,7 @@
 
 > - 基于`Golang`语言框架`Go Gin`开发的轻量级框架, 开箱即用, 设计灵感基于`Laravel`、`ThinPHP`等主流`PHP`框架, 项目架构目录层次分明,
     初学者的福音, 框架默认集成了`门面`、`服务提供者`、`jwt`、`日志`、`中间件`、`缓存`、`验证器`、`事件`、`路由`、
-    `队列(kafka、rabbitmq)`、`redis`、`命令行`等,支持多语言,开发简单易于上手, 方便扩展。
+    `队列(kafka、rabbitmq)`、`redis`、`命令行`、`Elasticsearch`等,支持多语言,开发简单易于上手, 方便扩展。
 > - 命令行按照模型、请求验证、服务层、控制器、路由的顺序正确创建可生成可运行带swagger文档的CURD完整代码。
 > - `grpc服务`目录结构使用`model`、`proto`、`request`、`service`支持命令行一键生成模型、请求、proto、服务的代码,`grpc-gen`自动生成grpc代码
 > - AI智能助手支持 (openai、deepseek...)
@@ -209,7 +219,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.1.1](version_history_zh.md#v311)
+> - 最新版本 [v3.1.2](version_history_zh.md#v312)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -470,6 +480,7 @@ make:
   make:command     命令创建
   make:controller  控制器创建
   make:errcode     错误码创建
+  make:es          ES搜索创建
   make:event       创建事件
   make:facade      创建门面
   make:listener    创建监听
@@ -539,6 +550,10 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "错误码创建",
       "name": "make:errcode"
+    },
+    {
+      "description": "ES搜索创建",
+      "name": "make:es"
     },
     {
       "description": "创建事件",
@@ -771,7 +786,7 @@ $ ./cli demo:command --args=arg1
 根据`grpc/proto/*.proto`自动生成protobuf消息和grpc服务代码:
 
 ```bash
-$ go run -tags cli ./cmd grpc-gen
+$ go run ./cmd/cli.go grpc-gen
 ```
 
 命令选项:
@@ -787,7 +802,7 @@ $ go run -tags cli ./cmd grpc-gen
 根据数据库表生成Go模型:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:model --table=user
+$ go run ./cmd/cli.go grpc-make:model --table=user
 ```
 
 命令选项:
@@ -802,7 +817,7 @@ $ go run -tags cli ./cmd grpc-make:model --table=user
 根据数据库表生成grpc proto:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:proto --table=user
+$ go run ./cmd/cli.go grpc-make:proto --table=user
 ```
 
 默认生成`Detail`、`List`、`Create`、`Update`、`Delete`五个rpc方法,整数字段使用`int32`。
@@ -818,7 +833,7 @@ $ go run -tags cli ./cmd grpc-make:proto --table=user
 根据数据库表生成grpc请求:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:request --table=user
+$ go run ./cmd/cli.go grpc-make:request --table=user
 ```
 
 命令选项:
@@ -831,7 +846,7 @@ $ go run -tags cli ./cmd grpc-make:request --table=user
 根据数据库表生成grpc服务:
 
 ```bash
-$ go run -tags cli ./cmd grpc-make:service --table=user
+$ go run ./cmd/cli.go grpc-make:service --table=user
 ```
 
 命令选项:
@@ -842,7 +857,7 @@ $ go run -tags cli ./cmd grpc-make:service --table=user
 
 grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。更新请求使用`google.protobuf.Struct`接收`data`,按需转成请求结构体做自定义校验,更新时只处理显式传入的字段,和controller的map更新方式一致。
 
-## Go内部调用
+## grpc内部调用
 
 需要鉴权的grpc服务在服务类中实现`AuthMethods() map[string]bool`,按RPC方法名单独控制是否需要JWT,未配置的方法默认不鉴权。需要鉴权的方法服务端会校验JWT并将用户ID写入上下文。内部调用时通过`facade.Grpc().WithToken(ctx, token)`携带Token:
 
@@ -2705,6 +2720,23 @@ Job 投递事件自动记录到调试器:
   ]
 }
 ```
+
+# Es
+
+## Es创建
+
+根据数据库表生成Es:
+
+```bash
+$ go run ./cmd/cli.go make:es --table=user
+```
+
+命令选项:
+
+- `--table=user`             表名
+- `--path=grpc/model`        输出目录(默认)
+- `--connection=mysql`       数据库连接
+- `--exclude=password,token` 排除字段
 
 # 发布事件
 
