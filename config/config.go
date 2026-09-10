@@ -26,6 +26,7 @@ type Config struct {
 	Mcp            Mcp            `mapstructure:"mcp" yaml:"mcp"`
 	Agent          Agent          `mapstructure:"agent" yaml:"agent"`
 	Grpc           Grpc           `mapstructure:"grpc" yaml:"grpc"`
+	Es             Es             `mapstructure:"es" yaml:"es"`
 }
 
 var (

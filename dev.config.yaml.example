@@ -174,3 +174,13 @@ grpc:
   enabled: true # 是否启用grpc服务
   host: 127.0.0.1 # 监听地址
   port: 50051 # 监听端口
+
+# Elasticsearch服务配置
+es:
+  enabled: false # 是否启用ES服务
+  addresses:
+    - http://172.30.117.79:9200 # ES地址
+  username: "" # 用户名
+  password: "" # 密码
+  api-key: "" # APIKey
+  timeout: 10s # 请求超时
