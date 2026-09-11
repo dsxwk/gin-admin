@@ -28,11 +28,15 @@ func NewServer(host string, port int, registrars ...ServiceRegistrar) (*Server, 
 		grpclib.ChainUnaryInterceptor(authUnaryServerInterceptor, unaryServerInterceptor),
 	)
 	reflection.Register(s)
-	for _, register := range Registrars() {
-		register(s)
-	}
-	for _, register := range registrars {
-		register(s)
+	// 显式传入注册器时仅注册当前服务,避免覆盖默认服务时重复注册
+	if len(registrars) > 0 {
+		for _, register := range registrars {
+			register(s)
+		}
+	} else {
+		for _, register := range Registrars() {
+			register(s)
+		}
 	}
 
 	return &Server{
