@@ -27,8 +27,7 @@ func TestCacheSetGet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// 获取带上下文的缓存实例
-			var _cache *cache.CacheProxy
-			_cache = facade.Cache(tt.cacheType).WithContext(ctx)
+			_cache := facade.Cache(tt.cacheType).WithContext(ctx)
 
 			// 设置缓存
 			err := _cache.Set(tt.key, 123, 10*time.Second)
@@ -163,19 +162,23 @@ func TestCacheDifferentTypes(t *testing.T) {
 			}
 		}},
 		{"slice", []int{1, 2, 3, 4, 5}, func(t *testing.T, got any) {
-			// JSON序列化后slice会变成[]any
-			s, ok := got.([]any)
-			require.True(t, ok)
-			require.Len(t, s, 5)
-			for i, v := range s {
-				switch v.(type) {
-				case int:
-					require.Equal(t, i+1, v)
-				case float64:
-					require.Equal(t, float64(i+1), v)
-				default:
-					t.Fatalf("unexpected type at index %d: %T", i, v)
+			switch s := got.(type) {
+			case []int:
+				require.Equal(t, []int{1, 2, 3, 4, 5}, s)
+			case []any:
+				require.Len(t, s, 5)
+				for i, v := range s {
+					switch v.(type) {
+					case int:
+						require.Equal(t, i+1, v)
+					case float64:
+						require.Equal(t, float64(i+1), v)
+					default:
+						t.Fatalf("unexpected type at index %d: %T", i, v)
+					}
 				}
+			default:
+				t.Fatalf("unexpected slice type: %T", got)
 			}
 		}},
 	}

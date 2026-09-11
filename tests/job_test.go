@@ -41,6 +41,10 @@ func TestJobDispatchRedis(t *testing.T) {
 
 // TestJobDispatchRabbitmq RabbitMQ Job投递(含延迟)
 func TestJobDispatchRabbitmq(t *testing.T) {
+	if !facade.Config().Queue.Rabbitmq.Enabled {
+		t.Skip("RabbitMQ未启用")
+	}
+
 	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-rabbitmq")
 
 	time.Sleep(500 * time.Millisecond)
