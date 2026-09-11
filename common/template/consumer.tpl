@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
 	"time"
@@ -32,7 +31,7 @@ type {{.TypeTitle}}{{.Name}}Payload struct {
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {
 	{{- if eq .Type "kafka"}}
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "{{.Topic}}",
@@ -53,7 +52,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 	}
 	{{- else if eq .Type "rabbitmq"}}
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
@@ -128,16 +127,6 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Enabled(cfg *config.Confi
 	{{- end}}
 }
 
-func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Status() queue.ConsumerStatus {
-	{{- if eq .Type "kafka"}}
-	return c.KafkaConsumer.Status()
-	{{- else if eq .Type "rabbitmq"}}
-	return c.RabbitmqConsumer.Status()
-	{{- else}}
-	return c.RedisConsumer.Status()
-	{{- end}}
-}
-
 func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) NewPayload() any {
 	return &{{.TypeTitle}}{{.Name}}Payload{}
 }
@@ -154,17 +143,17 @@ func init() {
 	cfg := facade.Config()
 	if cfg != nil && cfg.Queue.Kafka.Enabled {
 		if c := New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer(); c != nil {
-			queue.GetConsumerRegistry().Register(c)
+			facade.Queue().Register(c)
 		}
 	}
 	{{- else if eq .Type "rabbitmq"}}
 	cfg := facade.Config()
 	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
 		if c := New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer(); c != nil {
-			queue.GetConsumerRegistry().Register(c)
+			facade.Queue().Register(c)
 		}
 	}
 	{{- else}}
-	queue.GetConsumerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
+	facade.Queue().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
 	{{- end}}
 }

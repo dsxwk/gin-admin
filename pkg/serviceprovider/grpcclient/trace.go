@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
 	"time"
 
 	grpclib "google.golang.org/grpc"
@@ -12,20 +12,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// getTraceId 获取追踪ID
-func getTraceId(ctx context.Context) string {
-	if id := ctxkey.GetValue(ctx, ctxkey.TraceIdKey); id != nil {
-		if s, ok := id.(string); ok && s != "" {
-			return s
-		}
-	}
-	return "unknown"
-}
-
 // publishGrpcTrace 记录grpc调用调试信息
 func publishGrpcTrace(ctx context.Context, method string, req, resp any, err error, ms float64) {
-	message.NewEvent().Publish(debugger.TopicGrpc, debugger.GrpcEvent{
-		TraceId:  getTraceId(ctx),
+	eventbus.NewBus().Publish(debugger.TopicGrpc, debugger.GrpcEvent{
+		TraceId:  ctxkey.GetTraceId(ctx),
 		Method:   method,
 		Request:  req,
 		Response: resp,
@@ -36,7 +26,7 @@ func publishGrpcTrace(ctx context.Context, method string, req, resp any, err err
 
 // unaryClientInterceptor 客户端一元拦截器
 func unaryClientInterceptor(ctx context.Context, method string, req, reply any, cc *grpclib.ClientConn, invoker grpclib.UnaryInvoker, opts ...grpclib.CallOption) error {
-	traceId := getTraceId(ctx)
+	traceId := ctxkey.GetTraceId(ctx)
 	if traceId != "" && traceId != "unknown" {
 		ctx = metadata.AppendToOutgoingContext(ctx, "trace-id", traceId)
 	}

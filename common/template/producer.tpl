@@ -2,14 +2,11 @@ package {{.Package}}
 
 import (
 	"context"
-	{{- if ne .Type "redis"}}
 	"gin/app/facade"
-	{{- end}}
 	"gin/common/base"
 	{{- if eq .Type "rabbitmq"}}
 	"gin/pkg"
 	{{- end}}
-	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
 	{{- end}}
@@ -30,7 +27,7 @@ type {{.Name}}{{if .IsDelay}}Delay{{end}}Producer struct {
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer {
 	{{- if eq .Type "kafka"}}
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "{{.Topic}}",
@@ -49,7 +46,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 	return p
 	{{- else if eq .Type "rabbitmq"}}
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
@@ -121,17 +118,17 @@ func init() {
 	cfg := facade.Config()
 	if cfg != nil && cfg.Queue.Kafka.Enabled {
 		if p := New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer(); p != nil {
-			queue.GetProducerRegistry().Register(p)
+			facade.Queue().Register(p)
 		}
 	}
 	{{- else if eq .Type "rabbitmq"}}
 	cfg := facade.Config()
 	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
 		if p := New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer(); p != nil {
-			queue.GetProducerRegistry().Register(p)
+			facade.Queue().Register(p)
 		}
 	}
 	{{- else}}
-	queue.GetProducerRegistry().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer())
+	facade.Queue().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer())
 	{{- end}}
 }

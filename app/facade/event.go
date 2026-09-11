@@ -16,6 +16,15 @@ func Event() EventFacade {
 
 type EventFacade struct{}
 
+// Bus 获取底层事件总线
+func (f EventFacade) Bus() *eventbus.Bus {
+	bus := Get[*eventbus.Bus]("event")
+	if bus != nil {
+		return bus
+	}
+	return eventbus.NewBus()
+}
+
 // Register 注册监听器
 func (f EventFacade) Register[T eventbus.Event](listener eventbus.Listener[T], e T) {
 	eventbus.Register[T](listener, e)

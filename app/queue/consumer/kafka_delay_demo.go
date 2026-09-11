@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/queue"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -40,7 +39,7 @@ func (c *KafkaDelayDemoConsumer) Handle(payload any) error {
 
 func NewKafkaDelayDemoConsumer() *KafkaDelayDemoConsumer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "kafka_delay_demo",
@@ -83,15 +82,11 @@ func (c *KafkaDelayDemoConsumer) Enabled(cfg *config.Config) bool {
 	return cfg.Queue.Kafka.Enabled
 }
 
-func (c *KafkaDelayDemoConsumer) Status() queue.ConsumerStatus {
-	return c.KafkaConsumer.Status()
-}
-
 func init() {
 	cfg := facade.Config()
 	if cfg != nil && cfg.Queue.Kafka.Enabled {
 		if c := NewKafkaDelayDemoConsumer(); c != nil {
-			queue.GetConsumerRegistry().Register(c)
+			facade.Queue().Register(c)
 		}
 	}
 }

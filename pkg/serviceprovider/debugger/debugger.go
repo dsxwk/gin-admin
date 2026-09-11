@@ -1,17 +1,18 @@
 package debugger
 
 import (
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
+	"maps"
 	"sync"
 )
 
 type Debugger struct {
-	Bus    *message.Event
+	Bus    *eventbus.Bus
 	subIds map[string]uint64
 	mu     sync.RWMutex // 读写锁
 }
 
-func NewDebugger(bus *message.Event) *Debugger {
+func NewDebugger(bus *eventbus.Bus) *Debugger {
 	return &Debugger{
 		Bus:    bus,
 		subIds: make(map[string]uint64),
@@ -126,9 +127,7 @@ func (d *Debugger) SubIds() map[string]uint64 {
 
 	// 返回副本避免外部修改
 	result := make(map[string]uint64, len(d.subIds))
-	for k, v := range d.subIds {
-		result[k] = v
-	}
+	maps.Copy(result, d.subIds)
 	return result
 }
 

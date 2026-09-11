@@ -4,7 +4,7 @@ import (
 	"gin/app/facade"
 	"gin/common/flag"
 	"gin/pkg/serviceprovider"
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
 )
 
 func init() {
@@ -20,7 +20,7 @@ func (p *EventProvider) Name() string {
 
 func (p *EventProvider) Register(app serviceprovider.App) {
 	// 注册事件门面
-	facade.Register[*message.Event]("event", facade.Message())
+	facade.Register[*eventbus.Bus]("event", eventbus.NewBus())
 }
 
 func (p *EventProvider) Boot(app serviceprovider.App) {
@@ -28,5 +28,5 @@ func (p *EventProvider) Boot(app serviceprovider.App) {
 }
 
 func (p *EventProvider) Dependencies() []string {
-	return []string{"message", "log"} // 依赖日志服务
+	return []string{"log"} // 依赖日志服务
 }

@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/queue"
 )
 
 // RedisDemoConsumer Redis普通消费者
@@ -65,10 +64,6 @@ func (c *RedisDemoConsumer) Enabled(cfg *config.Config) bool {
 	return true
 }
 
-func (c *RedisDemoConsumer) Status() queue.ConsumerStatus {
-	return c.RedisConsumer.Status()
-}
-
 func init() {
-	queue.GetConsumerRegistry().Register(NewRedisDemoConsumer())
+	facade.Queue().Register(NewRedisDemoConsumer())
 }

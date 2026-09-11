@@ -27,6 +27,18 @@ type QueueFacade struct {
 	producers map[string]queue.Producer
 }
 
+// Register 注册队列消费者或生产者
+func (q *QueueFacade) Register[T queue.Named](item T) {
+	switch value := any(item).(type) {
+	case queue.Consumer:
+		queue.GetConsumerRegistry().Register(value)
+	case queue.Producer:
+		queue.GetProducerRegistry().Register(value)
+	default:
+		flag.Errorf("queue register unsupported type: %T", item)
+	}
+}
+
 func (q *QueueFacade) Producer(name string) queue.Producer {
 	q.mu.Lock()
 	defer q.mu.Unlock()

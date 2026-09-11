@@ -20,7 +20,7 @@ func (p *DebuggerProvider) Name() string {
 }
 
 func (p *DebuggerProvider) Register(app serviceprovider.App) {
-	facade.Register[*debugger.Debugger]("debugger", debugger.NewDebugger(facade.Message()))
+	facade.Register[*debugger.Debugger]("debugger", debugger.NewDebugger(facade.Event().Bus()))
 }
 
 func (p *DebuggerProvider) Boot(app serviceprovider.App) {
@@ -36,7 +36,7 @@ func (p *DebuggerProvider) Runners() []serviceprovider.Runner {
 }
 
 func (p *DebuggerProvider) Dependencies() []string {
-	return []string{"message", "event", "log"}
+	return []string{"event", "log"}
 }
 
 // DebuggerRunner 调试器后台任务

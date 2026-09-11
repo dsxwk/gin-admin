@@ -7,8 +7,8 @@ import (
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/logger"
-	"gin/pkg/serviceprovider/message"
 	"gin/pkg/serviceprovider/queue"
 	"sync"
 	"time"
@@ -23,10 +23,10 @@ type RabbitMQ struct {
 	Channel *amqp091.Channel
 	Conf    *config.Config
 	Log     *logger.Logger
-	Message *message.Event
+	Bus     *eventbus.Bus
 }
 
-func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *message.Event) (*RabbitMQ, error) {
+func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *eventbus.Bus) (*RabbitMQ, error) {
 	conn, err := amqp091.Dial(conf.Queue.Rabbitmq.Url)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *message.Event) (*
 	if err != nil {
 		return nil, err
 	}
-	return &RabbitMQ{Conn: conn, Channel: ch, Conf: conf, Log: log, Message: bus}, nil
+	return &RabbitMQ{Conn: conn, Channel: ch, Conf: conf, Log: log, Bus: bus}, nil
 }
 
 func (r *RabbitMQ) Close() error {
@@ -257,7 +257,7 @@ func (p *RabbitmqProducer) Publish(ctx context.Context, msg any) error {
 		}
 	}
 
-	p.Mq.Message.Publish(debugger.TopicMq, debugger.MqEvent{
+	p.Mq.Bus.Publish(debugger.TopicMq, debugger.MqEvent{
 		TraceId: traceId,
 		Driver:  "rabbitmq",
 		Topic:   p.Exchange + ":" + p.Routing,

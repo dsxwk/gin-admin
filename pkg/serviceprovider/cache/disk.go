@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"gin/config"
+	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/logger"
-	"gin/pkg/serviceprovider/message"
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
@@ -31,7 +31,7 @@ func NewDiskCache(conf *config.Config) *CacheProxy {
 	}
 	disk := &DiskCache{db: db}
 
-	diskCache = NewCacheProxy("disk", disk, message.NewEvent(), nil)
+	diskCache = NewCacheProxy("disk", disk, eventbus.NewBus(), nil)
 	return diskCache
 }
 

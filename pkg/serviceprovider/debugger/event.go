@@ -1,12 +1,14 @@
 package debugger
 
+import "gin/pkg/serviceprovider/eventbus"
+
 const (
 	TopicSql      = "debug:sql"
 	TopicCache    = "debug:cache"
 	TopicHttp     = "debug:http"
 	TopicMq       = "debug:mq"
 	TopicGrpc     = "debug:grpc"
-	TopicListener = "debug:listener"
+	TopicListener = eventbus.TopicListener
 	TopicJob      = "debug:job"
 	TopicEs       = "debug:es"
 )
@@ -75,12 +77,7 @@ type EsEvent struct {
 }
 
 // ListenerEvent 监听事件
-type ListenerEvent struct {
-	TraceId     string // tranceId
-	Name        string // 监听名称
-	Description string // 监听描述
-	Data        any    // 监听数据
-}
+type ListenerEvent = eventbus.ListenerEvent
 
 // JobEvent Job事件
 type JobEvent struct {

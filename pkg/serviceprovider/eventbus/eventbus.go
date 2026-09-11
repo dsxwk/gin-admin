@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/common/flag"
-	"gin/pkg/serviceprovider/debugger"
-	"gin/pkg/serviceprovider/message"
 	"sort"
 	"strings"
 	"sync"
@@ -15,97 +13,120 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+const (
+	// TopicListener 监听调试主题
+	TopicListener = "debug:listener"
+)
+
+// ListenerEvent 监听调试事件
+type ListenerEvent struct {
+	TraceId     string
+	Name        string
+	Description string
+	Data        any
+}
+
 type EventInfo struct {
 	Name        string
 	Description string
 	Listeners   []string
 }
 
-var (
-	listenerMap sync.Map // key: event name -> []Listener[T]
-	eventInfos  sync.Map // key: event name -> EventInfo
-)
+// Registry 事件注册表
+type Registry struct {
+	mu        sync.RWMutex
+	listeners map[string][]Listener[Event] // key: event name -> []Listener
+	infos     map[string]*EventInfo        // key: event name -> EventInfo
+}
 
-// Register 注册监听
-func Register[T Event](listener Listener[T], event T) {
-	name := event.Name()
-	desc := event.Description()
+// 默认注册表
+var defaultRegistry = &Registry{
+	listeners: make(map[string][]Listener[Event]),
+	infos:     make(map[string]*EventInfo),
+}
 
-	// 获取当前已注册监听
-	var listen []Listener[T]
-	if v, ok := listenerMap.Load(name); ok {
-		listen = v.([]Listener[T])
-	}
+// listenerWrapper 泛型监听器包装器
+// 用于将 Listener[T] 转换为 Listener[Event]
+type listenerWrapper[T Event] struct {
+	inner Listener[T]
+}
 
-	// 添加新的监听
-	listen = append(listen, listener)
-	listenerMap.Store(name, listen)
-
-	// 更新事件信息
-	info := EventInfo{
-		Name:        name,
-		Description: desc,
-	}
-	if v, ok := eventInfos.Load(name); ok {
-		existing := v.(EventInfo)
-		existing.Listeners = append(existing.Listeners, fmt.Sprintf("%T", listener))
-		eventInfos.Store(name, existing)
-	} else {
-		info.Listeners = []string{fmt.Sprintf("%T", listener)}
-		eventInfos.Store(name, info)
+func (w *listenerWrapper[T]) Handle(e Event) {
+	if t, ok := e.(T); ok {
+		w.inner.Handle(t)
 	}
 }
 
-// getTraceId 安全获取traceId
-func getTraceId(ctx context.Context) string {
-	if ctx == nil {
-		return "unknown"
-	}
-	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
-		if s, ok := id.(string); ok && s != "" {
-			return s
+// Register 注册监听
+func Register[T Event](listener Listener[T], event T) {
+	defaultRegistry.mu.Lock()
+	defer defaultRegistry.mu.Unlock()
+
+	name := event.Name()
+
+	// 包装监听器（Listener[T] -> Listener[Event]）
+	wrapped := &listenerWrapper[T]{inner: listener}
+	defaultRegistry.listeners[name] = append(defaultRegistry.listeners[name], wrapped)
+
+	// 更新事件信息
+	if info, ok := defaultRegistry.infos[name]; ok {
+		info.Listeners = append(info.Listeners, fmt.Sprintf("%T", listener))
+	} else {
+		defaultRegistry.infos[name] = &EventInfo{
+			Name:        name,
+			Description: event.Description(),
+			Listeners:   []string{fmt.Sprintf("%T", listener)},
 		}
 	}
-	return "unknown"
 }
 
 // Publish 发布事件
 func Publish[T Event](ctx context.Context, e T) {
-	message.NewEvent().Publish(debugger.TopicListener, debugger.ListenerEvent{
-		TraceId:     getTraceId(ctx),
+	NewBus().Publish(TopicListener, ListenerEvent{
+		TraceId:     ctxkey.GetTraceId(ctx),
 		Name:        e.Name(),
 		Description: e.Description(),
 		Data:        e,
 	})
 
-	if v, ok := listenerMap.Load(e.Name()); ok {
-		for _, listener := range v.([]Listener[T]) {
-			// 可替换goroutine为队列
-			go listener.Handle(e)
-		}
-	} else {
+	// 获取监听器
+	defaultRegistry.mu.RLock()
+	listeners := defaultRegistry.listeners[e.Name()]
+	defaultRegistry.mu.RUnlock()
+
+	if len(listeners) == 0 {
 		flag.Warningf("未找到事件监听: %s", e.Name())
+		return
+	}
+
+	// 异步执行监听器
+	for _, listener := range listeners {
+		// 可替换goroutine为队列
+		go listener.Handle(e)
 	}
 }
 
 // EventList 已注册事件列表
 func EventList() []EventInfo {
-	var list []EventInfo
-	eventInfos.Range(func(_, value any) bool {
-		list = append(list, value.(EventInfo))
-		return true
-	})
+	defaultRegistry.mu.RLock()
+	defer defaultRegistry.mu.RUnlock()
+
+	list := make([]EventInfo, 0, len(defaultRegistry.infos))
+	for _, info := range defaultRegistry.infos {
+		list = append(list, *info)
+	}
 	return list
 }
 
 // DebugPrint 打印所有注册事件信息
 func DebugPrint() {
-	// 收集所有事件
-	var events []EventInfo
-	eventInfos.Range(func(_, value any) bool {
-		events = append(events, value.(EventInfo))
-		return true
-	})
+	// 获取所有事件
+	defaultRegistry.mu.RLock()
+	events := make([]EventInfo, 0, len(defaultRegistry.infos))
+	for _, info := range defaultRegistry.infos {
+		events = append(events, *info)
+	}
+	defaultRegistry.mu.RUnlock()
 
 	if len(events) == 0 {
 		flag.Warningf("暂无注册的事件")

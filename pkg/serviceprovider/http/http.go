@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -371,7 +371,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		}
 	}
 
-	message.NewEvent().Publish(debugger.TopicHttp, debugger.HttpEvent{
+	eventbus.NewBus().Publish(debugger.TopicHttp, debugger.HttpEvent{
 		TraceId:  traceId,
 		Url:      req.URL.String(),
 		Method:   req.Method,

@@ -6,7 +6,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -14,7 +14,7 @@ import (
 )
 
 type RedisHook struct {
-	bus *message.Event
+	bus *eventbus.Bus
 }
 
 func (h *RedisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
@@ -92,7 +92,7 @@ type RedisCache struct {
 	client       *redis.Client
 	pubsubs      map[string]*redis.PubSub
 	ctx          context.Context
-	bus          *message.Event
+	bus          *eventbus.Bus
 	conf         *config.Config
 	lastPingFail time.Time
 }
@@ -106,7 +106,7 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 		return redisCache
 	}
 
-	bus := message.NewEvent()
+	bus := eventbus.NewBus()
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", conf.Cache.Redis.Address, conf.Cache.Redis.Port),
 		Password: conf.Cache.Redis.Password,

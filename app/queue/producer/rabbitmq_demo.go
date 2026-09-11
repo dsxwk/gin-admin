@@ -4,7 +4,6 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDemoProducer RabbitMQ普通生产者
@@ -15,7 +14,7 @@ type RabbitmqDemoProducer struct {
 // NewRabbitmqDemoProducer 创建生产者实例
 func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Message())
+	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
@@ -52,7 +51,7 @@ func init() {
 	cfg := facade.Config()
 	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
 		if p := NewRabbitmqDemoProducer(); p != nil {
-			queue.GetProducerRegistry().Register(p)
+			facade.Queue().Register(p)
 		}
 	}
 }

@@ -3,7 +3,7 @@ package {{.Package}}
 import (
     "fmt"
     "gin/app/event"
-    "gin/pkg/serviceprovider/eventbus"
+    "gin/app/facade"
     "time"
 )
 
@@ -20,5 +20,5 @@ func (l *{{.Name}}Listener) Handle(e event.{{.EventName}}) {
 }
 
 func init() {
-	eventbus.Register(&{{.Name}}Listener{}, event.{{.EventName}}{})
+	facade.Event().Register(&{{.Name}}Listener{}, event.{{.EventName}}{})
 }

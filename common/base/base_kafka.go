@@ -8,8 +8,8 @@ import (
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/logger"
-	"gin/pkg/serviceprovider/message"
 	"gin/pkg/serviceprovider/queue"
 	"sync"
 	"time"
@@ -20,15 +20,15 @@ import (
 
 // Kafka Kafka连接
 type Kafka struct {
-	Writer  *kafka.Writer
-	Reader  *kafka.Reader
-	Conf    *config.Config
-	Log     *logger.Logger
-	Message *message.Event
+	Writer *kafka.Writer
+	Reader *kafka.Reader
+	Conf   *config.Config
+	Log    *logger.Logger
+	Bus    *eventbus.Bus
 }
 
-func NewKafka(conf *config.Config, log *logger.Logger, bus *message.Event) *Kafka {
-	return &Kafka{Conf: conf, Log: log, Message: bus}
+func NewKafka(conf *config.Config, log *logger.Logger, bus *eventbus.Bus) *Kafka {
+	return &Kafka{Conf: conf, Log: log, Bus: bus}
 }
 
 // KafkaConsumer Kafka消费者基类
@@ -181,7 +181,7 @@ func (p *KafkaProducer) Publish(ctx context.Context, msg any) error {
 		}
 	}
 
-	p.Kafka.Message.Publish(debugger.TopicMq, debugger.MqEvent{
+	p.Kafka.Bus.Publish(debugger.TopicMq, debugger.MqEvent{
 		TraceId: traceId,
 		Driver:  "kafka",
 		Topic:   p.Topic,

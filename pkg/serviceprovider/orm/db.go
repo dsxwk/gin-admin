@@ -6,8 +6,8 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/eventbus"
 	l "gin/pkg/serviceprovider/logger"
-	"gin/pkg/serviceprovider/message"
 	"log"
 	"os"
 	"strings"
@@ -223,7 +223,7 @@ func after(db *gorm.DB) {
 		traceId = "unknown"
 	}
 
-	message.NewEvent().Publish(debugger.TopicSql, debugger.SqlEvent{
+	eventbus.NewBus().Publish(debugger.TopicSql, debugger.SqlEvent{
 		TraceId: traceId,
 		Sql:     sql,
 		Rows:    db.Statement.RowsAffected,

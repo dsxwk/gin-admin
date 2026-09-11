@@ -9,7 +9,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
 	t "gin/pkg/time"
 	"io"
 	"net/http"
@@ -367,7 +367,7 @@ func publishTrace(ctx context.Context, action, index string, reqData []byte, sta
 		}
 	}
 
-	message.NewEvent().Publish(debugger.TopicEs, debugger.EsEvent{
+	eventbus.NewBus().Publish(debugger.TopicEs, debugger.EsEvent{
 		TraceId:  traceId,
 		Action:   action,
 		Index:    index,

@@ -17,7 +17,7 @@ func (d *DebuggerFacade) instance() *debugger.Debugger {
 	if dbg != nil {
 		return dbg
 	}
-	return debugger.NewDebugger(Message())
+	return debugger.NewDebugger(Event().Bus())
 }
 
 // Start 启动调试器

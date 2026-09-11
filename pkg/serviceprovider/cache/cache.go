@@ -6,8 +6,8 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/logger"
-	"gin/pkg/serviceprovider/message"
 	"sync"
 	"time"
 )
@@ -23,12 +23,12 @@ type Cache interface {
 type CacheProxy struct {
 	driver string
 	c      Cache
-	bus    *message.Event
+	bus    *eventbus.Bus
 	ctx    context.Context
 	conf   *config.Config
 }
 
-func NewCacheProxy(driver string, c Cache, bus *message.Event, conf *config.Config) *CacheProxy {
+func NewCacheProxy(driver string, c Cache, bus *eventbus.Bus, conf *config.Config) *CacheProxy {
 	return &CacheProxy{
 		driver: driver,
 		c:      c,

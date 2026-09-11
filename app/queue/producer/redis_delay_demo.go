@@ -1,8 +1,8 @@
 package producer
 
 import (
+	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/serviceprovider/queue"
 )
 
 // RedisDelayDemoProducer Redis延迟生产者
@@ -37,5 +37,5 @@ func (p *RedisDelayDemoProducer) Description() string {
 }
 
 func init() {
-	queue.GetProducerRegistry().Register(NewRedisDelayDemoProducer())
+	facade.Queue().Register(NewRedisDelayDemoProducer())
 }

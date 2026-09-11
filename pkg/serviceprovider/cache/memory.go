@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"gin/config"
-	"gin/pkg/serviceprovider/message"
+	"gin/pkg/serviceprovider/eventbus"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -25,7 +25,7 @@ func NewMemoryCache(conf *config.Config) *CacheProxy {
 	m := &MemoryCache{
 		cache: cache.New(conf.Cache.Memory.DefaultExpire, conf.Cache.Memory.CleanupInterval),
 	}
-	memoryCache = NewCacheProxy("memory", m, message.NewEvent(), nil)
+	memoryCache = NewCacheProxy("memory", m, eventbus.NewBus(), nil)
 	return memoryCache
 }
 

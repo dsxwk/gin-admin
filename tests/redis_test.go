@@ -4,7 +4,6 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/app/queue/consumer"
-	_ "gin/app/queue/producer"
 	"gin/common/ctxkey"
 	"testing"
 	"time"

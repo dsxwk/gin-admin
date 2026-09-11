@@ -3,7 +3,7 @@ package listener
 import (
 	"fmt"
 	"gin/app/event"
-	"gin/pkg/serviceprovider/eventbus"
+	"gin/app/facade"
 	"time"
 )
 
@@ -20,5 +20,5 @@ func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
 }
 
 func init() {
-	eventbus.Register(&UserLoginListener{}, event.UserLoginEvent{})
+	facade.Event().Register(&UserLoginListener{}, event.UserLoginEvent{})
 }
