@@ -86,18 +86,6 @@ func (j *JobFacade) initConnections() {
 	})
 }
 
-func getTraceId(ctx context.Context) string {
-	if ctx == nil {
-		return "unknown"
-	}
-	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
-		if s, ok := id.(string); ok && s != "" {
-			return s
-		}
-	}
-	return "unknown"
-}
-
 func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) error {
 	jb := jsjob.Get(jobName)
 	if jb == nil {
@@ -130,8 +118,8 @@ func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) e
 		dispatchErr = fmt.Errorf("job [%s] 不支持的连接: %s", jobName, conn)
 	}
 
-	Message().Publish(debugger.TopicJob, debugger.JobEvent{
-		TraceId:    getTraceId(ctx),
+	Event().Bus().Publish(debugger.TopicJob, debugger.JobEvent{
+		TraceId:    ctxkey.GetTraceId(ctx),
 		Name:       jobName,
 		Connection: conn,
 		Payload:    string(payloadBytes),

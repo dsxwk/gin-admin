@@ -24,3 +24,16 @@ func WithValue(ctx context.Context, key string, value any) context.Context {
 func GetValue(ctx context.Context, key string) any {
 	return ctx.Value(key)
 }
+
+// GetTraceId 获取tracId
+func GetTraceId(ctx context.Context) string {
+	if ctx == nil {
+		return "unknown"
+	}
+	if id := ctx.Value(TraceIdKey); id != nil {
+		if s, ok := id.(string); ok && s != "" {
+			return s
+		}
+	}
+	return "unknown"
+}
