@@ -4,7 +4,7 @@ package main
 
 import (
 	"gin/app/facade"
-	_ "gin/cmd/import"
+	_ "gin/common/imports"
 	"gin/pkg/cli"
 )
 

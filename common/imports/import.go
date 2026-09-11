@@ -1,10 +1,11 @@
-package _import
+package imports
 
 import (
 	_ "gin/app/command"
 	_ "gin/app/job"
 	_ "gin/app/listener"
 	_ "gin/app/mcp"
+	_ "gin/app/provider"
 	_ "gin/app/queue/consumer"
 	_ "gin/app/queue/producer"
 	_ "gin/pkg/cli/db"

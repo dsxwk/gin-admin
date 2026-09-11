@@ -3,6 +3,7 @@ package tests
 import (
 	"gin/app/facade"
 	"gin/common/flag"
+	_ "gin/common/imports"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider"
 	"os"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// 初始化门面系统
+	// 初始化门面和默认服务
 	facade.Init()
 	// 创建应用实例
 	app := serviceprovider.GetApp()
@@ -18,7 +19,7 @@ func TestMain(m *testing.M) {
 	facade.Register("app", app)
 
 	// 打印启动信息
-	facade.Log().Info("Test environment initialized")
+	facade.Log().Info("Testing Initialized")
 	err := app.Boot()
 	if err != nil {
 		flag.Errorf("初始化应用失败: %v", err)
