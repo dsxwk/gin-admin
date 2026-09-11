@@ -280,7 +280,7 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 	}
 }
 
-// 格式化符合对齐
+// 格式化符号对齐
 func ensureEmojiSpace(s string) string {
 	r := []rune(s)
 	if len(r) > 0 && (r[0] > 0x1F000 && r[0] < 0x1FAFF) {
