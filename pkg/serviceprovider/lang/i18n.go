@@ -35,6 +35,9 @@ func LoadLang(conf *config.Config, logger *logger.Logger) {
 		Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 
 		baseDir := conf.I18n.Dir
+		if !filepath.IsAbs(baseDir) {
+			baseDir = filepath.Join(config.GetRootPath(), baseDir)
+		}
 		if _, err := os.Stat(baseDir); os.IsNotExist(err) {
 			log.Info(pkg.Sprintf("i18n baseDir not found: %s", baseDir))
 			return
@@ -100,6 +103,9 @@ func Trans(ctx context.Context, messageID string, data map[string]any) string {
 	localizer, ok := Localizers[langCode]
 	if !ok {
 		localizer = Localizers["zh"]
+	}
+	if localizer == nil {
+		return messageID
 	}
 
 	msg, err := localizer.Localize(&i18n.LocalizeConfig{
