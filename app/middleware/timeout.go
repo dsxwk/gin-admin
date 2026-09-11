@@ -19,25 +19,34 @@ type Timeout struct {
 // timeoutWriter 超时感知的ResponseWriter
 type timeoutWriter struct {
 	gin.ResponseWriter
+	ctx      context.Context
 	timedOut bool
 }
 
+// expired 判断请求是否已超时
+func (w *timeoutWriter) expired() bool {
+	return w.timedOut || errors.Is(w.ctx.Err(), context.DeadlineExceeded)
+}
+
 func (w *timeoutWriter) Write(data []byte) (int, error) {
-	if w.timedOut {
+	if w.expired() {
+		w.timedOut = true
 		return 0, errors.New("request timed out")
 	}
 	return w.ResponseWriter.Write(data)
 }
 
 func (w *timeoutWriter) WriteHeader(statusCode int) {
-	if w.timedOut {
+	if w.expired() {
+		w.timedOut = true
 		return
 	}
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
 func (w *timeoutWriter) WriteString(s string) (int, error) {
-	if w.timedOut {
+	if w.expired() {
+		w.timedOut = true
 		return 0, errors.New("request timed out")
 	}
 	return w.ResponseWriter.WriteString(s)
@@ -63,7 +72,8 @@ func (s Timeout) Handle(timeout time.Duration) gin.HandlerFunc {
 		c.Request = c.Request.WithContext(ctx)
 
 		// 包装ResponseWriter,超时后阻止后续写入
-		writer := &timeoutWriter{ResponseWriter: c.Writer}
+		originalWriter := c.Writer
+		writer := &timeoutWriter{ResponseWriter: originalWriter, ctx: ctx}
 		c.Writer = writer
 
 		c.Next()
@@ -71,8 +81,9 @@ func (s Timeout) Handle(timeout time.Duration) gin.HandlerFunc {
 		// 检查是否超时
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			writer.timedOut = true
+			c.Writer = originalWriter
 			// 如果还没写入响应,写超时响应
-			if !c.Writer.Written() {
+			if !originalWriter.Written() {
 				c.Abort()
 				s.Response.Error(c, errcode.TimeoutError())
 			}
