@@ -134,9 +134,9 @@ func (a *Agent) Ask(question string) (string, error) {
 			// 解析参数
 			args := a.parseArgs(tc.Arguments)
 
-			toolResult, err := a.callTool(tc.Name, args)
-			if err != nil {
-				toolResult = map[string]any{"error": err.Error()}
+			toolResult, _err := a.callTool(tc.Name, args)
+			if _err != nil {
+				toolResult = map[string]any{"error": _err.Error()}
 			}
 			resultJson, _ := json.Marshal(toolResult)
 

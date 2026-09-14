@@ -6,6 +6,22 @@ import (
 	"sync/atomic"
 )
 
+// Handler 泛型事件处理函数
+type Handler[T any] func(T)
+
+type busSubscriber struct {
+	id     uint64
+	handle func(any)
+	async  bool
+}
+
+// Bus 底层发布订阅总线
+type Bus struct {
+	mu          sync.RWMutex
+	subscribers map[string][]*busSubscriber
+	nextID      atomic.Uint64
+}
+
 var (
 	defaultBus *Bus
 	busOnce    sync.Once
@@ -21,236 +37,157 @@ func NewBus() *Bus {
 	return defaultBus
 }
 
-// busSubscriber 总线订阅者
-type busSubscriber struct {
-	Id     uint64
-	Async  bool
-	Handle func(any)
-}
-
-// Bus 底层事件总线
-type Bus struct {
-	subscribers map[string][]*busSubscriber
-	mu          sync.RWMutex
-	idCounter   atomic.Uint64
-	semaphore   chan struct{}
-}
-
 // Subscribe 订阅同步事件
-func (b *Bus) Subscribe[T any](topic string, fn func(T)) uint64 {
-	return b.addSubscriber(topic, func(event any) {
-		if v, ok := event.(T); ok {
-			fn(v)
-		}
-	}, false)
+func (b *Bus) Subscribe[T any](topic string, handler Handler[T]) uint64 {
+	return b.subscribe(topic, handler, false)
 }
 
 // SubscribeAsync 订阅异步事件
-func (b *Bus) SubscribeAsync[T any](topic string, fn func(T)) uint64 {
-	return b.addSubscriber(topic, func(event any) {
-		if v, ok := event.(T); ok {
-			fn(v)
+func (b *Bus) SubscribeAsync[T any](topic string, handler Handler[T]) uint64 {
+	return b.subscribe(topic, handler, true)
+}
+
+// subscribe 创建指定模式的事件订阅
+func (b *Bus) subscribe[T any](topic string, handler Handler[T], async bool) uint64 {
+	if b == nil || handler == nil {
+		return 0
+	}
+
+	return b.addSubscriber(topic, func(data any) {
+		event, ok := data.(T)
+		if !ok {
+			return
 		}
-	}, true)
+
+		handler(event)
+	}, async)
 }
 
 // addSubscriber 添加订阅者
-func (b *Bus) addSubscriber(topic string, fn func(any), async bool) uint64 {
-	id := b.idCounter.Add(1)
-
-	sub := &busSubscriber{
-		Id:     id,
-		Async:  async,
-		Handle: fn,
+func (b *Bus) addSubscriber(topic string, handler func(any), async bool) uint64 {
+	id := b.nextID.Add(1)
+	subscriber := &busSubscriber{
+		id:     id,
+		handle: handler,
+		async:  async,
 	}
 
 	b.mu.Lock()
-	b.subscribers[topic] = append(b.subscribers[topic], sub)
+	if b.subscribers == nil {
+		b.subscribers = make(map[string][]*busSubscriber)
+	}
+	b.subscribers[topic] = append(b.subscribers[topic], subscriber)
 	b.mu.Unlock()
 
 	return id
 }
 
-// Unsubscribe 删除订阅者
+// Unsubscribe 取消指定订阅
 func (b *Bus) Unsubscribe(topic string, id uint64) bool {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	subs, ok := b.subscribers[topic]
-	if !ok {
+	if b == nil {
 		return false
 	}
 
-	newSubs := make([]*busSubscriber, 0, len(subs))
-	removed := false
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
-	for _, s := range subs {
-		if s.Id == id {
-			removed = true
+	subscribers := b.subscribers[topic]
+	if len(subscribers) == 0 {
+		return false
+	}
+
+	for index, subscriber := range subscribers {
+		if subscriber.id != id {
 			continue
 		}
-		newSubs = append(newSubs, s)
-	}
 
-	if removed {
-		if len(newSubs) == 0 {
+		b.subscribers[topic] = append(subscribers[:index], subscribers[index+1:]...)
+		if len(b.subscribers[topic]) == 0 {
 			delete(b.subscribers, topic)
-		} else {
-			b.subscribers[topic] = newSubs
 		}
+
+		return true
 	}
 
-	return removed
-}
-
-// UnsubscribeAll 取消主题的所有订阅
-func (b *Bus) UnsubscribeAll(topic string) bool {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	if _, ok := b.subscribers[topic]; !ok {
-		return false
-	}
-
-	delete(b.subscribers, topic)
-	return true
+	return false
 }
 
 // Publish 发布事件
-func (b *Bus) Publish[T any](topic string, event T) {
-	b.mu.RLock()
-	subs := b.subscribers[topic]
-	subsCopy := make([]*busSubscriber, len(subs))
-	copy(subsCopy, subs)
-	b.mu.RUnlock()
-
-	if len(subsCopy) == 0 {
-		return
-	}
-
-	for _, sub := range subsCopy {
-		if sub.Async {
-			b.asyncHandle(sub, event)
-		} else {
-			sub.Handle(event)
-		}
-	}
+func (b *Bus) Publish(topic string, event any) {
+	b.PublishWithContext(context.Background(), topic, event)
 }
 
-// PublishWithContext 发布事件并支持取消
-func (b *Bus) PublishWithContext[T any](ctx context.Context, topic string, event T) {
-	b.mu.RLock()
-	subs := b.subscribers[topic]
-	subsCopy := make([]*busSubscriber, len(subs))
-	copy(subsCopy, subs)
-	b.mu.RUnlock()
-
-	if len(subsCopy) == 0 {
+// PublishWithContext 发布事件上下文
+func (b *Bus) PublishWithContext(ctx context.Context, topic string, event any) {
+	if b == nil {
 		return
 	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
 
-	for _, sub := range subsCopy {
-		select {
-		case <-ctx.Done():
+	subscribers := b.subscribersFor(topic)
+	for _, subscriber := range subscribers {
+		if ctx.Err() != nil {
 			return
-		default:
-			if sub.Async {
-				b.asyncHandle(sub, event)
-			} else {
-				sub.Handle(event)
-			}
 		}
+
+		if subscriber.async {
+			b.asyncHandle(ctx, subscriber, event)
+			continue
+		}
+
+		b.handle(ctx, subscriber, event)
 	}
 }
 
-// asyncHandle 异步执行
-func (b *Bus) asyncHandle(sub *busSubscriber, event any) {
-	if b.semaphore != nil {
-		b.semaphore <- struct{}{}
-		go func() {
-			defer func() { <-b.semaphore }()
-			sub.Handle(event)
-		}()
-		return
+// subscribersFor 获取订阅者快照
+func (b *Bus) subscribersFor(topic string) []*busSubscriber {
+	if b == nil {
+		return nil
 	}
-	sub.Handle(event)
-}
 
-// SubscribeIds 查询主题的所有订阅者ID
-func (b *Bus) SubscribeIds(topic string) []uint64 {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
-	subs, ok := b.subscribers[topic]
-	if !ok {
-		return []uint64{}
+	subscribers := b.subscribers[topic]
+	if len(subscribers) == 0 {
+		return nil
 	}
 
-	ids := make([]uint64, 0, len(subs))
-	for _, s := range subs {
-		ids = append(ids, s.Id)
-	}
-	return ids
-}
-
-// QueryAll 查询所有主题及订阅者ID
-func (b *Bus) QueryAll() map[string][]uint64 {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	result := make(map[string][]uint64, len(b.subscribers))
-	for topic, subs := range b.subscribers {
-		ids := make([]uint64, 0, len(subs))
-		for _, s := range subs {
-			ids = append(ids, s.Id)
-		}
-		result[topic] = ids
-	}
-
+	result := make([]*busSubscriber, len(subscribers))
+	copy(result, subscribers)
 	return result
 }
 
-// Topics 获取所有主题
-func (b *Bus) Topics() []string {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
+// handle 执行订阅者
+func (b *Bus) handle(ctx context.Context, subscriber *busSubscriber, event any) {
+	defer func() {
+		_ = recover()
+	}()
 
-	topics := make([]string, 0, len(b.subscribers))
-	for topic := range b.subscribers {
-		topics = append(topics, topic)
+	if ctx.Err() != nil {
+		return
 	}
-	return topics
+
+	subscriber.handle(event)
 }
 
-// Count 获取指定主题的订阅者数量
+// asyncHandle 异步执行订阅者
+func (b *Bus) asyncHandle(ctx context.Context, subscriber *busSubscriber, event any) {
+	go func() {
+		b.handle(ctx, subscriber, event)
+	}()
+}
+
+// Count 获取指定主题的订阅数量
 func (b *Bus) Count(topic string) int {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-	return len(b.subscribers[topic])
-}
-
-// Total 获取所有订阅者总数
-func (b *Bus) Total() int {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	total := 0
-	for _, subs := range b.subscribers {
-		total += len(subs)
+	if b == nil {
+		return 0
 	}
-	return total
-}
 
-// Clear 清空所有订阅
-func (b *Bus) Clear() {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	b.subscribers = make(map[string][]*busSubscriber)
-}
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 
-// ClearTopic 清空指定主题的订阅
-func (b *Bus) ClearTopic(topic string) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	delete(b.subscribers, topic)
+	return len(b.subscribers[topic])
 }

@@ -371,9 +371,9 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		}
 	}
 
-	eventbus.NewBus().Publish(debugger.TopicHttp, debugger.HttpEvent{
-		TraceId:  traceId,
-		Url:      req.URL.String(),
+	eventbus.NewBus().Publish(debugger.TopicHTTP, debugger.HTTPEvent{
+		TraceID:  traceId,
+		URL:      req.URL.String(),
 		Method:   req.Method,
 		Header:   headersToMap(req.Header),
 		Body:     string(reqBodyBytes),

@@ -14,8 +14,8 @@ import (
 
 // publishGrpcTrace 记录grpc调用调试信息
 func publishGrpcTrace(ctx context.Context, method string, req, resp any, err error, ms float64) {
-	eventbus.NewBus().Publish(debugger.TopicGrpc, debugger.GrpcEvent{
-		TraceId:  ctxkey.GetTraceId(ctx),
+	eventbus.NewBus().Publish(debugger.TopicGRPC, debugger.GRPCEvent{
+		TraceID:  ctxkey.GetTraceId(ctx),
 		Method:   method,
 		Request:  req,
 		Response: resp,

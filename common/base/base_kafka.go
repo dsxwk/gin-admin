@@ -181,8 +181,8 @@ func (p *KafkaProducer) Publish(ctx context.Context, msg any) error {
 		}
 	}
 
-	p.Kafka.Bus.Publish(debugger.TopicMq, debugger.MqEvent{
-		TraceId: traceId,
+	p.Kafka.Bus.Publish(debugger.TopicMQ, debugger.MQEvent{
+		TraceID: traceId,
 		Driver:  "kafka",
 		Topic:   p.Topic,
 		Message: string(body),

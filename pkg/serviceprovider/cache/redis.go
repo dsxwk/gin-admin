@@ -40,7 +40,7 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	// 发布事件
 	if h.bus != nil {
 		h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
-			TraceId: traceId,
+			TraceID: traceId,
 			Driver:  "redis",
 			Name:    cmd.Name(),
 			Cmd:     cmd.FullName(),
@@ -74,7 +74,7 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 	for _, cmd := range cmds {
 		if h.bus != nil {
 			h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
-				TraceId: traceId,
+				TraceID: traceId,
 				Driver:  "redis",
 				Name:    cmd.Name(),
 				Cmd:     cmd.FullName(),

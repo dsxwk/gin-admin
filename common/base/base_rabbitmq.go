@@ -257,8 +257,8 @@ func (p *RabbitmqProducer) Publish(ctx context.Context, msg any) error {
 		}
 	}
 
-	p.Mq.Bus.Publish(debugger.TopicMq, debugger.MqEvent{
-		TraceId: traceId,
+	p.Mq.Bus.Publish(debugger.TopicMQ, debugger.MQEvent{
+		TraceID: traceId,
 		Driver:  "rabbitmq",
 		Topic:   p.Exchange + ":" + p.Routing,
 		Message: string(body),

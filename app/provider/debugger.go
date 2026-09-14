@@ -20,7 +20,7 @@ func (p *DebuggerProvider) Name() string {
 }
 
 func (p *DebuggerProvider) Register(app serviceprovider.App) {
-	facade.Register[*debugger.Debugger]("debugger", debugger.NewDebugger(facade.Event().Bus()))
+	facade.Register[*debugger.Debugger]("debugger", debugger.New(facade.Event().Bus()))
 }
 
 func (p *DebuggerProvider) Boot(app serviceprovider.App) {

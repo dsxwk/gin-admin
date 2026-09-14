@@ -223,9 +223,9 @@ func after(db *gorm.DB) {
 		traceId = "unknown"
 	}
 
-	eventbus.NewBus().Publish(debugger.TopicSql, debugger.SqlEvent{
-		TraceId: traceId,
-		Sql:     sql,
+	eventbus.NewBus().Publish(debugger.TopicSQL, debugger.SQLEvent{
+		TraceID: traceId,
+		SQL:     sql,
 		Rows:    db.Statement.RowsAffected,
 		Ms:      costMs,
 	})

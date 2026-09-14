@@ -70,13 +70,6 @@ func NewCache(driver string, conf *config.Config) *CacheProxy {
 	}
 }
 
-func ResetCache(driver string, conf *config.Config) *CacheProxy {
-	cacheInstanceMu.Lock()
-	delete(cacheInstance, driver)
-	delete(cacheInstance, conf.Cache.Driver)
-	cacheInstanceMu.Unlock()
-	return NewCache(driver, conf)
-}
 func (p *CacheProxy) WithContext(ctx context.Context) *CacheProxy {
 	return &CacheProxy{
 		driver: p.driver,
@@ -121,7 +114,7 @@ func (p *CacheProxy) publish(method, key string, val any, cost time.Duration) {
 			traceId = "unknown"
 		}
 		p.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
-			TraceId: traceId,
+			TraceID: traceId,
 			Driver:  p.driver,
 			Name:    method,
 			Cmd:     key,

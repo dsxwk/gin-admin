@@ -19,8 +19,10 @@ func (p *EventProvider) Name() string {
 }
 
 func (p *EventProvider) Register(app serviceprovider.App) {
-	// 注册事件门面
-	facade.Register[*eventbus.Bus]("event", eventbus.NewBus())
+	registry := facade.Event().Registry()
+
+	// 注册业务事件注册表
+	facade.Register[*eventbus.Registry]("event", registry)
 }
 
 func (p *EventProvider) Boot(app serviceprovider.App) {

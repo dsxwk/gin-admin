@@ -21,7 +21,7 @@ func (s *EventListenerList) Help() []base.CommandOption {
 }
 
 func (s *EventListenerList) Execute(values map[string]string) {
-	facade.Event().Debug()
+	printEventTable(facade.Event().List(), true)
 }
 
 func init() {

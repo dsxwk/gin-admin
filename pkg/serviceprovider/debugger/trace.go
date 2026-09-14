@@ -1,249 +1,122 @@
 package debugger
 
 import (
+	"encoding/json"
+	"maps"
 	"sync"
 	"time"
 )
 
-// TraceField 追踪字段类型
-type TraceField string
-
-const (
-	FieldSql      TraceField = "Sql"
-	FieldCache    TraceField = "Cache"
-	FieldHttp     TraceField = "Http"
-	FieldMq       TraceField = "Mq"
-	FieldGrpc     TraceField = "Grpc"
-	FieldListener TraceField = "Listener"
-	FieldJob      TraceField = "Job"
-	FieldEs       TraceField = "Es"
-)
-
 // TraceData 单个追踪数据
 type TraceData struct {
-	mu            sync.RWMutex
-	Sql           []map[string]any `json:"Sql"`
-	Cache         []map[string]any `json:"Cache"`
-	Http          []map[string]any `json:"Http"`
-	Mq            []map[string]any `json:"Mq"`
-	Grpc          []map[string]any `json:"Grpc"`
-	ListenerEvent []map[string]any `json:"ListenerEvent"`
-	Job           []map[string]any `json:"Job"`
-	Es            []map[string]any `json:"Es"`
-	createdAt     time.Time        // 创建时间(用于过期清理)
+	mu sync.RWMutex
+
+	SQL      []SQLEvent      `json:"sql"`
+	Cache    []CacheEvent    `json:"cache"`
+	HTTP     []HTTPEvent     `json:"http"`
+	MQ       []MQEvent       `json:"mq"`
+	GRPC     []GRPCEvent     `json:"grpc"`
+	Listener []ListenerEvent `json:"listener"`
+	Job      []JobEvent      `json:"job"`
+	ES       []ESEvent       `json:"es"`
+
+	createdAt time.Time
 }
 
-// newTraceData 创建空的追踪数据
-func newTraceData() *TraceData {
+// NewTraceData 创建追踪数据
+func NewTraceData() *TraceData {
 	return &TraceData{
-		Sql:           make([]map[string]any, 0),
-		Cache:         make([]map[string]any, 0),
-		Http:          make([]map[string]any, 0),
-		Mq:            make([]map[string]any, 0),
-		Grpc:          make([]map[string]any, 0),
-		ListenerEvent: make([]map[string]any, 0),
-		Job:           make([]map[string]any, 0),
-		Es:            make([]map[string]any, 0),
+		SQL:       make([]SQLEvent, 0),
+		Cache:     make([]CacheEvent, 0),
+		HTTP:      make([]HTTPEvent, 0),
+		MQ:        make([]MQEvent, 0),
+		GRPC:      make([]GRPCEvent, 0),
+		Listener:  make([]ListenerEvent, 0),
+		Job:       make([]JobEvent, 0),
+		ES:        make([]ESEvent, 0),
+		createdAt: time.Now(),
 	}
 }
 
-// traceFieldMap 字段映射
-var traceFieldMap = map[TraceField]func(d *TraceData) *[]map[string]any{
-	FieldSql:      func(d *TraceData) *[]map[string]any { return &d.Sql },
-	FieldCache:    func(d *TraceData) *[]map[string]any { return &d.Cache },
-	FieldHttp:     func(d *TraceData) *[]map[string]any { return &d.Http },
-	FieldMq:       func(d *TraceData) *[]map[string]any { return &d.Mq },
-	FieldGrpc:     func(d *TraceData) *[]map[string]any { return &d.Grpc },
-	FieldListener: func(d *TraceData) *[]map[string]any { return &d.ListenerEvent },
-	FieldJob:      func(d *TraceData) *[]map[string]any { return &d.Job },
-	FieldEs:       func(d *TraceData) *[]map[string]any { return &d.Es },
-}
-
-// TraceStore 追踪存储
-type TraceStore struct {
-	mu    sync.RWMutex
-	store map[string]*TraceData
-}
-
-// Store 全局追踪存储
-var Store = &TraceStore{
-	store: make(map[string]*TraceData),
-}
-
-// Get 获取追踪数据（不存在时创建）
-func (ts *TraceStore) Get(traceId string) *TraceData {
-	ts.mu.RLock()
-	if data, ok := ts.store[traceId]; ok {
-		ts.mu.RUnlock()
-		return data
-	}
-	ts.mu.RUnlock()
-
-	ts.mu.Lock()
-	defer ts.mu.Unlock()
-
-	// 双重检查
-	if data, ok := ts.store[traceId]; ok {
-		return data
-	}
-
-	data := newTraceData()
-	ts.store[traceId] = data
-	return data
-}
-
-// Set 设置追踪数据
-func (ts *TraceStore) Set(traceId string, data *TraceData) {
-	ts.mu.Lock()
-	defer ts.mu.Unlock()
-	ts.store[traceId] = data
-}
-
-// Delete 删除追踪数据
-func (ts *TraceStore) Delete(traceId string) {
-	ts.mu.Lock()
-	defer ts.mu.Unlock()
-	delete(ts.store, traceId)
-}
-
-// Has 检查是否存在
-func (ts *TraceStore) Has(traceId string) bool {
-	ts.mu.RLock()
-	defer ts.mu.RUnlock()
-	_, ok := ts.store[traceId]
-	return ok
-}
-
-// Count 获取追踪数量
-func (ts *TraceStore) Count() int {
-	ts.mu.RLock()
-	defer ts.mu.RUnlock()
-	return len(ts.store)
-}
-
-// List 获取所有traceId
-func (ts *TraceStore) List() []string {
-	ts.mu.RLock()
-	defer ts.mu.RUnlock()
-
-	ids := make([]string, 0, len(ts.store))
-	for id := range ts.store {
-		ids = append(ids, id)
-	}
-	return ids
-}
-
-// Clear 清空所有追踪数据
-func (ts *TraceStore) Clear() {
-	ts.mu.Lock()
-	defer ts.mu.Unlock()
-	ts.store = make(map[string]*TraceData)
-}
-
-// CleanExpired 清理过期的追踪数据
-func (ts *TraceStore) CleanExpired(expire time.Duration) int {
-	ts.mu.Lock()
-	defer ts.mu.Unlock()
-
-	now := time.Now()
-	cleaned := 0
-
-	for id, data := range ts.store {
-		if now.Sub(data.createdAt) > expire {
-			delete(ts.store, id)
-			cleaned++
-		}
-	}
-
-	return cleaned
-}
-
-// StartCleanup 启动定时清理(返回停止函数)
-func (ts *TraceStore) StartCleanup(interval, expire time.Duration) func() {
-	ticker := time.NewTicker(interval)
-	stop := make(chan struct{})
-
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				ts.CleanExpired(expire)
-			case <-stop:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-
-	return func() {
-		close(stop)
-	}
-}
-
-// Add 记录调试信息
-func Add(traceId string, field TraceField, data map[string]any) {
-	if traceId == "" {
-		return
-	}
-
-	fieldFn, ok := traceFieldMap[field]
-	if !ok {
-		return
-	}
-
-	// 获取或创建TraceData
-	Store.mu.Lock()
-	d, ok := Store.store[traceId]
-	if !ok {
-		d = newTraceData()
-		Store.store[traceId] = d
-	}
-	Store.mu.Unlock()
-
-	// 追加数据(只在TraceData锁内操作)
-	d.mu.Lock()
-	*fieldFn(d) = append(*fieldFn(d), data)
-	d.mu.Unlock()
-}
-
-// AddBatch 批量记录
-func AddBatch(traceId string, items map[TraceField]map[string]any) {
-	if traceId == "" || len(items) == 0 {
-		return
-	}
-
-	// 获取或创建TraceData
-	Store.mu.Lock()
-	d, ok := Store.store[traceId]
-	if !ok {
-		d = newTraceData()
-		Store.store[traceId] = d
-	}
-	Store.mu.Unlock()
-
-	// 批量追加
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	for field, data := range items {
-		if fieldFn, _ok := traceFieldMap[field]; _ok {
-			*fieldFn(d) = append(*fieldFn(d), data)
-		}
-	}
-}
-
-// GetField 获取指定字段的数据
-func (d *TraceData) GetField(field TraceField) []map[string]any {
+// CreatedAt 获取创建时间
+func (d *TraceData) CreatedAt() time.Time {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
-	if fieldFn, ok := traceFieldMap[field]; ok {
-		src := *fieldFn(d)
-		result := make([]map[string]any, len(src))
-		copy(result, src)
-		return result
-	}
-	return nil
+	return d.createdAt
+}
+
+// AddSQL 添加SQL事件
+func (d *TraceData) AddSQL(event SQLEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.SQL = append(d.SQL, event)
+}
+
+// AddCache 添加缓存事件
+func (d *TraceData) AddCache(event CacheEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.Cache = append(d.Cache, event)
+}
+
+// AddHTTP 添加HTTP事件
+func (d *TraceData) AddHTTP(event HTTPEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.HTTP = append(d.HTTP, event)
+}
+
+// AddMQ 添加消息队列事件
+func (d *TraceData) AddMQ(event MQEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.MQ = append(d.MQ, event)
+}
+
+// AddGRPC 添加gRPC事件
+func (d *TraceData) AddGRPC(event GRPCEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.GRPC = append(d.GRPC, event)
+}
+
+// AddListener 添加业务监听事件
+func (d *TraceData) AddListener(event ListenerEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.Listener = append(d.Listener, event)
+}
+
+// AddJob 添加Job事件
+func (d *TraceData) AddJob(event JobEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.Job = append(d.Job, event)
+}
+
+// AddES 添加ES事件
+func (d *TraceData) AddES(event ESEvent) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.ES = append(d.ES, event)
+}
+
+// MarshalJSON 序列化追踪数据
+func (d *TraceData) MarshalJSON() ([]byte, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	type traceData TraceData
+	return json.Marshal((*traceData)(d))
 }
 
 // Summary 获取统计摘要
@@ -252,13 +125,190 @@ func (d *TraceData) Summary() map[string]int {
 	defer d.mu.RUnlock()
 
 	return map[string]int{
-		"Sql":           len(d.Sql),
-		"Cache":         len(d.Cache),
-		"Http":          len(d.Http),
-		"Mq":            len(d.Mq),
-		"Grpc":          len(d.Grpc),
-		"ListenerEvent": len(d.ListenerEvent),
-		"Job":           len(d.Job),
-		"Es":            len(d.Es),
+		"sql":      len(d.SQL),
+		"cache":    len(d.Cache),
+		"http":     len(d.HTTP),
+		"mq":       len(d.MQ),
+		"grpc":     len(d.GRPC),
+		"listener": len(d.Listener),
+		"job":      len(d.Job),
+		"es":       len(d.ES),
 	}
+}
+
+// TraceStore 追踪存储
+type TraceStore struct {
+	mu   sync.RWMutex
+	data map[string]*TraceData
+}
+
+// Store 全局追踪存储
+var Store = NewTraceStore()
+
+// NewTraceStore 创建追踪存储
+func NewTraceStore() *TraceStore {
+	return &TraceStore{
+		data: make(map[string]*TraceData),
+	}
+}
+
+// Get 获取追踪数据
+func (s *TraceStore) Get(traceID string) (*TraceData, bool) {
+	if s == nil {
+		return nil, false
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	trace, ok := s.data[traceID]
+	return trace, ok
+}
+
+// GetOrCreate 获取或创建追踪数据
+func (s *TraceStore) GetOrCreate(traceID string) *TraceData {
+	if s == nil {
+		return nil
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.data == nil {
+		s.data = make(map[string]*TraceData)
+	}
+
+	trace, ok := s.data[traceID]
+	if ok {
+		return trace
+	}
+
+	trace = NewTraceData()
+	s.data[traceID] = trace
+	return trace
+}
+
+// Set 设置追踪数据
+func (s *TraceStore) Set(traceID string, trace *TraceData) {
+	if s == nil || trace == nil {
+		return
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.data == nil {
+		s.data = make(map[string]*TraceData)
+	}
+	s.data[traceID] = trace
+}
+
+// Delete 删除追踪数据
+func (s *TraceStore) Delete(traceID string) {
+	if s == nil {
+		return
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	delete(s.data, traceID)
+}
+
+// Has 判断追踪数据是否存在
+func (s *TraceStore) Has(traceID string) bool {
+	if s == nil {
+		return false
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	_, ok := s.data[traceID]
+	return ok
+}
+
+// Count 获取追踪数据数量
+func (s *TraceStore) Count() int {
+	if s == nil {
+		return 0
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return len(s.data)
+}
+
+// List 获取全部追踪数据
+func (s *TraceStore) List() map[string]*TraceData {
+	if s == nil {
+		return nil
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	result := make(map[string]*TraceData, len(s.data))
+	maps.Copy(result, s.data)
+
+	return result
+}
+
+// Clear 清空全部追踪数据
+func (s *TraceStore) Clear() {
+	if s == nil {
+		return
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.data = make(map[string]*TraceData)
+}
+
+// CleanExpired 清理过期追踪数据
+func (s *TraceStore) CleanExpired(ttl time.Duration) int {
+	if s == nil || ttl <= 0 {
+		return 0
+	}
+
+	now := time.Now()
+	count := 0
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for traceID, trace := range s.data {
+		if now.Sub(trace.CreatedAt()) < ttl {
+			continue
+		}
+
+		delete(s.data, traceID)
+		count++
+	}
+
+	return count
+}
+
+// StartCleanup 启动定时清理
+func (s *TraceStore) StartCleanup(interval, ttl time.Duration, stop <-chan struct{}) {
+	if s == nil || interval <= 0 || ttl <= 0 {
+		return
+	}
+
+	ticker := time.NewTicker(interval)
+
+	go func() {
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				s.CleanExpired(ttl)
+			case <-stop:
+				return
+			}
+		}
+	}()
 }

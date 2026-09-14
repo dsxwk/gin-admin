@@ -367,8 +367,8 @@ func publishTrace(ctx context.Context, action, index string, reqData []byte, sta
 		}
 	}
 
-	eventbus.NewBus().Publish(debugger.TopicEs, debugger.EsEvent{
-		TraceId:  traceId,
+	eventbus.NewBus().Publish(debugger.TopicES, debugger.ESEvent{
+		TraceID:  traceId,
 		Action:   action,
 		Index:    index,
 		Request:  request,

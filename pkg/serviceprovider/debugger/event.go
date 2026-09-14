@@ -1,89 +1,81 @@
 package debugger
 
-import "gin/pkg/serviceprovider/eventbus"
-
-const (
-	TopicSql      = "debug:sql"
-	TopicCache    = "debug:cache"
-	TopicHttp     = "debug:http"
-	TopicMq       = "debug:mq"
-	TopicGrpc     = "debug:grpc"
-	TopicListener = eventbus.TopicListener
-	TopicJob      = "debug:job"
-	TopicEs       = "debug:es"
-)
-
-// SqlEvent Sql事件
-type SqlEvent struct {
-	TraceId string // tranceId
-	Sql     string
-	Rows    int64
-	Ms      float64
+// SQLEvent SQL调试事件
+type SQLEvent struct {
+	TraceID string  `json:"traceId"`
+	SQL     string  `json:"sql"`
+	Rows    int64   `json:"rows"`
+	Ms      float64 `json:"ms"`
 }
 
-// CacheEvent 缓存事件
+// CacheEvent 缓存调试事件
 type CacheEvent struct {
-	TraceId string // tranceId
-	Driver  string
-	Name    string
-	Cmd     string
-	Args    any
-	Ms      float64
+	TraceID string  `json:"traceId"`
+	Driver  string  `json:"driver"`
+	Name    string  `json:"name"`
+	Cmd     string  `json:"cmd"`
+	Args    any     `json:"args"`
+	Ms      float64 `json:"ms"`
 }
 
-// HttpEvent Http事件
-type HttpEvent struct {
-	TraceId  string // tranceId
-	Url      string
-	Method   string
-	Header   map[string]string
-	Body     any
-	Status   int
-	Response any
-	Ms       float64
+// HTTPEvent HTTP调试事件
+type HTTPEvent struct {
+	TraceID  string            `json:"traceId"`
+	URL      string            `json:"url"`
+	Method   string            `json:"method"`
+	Header   map[string]string `json:"header"`
+	Body     any               `json:"body"`
+	Status   int               `json:"status"`
+	Response any               `json:"response"`
+	Ms       float64           `json:"ms"`
 }
 
-// MqEvent 消息队列事件
-type MqEvent struct {
-	TraceId string         // tranceId
-	Driver  string         // kafka rabbitmq redis-stream
-	Topic   string         // topic queue stream
-	Message string         // 消息内容
-	Key     string         // 用于Kafka
-	Group   string         // 消费组
-	Ms      float64        // 耗时ms
-	Extra   map[string]any // 扩展信息
+// MQEvent 消息队列调试事件
+type MQEvent struct {
+	TraceID string         `json:"traceId"`
+	Driver  string         `json:"driver"`
+	Topic   string         `json:"topic"`
+	Message string         `json:"message"`
+	Key     string         `json:"key"`
+	Group   string         `json:"group"`
+	Ms      float64        `json:"ms"`
+	Extra   map[string]any `json:"extra"`
 }
 
-// GrpcEvent grpc事件
-type GrpcEvent struct {
-	TraceId  string
-	Method   string
-	Request  any
-	Response any
-	Code     string
-	Ms       float64
+// GRPCEvent gRPC调试事件
+type GRPCEvent struct {
+	TraceID  string  `json:"traceId"`
+	Method   string  `json:"method"`
+	Request  any     `json:"request"`
+	Response any     `json:"response"`
+	Code     string  `json:"code"`
+	Ms       float64 `json:"ms"`
 }
 
-// EsEvent ES事件
-type EsEvent struct {
-	TraceId  string  // traceId
-	Action   string  // 操作
-	Index    string  // 索引
-	Request  any     // 请求
-	Response any     // 响应
-	Code     string  // 状态
-	Ms       float64 // 耗时
+// ListenerEvent 业务监听调试事件
+type ListenerEvent struct {
+	TraceID     string `json:"traceId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Data        any    `json:"data"`
 }
 
-// ListenerEvent 监听事件
-type ListenerEvent = eventbus.ListenerEvent
-
-// JobEvent Job事件
+// JobEvent Job调试事件
 type JobEvent struct {
-	TraceId    string  `json:"traceId"`    // traceId
-	Name       string  `json:"name"`       // Job名称
-	Connection string  `json:"connection"` // 连接类型
-	Payload    string  `json:"payload"`    // 消息内容
-	Ms         float64 `json:"ms"`         // 耗时ms
+	TraceID    string  `json:"traceId"`
+	Name       string  `json:"name"`
+	Connection string  `json:"connection"`
+	Payload    string  `json:"payload"`
+	Ms         float64 `json:"ms"`
+}
+
+// ESEvent ES调试事件
+type ESEvent struct {
+	TraceID  string  `json:"traceId"`
+	Action   string  `json:"action"`
+	Index    string  `json:"index"`
+	Request  any     `json:"request"`
+	Response any     `json:"response"`
+	Code     string  `json:"code"`
+	Ms       float64 `json:"ms"`
 }

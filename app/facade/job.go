@@ -119,7 +119,7 @@ func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) e
 	}
 
 	Event().Bus().Publish(debugger.TopicJob, debugger.JobEvent{
-		TraceId:    ctxkey.GetTraceId(ctx),
+		TraceID:    ctxkey.GetTraceId(ctx),
 		Name:       jobName,
 		Connection: conn,
 		Payload:    string(payloadBytes),

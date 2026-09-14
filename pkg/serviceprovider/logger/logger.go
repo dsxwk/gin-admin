@@ -138,6 +138,7 @@ func (l *Logger) WithDebugger(c context.Context) *zap.Logger {
 	}
 
 	traceId := getString(c, ctxkey.TraceIdKey)
+	trace, _ := debugger.Store.Get(traceId)
 
 	return l.Logger.With(
 		zap.String(ctxkey.TraceIdKey, traceId),
@@ -146,7 +147,7 @@ func (l *Logger) WithDebugger(c context.Context) *zap.Logger {
 		zap.String(ctxkey.MethodKey, getString(c, ctxkey.MethodKey)),
 		zap.Any(ctxkey.ParamsKey, c.Value(ctxkey.ParamsKey)),
 		zap.Float64(ctxkey.MsKey, ms),
-		zap.Any(ctxkey.DebuggerKey, debugger.Store.Get(traceId)),
+		zap.Any(ctxkey.DebuggerKey, trace),
 	)
 }
 

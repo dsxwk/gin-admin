@@ -2,6 +2,7 @@ package facade
 
 import (
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/eventbus"
 )
 
 // Debugger 调试器门面-调试器统一入口
@@ -17,7 +18,7 @@ func (d *DebuggerFacade) instance() *debugger.Debugger {
 	if dbg != nil {
 		return dbg
 	}
-	return debugger.NewDebugger(Event().Bus())
+	return debugger.New(Event().Bus())
 }
 
 // Start 启动调试器
@@ -55,4 +56,22 @@ func (d *DebuggerFacade) GetSubId(topic string) (uint64, bool) {
 // GetInstance 获取原始调试器实例
 func (d *DebuggerFacade) GetInstance() *debugger.Debugger {
 	return d.instance()
+}
+
+// Bus 获取调试器使用的总线
+func (d *DebuggerFacade) Bus() *eventbus.Bus {
+	inst := d.instance()
+	if inst == nil {
+		return nil
+	}
+	return inst.Bus()
+}
+
+// Store 获取调试器使用的追踪存储
+func (d *DebuggerFacade) Store() *debugger.TraceStore {
+	inst := d.instance()
+	if inst == nil {
+		return nil
+	}
+	return inst.Store()
 }
