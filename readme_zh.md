@@ -219,7 +219,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.1.3](version_history_zh.md#v313)
+> - 最新版本 [v3.1.4](version_history_zh.md#v314)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -351,7 +351,6 @@ $ ./cli demo:command --args=11
 │   │   ├── http              # http请求
 │   │   ├── lang              # 语言包
 │   │   ├── logger            # 日志
-│   │   ├── message           # 消息事件
 │   │   ├── orm               # orm工具
 │   │   ├── queue             # 队列
 │   │   ├── ratelimit         # 限流
@@ -652,8 +651,7 @@ $ go run ./cmd/cli.go make:command --file=cronjob/demo --name=demo-test --desc=c
 
 ## 命令结构
 
-> 生成命令后，应为`Name()` 和 `Description()` 方法定义适当的值。当在显示命令列表时，将使用这些属性。 `Name()`
-> 方法还允许你定义命令的输入期望值。 `Execute()` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。 让我们看一个示例命令。
+> 生成命令后，应为`Name()` 和 `Description()` 方法定义适当的值。当在显示命令列表时，将使用这些属性。 `Name()`方法还允许你定义命令的输入期望值。 `Execute()` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。 让我们看一个示例命令。
 
 ```go
 package cronjob
@@ -661,7 +659,6 @@ package cronjob
 import (
 	"gin/common/base"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 )
 
 type DemoCommand struct {
@@ -669,7 +666,7 @@ type DemoCommand struct {
 }
 
 func (m *DemoCommand) Name() string {
-    return "demo-test"
+	return "demo-test"
 }
 
 func (m *DemoCommand) Description() string {
@@ -678,19 +675,19 @@ func (m *DemoCommand) Description() string {
 
 func (m *DemoCommand) Help() []base.CommandOption {
 	return []base.CommandOption{
-        {
-            base.Flag{
-                Short: "a",
-                Long:  "args",
-            },
-            "示例参数, 如: arg1",
-            true,
-        },
-    }
+		{
+			base.Flag{
+				Short: "a",
+				Long:  "args",
+			},
+			"示例参数, 如: arg1",
+			true,
+		},
+	}
 }
 
 func (m *DemoCommand) Execute(values map[string]string) {
-  // todo
+	// todo
 }
 
 func init() {
@@ -701,8 +698,7 @@ func init() {
 
 ## 命令注册
 
-> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在
-> `./cmd/imports/import.go` 中添加导入包的路径。
+> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在`./cmd/imports/import.go` 中添加导入包的路径。
 
 ```go
 //go:build cli
@@ -725,10 +721,7 @@ func main() {
 
 ## 帮助选项
 
-> 命令选项参数使用 `base.CommandOption` 结构体来定义。 `base.CommandOption` 结构体包含两个属性： `Flag` 和 `Description`。
-> `Flag` 属性用于定义命令选项的标志，可以是短标志（如 `-a`）或长标志（如 `--args`）。 `Description` 属性用于定义命令选项的描述。
-> `base.CommandOption` 结构体还包含一个 `Required` 属性，用于指定命令选项是否为必需的。同时该方法支持控制台 `--help`
-> 参数，自动生成帮助信息。
+> 命令选项参数使用 `base.CommandOption` 结构体来定义。 `base.CommandOption` 结构体包含两个属性: `Flag` 和 `Description`。`Flag` 属性用于定义命令选项的标志，可以是短标志（如 `-a`）或长标志（如 `--args`）。 `Description` 属性用于定义命令选项的描述。`base.CommandOption` 结构体还包含一个 `Required` 属性，用于指定命令选项是否为必需的。同时该方法支持控制台 `--help`参数，自动生成帮助信息。
 
 ```go
 func (m *DemoCommand) Help() []base.CommandOption {
@@ -963,11 +956,7 @@ func (*User) Connection() string {
 
 ## ORM动态筛选
 
-> 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]any`
-> 如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not
-> in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not
-> exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username":
-> "admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
+> 通过`post`或者`get`传递`query`|`body`参数`__search`根据列表字段动态指定查询条件,`__search`类型为`map[string]any`如: __search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. 支持or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract等条件,不区分大小写.参数支持两种模式{"username": "admin"}或者{"username":["like", "admin"]},字段名为mysql where条件的关键字时自动根据条件构建sql语句.
 
 ### OR条件查询
 
@@ -1015,14 +1004,10 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 package service
 
 import (
-    "context"
-    "errors"
-    "gin/app/model"
-    "gin/app/request"
-    "gin/common/base"
-    "gin/pkg"
-    "github.com/samber/lo"
-    "time"
+	"context"
+	"gin/app/model"
+	"gin/app/request"
+	"gin/common/base"
 )
 
 type UserService struct {
@@ -1031,39 +1016,40 @@ type UserService struct {
 
 // List 列表
 func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
-    var (
-        m  []model.User
-        db = s.DB(ctx, &model.User{})
-    )
-  
-    // 搜索
-    db = s.Search(db, req.Search)
-  
-    err = db.Count(&pageData.Total).Error
-    if err != nil {
-        return pageData, err
-    }
-  
-    if req.NotPage {
-        err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
-        if err != nil {
-            return pageData, err
-        }
-        pageData.List = m
-    } else {
-      pageData.Page = req.Page
-      pageData.PageSize = req.PageSize
-      offset, limit := request.Pagination(req.Page, req.PageSize)
-  
-      err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-      if err != nil {
-          return pageData, err
-      }
-      pageData.List = m
-    }
-  
-    return pageData, nil
+	var (
+		m  []model.User
+		db = s.DB(ctx, &model.User{})
+	)
+
+	// 搜索
+	db = s.Search(db, req.Search)
+
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
+
+	if req.NotPage {
+		err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	} else {
+		pageData.Page = req.Page
+		pageData.PageSize = req.PageSize
+		offset, limit := request.Pagination(req.Page, req.PageSize)
+
+		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	}
+
+	return pageData, nil
 }
+
 ```
 
 # 表单验证
@@ -2328,7 +2314,7 @@ package listener
 import (
     "fmt"
     "gin/app/event"
-    "gin/pkg/eventbus"
+    "gin/app/facade"
     "time"
 )
 
@@ -2345,10 +2331,17 @@ func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
 }
 
 func init() {
-  eventbus.Register(&UserLoginListener{}, event.UserLoginEvent{})
+  facade.Event().Register(&UserLoginListener{}, event.UserLoginEvent{})
 }
 
 ```
+
+事件系统分为两层:
+
+- `eventbus.Bus`: 通用主题发布订阅, 不感知业务和调试器.
+- `eventbus.Registry`: 负责业务事件注册、监听器分发以及 `PublishedEvent` 发布.
+
+调试器作为总线消费者收集调试事件和业务事件, `eventbus` 不再反向依赖 `debugger`.
 
 # 队列
 
@@ -2416,63 +2409,60 @@ $ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=t
 package consumer
 
 import (
-    "gin/app/facade"
-    "gin/common/base"
-    "gin/common/flag"
-    "gin/config"
-    "gin/pkg"
-    "gin/pkg/serviceprovider/queue"
-    "github.com/segmentio/kafka-go"
-    "time"
+	"gin/app/facade"
+	"gin/common/base"
+	"gin/pkg"
+	"time"
 )
 
 // KafkaDemoConsumer Kafka消费者
 type KafkaDemoConsumer struct {
-    *base.KafkaConsumer
+	*base.KafkaConsumer
 }
 
 // KafkaDemoPayload 消息体
 type KafkaDemoPayload struct {
-    Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
-    cfg := facade.Config()
-    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
-    kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
-        Brokers:        cfg.Queue.Kafka.Brokers,
-        Topic:          "kafka_demo",
-        GroupID:        "kafka_demo_group",
-        MinBytes:       1,
-        MaxBytes:       10e6,
-        StartOffset:    kafka.LastOffset,
-        CommitInterval: 0,
-        MaxWait:        5 * time.Second,
-    })
-    return &KafkaDemoConsumer{
-        KafkaConsumer: &base.KafkaConsumer{
-            Kafka: kfk,
-            Topic: "kafka_demo",
-            Group: "kafka_demo_group",
-        },
-    }
+	cfg := facade.Config()
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
+		Brokers:        cfg.Queue.Kafka.Brokers,
+		Topic:          "kafka_demo",
+		GroupID:        "kafka_demo_group",
+		MinBytes:       1,
+		MaxBytes:       10e6,
+		StartOffset:    kafka.LastOffset,
+		CommitInterval: 0,
+		MaxWait:        5 * time.Second,
+	})
+	return &KafkaDemoConsumer{
+		KafkaConsumer: &base.KafkaConsumer{
+			Kafka: kfk,
+			Topic: "kafka_demo",
+			Group: "kafka_demo_group",
+		},
+	}
 }
 
 func (c *KafkaDemoConsumer) Handle(payload any) error {
-    data := payload.(*KafkaDemoPayload)
-    facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
-    // todo 处理业务逻辑
-    return nil
+	data := payload.(*KafkaDemoPayload)
+	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
+	// todo 处理业务逻辑
+	return nil
 }
 
 func init() {
-    cfg := facade.Config()
-    if cfg != nil && cfg.Queue.Kafka.Enabled {
-        if c := NewKafkaDemoConsumer(); c != nil {
-            queue.GetConsumerRegistry().Register(c)
-        }
-    }
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if c := NewKafkaDemoConsumer(); c != nil {
+			facade.Queue().Register(c)
+		}
+	}
 }
+
 ```
 
 ### 生成的生产者示例 (Kafka)
@@ -2481,49 +2471,48 @@ func init() {
 package producer
 
 import (
-    "context"
-    "gin/app/facade"
-    "gin/common/base"
-    "gin/pkg/serviceprovider/queue"
-    "github.com/segmentio/kafka-go"
+	"context"
+	"gin/app/facade"
+	"gin/common/base"
 )
 
 type KafkaDemoProducer struct {
-    *base.KafkaProducer
+	*base.KafkaProducer
 }
 
 func NewKafkaDemoProducer() *KafkaDemoProducer {
-    cfg := facade.Config()
-    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
-    kfk.Writer = &kafka.Writer{
-        Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
-        Topic:        "kafka_demo",
-        Balancer:     &kafka.LeastBytes{},
-        RequiredAcks: kafka.RequireAll,
-    }
-    p := &KafkaDemoProducer{
-        KafkaProducer: &base.KafkaProducer{
-            Kafka: kfk,
-            Topic: "kafka_demo",
-            Key:   "kafka_demo_key",
-        },
-    }
-    p.KafkaProducer.Owner = p
-    return p
+	cfg := facade.Config()
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk.Writer = &kafka.Writer{
+		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
+		Topic:        "kafka_demo",
+		Balancer:     &kafka.LeastBytes{},
+		RequiredAcks: kafka.RequireAll,
+	}
+	p := &KafkaDemoProducer{
+		KafkaProducer: &base.KafkaProducer{
+			Kafka: kfk,
+			Topic: "kafka_demo",
+			Key:   "kafka_demo_key",
+		},
+	}
+	p.KafkaProducer.Owner = p
+	return p
 }
 
 func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
-    return p.KafkaProducer.Publish(ctx, msg)
+	return p.KafkaProducer.Publish(ctx, msg)
 }
 
 func init() {
-    cfg := facade.Config()
-    if cfg != nil && cfg.Queue.Kafka.Enabled {
-        if p := NewKafkaDemoProducer(); p != nil {
-            queue.GetProducerRegistry().Register(p)
-        }
-    }
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if p := NewKafkaDemoProducer(); p != nil {
+			facade.Queue().Register(p)
+		}
+	}
 }
+
 ```
 
 ## 队列使用
@@ -2710,8 +2699,9 @@ Job 投递事件自动记录到调试器:
 
 ```json
 {
-  "Job": [
+  "job": [
     {
+      "traceId": "xxx",
       "name": "send_email",
       "connection": "redis",
       "payload": "{\"to\":\"user@example.com\",\"subject\":\"你好\"}",
@@ -3065,18 +3055,21 @@ func (s *TestController) Test(c *gin.Context) {
   },
   "ms": 59,
   "debugger": {
-    "Sql": [
+    "sql": [
       {
+        "traceId": "fa505122-d31e-4d4f-a05c-13c1641d6c6c",
         "ms": 2.5008,
         "rows": 1,
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": [],
-    "Http": [],
-    "Mq": [],
-    "Grpc": [],
-    "ListenerEvent": []
+    "cache": [],
+    "http": [],
+    "mq": [],
+    "grpc": [],
+    "listener": [],
+    "job": [],
+    "es": []
   }
 }
 ```
@@ -3143,18 +3136,21 @@ func (s *TestController) Test(c *gin.Context) {
   },
   "ms": 58,
   "debugger": {
-    "Sql": [
+    "sql": [
       {
+        "traceId": "fa505122-d31e-4d4f-a05c-13c1641d6c6c",
         "ms": 2.5008,
         "rows": 1,
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": [],
-    "Http": [],
-    "Mq": [],
-    "Grpc": [],
-    "ListenerEvent": []
+    "cache": [],
+    "http": [],
+    "mq": [],
+    "grpc": [],
+    "listener": [],
+    "job": [],
+    "es": []
   },
   "stackTrace": "gin/app/errcode.Error\n\tE:/www/dsx/www-go/gin/app/errcode/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
 }
@@ -3504,6 +3500,7 @@ package controller
 import (
     "gin/app/facade"
     "gin/common/base"
+	
     "github.com/gin-gonic/gin"
 )
 
@@ -3533,10 +3530,12 @@ func (s *TestController) Test(c *gin.Context)  {
 package controller
 
 import (
+	"gin/app/errcode"
     "gin/app/facade"
     "gin/app/model"
     "gin/app/request"
     "gin/app/service"
+	
     "github.com/gin-gonic/gin"
 )
 
@@ -3554,13 +3553,13 @@ func (s *UserController) Test(c *gin.Context) {
     // 绑定并验证参数
     err := facade.Request().BindValidate(c, &req, "List")
     if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
+        s.Response.Error(c, err)
         return
     }
   
     res, err := s.service.List(ctx, req)
     if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
+        s.Response.Error(c, err)
         return
     }
   
@@ -3591,14 +3590,14 @@ func (s *UserService) List(ctx context.Context, req request.User) (pageData requ
     )
   
     // 搜索
-    db = s.Search(db, m, req.Search)
+	db = (s.Search(db, m, req.Search)).
+		Model(&m).
+		Preload("UserRoles")
   
-    err = db.Model(&m).Count(&pageData.Total).Error
+    err = db.Count(&pageData.Total).Error
     if err != nil {
         return pageData, err
     }
-  
-    db = db.Model(&m).Preload("UserRoles")
   
     if req.NotPage {
         err = db.Order("id DESC").Find(&m).Error

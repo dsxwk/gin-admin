@@ -230,7 +230,7 @@
 
 # Version History
 
-> - Latest Version [v3.1.3](version_history.md#v313)
+> - Latest Version [v3.1.4](version_history.md#v314)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -365,7 +365,6 @@ $ ./cli demo:command --args=11
 │   │   ├── http                # Http Request
 │   │   ├── lang                # Language
 │   │   ├── logger              # Logger
-│   │   ├── message             # Message Event
 │   │   ├── orm                 # Orm Tool
 │   │   ├── queue               # Queue
 │   │   ├── ratelimit           # Rate Limit
@@ -667,10 +666,7 @@ $ go run ./cmd/cli.go make:command --file=cronjob/demo --name=demo-test --desc=c
 
 ## Command Structure
 
-> After generating the command, appropriate values should be defined for the ` Name() ` and ` Descript() ` functions.
-> These properties will be used when displaying the command list. The `Name()` function also allows you to define the
-> expected input value for the command. It will call the `Execute()` function when executing the command. You can put the
-> command logic in this method. Let's take a look at an example command.
+> After generating the command, appropriate values should be defined for the ` Name() ` and ` Descript() ` functions. These properties will be used when displaying the command list. The `Name()` function also allows you to define the expected input value for the command. It will call the `Execute()` function when executing the command. You can put the command logic in this method. Let's take a look at an example command.
 
 ```go
 package cronjob
@@ -678,7 +674,6 @@ package cronjob
 import (
 	"gin/common/base"
 	"gin/pkg/cli"
-	"github.com/fatih/color"
 )
 
 type DemoCommand struct {
@@ -686,7 +681,7 @@ type DemoCommand struct {
 }
 
 func (m *DemoCommand) Name() string {
-    return "demo-test"
+	return "demo-test"
 }
 
 func (m *DemoCommand) Description() string {
@@ -695,19 +690,19 @@ func (m *DemoCommand) Description() string {
 
 func (m *DemoCommand) Help() []base.CommandOption {
 	return []base.CommandOption{
-        {
-            base.Flag{
-                Short: "a",
-                Long:  "args",
-            },
-            "Example Argument, Example: arg1",
-            true,
-        },
-    }
+		{
+			base.Flag{
+				Short: "a",
+				Long:  "args",
+			},
+			"Example Argument, Example: arg1",
+			true,
+		},
+	}
 }
 
 func (m *DemoCommand) Execute(values map[string]string) {
-    // todo
+	// todo
 }
 
 func init() {
@@ -718,9 +713,7 @@ func init() {
 
 ## Command Registration
 
-> `cli. go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the
-> command you registered is not `command` package, you can add the path to import the package in
-> `./cmd/imports/import.go`.
+> `cli.go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the command you registered is not `command` package, you can add the path to import the package in `./common/imports/import.go`.
 
 ```go
 //go:build cli
@@ -728,27 +721,22 @@ func init() {
 package main
 
 import (
-  "gin/app/facade"
-  _ "gin/cmd/import"
-  "gin/pkg/cli"
+	"gin/app/facade"
+	_ "gin/common/imports"
+	"gin/pkg/cli"
 )
 
 func main() {
-  _ = facade.Config()
+	_ = facade.Config()
 
-  cli.Execute()
+	cli.Execute()
 }
 
 ```
 
 ## Help Options
 
-> Command option parameters are defined using the `base. CommandOption` structure. The `base. CommandOption` struct
-> contains two attributes: `Flag` and `Description`. The `Flag` attribute is used to define the flag of command options,
-> which can be a short flag (such as `- a `) or a long flag (such as `--args`). The `Description` attribute is used to
-> define the description of command options. The `base. CommandOption` struct also contains a `Required` attribute that
-> specifies whether a command option is required. At the same time, this method supports the console `--help` parameter
-> and automatically generates help information.
+> Command option parameters are defined using the `base. CommandOption` structure. The `base. CommandOption` struct contains two attributes: `Flag` and `Description`. The `Flag` attribute is used to define the flag of command options, which can be a short flag (such as `- a `) or a long flag (such as `--args`). The `Description` attribute is used to define the description of command options. The `base. CommandOption` struct also contains a `Required` attribute that specifies whether a command option is required. At the same time, this method supports the console `--help` parameter and automatically generates help information.
 
 ```go
 func (m *DemoCommand) Help() []base.CommandOption {
@@ -763,6 +751,7 @@ func (m *DemoCommand) Help() []base.CommandOption {
         },
     }
 }
+
 ```
 
 ```bash
@@ -830,7 +819,8 @@ Options:
 - `--path=grpc/model` Output directory (default)
 - `--connection=mysql` Database connection
 
-Integer columns are generated as `int32`, so Postman displays numbers instead of strings. The gRPC service layer uses the models under `grpc/model`.
+Integer columns are generated as `int32`, so Postman displays numbers instead of strings. The gRPC service layer uses
+the models under `grpc/model`.
 
 ## Generate gRPC Proto
 
@@ -840,8 +830,8 @@ Generate a gRPC proto file from a database table:
 $ go run ./cmd/cli.go grpc-make:proto --table=user
 ```
 
-It generates the `Detail`, `List`, `Create`, `Update`, and `Delete` rpc methods by default, with integer fields as `int32`.
-The shared `EmptyResponse` is defined in `grpc/proto/base.proto` and imported by generated protos.
+It generates the `Detail`, `List`, `Create`, `Update`, and `Delete` rpc methods by default, with integer fields as
+`int32`. The shared `EmptyResponse` is defined in `grpc/proto/base.proto` and imported by generated protos.
 
 Options:
 
@@ -978,19 +968,13 @@ func (*User) TableName() string {
 
 // Connection Database connection name
 func (*User) Connection() string {
-  return "mysql"
+	return "mysql"
 }
 ```
 
 ## ORM Dynamic Filtering
 
-> By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria
-> based on the list fields. The `__search` type is `map[string]any`, for example:__
-> search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. support or、and、in、not
-> in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not
-> exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes:
-> `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where'
-> condition, SQL statements will be automatically constructed based on the condition
+> By passing the `query` | `body` parameter `__search` through `post` or `get`, dynamically specify the query criteria based on the list fields. The `__search` type is `map[string]any`, for example:__search={"and":[{"username":"test"},{"age":18}]}, __search={"or":[{"username":"test"},{"age":18}]}. support or、and、in、not in、between、not between、like、left like、right like、is not null、is null、gt、gte、lt、lte、exist、not exist、json_contains、json_extract Wait for conditions, case insensitive The parameter supports two modes: `{'username': 'admin'}` or `{'username': ['like', 'admin']}`. When the field name is a keyword of the 'mysql where' condition, SQL statements will be automatically constructed based on the condition
 
 ### OR Condition Query
 
@@ -999,7 +983,9 @@ GET /api/v1/user?__search={"or":[{"username":"test"},{"age":18}]} // {"or":[{"us
 ```
 
 ```sql
-SELECT * FROM `user` WHERE (username = 'test' OR age = 18)
+SELECT *
+FROM `user`
+WHERE (username = 'test' OR age = 18)
 ```
 
 ### AND Condition Query
@@ -1009,7 +995,9 @@ GET /api/v1/user?__search={"and":[{"username":"test"},{"age":18}]} // {"and":[{"
 ```
 
 ```sql
-SELECT * FROM `user` WHERE (username = 'test' AND age = 18)
+SELECT *
+FROM `user`
+WHERE (username = 'test' AND age = 18)
 ```
 
 ### JSON Field Query
@@ -1019,7 +1007,10 @@ GET /api/v1/menu?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 ```
 
 ```sql
- SELECT * FROM `menu` WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
+ SELECT *
+ FROM `menu`
+ WHERE ((((menu.created_at > '2025-01-01') AND (menu.created_at < '2026-01-01') AND (menu.name = '') AND
+          (JSON_EXTRACT(meta, '$.icon') = 'ele-Collection'))))
 ```
 
 ### Complex Condition Query
@@ -1029,7 +1020,11 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 ```
 
 ```sql
- SELECT * FROM `user` WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR (user.username = 'admin')))
+ SELECT *
+ FROM `user`
+ WHERE ((((user.created_at > '2025-01-01') AND (user.created_at < '2026-01-01') AND
+          (NOT EXISTS (SELECT 1 FROM user_roles WHERE user_roles.user_id = user.id AND user_roles.name = 'admin'))) OR
+         (user.username = 'admin')))
 ```
 
 ### Query Example
@@ -1038,55 +1033,52 @@ GET /api/v1/user?__search={"or":[{"and":[{"createdAt":[">","2025-01-01"]},{"crea
 package service
 
 import (
-  "context"
-  "errors"
-  "gin/app/model"
-  "gin/app/request"
-  "gin/common/base"
-  "gin/pkg"
-  "github.com/samber/lo"
-  "time"
+	"context"
+	"gin/app/model"
+	"gin/app/request"
+	"gin/common/base"
 )
 
 type UserService struct {
-  base.BaseService
+	base.BaseService
 }
 
 // List user-list
 func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
-  var (
-    m  []model.User
-    db = s.DB(ctx, &model.User{})
-  )
+	var (
+		m  []model.User
+		db = s.DB(ctx, &model.User{})
+	)
 
-  // Search
-  db = s.Search(db, req.Search)
+	// Search
+	db = s.Search(db, req.Search)
 
-  err = db.Count(&pageData.Total).Error
-  if err != nil {
-    return pageData, err
-  }
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
 
-  if req.NotPage {
-    err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
-    if err != nil {
-      return pageData, err
-    }
-    pageData.List = m
-  } else {
-    pageData.Page = req.Page
-    pageData.PageSize = req.PageSize
-    offset, limit := request.Pagination(req.Page, req.PageSize)
+	if req.NotPage {
+		err = db.Preload("UserRoles").Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	} else {
+		pageData.Page = req.Page
+		pageData.PageSize = req.PageSize
+		offset, limit := request.Pagination(req.Page, req.PageSize)
 
-    err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-    if err != nil {
-      return pageData, err
-    }
-    pageData.List = m
-  }
+		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	}
 
-  return pageData, nil
+	return pageData, nil
 }
+
 ```
 
 # Form Validation
@@ -1128,63 +1120,63 @@ package request
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gookit/validate"
+	"gin/common/base"
+
+	"github.com/gookit/validate"
 )
 
 // Roles role-request-validation
 type Roles struct {
-    base.BaseRequest
-    ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-    Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
-    Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
-    Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
-    PageListValidate
+	base.BaseRequest
+	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+	Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
+	Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
+	Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+	PageListValidate
 }
 
 func (s Roles) Validate(data Roles, scene string) error {
-    v := validate.Struct(data, scene)
-    if !v.Validate(scene) {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
-    }
-    return nil
+	v := validate.Struct(data, scene)
+	if !v.Validate(scene) {
+		return errcode.ArgsError().WithMsg(v.Errors.One())
+	}
+	return nil
 }
 
 // ConfigValidation Configuration-Validation
 // - Define validation scenes
 // - You can also add verification settings
 func (s Roles) ConfigValidation(v *validate.Validation) {
-    scenes := validate.SValues{
-        "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-        "Create": []string{"Name", "Desc", "Status"},
-        "Update": []string{"ID", "Name", "Desc", "Status"},
-        "Detail": []string{"ID"},
-        "Delete": []string{"ID"},
-    }
-    v.WithScenes(scenes)
+	scenes := validate.SValues{
+		"List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+		"Create": []string{"Name", "Desc", "Status"},
+		"Update": []string{"ID", "Name", "Desc", "Status"},
+		"Detail": []string{"ID"},
+		"Delete": []string{"ID"},
+	}
+	v.WithScenes(scenes)
 }
 
 // Messages messages
 func (s Roles) Messages() map[string]string {
-    return validate.MS{
-        "required":    "Field {field} Required",
-        "int":         "Field {field} Must be an integer",
-        "Page.gt":     "Field {field} Must be greater than 0",
-        "PageSize.gt": "Field {field} Must be greater than 0",
-    }
+	return validate.MS{
+		"required":    "Field {field} Required",
+		"int":         "Field {field} Must be an integer",
+		"Page.gt":     "Field {field} Must be greater than 0",
+		"PageSize.gt": "Field {field} Must be greater than 0",
+	}
 }
 
 // Translates translate
 func (s Roles) Translates() map[string]string {
-    return validate.MS{
-        "ID":       "ID",
-        "Name":     "Role Name",
-        "Desc":     "Role Description",
-        "Status":   "Status 1=Enable 2=Disable",
-        "Page":     "Page",
-        "PageSize": "Page Size",
-    }
+	return validate.MS{
+		"ID":       "ID",
+		"Name":     "Role Name",
+		"Desc":     "Role Description",
+		"Status":   "Status 1=Enable 2=Disable",
+		"Page":     "Page",
+		"PageSize": "Page Size",
+	}
 }
 ```
 
@@ -1197,12 +1189,12 @@ package request
 
 // Roles role-request-validation
 type Roles struct {
-  base.BaseRequest
-  ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-  Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"Role Name"`
-  Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"Role Description"`
-  Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
-  PageListValidate
+	base.BaseRequest
+	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
+	Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"Role Name"`
+	Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"Role Description"`
+	Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+	PageListValidate
 }
 ```
 
@@ -1215,14 +1207,14 @@ package request
 // - Define validation scenes
 // - You can also add verification settings
 func (s Roles) ConfigValidation(v *validate.Validation) {
-  scenes := validate.SValues{
-    "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-    "Create": []string{"Name", "Desc", "Status"},
-    "Update": []string{"ID", "Name", "Desc", "Status"},
-    "Detail": []string{"ID"},
-    "Delete": []string{"ID"},
-  }
-  v.WithScenes(scenes)
+	scenes := validate.SValues{
+		"List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
+		"Create": []string{"Name", "Desc", "Status"},
+		"Update": []string{"ID", "Name", "Desc", "Status"},
+		"Detail": []string{"ID"},
+		"Delete": []string{"ID"},
+	}
+	v.WithScenes(scenes)
 }
 ```
 
@@ -1233,12 +1225,12 @@ package request
 
 // Messages Validator-Error-Message
 func (s Roles) Messages() map[string]string {
-    return validate.MS{
-        "required":                     "Field {field} Required",
-        "int":                          "Field {field} Must be an integer",
-        "PageListValidate.Page.gt":     "Field {field} Must be greater than 0",
-        "PageListValidate.PageSize.gt": "Field {field} Must be greater than 0",
-    }
+	return validate.MS{
+		"required":                     "Field {field} Required",
+		"int":                          "Field {field} Must be an integer",
+		"PageListValidate.Page.gt":     "Field {field} Must be greater than 0",
+		"PageListValidate.PageSize.gt": "Field {field} Must be greater than 0",
+	}
 }
 ```
 
@@ -1250,12 +1242,12 @@ package request
 // Translates Field-Translation
 func (s Roles) Translates() map[string]string {
 	return validate.MS{
-      "ID":       "ID",
-      "Name":     "Role Name",
-      "Desc":     "Role Description",
-      "Status":   "Status 1=Enable 2=Disable",
-      "Page":     "Page",
-      "PageSize": "Page Size",
+		"ID":       "ID",
+		"Name":     "Role Name",
+		"Desc":     "Role Description",
+		"Status":   "Status 1=Enable 2=Disable",
+		"Page":     "Page",
+		"PageSize": "Page Size",
 	}
 }
 ```
@@ -1270,74 +1262,74 @@ package request
 import (
 	"gin/app/errcode"
 	"gin/pkg"
-    
+
 	"github.com/gookit/validate"
 )
 
 // UserImport User Import
 type UserImport struct {
-    Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"Import Data"`
+	Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"Import Data"`
 }
 
 // UserImportItem User Import Item
 type UserImportItem struct {
-    Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"Username"`
-    Password string `json:"password" validate:"required" label:"Password"`
-    FullName string `json:"fullName" validate:"required" label:"FullName"`
-    Nickname string `json:"nickname" validate:"required" label:"Nickname"`
-    Email    string `json:"email" validate:"required|email" label:"Email"`
-    Gender   int64  `json:"gender" validate:"required|int" label:"Gender"`
-    Age      int64  `json:"age" validate:"int" label:"Age"`
-    Status   int64  `json:"status" validate:"int" label:"Status"`
+	Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"Username"`
+	Password string `json:"password" validate:"required" label:"Password"`
+	FullName string `json:"fullName" validate:"required" label:"FullName"`
+	Nickname string `json:"nickname" validate:"required" label:"Nickname"`
+	Email    string `json:"email" validate:"required|email" label:"Email"`
+	Gender   int64  `json:"gender" validate:"required|int" label:"Gender"`
+	Age      int64  `json:"age" validate:"int" label:"Age"`
+	Status   int64  `json:"status" validate:"int" label:"Status"`
 }
 
 // Validate User Import Validate
 func (s UserImport) Validate(data UserImport, scene string) error {
-    v := validate.Struct(data, scene)
-    if !v.Validate(scene) {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
-    }
-    return nil
+	v := validate.Struct(data, scene)
+	if !v.Validate(scene) {
+		return errcode.ArgsError().WithMsg(v.Errors.One())
+	}
+	return nil
 }
 
 // ConfigValidation Config Validation
 func (s UserImport) ConfigValidation(v *validate.Validation) {
-    scenes := validate.SValues{
-        "Import": []string{"Data"},
-    }
-    v.WithScenes(scenes)
+	scenes := validate.SValues{
+		"Import": []string{"Data"},
+	}
+	v.WithScenes(scenes)
 }
 
 // Messages Validation Messages
 func (s UserImport) Messages() map[string]string {
-    return validate.MS{
-        "required": "{field} Required",
-        "minLen":   "{field} the length cannot be less than {min} characters",
-        "maxLen":   "{field} the length cannot exceed {max} characters",
-        "int":      "{field} Must be an integer",
-        "regex":    "{field} format error",
-        "email":    "{field} email format error",
-    }
+	return validate.MS{
+		"required": "{field} Required",
+		"minLen":   "{field} the length cannot be less than {min} characters",
+		"maxLen":   "{field} the length cannot exceed {max} characters",
+		"int":      "{field} Must be an integer",
+		"regex":    "{field} format error",
+		"email":    "{field} email format error",
+	}
 }
 
 // Translates Translates
 func (s UserImport) Translates() map[string]string {
-    ms := validate.MS{
-        "Data": "Import Data",
-    }
-    for i := range s.Data {
-      prefix := pkg.Sprintf("Data.%d.", i)
-      rowLabel := pkg.Sprintf("Line %d ", i+1)
-      ms[prefix+"Username"] = rowLabel + "Username"
-      ms[prefix+"Password"] = rowLabel + "Password"
-      ms[prefix+"FullName"] = rowLabel + "FullName"
-      ms[prefix+"Nickname"] = rowLabel + "Nickname"
-      ms[prefix+"Email"] = rowLabel + "Email"
-      ms[prefix+"Gender"] = rowLabel + "Gender"
-      ms[prefix+"Age"] = rowLabel + "Age"
-      ms[prefix+"Status"] = rowLabel + "Status"
-    }
-    return ms
+	ms := validate.MS{
+		"Data": "Import Data",
+	}
+	for i := range s.Data {
+		prefix := pkg.Sprintf("Data.%d.", i)
+		rowLabel := pkg.Sprintf("Line %d ", i+1)
+		ms[prefix+"Username"] = rowLabel + "Username"
+		ms[prefix+"Password"] = rowLabel + "Password"
+		ms[prefix+"FullName"] = rowLabel + "FullName"
+		ms[prefix+"Nickname"] = rowLabel + "Nickname"
+		ms[prefix+"Email"] = rowLabel + "Email"
+		ms[prefix+"Gender"] = rowLabel + "Gender"
+		ms[prefix+"Age"] = rowLabel + "Age"
+		ms[prefix+"Status"] = rowLabel + "Status"
+	}
+	return ms
 }
 ```
 
@@ -1348,8 +1340,8 @@ package request
 
 import (
 	"fmt"
-    "gin/app/errcode"
-	
+	"gin/app/errcode"
+
 	"github.com/gookit/validate"
 )
 
@@ -1367,40 +1359,40 @@ type SystemConfigUpdates struct {
 
 // Validate System configuration batch update request verification
 func (s SystemConfigUpdates) Validate() error {
-    if len(s.List) == 0 {
-        return errcode.ArgsError().WithMsg("The configuration list cannot be empty")
-    }
+	if len(s.List) == 0 {
+		return errcode.ArgsError().WithMsg("The configuration list cannot be empty")
+	}
 
-    for i, item := range s.List {
-        v := validate.Struct(item)
-        if !v.Validate() {
-            return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]item %s", i, v.Errors.One()))
-        }
-    }
+	for i, item := range s.List {
+		v := validate.Struct(item)
+		if !v.Validate() {
+			return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]item %s", i, v.Errors.One()))
+		}
+	}
 
-    return nil
+	return nil
 }
 
 // Translates Field translation
 func (s SystemConfigValueUpdate) Translates() map[string]string {
-    return validate.MS{
-        "ID":               "ID",
-        "Key":              "Identification",
-        "Name":             "Name",
-        "DefaultValue":     "DefaultValue",
-        "OptionValue":      "OptionValue",
-        "Type":             "Type 1=input 2=radio 3=checkbox 4=select 5=textarea 6=file",
-        "ConfigCategoryId": "ConfigCategoryId",
-    }
+	return validate.MS{
+		"ID":               "ID",
+		"Key":              "Identification",
+		"Name":             "Name",
+		"DefaultValue":     "DefaultValue",
+		"OptionValue":      "OptionValue",
+		"Type":             "Type 1=input 2=radio 3=checkbox 4=select 5=textarea 6=file",
+		"ConfigCategoryId": "ConfigCategoryId",
+	}
 }
 
 // Messages Validator error message
 func (s SystemConfigValueUpdate) Messages() map[string]string {
-    return validate.MS{
-        "required": "Field {field} is required",
-        "int":      "Field {field} must be an integer",
-        "gt":       "Field {field} must be greater than 0",
-    }
+	return validate.MS{
+		"required": "Field {field} is required",
+		"int":      "Field {field} must be an integer",
+		"gt":       "Field {field} must be greater than 0",
+	}
 }
 ```
 
@@ -1415,18 +1407,18 @@ func (s SystemConfigValueUpdate) Messages() map[string]string {
 package main
 
 import (
-  "github.com/gookit/validate"
+	"github.com/gookit/validate"
 )
 
 // Register during initialization
 func init() {
-  validate.AddValidator("is_even", func(val any, rule string) bool {
-    num, ok := val.(int)
-    if !ok {
-      return false
-    }
-    return num%2 == 0
-  })
+	validate.AddValidator("is_even", func(val any, rule string) bool {
+		num, ok := val.(int)
+		if !ok {
+			return false
+		}
+		return num%2 == 0
+	})
 }
 ```
 
@@ -1437,8 +1429,8 @@ package request
 
 // ValidateIsEven Define local rule methods (naming convention: Validate<rule name>)
 func (s User) ValidateIsEven(val any) bool {
-    num := val.(int)
-    return num%2 == 0
+	num := val.(int)
+	return num%2 == 0
 }
 ```
 
@@ -1453,19 +1445,19 @@ import (
 
 // Validate Request-Validation
 func (s User) Validate(data User, scene string) error {
-    v := validate.Struct(data, scene)
-    v.AddValidator("is_even", func(val any, rule string) bool {
-        num, ok := val.(int)
-        if !ok {
-            return false
-        }
-        return num%2 == 0
-    })
+	v := validate.Struct(data, scene)
+	v.AddValidator("is_even", func(val any, rule string) bool {
+		num, ok := val.(int)
+		if !ok {
+			return false
+		}
+		return num%2 == 0
+	})
 	if !v.Validate(scene) {
 		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 
-    return nil
+	return nil
 }
 ```
 
@@ -1475,7 +1467,7 @@ func (s User) Validate(data User, scene string) error {
 package request
 
 type User struct {
-    Age int `json:"gender" validate:"required|is_even" label:"age"`
+	Age int `json:"gender" validate:"required|is_even" label:"age"`
 }
 ```
 
@@ -1487,19 +1479,19 @@ type User struct {
 package v1
 
 import (
-    "gin/app/errcode"
-    "gin/app/facade"
-    "gin/app/model"
-    "gin/app/request"
-    "gin/app/service"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/app/errcode"
+	"gin/app/facade"
+	"gin/app/model"
+	"gin/app/request"
+	"gin/app/service"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-    base.BaseController
-    service service.UserService
+	base.BaseController
+	service service.UserService
 }
 
 // List User-List
@@ -1514,39 +1506,39 @@ type UserController struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user [get]
 func (s *UserController) List(c *gin.Context) {
-    var (
-        ctx = c.Request.Context()
-        req request.User
-    )
+	var (
+		ctx = c.Request.Context()
+		req request.User
+	)
 
-    // Method One
-    /*err := c.ShouldBind(&req)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	// Method One
+	/*err := c.ShouldBind(&req)
+	  if err != nil {
+	      s.Response.Error(c, err)
+	      return
+	  }
 
-    // Validator
-    err = facade.Request().Validate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }*/
-    // Method Two
-    // Bind And Validate
-    err := facade.Request().BindValidate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	  // Validator
+	  err = facade.Request().Validate(c, &req, "List")
+	  if err != nil {
+	      s.Response.Error(c, err)
+	      return
+	  }*/
+	// Method Two
+	// Bind And Validate
+	err := facade.Request().BindValidate(c, &req, "List")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    res, err := s.service.List(ctx, req)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	res, err := s.service.List(ctx, req)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    s.Response.Success(c, errcode.Success().WithData(res))
+	s.Response.Success(c, errcode.Success().WithData(res))
 }
 ```
 
@@ -1622,20 +1614,20 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/app/facade"
-    "gin/app/request"
-    "gin/app/service"
-    "gin/common/base"
-    "gin/pkg/serviceprovider/lang"
-    
-    "github.com/gin-gonic/gin"
-    "github.com/gin-gonic/gin/binding"
-    "github.com/go-viper/mapstructure/v2"
+	"gin/app/facade"
+	"gin/app/request"
+	"gin/app/service"
+	"gin/common/base"
+	"gin/pkg/serviceprovider/lang"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-viper/mapstructure/v2"
 )
 
 type UserController struct {
-    base.BaseController
-    service service.UserService
+	base.BaseController
+	service service.UserService
 }
 
 // List User List
@@ -1656,19 +1648,19 @@ func (s *UserController) List(c *gin.Context) {
 	)
 
 	// Bind parameters and validate
-    err := facade.Request().BindValidate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	err := facade.Request().BindValidate(c, &req, "List")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    res, err := s.service.List(ctx, req)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	res, err := s.service.List(ctx, req)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    s.Response.Success(c, errcode.Success().WithData(res))
+	s.Response.Success(c, errcode.Success().WithData(res))
 }
 
 // Create User Create
@@ -1688,19 +1680,19 @@ func (s *UserController) Create(c *gin.Context) {
 	)
 
 	// Bind parameters and validate
-    err := facade.Request().BindValidate(c, &req, "Create")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	err := facade.Request().BindValidate(c, &req, "Create")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    user, err := s.service.Create(ctx, req)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	user, err := s.service.Create(ctx, req)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    s.Response.Success(c, errcode.Success().WithData(user))
+	s.Response.Success(c, errcode.Success().WithData(user))
 }
 
 // Update User Update
@@ -1715,38 +1707,38 @@ func (s *UserController) Create(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user/{id} [put]
 func (s *UserController) Update(c *gin.Context) {
-  var (
-    ctx  = c.Request.Context()
-    data map[string]any
-    req  request.User
-  )
+	var (
+		ctx  = c.Request.Context()
+		data map[string]any
+		req  request.User
+	)
 
-  err := c.ShouldBindBodyWith(&data, binding.JSON)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	err := c.ShouldBindBodyWith(&data, binding.JSON)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  err = mapstructure.Decode(data, &req)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	err = mapstructure.Decode(data, &req)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  req.ID = facade.Request().Path[int64](c, "id", 0)
-  err = facade.Request().Validate(c, &req, "Update")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	req.ID = facade.Request().Path[int64](c, "id", 0)
+	err = facade.Request().Validate(c, &req, "Update")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  err = s.service.Update(ctx, req.ID, data)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	err = s.service.Update(ctx, req.ID, data)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  s.Response.Success(c, errcode.Success().WithData(data))
+	s.Response.Success(c, errcode.Success().WithData(data))
 }
 
 // Detail User Detail
@@ -1764,23 +1756,23 @@ func (s *UserController) Detail(c *gin.Context) {
 		ctx = c.Request.Context()
 		req request.User
 	)
-	
-    req.ID = facade.Request().Path[int64](c, "id", 0)
 
-    // Bind parameters and validate
-    err := facade.Request().BindValidate(c, &req, "Detail")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
-    m, err := s.service.Detail(ctx, req.ID)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
+	// Bind parameters and validate
+	err := facade.Request().BindValidate(c, &req, "Detail")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-    s.Response.Success(c, errcode.Success().WithData(m))
+	m, err := s.service.Detail(ctx, req.ID)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(m))
 }
 
 // Delete User Delete
@@ -1794,27 +1786,27 @@ func (s *UserController) Detail(c *gin.Context) {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/user/{id} [delete]
 func (s *UserController) Delete(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.User
-  )
+	var (
+		ctx = c.Request.Context()
+		req request.User
+	)
 
-  req.ID = facade.Request().Path[int64](c, "id", 0)
+	req.ID = facade.Request().Path[int64](c, "id", 0)
 
-  // Bind parameters and validate
-  err := facade.Request().BindValidate(c, &req, "Delete")
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	// Bind parameters and validate
+	err := facade.Request().BindValidate(c, &req, "Delete")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  err = s.service.Delete(ctx, req.ID)
-  if err != nil {
-    s.Response.Error(c, err)
-    return
-  }
+	err = s.service.Delete(ctx, req.ID)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  s.Response.Success(c, errcode.Success())
+	s.Response.Success(c, errcode.Success())
 }
 
 ```
@@ -1857,42 +1849,42 @@ $ go run ./cmd/cli.go make:router --file=user --desc=User-Routing
 package router
 
 import (
-    "gin/app/controller/v1"
-  
-    "github.com/gin-gonic/gin"
+	"gin/app/controller/v1"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UserRouter User Router
 type UserRouter struct{}
 
 func init() {
-    Register(&UserRouter{})
+	Register(&UserRouter{})
 }
 
 // RegisterRoutes Register Routes
 func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
-    var (
-        user v1.UserController
-    )
+	var (
+		user v1.UserController
+	)
 
-    router := routerGroup.Group("api/v1/user")
-    {
-        // List
-        router.GET("", user.List)
-        // Create
-        router.POST("", user.Create)
-        // Update
-        router.PUT("/:id", user.Update)
-        // Delete
-        router.DELETE("/:id", user.Delete)
-        // Detail
-        router.GET("/:id", user.Detail)
-    }
+	router := routerGroup.Group("api/v1/user")
+	{
+		// List
+		router.GET("", user.List)
+		// Create
+		router.POST("", user.Create)
+		// Update
+		router.PUT("/:id", user.Update)
+		// Delete
+		router.DELETE("/:id", user.Delete)
+		// Detail
+		router.GET("/:id", user.Detail)
+	}
 }
 
 // IsAuth Is need auth
 func (r *UserRouter) IsAuth() bool {
-    return true
+	return true
 }
 
 ```
@@ -1951,42 +1943,41 @@ $ go run ./cmd/cli.go make:middleware --file=auth --desc=Authorization-Middlewar
 
 ## Rate Limit Middleware
 
-> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow
-> limiting, IP interface flow limiting, and global flow limiting.
+> The `middleware/rate_imit.go` file defines a global flow limiting middleware that supports global user interface flow limiting, IP interface flow limiting, and global flow limiting.
 
 ```go
 package router
 
 import (
 	"gin/app/facade"
-    "gin/app/middleware"
+	"gin/app/middleware"
 	"gin/pkg/errcode"
-    
-    "github.com/gin-gonic/gin"
+
+	"github.com/gin-gonic/gin"
 )
 
 var rateLimitMiddleware middleware.RateLimit
 
 // LoadRouters Load Routers
 func LoadRouters(router *gin.Engine) {
-    // Global Rate Limit
-    group := router.Group("", rateLimitMiddleware.Handle())
-    r := group.Group("")
-    {
-        r.GET("/global-test1", func(c *gin.Context) {
+	// Global Rate Limit
+	group := router.Group("", rateLimitMiddleware.Handle())
+	r := group.Group("")
+	{
+		r.GET("/global-test1", func(c *gin.Context) {
 			facade.Response().Success(c, errcode.NewError(0, "global test1"))
-        })
+		})
 
-        r.GET("/global-test2", func(c *gin.Context) {
+		r.GET("/global-test2", func(c *gin.Context) {
 			facade.Response().Success(c, errcode.NewError(0, "global test2"))
-        })
-    }
+		})
+	}
 
 	// Specify interface current limit
-    // User Rate Limit
-    // r How many tokens are generated per second
-    // burst Bucket capacity
-    userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
+	// User Rate Limit
+	// r How many tokens are generated per second
+	// burst Bucket capacity
+	userGroup := router.Group("", rateLimitMiddleware.UserRateLimit(1, 1))
 	r1 := userGroup.Group("")
 	{
 		r1.GET("/test1", func(c *gin.Context) {
@@ -1996,13 +1987,13 @@ func LoadRouters(router *gin.Engine) {
 		r1.GET("/test2", func(c *gin.Context) {
 			facade.Response().Success(c, errcode.NewError(0, "user test2"))
 		})
-    }
+	}
 
-    // Specify interface current limit
-    // Ip Rate Limit
-    // r How many tokens are generated per second
-    // burst Bucket capacity
-    ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
+	// Specify interface current limit
+	// Ip Rate Limit
+	// r How many tokens are generated per second
+	// burst Bucket capacity
+	ipGroup := router.Group("", rateLimitMiddleware.IpRateLimit(1, 1))
 	r2 := ipGroup.Group("")
 	{
 		r2.GET("/test1", func(c *gin.Context) {
@@ -2012,7 +2003,7 @@ func LoadRouters(router *gin.Engine) {
 		r2.GET("/test2", func(c *gin.Context) {
 			facade.Response().Success(c, errcode.NewError(0, "ip test2"))
 		})
-    }
+	}
 }
 ```
 
@@ -2033,50 +2024,50 @@ package controller
 
 import (
 	"fmt"
-    "gin/app/facade"
-    "gin/common/base"
+	"gin/app/facade"
+	"gin/common/base"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
-func (s *TestController) Test()  {
-    // Set Set-Cache	
-    key := "test_key"
-    value := "test_value"
-    cache := facade.Cache()
-    cache = facade.Cache("redis")
-    err := cache.Set(key, value, time.Second*10)
+func (s *TestController) Test() {
+	// Set Set-Cache	
+	key := "test_key"
+	value := "test_value"
+	cache := facade.Cache()
+	cache = facade.Cache("redis")
+	err := cache.Set(key, value, time.Second*10)
 	if err != nil {
-	    // Handle error	
-    }
-	
-    // Get Get-Cache
-    key = "test_key"
-    value = "test_value"
-    result, ok := cache.Get(key)
+		// Handle error	
+	}
+
+	// Get Get-Cache
+	key = "test_key"
+	value = "test_value"
+	result, ok := cache.Get(key)
 	if ok {
-	    println(result) // test_value	
-    }
-	
+		println(result) // test_value	
+	}
+
 	// Delete Delete-Cache
 	key = "test_key"
 	err = cache.Delete(key)
 	if err != nil {
-        // Handle error	
-    }
-	
+		// Handle error	
+	}
+
 	// Expire Get-Cache-Expire
 	key = "test_key"
-    val, expireAt, ok, err := cache.Expire(key)
+	val, expireAt, ok, err := cache.Expire(key)
 	if err != nil {
-	    // Handle error
-    }
+		// Handle error
+	}
 	if ok {
-      fmt.Println(val) // test_value
-      fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
-    }
+		fmt.Println(val)                       // test_value
+		fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
+	}
 }
 ```
 
@@ -2087,50 +2078,50 @@ package controller
 
 import (
 	"fmt"
-    "gin/app/facade"
-    "gin/common/base"
+	"gin/app/facade"
+	"gin/common/base"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
-func (s *TestController) Test()  {
-    // Set Set-Cache	
-    key := "test_key"
-    value := "test_value"
-    redisCache := facade.Cache("redis")
-    err := redisCache.Set(key, value, time.Second*10)
+func (s *TestController) Test() {
+	// Set Set-Cache	
+	key := "test_key"
+	value := "test_value"
+	redisCache := facade.Cache("redis")
+	err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
-	    // Handle error	
-    }
-	
-    // Get Get-Cache
-    key = "test_key"
-    value = "test_value"
-    result, ok := redisCache.Get(key)
+		// Handle error	
+	}
+
+	// Get Get-Cache
+	key = "test_key"
+	value = "test_value"
+	result, ok := redisCache.Get(key)
 	if ok {
-	    println(result) // test_value	
-    }
-	
+		println(result) // test_value	
+	}
+
 	// Delete Delete-Cache
 	key = "test_key"
 	err = redisCache.Delete(key)
 	if err != nil {
-        // Handle error	
-    }
-	
+		// Handle error	
+	}
+
 	// Expire Get-Cache-Expire
 	key = "test_key"
-    val, expireAt, ok, err := redisCache.Expire(key)
+	val, expireAt, ok, err := redisCache.Expire(key)
 	if err != nil {
-	    // Handle error
-    }
+		// Handle error
+	}
 	if ok {
-      fmt.Println(val) // test_value
-      fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
-    }
-	
+		fmt.Println(val)                       // test_value
+		fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
+	}
+
 	// ... Other
 }
 ```
@@ -2142,50 +2133,50 @@ package controller
 
 import (
 	"fmt"
-    "gin/app/facade"
-    "gin/common/base"
+	"gin/app/facade"
+	"gin/common/base"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
-func (s *TestController) Test()  {
-    // Set Set-Cache	
-    key := "test_key"
-    value := "test_value"
-    memoryCache := facade.Cache("memory")
-    err := memoryCache.Set(key, value, time.Second*10)
+func (s *TestController) Test() {
+	// Set Set-Cache	
+	key := "test_key"
+	value := "test_value"
+	memoryCache := facade.Cache("memory")
+	err := memoryCache.Set(key, value, time.Second*10)
 	if err != nil {
-	    // Handle error	
-    }
-	
-    // Get Get-Cache
-    key = "test_key"
-    value = "test_value"
-    result, ok := memoryCache.Get(key)
+		// Handle error	
+	}
+
+	// Get Get-Cache
+	key = "test_key"
+	value = "test_value"
+	result, ok := memoryCache.Get(key)
 	if ok {
-	    println(result) // test_value	
-    }
-	
+		println(result) // test_value	
+	}
+
 	// Delete Delete-Cache
 	key = "test_key"
 	err = memoryCache.Delete(key)
 	if err != nil {
-        // Handle error	
-    }
-	
+		// Handle error	
+	}
+
 	// Expire Get-Cache-Expire
 	key = "test_key"
-    val, expireAt, ok, err := memoryCache.Expire(key)
+	val, expireAt, ok, err := memoryCache.Expire(key)
 	if err != nil {
-	    // Handle error
-    }
+		// Handle error
+	}
 	if ok {
-      fmt.Println(val) // test_value
-      fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
-    }
-	
+		fmt.Println(val)                       // test_value
+		fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
+	}
+
 	// ... Other
 }
 ```
@@ -2196,53 +2187,53 @@ func (s *TestController) Test()  {
 package controller
 
 import (
-    "fmt"
-    "gin/app/facade"
-    "gin/common/base"
+	"fmt"
+	"gin/app/facade"
+	"gin/common/base"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test() {
-    // Set Set-Cache	
-    key := "test_key"
-    value := "test_value"
-    diskCache := facade.Cache("disk")
-    err := diskCache.Set(key, value, time.Second*10)
-    if err != nil {
-        // Handle error	
-    }
-    
-    // Get Get-Cache
-    key = "test_key"
-    value = "test_value"
-    result, ok := diskCache.Get(key)
-    if ok {
-        println(result) // test_value	
-    }
-    
-    // Delete Delete-Cache
-    key = "test_key"
-    err = diskCache.Delete(key)
-    if err != nil {
-        // Handle error	
-    }
-    
-    // Expire Get-Cache-Expire
-    key = "test_key"
-    val, expireAt, ok, err := diskCache.Expire(key)
-    if err != nil {
-        // Handle error
-    }
-    if ok {
-        fmt.Println(val) // test_value
-        fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
-    }
-    
-    // ... Other
-}	
+	// Set Set-Cache	
+	key := "test_key"
+	value := "test_value"
+	diskCache := facade.Cache("disk")
+	err := diskCache.Set(key, value, time.Second*10)
+	if err != nil {
+		// Handle error	
+	}
+
+	// Get Get-Cache
+	key = "test_key"
+	value = "test_value"
+	result, ok := diskCache.Get(key)
+	if ok {
+		println(result) // test_value	
+	}
+
+	// Delete Delete-Cache
+	key = "test_key"
+	err = diskCache.Delete(key)
+	if err != nil {
+		// Handle error	
+	}
+
+	// Expire Get-Cache-Expire
+	key = "test_key"
+	val, expireAt, ok, err := diskCache.Expire(key)
+	if err != nil {
+		// Handle error
+	}
+	if ok {
+		fmt.Println(val)                       // test_value
+		fmt.Printf("ExpireAt: %v\n", expireAt) // ExpireAt: 2025-10-28 11:23:38.7416956 +0800 CST
+	}
+
+	// ... Other
+}    
 ```
 
 # Event
@@ -2333,10 +2324,10 @@ $ go run ./cmd/cli.go make:listener -f=user_login -e=UserLoginEvent
 package listener
 
 import (
-    "fmt"
-    "gin/app/event"
-    "gin/pkg/eventbus"
-    "time"
+	"fmt"
+	"gin/app/event"
+	"gin/app/facade"
+	"time"
 )
 
 type UserLoginListener struct{}
@@ -2344,18 +2335,26 @@ type UserLoginListener struct{}
 func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
 	fmt.Printf(
 		"Recieved Event: %s Event Description: %s Event Data: %T, Time: %s\n",
-		e.Name(), 
-		e.Description(), 
-		e, 
+		e.Name(),
+		e.Description(),
+		e,
 		time.Now().Format("2006-01-02 15:04:05"),
-    )
+	)
 }
 
 func init() {
-	eventbus.Register(&UserLoginListener{}, event.UserLoginEvent{})
+	facade.Event().Register(&UserLoginListener{}, event.UserLoginEvent{})
 }
 
 ```
+
+The event system is split into two layers:
+
+- `eventbus.Bus`: generic topic publish/subscribe, with no business or debugger knowledge.
+- `eventbus.Registry`: business event registration, listener dispatch, and `PublishedEvent` publishing.
+
+The debugger is a consumer of the bus. It collects debug events and business events without becoming a dependency of
+`eventbus`.
 
 # Queue
 
@@ -2425,62 +2424,61 @@ $ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=t
 package consumer
 
 import (
-    "gin/app/facade"
-    "gin/common/base"
-    "gin/common/flag"
-    "gin/config"
-    "gin/pkg"
-    "gin/pkg/serviceprovider/queue"
-    "github.com/segmentio/kafka-go"
-    "time"
+	"gin/app/facade"
+	"gin/common/base"
+	"gin/common/flag"
+	"gin/config"
+	"gin/pkg"
+	"github.com/segmentio/kafka-go"
+	"time"
 )
 
 // KafkaDemoConsumer Kafka consumer
 type KafkaDemoConsumer struct {
-    *base.KafkaConsumer
+	*base.KafkaConsumer
 }
 
 // KafkaDemoPayload message payload
 type KafkaDemoPayload struct {
-    Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
-    cfg := facade.Config()
-    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
-    kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
-        Brokers:        cfg.Queue.Kafka.Brokers,
-        Topic:          "kafka_demo",
-        GroupID:        "kafka_demo_group",
-        MinBytes:       1,
-        MaxBytes:       10e6,
-        StartOffset:    kafka.LastOffset,
-        CommitInterval: 0,
-        MaxWait:        5 * time.Second,
-    })
-    return &KafkaDemoConsumer{
-        KafkaConsumer: &base.KafkaConsumer{
-            Kafka: kfk,
-            Topic: "kafka_demo",
-            Group: "kafka_demo_group",
-        },
-    }
+	cfg := facade.Config()
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
+		Brokers:        cfg.Queue.Kafka.Brokers,
+		Topic:          "kafka_demo",
+		GroupID:        "kafka_demo_group",
+		MinBytes:       1,
+		MaxBytes:       10e6,
+		StartOffset:    kafka.LastOffset,
+		CommitInterval: 0,
+		MaxWait:        5 * time.Second,
+	})
+	return &KafkaDemoConsumer{
+		KafkaConsumer: &base.KafkaConsumer{
+			Kafka: kfk,
+			Topic: "kafka_demo",
+			Group: "kafka_demo_group",
+		},
+	}
 }
 
 func (c *KafkaDemoConsumer) Handle(payload any) error {
-    data := payload.(*KafkaDemoPayload)
-    facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
-    // todo business logic
-    return nil
+	data := payload.(*KafkaDemoPayload)
+	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
+	// todo business logic
+	return nil
 }
 
 func init() {
-    cfg := facade.Config()
-    if cfg != nil && cfg.Queue.Kafka.Enabled {
-        if c := NewKafkaDemoConsumer(); c != nil {
-            queue.GetConsumerRegistry().Register(c)
-        }
-    }
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if c := NewKafkaDemoConsumer(); c != nil {
+			facade.Queue().Register(c)
+		}
+	}
 }
 ```
 
@@ -2490,48 +2488,47 @@ func init() {
 package producer
 
 import (
-    "context"
-    "gin/app/facade"
-    "gin/common/base"
-    "gin/pkg/serviceprovider/queue"
-    "github.com/segmentio/kafka-go"
+	"context"
+	"gin/app/facade"
+	"gin/common/base"
+	"github.com/segmentio/kafka-go"
 )
 
 type KafkaDemoProducer struct {
-    *base.KafkaProducer
+	*base.KafkaProducer
 }
 
 func NewKafkaDemoProducer() *KafkaDemoProducer {
-    cfg := facade.Config()
-    kfk := base.NewKafka(cfg, facade.Log(), facade.Message())
-    kfk.Writer = &kafka.Writer{
-        Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
-        Topic:        "kafka_demo",
-        Balancer:     &kafka.LeastBytes{},
-        RequiredAcks: kafka.RequireAll,
-    }
-    p := &KafkaDemoProducer{
-        KafkaProducer: &base.KafkaProducer{
-            Kafka: kfk,
-            Topic: "kafka_demo",
-            Key:   "kafka_demo_key",
-        },
-    }
-    p.KafkaProducer.Owner = p
-    return p
+	cfg := facade.Config()
+	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk.Writer = &kafka.Writer{
+		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
+		Topic:        "kafka_demo",
+		Balancer:     &kafka.LeastBytes{},
+		RequiredAcks: kafka.RequireAll,
+	}
+	p := &KafkaDemoProducer{
+		KafkaProducer: &base.KafkaProducer{
+			Kafka: kfk,
+			Topic: "kafka_demo",
+			Key:   "kafka_demo_key",
+		},
+	}
+	p.KafkaProducer.Owner = p
+	return p
 }
 
 func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
-    return p.KafkaProducer.Publish(ctx, msg)
+	return p.KafkaProducer.Publish(ctx, msg)
 }
 
 func init() {
-    cfg := facade.Config()
-    if cfg != nil && cfg.Queue.Kafka.Enabled {
-        if p := NewKafkaDemoProducer(); p != nil {
-            queue.GetProducerRegistry().Register(p)
-        }
-    }
+	cfg := facade.Config()
+	if cfg != nil && cfg.Queue.Kafka.Enabled {
+		if p := NewKafkaDemoProducer(); p != nil {
+			facade.Queue().Register(p)
+		}
+	}
 }
 ```
 
@@ -2543,27 +2540,27 @@ func init() {
 package controller
 
 import (
-    "gin/app/facade"
-    "gin/app/queue/consumer"
-    "gin/common/base"
+	"gin/app/facade"
+	"gin/app/queue/consumer"
+	"gin/common/base"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(ctx context.Context) {
-    // Kafka
-    _ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
-    _ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
+	// Kafka
+	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
+	_ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
 
-    // RabbitMQ
-    _ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, consumer.RabbitmqDemoPayload{Name: "test111"})
-    _ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, consumer.RabbitmqDelayDemoPayload{Name: "test222"})
+	// RabbitMQ
+	_ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, consumer.RabbitmqDemoPayload{Name: "test111"})
+	_ = facade.Queue().Producer("rabbitmq_delay_demo").Publish(ctx, consumer.RabbitmqDelayDemoPayload{Name: "test222"})
 
-    // Redis
-    _ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
-    _ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
+	// Redis
+	_ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
+	_ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
 }
 ```
 
@@ -2626,17 +2623,17 @@ Total 6 producers
 package job
 
 import (
-    "gin/app/facade"
-    "gin/pkg"
-    "gin/pkg/serviceprovider/job"
+	"gin/app/facade"
+	"gin/pkg"
+	"gin/pkg/serviceprovider/job"
 )
 
 type SendEmailJob struct{}
 
 type SendEmail struct {
-    To      string `json:"to"`
-    Subject string `json:"subject"`
-    Content string `json:"content"`
+	To      string `json:"to"`
+	Subject string `json:"subject"`
+	Content string `json:"content"`
 }
 
 func (j *SendEmailJob) Name() string        { return "send_email" }
@@ -2647,14 +2644,14 @@ func (j *SendEmailJob) Delay() int64        { return 3000 }
 func (j *SendEmailJob) NewPayload() any     { return &SendEmail{} }
 
 func (j *SendEmailJob) Handle(payload any) error {
-    data := payload.(*SendEmail)
-    // todo: implement business logic
-    facade.Log().Info(pkg.Sprintf("Sending email to: %s, subject: %s", data.To, data.Subject))
-    return nil
+	data := payload.(*SendEmail)
+	// todo: implement business logic
+	facade.Log().Info(pkg.Sprintf("Sending email to: %s, subject: %s", data.To, data.Subject))
+	return nil
 }
 
 func init() {
-    job.Register(&SendEmailJob{})
+	job.Register(&SendEmailJob{})
 }
 ```
 
@@ -2664,26 +2661,26 @@ func init() {
 package v1
 
 import (
-    "gin/app/facade"
-    "gin/app/job"
-    "github.com/gin-gonic/gin"
+	"gin/app/facade"
+	"gin/app/job"
+	"github.com/gin-gonic/gin"
 )
 
 func (s *TestController) Test(c *gin.Context) {
-    ctx := c.Request.Context()
+	ctx := c.Request.Context()
 
-    // Async dispatch (redis/kafka/rabbitmq)
-    _ = facade.Job().Dispatch(ctx, "send_email", job.SendEmail{
-        To:      "user@example.com",
-        Subject: "Hello",
-        Content: "Test email content",
-    })
+	// Async dispatch (redis/kafka/rabbitmq)
+	_ = facade.Job().Dispatch(ctx, "send_email", job.SendEmail{
+		To:      "user@example.com",
+		Subject: "Hello",
+		Content: "Test email content",
+	})
 
-    // Sync dispatch (sync driver)
-    _ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{
-        UserID: 1,
-        Action: "update",
-    })
+	// Sync dispatch (sync driver)
+	_ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{
+		UserID: 1,
+		Action: "update",
+	})
 }
 ```
 
@@ -2728,8 +2725,9 @@ Job dispatch events are automatically recorded in the debugger:
 
 ```json
 {
-  "Job": [
+  "job": [
     {
+      "traceId": "xxx",
       "name": "send_email",
       "connection": "redis",
       "payload": "{\"to\":\"user@example.com\",\"subject\":\"Hello\"}",
@@ -2752,7 +2750,7 @@ $ go run ./cmd/cli.go make:es --table=user
 command options:
 
 - `--table=user`             Table Name
-- `--path=grpc/model`        Output directory(default)
+- `--path=grpc/model`        Output directory (default)
 - `--connection=mysql`       Database connection
 - `--exclude=password,token` Exclude field
 
@@ -2768,13 +2766,13 @@ import (
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
-    
+
 	"github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
-    base.BaseController
-    service service.LoginService
+	base.BaseController
+	service service.LoginService
 }
 
 // Token token-info
@@ -2802,45 +2800,45 @@ type LoginResponse struct {
 // @Failure 500 {object} errcode.SystemErrorResponse "System Error"
 // @Router /api/v1/login [post]
 func (s *LoginController) Login(c *gin.Context) {
-  var (
-    ctx = c.Request.Context()
-    req request.Login
-  )
+	var (
+		ctx = c.Request.Context()
+		req request.Login
+	)
 
-  // Bind And Validate
-  err := facade.Request().BindValidate(c, &req, "Login")
-  if err != nil {
-    s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-    return
-  }
+	// Bind And Validate
+	err := facade.Request().BindValidate(c, &req, "Login")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
-  if err != nil {
-    s.Response.Error(c, errcode.SystemError().WithMsg(facade.Lang().Trans(ctx, err.Error(), nil)))
-    return
-  }
+	err, userModel, accessToken, refreshToken, tokenExpire, refreshTokenExpire := s.service.Login(ctx, req.Username, req.Password)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
-  // Publish Event
-  facade.Event().Publish[event.UserLoginEvent](ctx, event.UserLoginEvent{
-    UserId:   userModel.ID,
-    Username: userModel.Username,
-  })
+	// Publish Event
+	facade.Event().Publish[event.UserLoginEvent](ctx, event.UserLoginEvent{
+		UserId:   userModel.ID,
+		Username: userModel.Username,
+	})
 
-  s.Response.Success(
-    c, errcode.Success().WithMsg(
-      facade.Lang().Trans(ctx, "login.success", map[string]any{
-        "name": userModel.Username,
-      }),
-    ).WithData(LoginResponse{
-      Token{
-        AccessToken:        accessToken,
-        RefreshToken:       refreshToken,
-        TokenExpire:        tokenExpire,
-        RefreshTokenExpire: refreshTokenExpire,
-      },
-      userModel,
-    }),
-  )
+	s.Response.Success(
+		c, errcode.Success().WithMsg(
+			facade.Lang().Trans(ctx, "login.success", map[string]any{
+				"name": userModel.Username,
+			}),
+		).WithData(LoginResponse{
+			Token{
+				AccessToken:        accessToken,
+				RefreshToken:       refreshToken,
+				TokenExpire:        tokenExpire,
+				RefreshTokenExpire: refreshTokenExpire,
+			},
+			userModel,
+		}),
+	)
 }
 ```
 
@@ -2898,17 +2896,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Success(c, errcode.Success())
+	return s.Response.Success(c, errcode.Success())
 }
 ```
 
@@ -2919,17 +2917,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Success(c, errcode.Success().WithMsg("Success"))
+	return s.Response.Success(c, errcode.Success().WithMsg("Success"))
 }
 ```
 
@@ -2940,17 +2938,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Success(c, errcode.Success().WithData([]string{"test data"}))
+	return s.Response.Success(c, errcode.Success().WithData([]string{"test data"}))
 }
 ```
 
@@ -2961,17 +2959,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Error(c, errcode.SystemError())
+	return s.Response.Error(c, errcode.SystemError())
 }
 ```
 
@@ -2982,17 +2980,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Error(c, errcode.SystemError().WithCode(500))
+	return s.Response.Error(c, errcode.SystemError().WithCode(500))
 }
 ```
 
@@ -3003,17 +3001,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Error(c, errcode.SystemError().WithMsg("System Error"))
+	return s.Response.Error(c, errcode.SystemError().WithMsg("System Error"))
 }
 ```
 
@@ -3024,17 +3022,17 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Error(c, errcode.SystemError().WithData([]string{"test data"}))
+	return s.Response.Error(c, errcode.SystemError().WithData([]string{"test data"}))
 }
 ```
 
@@ -3045,25 +3043,26 @@ package v1
 
 import (
 	"gin/app/errcode"
-    "gin/common/base"
+	"gin/common/base"
 	"net/http"
-    
-    "github.com/gin-gonic/gin"
+
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    return s.Response.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
+	return s.Response.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
 }
 ```
 
 # Log
 
 > Use the `zap` package to implement logging. The storage path for log files is `storage/logs`, and the default log
-> level is `debug`. When the error code returned is not 0, it automatically records log TraceId, stack, SQL, HTTP, Redis,
+> level is `debug`. When the error code returned is not 0, it automatically records log TraceId, stack, SQL, HTTP,
+> Redis,
 > GRPC, and other call information. Logging can also be directly called to automatically record debugging information.
 > Does `log.access` in the configuration file `yaml` support automatic recording of request logs? If enabled, it will
 > automatically record request logs.
@@ -3084,18 +3083,21 @@ func (s *TestController) Test(c *gin.Context) {
   },
   "ms": 59,
   "debugger": {
-    "Sql": [
+    "sql": [
       {
+        "traceId": "fa505122-d31e-4d4f-a05c-13c1641d6c6c",
         "ms": 2.5008,
         "rows": 1,
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": [],
-    "Http": [],
-    "Mq": [],
-    "Grpc": [],
-    "ListenerEvent": []
+    "cache": [],
+    "http": [],
+    "mq": [],
+    "grpc": [],
+    "listener": [],
+    "job": [],
+    "es": []
   }
 }
 ```
@@ -3109,16 +3111,16 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
-    "gin/app/facade"
-    "github.com/gin-gonic/gin"
+	"gin/app/facade"
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    facade.Log().Error("System Error")
+	facade.Log().Error("System Error")
 }
 ```
 
@@ -3132,18 +3134,18 @@ func (s *TestController) Test(c *gin.Context) {
 package v1
 
 import (
-    "gin/app/facade"
-    "gin/common/base"
-    "github.com/gin-gonic/gin"
+	"gin/app/facade"
+	"gin/common/base"
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
 func (s *TestController) Test(c *gin.Context) {
-    ctx := c.Request.Context()
-    facade.Log().WithDebugger(ctx).Error("System Error")
+	ctx := c.Request.Context()
+	facade.Log().WithDebugger(ctx).Error("System Error")
 }
 ```
 
@@ -3163,18 +3165,21 @@ func (s *TestController) Test(c *gin.Context) {
   },
   "ms": 58,
   "debugger": {
-    "Sql": [
+    "sql": [
       {
+        "traceId": "fa505122-d31e-4d4f-a05c-13c1641d6c6c",
         "ms": 2.5008,
         "rows": 1,
         "sql": "SELECT * FROM `user` WHERE username = 'admin' AND `user`.`deleted_at` IS NULL ORDER BY `user`.`id` LIMIT 1"
       }
     ],
-    "Cache": [],
-    "Http": [],
-    "Mq": [],
-    "Grpc": [],
-    "ListenerEvent": []
+    "cache": [],
+    "http": [],
+    "mq": [],
+    "grpc": [],
+    "listener": [],
+    "job": [],
+    "es": []
   },
   "stackTrace": "gin/app/errcode.Error\n\tE:/www/dsx/www-go/gin/app/errcode/response.go:60\ngin/common/base.(*BaseController).Error\n\tE:/www/dsx/www-go/gin/common/base/base_controller.go:25\ngin/app/controller/v1.(*LoginController).Login\n\tE:/www/dsx/www-go/gin/app/controller/v1/login.go:67\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Cors.Handle.func2\n\tE:/www/dsx/www-go/gin/app/middleware/cors.go:30\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngin/router.init.Logger.Handle.func1\n\tE:/www/dsx/www-go/gin/app/middleware/logger.go:76\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.CustomRecoveryWithWriter.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/recovery.go:92\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/context.go:192\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:689\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tE:/www/dsx/www-go/gin/vendor/github.com/gin-gonic/gin/gin.go:643\nnet/http.serverHandler.ServeHTTP\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tE:/go-sdk/go1.25.2/src/net/http/server.go:2109"
 }
@@ -3190,7 +3195,8 @@ func (s *TestController) Test(c *gin.Context) {
 
 > The storage path for translation files is `storage/scales`, the default language is `zh`, and multiple languages are
 > separated by commas. Languages are stored in the corresponding language directory without distinguishing between
-> subdirectories. For example, Chinese is stored in `storage/scales/zh` and can support `json` and `yaml` format files in
+> subdirectories. For example, Chinese is stored in `storage/scales/zh` and can support `json` and `yaml` format files
+> in
 > any directory.
 
 ```yaml
@@ -3207,18 +3213,18 @@ package controller
 
 import (
 	"fmt"
-    "gin/app/facade"
-    "gin/common/base"
-    "github.com/gin-gonic/gin"
+	"gin/app/facade"
+	"gin/common/base"
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
-func (s *TestController) Test(c *gin.Context)  {
-    ctx := c.Request.Context()
-    trans := facade.Lang().Trans(ctx, "login.username", nil)
+func (s *TestController) Test(c *gin.Context) {
+	ctx := c.Request.Context()
+	trans := facade.Lang().Trans(ctx, "login.username", nil)
 	fmt.Println(trans) // Output: 用户名, English Output: Username
 }
 ```
@@ -3241,22 +3247,22 @@ func (s *TestController) Test(c *gin.Context)  {
 package controller
 
 import (
-    "fmt"
-    "gin/app/facade"
-    "gin/common/base"
-    "github.com/gin-gonic/gin"
+	"fmt"
+	"gin/app/facade"
+	"gin/common/base"
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-    base.BaseController
+	base.BaseController
 }
 
-func (s *TestController) Test(c *gin.Context)  {
-    ctx := c.Request.Context()
-    trans := facade.Lang().Trans(ctx, "login.success", map[string]any{
-        "name": "admin",
-    }),
-	fmt.Println(trans) // Output: admin,登录成功 English Output: admin,Login Success
+func (s *TestController) Test(c *gin.Context) {
+	ctx := c.Request.Context()
+	trans := facade.Lang().Trans(ctx, "login.success", map[string]any{
+		"name": "admin",
+	}),
+		fmt.Println(trans) // Output: admin,登录成功 English Output: admin,Login Success
 }
 ```
 
@@ -3298,24 +3304,24 @@ i18n:
 package controller
 
 import (
-    "gin/app/facade"
-    "gin/common/base"
-    "github.com/gin-gonic/gin"
+	"gin/app/facade"
+	"gin/common/base"
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
 	base.BaseController
 }
 
-func (s *TestController) Test(c *gin.Context)  {
-    ctx := c.Request.Context()
-    cache := facade.Cache()
-    redisCache := facade.Cache("redis")
-    // Bind context to cache
-    redisCache = redisCache.WithContext(ctx)
-    memoryCache := facade.Cache("memory") 
-    diskCache := facade.Cache("disk")    
-    // Other facade usage ...
+func (s *TestController) Test(c *gin.Context) {
+	ctx := c.Request.Context()
+	cache := facade.Cache()
+	redisCache := facade.Cache("redis")
+	// Bind context to cache
+	redisCache = redisCache.WithContext(ctx)
+	memoryCache := facade.Cache("memory")
+	diskCache := facade.Cache("disk")
+	// Other facade usage ...
 }
 ```
 
@@ -3373,16 +3379,16 @@ func (s *UserEnum) Status() *base.Enum[string] {
 package v1
 
 import (
-    "gin/app/enum"
+	"gin/app/enum"
 	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
+	"gin/common/base"
+
+	"github.com/gin-gonic/gin"
 )
 
 type LoginController struct {
-  base.BaseController
-  service service.LoginService
+	base.BaseController
+	service service.LoginService
 }
 
 // Test 
@@ -3472,7 +3478,8 @@ func (s *UserService) Detail(ctx context.Context, id int64) error {
 
 > The database is initialized through a container and bound to the context through middleware, so that database
 > instances can be obtained wherever there is context. You can also obtain database instances separately. By default,
-> MySQL, pgSQL, SQLite, and SQLSRV are integrated, and the default database can be configured and the database connection
+> MySQL, pgSQL, SQLite, and SQLSRV are integrated, and the default database can be configured and the database
+> connection
 > can be specified through the Connection method.
 
 ## Database Configuration
@@ -3534,26 +3541,27 @@ sqlsrv:
 package controller
 
 import (
-  "gin/app/facade"
-  "gin/common/base"
-  "github.com/gin-gonic/gin"
+	"gin/app/facade"
+	"gin/common/base"
+	
+	"github.com/gin-gonic/gin"
 )
 
 type TestController struct {
-  base.BaseController
+	base.BaseController
 }
 
-func (s *TestController) Test(c *gin.Context)  {
-  ctx := c.Request.Context()
-  // Default Connection
-  db := facade.DB()
-  // Using context
-  db1 := facade.DB().WithContext(ctx)
-  // Connection pgsql
-  db2 := facade.DB("pgsql").WithContext(ctx)
-  // Connection sqlsrv
-  db3 := facade.DB("sqlsrv").WithContext(ctx)
-  // todo ...
+func (s *TestController) Test(c *gin.Context) {
+	ctx := c.Request.Context()
+	// Default Connection
+	db := facade.DB()
+	// Using context
+	db1 := facade.DB().WithContext(ctx)
+	// Connection pgsql
+	db2 := facade.DB("pgsql").WithContext(ctx)
+	// Connection sqlsrv
+	db3 := facade.DB("sqlsrv").WithContext(ctx)
+	// todo ...
 }
 ```
 
@@ -3565,38 +3573,40 @@ func (s *TestController) Test(c *gin.Context)  {
 package controller
 
 import (
-    "gin/app/facade"
-    "gin/app/model"
-    "gin/app/request"
-    "gin/app/service"
-    "github.com/gin-gonic/gin"
+	"gin/app/errcode"
+	"gin/app/facade"
+	"gin/app/model"
+	"gin/app/request"
+	"gin/app/service"
+	
+	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-    base.BaseController
-    service service.UserService
+	base.BaseController
+	service service.UserService
 }
 
 func (s *UserController) Test(c *gin.Context) {
-    var (
-        ctx = c.Request.Context()
+	var (
+		ctx = c.Request.Context()
 		req request.User
 	)
-  
-    // Bind and validate parameters
-    err := facade.Request().BindValidate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, errcode.ArgsError().WithMsg(err.Error()))
-        return
-    }
-  
-    res, err := s.service.List(ctx, req)
-    if err != nil {
-        s.Response.Error(c, errcode.SystemError().WithMsg(lang.Trans(ctx, err.Error(), nil)))
-        return
-    }
-  
-    s.Response.Success(c, errcode.Success().WithData(res))
+
+	// Bind and validate parameters
+	err := facade.Request().BindValidate(c, &req, "List")
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
+
+	res, err := s.service.List(ctx, req)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
+
+	s.Response.Success(c, errcode.Success().WithData(res))
 }
 
 ```
@@ -3617,40 +3627,40 @@ type UserService struct {
 
 // List
 func (s *UserService) List(ctx context.Context, req request.User) (pageData request.PageData, err error) {
-    var (
-        m  []model.User
-        db = s.DB(ctx, &model.User{})
-    )
-  
-    // Search 
-    db = s.Search(db, m, req.Search)
-  
-    err = db.Model(&m).Count(&pageData.Total).Error
-    if err != nil {
-        return pageData, err
-    }
-  
-    db = db.Model(&m).Preload("UserRoles")
-  
-    if req.NotPage {
-        err = db.Order("id DESC").Find(&m).Error
-        if err != nil {
-            return pageData, err
-        }
-        pageData.List = m
-    } else {
-      pageData.Page = req.Page
-      pageData.PageSize = req.PageSize
-      offset, limit := request.Pagination(req.Page, req.PageSize)
-  
-      err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
-      if err != nil {
-            return pageData, err
-      }
-      pageData.List = m
-    }
-  
-    return pageData, nil
+	var (
+		m  []model.User
+		db = s.DB(ctx, &model.User{})
+	)
+
+	// Search 
+	db = (s.Search(db, m, req.Search)).
+		Model(&m).
+		Preload("UserRoles")
+
+	err = db.Count(&pageData.Total).Error
+	if err != nil {
+		return pageData, err
+	}
+
+	if req.NotPage {
+		err = db.Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	} else {
+		pageData.Page = req.Page
+		pageData.PageSize = req.PageSize
+		offset, limit := request.Pagination(req.Page, req.PageSize)
+
+		err = db.Offset(offset).Limit(limit).Order("id DESC").Find(&m).Error
+		if err != nil {
+			return pageData, err
+		}
+		pageData.List = m
+	}
+
+	return pageData, nil
 }
 ```
 

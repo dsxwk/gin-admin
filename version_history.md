@@ -1,7 +1,16 @@
 # Version History
 
+## v3.1.4
+> - Merge public imports and event-related packages
+> - Separate the event bus, business event registry, debugger collector, and trace store responsibilities
+> - Add new event and ES test cases
+> - Add a public method for obtaining the traceId based on the context
+> - Adjusted and fixed the issue of duplicate registration of gRPC default services and set the i18n language loading directory to an absolute path
+> - Fix and optimize the timeout middleware
+> - Fix comments, adjust test cases
+
 ## v3.1.3
-> - 更新配置文件JWT秘钥示例
+> - Update configuration file JWT secret key example
 
 ## v3.1.2
 > - Add and update Es configuration
