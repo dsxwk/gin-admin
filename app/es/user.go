@@ -7,7 +7,6 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
-	eslib "gin/pkg/serviceprovider/es"
 	"strconv"
 )
 
@@ -32,11 +31,6 @@ var userTextFields = []string{"username", "fullName", "nickname", "email"}
 
 // UserSearch 用户ES搜索服务
 type UserSearch struct{}
-
-// Client 获取ES客户端
-func (s *UserSearch) Client() *eslib.Client {
-	return facade.ES()
-}
 
 // IndexName 获取索引名称
 func (s *UserSearch) IndexName() string {
@@ -66,24 +60,24 @@ func (s *UserSearch) Mapping() map[string]string {
 
 // CreateIndex 创建用户索引
 func (s *UserSearch) CreateIndex(ctx context.Context) error {
-	return s.Client().CreateIndex(ctx, s.IndexName(), s.Mapping())
+	return facade.ES().CreateIndex(ctx, s.IndexName(), s.Mapping())
 }
 
 // EnsureIndex 确保用户索引存在
 func (s *UserSearch) EnsureIndex(ctx context.Context) error {
-	exists, err := s.Client().IndexExists(ctx, s.IndexName())
+	exists, err := facade.ES().IndexExists(ctx, s.IndexName())
 	if err != nil {
 		return err
 	}
 	if exists {
 		return nil
 	}
-	return s.Client().CreateIndex(ctx, s.IndexName(), s.Mapping())
+	return facade.ES().CreateIndex(ctx, s.IndexName(), s.Mapping())
 }
 
 // DeleteIndex 删除用户索引
 func (s *UserSearch) DeleteIndex(ctx context.Context) error {
-	return s.Client().DeleteIndex(ctx, s.IndexName())
+	return facade.ES().DeleteIndex(ctx, s.IndexName())
 }
 
 // Save 保存用户文档
@@ -95,7 +89,7 @@ func (s *UserSearch) Save(ctx context.Context, user *model.User) error {
 		return errors.New("用户ID必须大于0")
 	}
 
-	return s.Client().Index(ctx, s.IndexName(), strconv.FormatInt(user.ID, 10), s.Doc(user))
+	return facade.ES().Index(ctx, s.IndexName(), strconv.FormatInt(user.ID, 10), s.Doc(user))
 }
 
 // Update 更新用户文档
@@ -114,7 +108,7 @@ func (s *UserSearch) Update(ctx context.Context, id int64, data map[string]any) 
 		return errors.New("没有可更新的ES字段")
 	}
 
-	return s.Client().Update(ctx, s.IndexName(), strconv.FormatInt(id, 10), doc)
+	return facade.ES().Update(ctx, s.IndexName(), strconv.FormatInt(id, 10), doc)
 }
 
 // Delete 删除用户文档
@@ -122,7 +116,7 @@ func (s *UserSearch) Delete(ctx context.Context, id int64) error {
 	if id <= 0 {
 		return errors.New("用户ID必须大于0")
 	}
-	return s.Client().Delete(ctx, s.IndexName(), strconv.FormatInt(id, 10))
+	return facade.ES().Delete(ctx, s.IndexName(), strconv.FormatInt(id, 10))
 }
 
 // Detail 获取用户文档
@@ -131,7 +125,7 @@ func (s *UserSearch) Detail(ctx context.Context, id int64) (map[string]any, erro
 		return nil, errors.New("用户ID必须大于0")
 	}
 
-	doc, err := s.Client().GetDocument[map[string]any](ctx, s.IndexName(), strconv.FormatInt(id, 10))
+	doc, err := facade.ES().GetDocument[map[string]any](ctx, s.IndexName(), strconv.FormatInt(id, 10))
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +153,7 @@ func (s *UserSearch) List(ctx context.Context, conditions map[string]any, page, 
 		body["sort"] = sortList
 	}
 
-	result, err := s.Client().Search[map[string]any](ctx, s.IndexName(), body)
+	result, err := facade.ES().Search[map[string]any](ctx, s.IndexName(), body)
 	if err != nil {
 		return request.PageData{}, err
 	}
@@ -262,8 +256,8 @@ func (s *UserSearch) Doc(user *model.User) map[string]any {
 		"userRoles": userRoles,
 		"mainDept":  mainDept,
 		"userDepts": userDepts,
-		"createdAt": s.Client().FormatDateTime(user.CreatedAt),
-		"updatedAt": s.Client().FormatDateTime(user.UpdatedAt),
+		"createdAt": facade.ES().FormatDateTime(user.CreatedAt),
+		"updatedAt": facade.ES().FormatDateTime(user.UpdatedAt),
 	}
 }
 
