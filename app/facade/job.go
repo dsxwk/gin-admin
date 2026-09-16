@@ -59,7 +59,7 @@ func (j *JobFacade) initConnections() {
 				ch, err := conn.Channel()
 				if err != nil {
 					Log().Error("Job RabbitMQ Channel 创建失败: " + err.Error())
-					conn.Close()
+					_ = conn.Close()
 				} else {
 					_ = ch.ExchangeDeclare(JobRabbitmqExchange, "direct", true, false, false, false, nil)
 					_, _ = ch.QueueDeclare(JobRabbitmqQueue, true, false, false, false, nil)
@@ -201,7 +201,8 @@ func (j *JobFacade) dispatchRabbitmq(ctx context.Context, jobName string, payloa
 		if err != nil {
 			return err
 		}
-		return j.rabbitmqCh.Publish(
+		return j.rabbitmqCh.PublishWithContext(
+			ctx,
 			JobRabbitmqDelayExchange,
 			JobRabbitmqRouting,
 			false,
@@ -219,7 +220,8 @@ func (j *JobFacade) dispatchRabbitmq(ctx context.Context, jobName string, payloa
 	if err != nil {
 		return err
 	}
-	return j.rabbitmqCh.Publish(
+	return j.rabbitmqCh.PublishWithContext(
+		ctx,
 		JobRabbitmqExchange,
 		JobRabbitmqRouting,
 		false,
