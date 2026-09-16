@@ -169,6 +169,111 @@ func TestHttpRequest(t *testing.T) {
 	require.Equal(t, "pong", result["msg"])
 }
 
+// TestHttpTraceCollected 测试普通HTTP请求记录调试信息
+func TestHttpTraceCollected(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	traceID := "test-http-trace-collected"
+	store := facade.Debugger().Store()
+	store.Delete(traceID)
+	t.Cleanup(func() {
+		store.Delete(traceID)
+	})
+
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, traceID)
+	_, err := facade.Http().Send(ctx, http.MethodGet, ts.URL+"/ping", nil)
+	require.NoError(t, err)
+
+	trace, ok := store.Get(traceID)
+	require.True(t, ok)
+	require.NotEmpty(t, trace.HTTP)
+}
+
+// TestHttpWithoutTrace 测试普通HTTP请求跳过调试信息
+func TestHttpWithoutTrace(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	traceID := "test-http-without-trace"
+	store := facade.Debugger().Store()
+	store.Delete(traceID)
+	t.Cleanup(func() {
+		store.Delete(traceID)
+	})
+
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, traceID)
+	_, err := facade.Http().Send(h.WithoutTrace(ctx), http.MethodGet, ts.URL+"/ping", nil)
+	require.NoError(t, err)
+
+	trace, ok := store.Get(traceID)
+	require.False(t, ok)
+	require.Nil(t, trace)
+}
+
+// TestHttpClientBuilder 测试HTTP客户端链式配置
+func TestHttpClientBuilder(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	type EchoResponse struct {
+		Code int            `json:"code"`
+		Msg  string         `json:"msg"`
+		Data map[string]any `json:"data"`
+	}
+
+	queryResp, err := facade.Http().
+		WithQuery(map[string]any{"name": "张三", "age": "18"}).
+		SendAsJson[EchoResponse](t.Context(), http.MethodGet, ts.URL+"/echo")
+	require.NoError(t, err)
+	require.Equal(t, "张三", queryResp.Data["name"])
+	require.Equal(t, "18", queryResp.Data["age"])
+
+	bodyResp, err := facade.Http().
+		WithHeader("Content-Type", "application/json").
+		WithBody(map[string]any{"name": "李四", "email": "lisi@example.com"}).
+		SendAsJson[EchoResponse](t.Context(), http.MethodPost, ts.URL+"/echo")
+	require.NoError(t, err)
+	require.Equal(t, "李四", bodyResp.Data["name"])
+	require.Equal(t, "lisi@example.com", bodyResp.Data["email"])
+
+	type FormResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Name  string `json:"name"`
+			Email string `json:"email"`
+		} `json:"data"`
+	}
+
+	formResp, err := facade.Http().
+		WithForm(map[string]any{"name": "王五", "email": "wangwu@example.com"}).
+		SendAsJson[FormResponse](t.Context(), http.MethodPost, ts.URL+"/form")
+	require.NoError(t, err)
+	require.Equal(t, "王五", formResp.Data.Name)
+	require.Equal(t, "wangwu@example.com", formResp.Data.Email)
+
+	headerServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"code": 0,
+			"data": map[string]any{
+				"x-custom-header": r.Header.Get("X-Custom-Header"),
+				"authorization":   r.Header.Get("Authorization"),
+			},
+		})
+	}))
+	defer headerServer.Close()
+
+	headerResp, err := facade.Http().
+		WithHeaders(map[string]string{
+			"X-Custom-Header": "custom-value",
+			"Authorization":   "Bearer token123",
+		}).
+		SendAsJson[EchoResponse](t.Context(), http.MethodGet, headerServer.URL)
+	require.NoError(t, err)
+	require.Equal(t, "custom-value", headerResp.Data["x-custom-header"])
+	require.Equal(t, "Bearer token123", headerResp.Data["authorization"])
+}
+
 // TestHttpSendAsJsonJson 测试JSON响应解析
 func TestHttpSendAsJsonJson(t *testing.T) {
 	ts := setupTestServer()
@@ -428,6 +533,23 @@ func TestHttpRequestErrorResponse(t *testing.T) {
 	_, err := facade.Http().Send(ctx, "GET", ts.URL+"/error", nil)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "状态码: 500")
+}
+
+// TestHttpSendResponseKeepsErrorStatus 测试保留错误状态码和响应体
+func TestHttpSendResponseKeepsErrorStatus(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	response, err := facade.Http().SendResponse(
+		t.Context(),
+		http.MethodGet,
+		ts.URL+"/error",
+		nil,
+	)
+	require.NoError(t, err)
+	require.NotNil(t, response)
+	require.Equal(t, http.StatusInternalServerError, response.StatusCode)
+	require.Contains(t, string(response.Body), "internal server error")
 }
 
 // TestHttpSendToJsonErrorResponse 测试JSON解析错误响应

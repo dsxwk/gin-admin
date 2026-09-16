@@ -11,6 +11,7 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/grpc/proto"
+	"gin/pkg"
 	"image/color"
 
 	"github.com/gin-gonic/gin"
@@ -165,6 +166,8 @@ func (s *LoginController) Test(c *gin.Context) {
 	containsDesc2 := userEnum.Gender().ContainsDesc("男")
 	length2 := userEnum.Gender().Len()
 
+	httpRes, _ := facade.Http().SendAsJson[map[string]any](ctx, "GET", "http://127.0.0.1:"+pkg.IntToString[int64](facade.Config().App.Port)+"/ping", nil)
+
 	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
 	_ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
 	_ = facade.Queue().Producer("rabbitmq_demo").Publish(ctx, consumer.RabbitmqDemoPayload{Name: "test111"})
@@ -203,6 +206,7 @@ func (s *LoginController) Test(c *gin.Context) {
 		"containsDesc2":  containsDesc2,
 		"length2":        length2,
 		"grpcResp":       grpcResp,
+		"httpRes":        httpRes,
 	}))
 }
 
