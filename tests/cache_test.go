@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/require"
 )
 
@@ -225,10 +226,10 @@ func TestCacheStoreMethods(t *testing.T) {
 		name  string
 		cache *cache.CacheProxy
 	}{
-		{"Store()", facade.Cache().WithContext(ctx)},
-		{"Redis()", facade.Cache("redis").WithContext(ctx)},
-		{"Memory()", facade.Cache("memory").WithContext(ctx)},
-		{"Disk()", facade.Cache("disk").WithContext(ctx)},
+		{"Cache()", facade.Cache().WithContext(ctx)},
+		{"Cache(redis)", facade.Cache("redis").WithContext(ctx)},
+		{"Cache(memory)", facade.Cache("memory").WithContext(ctx)},
+		{"Cache(disk)", facade.Cache("disk").WithContext(ctx)},
 	}
 
 	for _, tt := range tests {
@@ -252,4 +253,41 @@ func TestCacheStoreMethods(t *testing.T) {
 			_ = tt.cache.Delete(key)
 		})
 	}
+}
+
+// TestCacheDiskDriver 测试磁盘缓存未错误使用Redis
+func TestCacheDiskDriver(t *testing.T) {
+	ctx := t.Context()
+	key := "disk_driver_test"
+	value := "disk_value"
+
+	diskCache := facade.Cache("disk").WithContext(ctx)
+	err := diskCache.Set(key, value, 10*time.Second)
+	require.NoError(t, err)
+	defer func() { _ = diskCache.Delete(key) }()
+
+	val, ok := diskCache.Get(key)
+	require.True(t, ok)
+	require.Equal(t, []byte(value), val)
+
+	_, err = facade.Redis().Client().Get(ctx, key).Result()
+	require.ErrorIs(t, err, redis.Nil)
+}
+
+// TestCacheRedisFacade 测试Redis门面访问同一实例
+func TestCacheRedisFacade(t *testing.T) {
+	ctx := t.Context()
+	key := "redis_facade_test"
+	value := "redis_value"
+
+	err := facade.Cache("redis").WithContext(ctx).Set(key, value, 10*time.Second)
+	require.NoError(t, err)
+	defer func() { _ = facade.Redis().Delete(key) }()
+
+	val, ok := facade.Redis().Get(key)
+	require.True(t, ok)
+	require.Equal(t, value, val)
+
+	err = facade.Cache("redis").WithContext(ctx).Delete(key)
+	require.NoError(t, err)
 }

@@ -59,7 +59,7 @@ func (w *RedisWorker) Stop() error {
 
 // consume 消费循环
 func (w *RedisWorker) consume() {
-	client := facade.Cache("redis").Redis().Client()
+	client := facade.Redis().Client()
 	if client == nil {
 		time.Sleep(time.Second)
 		return

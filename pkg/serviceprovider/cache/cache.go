@@ -43,40 +43,54 @@ var (
 )
 
 func NewCache(driver string, conf *config.Config) *CacheProxy {
-	cacheInstanceMu.RLock()
-	c, ok := cacheInstance[driver]
-	cacheInstanceMu.RUnlock()
-	if ok {
-		return c
+	if driver == "" {
+		driver = "memory"
 	}
+
+	cacheInstanceMu.Lock()
+	defer cacheInstanceMu.Unlock()
+
+	if instance, exists := cacheInstance[driver]; exists {
+		return instance
+	}
+
+	var c *CacheProxy
 	switch driver {
-	case "redis", "disk":
+	case "redis":
 		c = NewRedisCache(conf)
-		cacheInstanceMu.Lock()
-		cacheInstance[driver] = c
-		cacheInstanceMu.Unlock()
-		flag.Infof("%s缓存初始化成功", driver)
-		return c
-	case "", "memory":
+	case "disk":
+		c = NewDiskCache(conf)
+	case "memory":
 		c = NewMemoryCache(conf)
-		cacheInstanceMu.Lock()
-		cacheInstance["memory"] = c
-		cacheInstanceMu.Unlock()
-		flag.Infof("memory缓存初始化成功")
-		return c
 	default:
 		logger.NewLogger(conf).Fatal("不支持的缓存驱动: " + driver)
 		return nil
 	}
+
+	cacheInstance[driver] = c
+	flag.Infof("%s缓存初始化成功", driver)
+	return c
 }
 
 func (p *CacheProxy) WithContext(ctx context.Context) *CacheProxy {
-	return &CacheProxy{
+	proxy := &CacheProxy{
 		driver: p.driver,
 		c:      p.c,
 		bus:    p.bus,
 		ctx:    ctx,
+		conf:   p.conf,
 	}
+
+	switch driver := p.c.(type) {
+	case *RedisCache:
+		proxy.c = driver.WithContext(ctx)
+	case *MemoryCache:
+		proxy.c = driver.WithContext(ctx)
+	case *DiskCache:
+		proxy.c = driver.WithContext(ctx)
+	}
+
+	return proxy
 }
 
 func (p *CacheProxy) Set(key string, value any, expire time.Duration) error {
@@ -124,7 +138,13 @@ func (p *CacheProxy) publish(method, key string, val any, cost time.Duration) {
 	}
 }
 
-// Redis 获取Redis实例
-func (p *CacheProxy) Redis() *RedisCache {
-	return p.c.(*RedisCache)
+// Redis 获取Redis缓存实例
+func Redis(conf *config.Config) *RedisCache {
+	proxy := NewCache("redis", conf)
+	if proxy == nil {
+		return nil
+	}
+
+	redisCache, _ := proxy.c.(*RedisCache)
+	return redisCache
 }

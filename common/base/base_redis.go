@@ -52,7 +52,7 @@ func (c *RedisConsumer) Start[T queue.ConsumerHandler](h T) {
 }
 
 func (c *RedisConsumer) consumeLoop[T queue.ConsumerHandler](h T) {
-	client := facade.Cache("redis").Redis().Client()
+	client := facade.Redis().Client()
 	if client == nil {
 		time.Sleep(time.Second)
 		return
@@ -118,7 +118,7 @@ type RedisProducer struct {
 }
 
 func (p *RedisProducer) Publish(ctx context.Context, msg any) error {
-	client := facade.Cache("redis").Redis().Client()
+	client := facade.Redis().Client()
 	if client == nil {
 		return fmt.Errorf("redis client not initialized")
 	}

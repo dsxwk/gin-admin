@@ -2073,6 +2073,8 @@ func (s *TestController) Test() {
 
 ## Redis Cache
 
+> Use `facade.Cache("redis")` for common cache operations, or `facade.Redis()` for Redis-specific capabilities.
+
 ```go
 package controller
 
@@ -2090,7 +2092,7 @@ func (s *TestController) Test() {
 	// Set Set-Cache	
 	key := "test_key"
 	value := "test_value"
-	redisCache := facade.Cache("redis")
+	redisCache := facade.Redis()
 	err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 		// Handle error	

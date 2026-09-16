@@ -29,3 +29,8 @@ func Cache(cacheType ...string) *cache.CacheProxy {
 	Register[*cache.CacheProxy](name, cp)
 	return cp
 }
+
+// Redis 获取Redis缓存实例
+func Redis() *cache.RedisCache {
+	return cache.Redis(Config())
+}

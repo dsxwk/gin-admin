@@ -142,7 +142,7 @@ func (j *JobFacade) dispatchSync(jb jsjob.Job, payloadBytes []byte) error {
 }
 
 func (j *JobFacade) dispatchRedis(ctx context.Context, jobName string, payloadBytes []byte, delayMs int64) error {
-	client := Cache("redis").Redis().Client()
+	client := Redis().Client()
 	if client == nil {
 		return fmt.Errorf("redis 客户端未初始化")
 	}
@@ -274,7 +274,7 @@ func (j *JobFacade) GetAllJobs() []JobStats {
 }
 
 func (j *JobFacade) Count(ctx context.Context) (int64, error) {
-	client := Cache("redis").Redis().Client()
+	client := Redis().Client()
 	if client == nil {
 		return 0, fmt.Errorf("redis 客户端未初始化")
 	}
@@ -284,7 +284,7 @@ func (j *JobFacade) Count(ctx context.Context) (int64, error) {
 }
 
 func (j *JobFacade) Clear(ctx context.Context) error {
-	client := Cache("redis").Redis().Client()
+	client := Redis().Client()
 	if client == nil {
 		return fmt.Errorf("redis 客户端未初始化")
 	}

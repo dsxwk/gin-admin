@@ -145,22 +145,22 @@ func TestRedisCacheLock(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	redisCache := facade.Cache("redis").WithContext(ctx)
+	redisCache := facade.Redis().WithContext(ctx)
 	key := "test:cache:lock"
 	value := "lock-owner"
-	defer func() { _ = redisCache.Redis().UnLock(key, value) }()
+	defer func() { _ = redisCache.UnLock(key, value) }()
 
-	err := redisCache.Redis().Lock(key, value, 2*time.Second)
+	err := redisCache.Lock(key, value, 2*time.Second)
 	require.NoError(t, err, "获取锁失败")
 
-	err = redisCache.Redis().Lock(key, value, 2*time.Second)
+	err = redisCache.Lock(key, value, 2*time.Second)
 	require.Error(t, err, "重复获取同一锁应该失败")
 	assert.Contains(t, err.Error(), "lock already exists")
 
-	err = redisCache.Redis().UnLock(key, value)
+	err = redisCache.UnLock(key, value)
 	require.NoError(t, err, "释放锁失败")
 
-	err = redisCache.Redis().Lock(key, value, 2*time.Second)
+	err = redisCache.Lock(key, value, 2*time.Second)
 	require.NoError(t, err, "释放后重新获取锁失败")
 }
 
@@ -169,18 +169,18 @@ func TestRedisCacheSetOps(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	redisCache := facade.Cache("redis").WithContext(ctx)
+	redisCache := facade.Redis().WithContext(ctx)
 	key := "test:cache:set"
-	defer func() { _ = redisCache.Redis().Delete(key) }()
+	defer func() { _ = redisCache.Delete(key) }()
 
-	err := redisCache.Redis().SAdd(key, "a", "b", "c")
+	err := redisCache.SAdd(key, "a", "b", "c")
 	require.NoError(t, err, "SAdd失败")
 
-	isMember, err := redisCache.Redis().SIsMember(key, "a")
+	isMember, err := redisCache.SIsMember(key, "a")
 	require.NoError(t, err)
 	assert.True(t, isMember, "成员a应存在")
 
-	isMember, err = redisCache.Redis().SIsMember(key, "x")
+	isMember, err = redisCache.SIsMember(key, "x")
 	require.NoError(t, err)
 	assert.False(t, isMember, "成员x不应存在")
 }

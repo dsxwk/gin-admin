@@ -2061,6 +2061,8 @@ func (s *TestController) Test() {
 
 ## Redis缓存
 
+> 通用缓存能力可使用 `facade.Cache("redis")`, Redis专属能力可使用 `facade.Redis()`。
+
 ```go
 package controller
 
@@ -2078,7 +2080,7 @@ func (s *TestController) Test() {
     // Set 设置缓存	
     key := "test_key"
     value := "test_value"
-	redisCache := facade.Cache("redis")
+	redisCache := facade.Redis()
     err := redisCache.Set(key, value, time.Second*10)
 	if err != nil {
 	    // 处理错误	

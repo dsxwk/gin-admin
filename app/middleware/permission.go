@@ -33,7 +33,7 @@ func (s Permission) hasPermission(c *gin.Context, code string) bool {
 	ctx := c.Request.Context()
 	redisKey := fmt.Sprintf("permission:user:%d", userID)
 
-	redisCache := facade.Cache("redis").Redis().WithContext(ctx)
+	redisCache := facade.Redis().WithContext(ctx)
 
 	// 检查Redis中权限集合是否存在
 	exists, err := redisCache.Exists(redisKey)

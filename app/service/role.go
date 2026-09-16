@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gin/app/facade"
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
@@ -451,7 +452,7 @@ func (s *RoleService) SyncAllUserPermissions(ctx context.Context) error {
 	}
 
 	// Redis Pipeline 批量写入
-	redisCache := s.Cache(ctx, "redis").Redis()
+	redisCache := facade.Redis().WithContext(ctx)
 	pipe := redisCache.Pipeline()
 	for userID, keys := range userPerms {
 		redisKey := fmt.Sprintf("permission:user:%d", userID)
@@ -489,7 +490,7 @@ func (s *RoleService) rebuildUserPermissions(ctx context.Context, db *gorm.DB, u
 	}
 
 	key := fmt.Sprintf("permission:user:%d", userID)
-	redisCache := s.Cache(ctx, "redis").Redis()
+	redisCache := facade.Redis().WithContext(ctx)
 
 	_ = redisCache.Delete(key)
 
