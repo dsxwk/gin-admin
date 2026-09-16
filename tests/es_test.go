@@ -9,6 +9,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/config"
 	eslib "gin/pkg/serviceprovider/es"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -170,9 +171,7 @@ func (s *fakeESStore) handleUpdate(w http.ResponseWriter, r *http.Request, index
 		doc = make(map[string]any)
 		s.indexes[index][id] = doc
 	}
-	for key, value := range body.Doc {
-		doc[key] = value
-	}
+	maps.Copy(doc, body.Doc)
 	s.mu.Unlock()
 	writeESResponse(w, http.StatusOK, map[string]any{"result": "updated"})
 }
@@ -300,6 +299,28 @@ func TestESClientCRUD(t *testing.T) {
 	require.Error(t, err)
 
 	require.NoError(t, client.DeleteIndex(ctx, index))
+}
+
+// TestESRequestTraceOnlyRecordsES 测试ES请求只记录ES调试信息
+func TestESRequestTraceOnlyRecordsES(t *testing.T) {
+	client := newTestESClient(t)
+	traceID := "test-es-http-trace"
+	store := facade.Debugger().Store()
+	store.Delete(traceID)
+	t.Cleanup(func() {
+		store.Delete(traceID)
+	})
+
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, traceID)
+
+	require.NoError(t, client.Ping(ctx))
+
+	trace, ok := store.Get(traceID)
+	require.True(t, ok)
+	require.NotEmpty(t, trace.ES)
+	require.Empty(t, trace.HTTP)
 }
 
 // TestESUserSearch 测试用户ES搜索封装

@@ -51,5 +51,5 @@ func (p *EsProvider) Boot(app serviceprovider.App) {
 
 // Dependencies 依赖服务
 func (p *EsProvider) Dependencies() []string {
-	return []string{"config", "log"}
+	return []string{"config", "log", "http"}
 }

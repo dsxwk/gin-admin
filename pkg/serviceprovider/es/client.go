@@ -1,8 +1,8 @@
 package es
 
 import (
-	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"gin/app/model"
@@ -10,8 +10,8 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
+	httpclient "gin/pkg/serviceprovider/http"
 	t "gin/pkg/time"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -23,12 +23,12 @@ const defaultEsTimeout = 10 * time.Second
 
 // Client Elasticsearch客户端
 type Client struct {
-	baseURL    string        // 基础地址
-	username   string        // 用户名
-	password   string        // 密码
-	apiKey     string        // APIKey
-	timeout    time.Duration // 请求超时
-	httpClient *http.Client  // HTTP客户端
+	baseURL  string             // 基础地址
+	username string             // 用户名
+	password string             // 密码
+	apiKey   string             // APIKey
+	timeout  time.Duration      // 请求超时
+	client   *httpclient.Client // HTTP客户端
 }
 
 // NewClient 创建ES客户端
@@ -52,9 +52,7 @@ func NewClient(conf config.Es) *Client {
 		password: conf.Password,
 		apiKey:   conf.ApiKey,
 		timeout:  timeout,
-		httpClient: &http.Client{
-			Timeout: timeout,
-		},
+		client:   httpclient.NewClient().WithTimeout(timeout),
 	}
 }
 
@@ -276,64 +274,65 @@ func (c *Client) request(ctx context.Context, action, index, method, path, conte
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	if c.timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, c.timeout)
-		defer cancel()
-	}
+	ctx = httpclient.WithoutTrace(ctx)
 
 	fullURL := c.baseURL + "/" + strings.TrimLeft(path, "/")
-	var (
-		reader  io.Reader
-		reqData []byte
-		err     error
-	)
-	if body != nil {
-		switch v := body.(type) {
-		case []byte:
-			reqData = v
-		case string:
-			reqData = []byte(v)
-		default:
-			reqData, err = json.Marshal(body)
-			if err != nil {
-				return 0, nil, fmt.Errorf("序列化ES请求失败: %w", err)
-			}
-		}
-		reader = bytes.NewReader(reqData)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, fullURL, reader)
+	reqData, err := marshalRequestBody(body)
 	if err != nil {
-		return 0, nil, fmt.Errorf("创建ES请求失败: %w", err)
+		return 0, nil, err
 	}
 
 	if contentType == "" {
 		contentType = "application/json"
 	}
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("Accept", "application/json")
+	headers := map[string]string{
+		"Accept":       "application/json",
+		"Content-Type": contentType,
+	}
 	if c.apiKey != "" {
-		req.Header.Set("Authorization", "ApiKey "+c.apiKey)
+		headers["Authorization"] = "ApiKey " + c.apiKey
 	} else if c.username != "" {
-		req.SetBasicAuth(c.username, c.password)
+		auth := base64.StdEncoding.EncodeToString([]byte(c.username + ":" + c.password))
+		headers["Authorization"] = "Basic " + auth
 	}
 
 	start := time.Now()
-	resp, requestErr := c.httpClient.Do(req)
+	response, requestErr := c.client.SendResponse(ctx, method, fullURL, &httpclient.Option{
+		Headers: headers,
+		Body:    reqData,
+	})
 	var (
 		status int
 		data   []byte
 	)
-	if requestErr == nil {
-		status = resp.StatusCode
-		data, requestErr = io.ReadAll(resp.Body)
-		_ = resp.Body.Close()
+	if response != nil {
+		status = response.StatusCode
+		data = response.Body
 	}
 
 	costMs := float64(time.Since(start).Nanoseconds()) / 1e6
 	publishTrace(ctx, action, index, reqData, status, data, requestErr, costMs)
 	return status, data, requestErr
+}
+
+// marshalRequestBody 序列化ES请求体
+func marshalRequestBody(body any) ([]byte, error) {
+	if body == nil {
+		return nil, nil
+	}
+
+	switch v := body.(type) {
+	case []byte:
+		return v, nil
+	case string:
+		return []byte(v), nil
+	default:
+		data, err := json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("序列化ES请求失败: %w", err)
+		}
+		return data, nil
+	}
 }
 
 // publishTrace 发布ES调试事件
