@@ -301,7 +301,7 @@ $ ./cli demo:command --args=11
  SUCCESS  执行命令: demo:command --args=11
 ```
 
-# 项目目录结构
+# 目录结构
 
 ```
 ├── app                       # 应用程序
