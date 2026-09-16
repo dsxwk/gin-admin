@@ -1,5 +1,10 @@
 # Version History
 
+## v3.1.5
+> - Remove unused error codes in mcp
+> - Optimization of es, logger, and http packages
+> - Cache package repair and optimization
+
 ## v3.1.4
 > - Merge public imports and event-related packages
 > - Separate the event bus, business event registry, debugger collector, and trace store responsibilities
