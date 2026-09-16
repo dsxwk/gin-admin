@@ -2,14 +2,12 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -19,11 +17,13 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+const StackTraceKey = "stackTrace"
+
 var (
 	loggerInstance *Logger
 	loggerOnce     sync.Once
 	// 全局日志级别(支持动态修改)
-	logLevel zap.AtomicLevel
+	logLevel = zap.NewAtomicLevelAt(zap.InfoLevel)
 )
 
 // Logger 包装器
@@ -33,19 +33,17 @@ type Logger struct {
 
 func NewLogger(conf *config.Config) *Logger {
 	loggerOnce.Do(func() {
-		// 初始化日志级别(默认info)
-		logLevel = zap.NewAtomicLevel()
 		setLogLevel(strings.ToLower(conf.Log.Level))
 
 		// 确保日志目录存在
-		logDir := "storage/logs"
-		if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		logDir := filepath.Join(config.GetRootPath(), "storage", "logs")
+		if err := os.MkdirAll(logDir, 0755); err != nil {
 			flag.Errorf("创建日志目录失败: %v", err)
 			os.Exit(1)
 		}
 
 		// 动态日志路径
-		logPath := filepath.Join(logDir, time.Now().Format("2006-01")+".log")
+		logPath := filepath.Join(logDir, "gin.log")
 
 		// 日志切割
 		lumberJackLogger := &lumberjack.Logger{
@@ -66,20 +64,25 @@ func NewLogger(conf *config.Config) *Logger {
 		encoderConfig.CallerKey = "caller"
 		encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 		// 堆栈
-		encoderConfig.StacktraceKey = "stackTrace"
+		encoderConfig.StacktraceKey = StackTraceKey
 
 		// 创建encoder,同时输出到文件 + 控制台
 		fileEncoder := zapcore.NewJSONEncoder(encoderConfig)
-		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+		consoleEncoderConfig := encoderConfig
+		consoleEncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+		consoleEncoder := zapcore.NewConsoleEncoder(consoleEncoderConfig)
 
 		// 动态设置日志级别
-		level := logLevel                                   // 文件跟随全局
-		consoleLevel := zap.NewAtomicLevelAt(zap.InfoLevel) // 控制台默认info
+		level := logLevel
 
 		// 创建核心
+		fileCore := StructuredStackCore{
+			Core: zapcore.NewCore(fileEncoder, zapcore.AddSync(lumberJackLogger), level),
+		}
+		consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level)
 		core := zapcore.NewTee(
-			zapcore.NewCore(fileEncoder, zapcore.AddSync(lumberJackLogger), level),
-			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), consoleLevel),
+			fileCore,
+			consoleCore,
 		)
 
 		// 初始化 Logger
@@ -98,24 +101,11 @@ func NewLogger(conf *config.Config) *Logger {
 
 // 设置日志级别
 func setLogLevel(level string) {
-	switch level {
-	case "debug":
-		logLevel.SetLevel(zap.DebugLevel)
-	case "info":
-		logLevel.SetLevel(zap.InfoLevel)
-	case "warn":
-		logLevel.SetLevel(zap.WarnLevel)
-	case "error":
-		logLevel.SetLevel(zap.ErrorLevel)
-	case "dpanic":
-		logLevel.SetLevel(zap.DPanicLevel)
-	case "panic":
-		logLevel.SetLevel(zap.PanicLevel)
-	case "fatal":
-		logLevel.SetLevel(zap.FatalLevel)
-	default:
-		logLevel.SetLevel(zap.InfoLevel)
+	parsed, err := zapcore.ParseLevel(level)
+	if err != nil {
+		parsed = zapcore.InfoLevel
 	}
+	logLevel.SetLevel(parsed)
 }
 
 // SetLevel 设置日志级别
@@ -129,6 +119,13 @@ func (l *Logger) GetLevel() string {
 }
 
 func (l *Logger) WithDebugger(c context.Context) *zap.Logger {
+	if l == nil || l.Logger == nil {
+		return zap.NewNop()
+	}
+	if c == nil {
+		c = context.Background()
+	}
+
 	var ms float64
 	if start, ok := c.Value(ctxkey.StartTimeKey).(time.Time); ok {
 		ms = float64(time.Since(start).Milliseconds())
@@ -162,38 +159,51 @@ func getString(c context.Context, key string) string {
 	return "unknown"
 }
 
-type StackTrace struct{}
-
-func (s StackTrace) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	stack := getStackTrace(3)
-	return enc.AddArray("stack", zapcore.ArrayMarshalerFunc(func(arr zapcore.ArrayEncoder) error {
-		for _, line := range stack {
-			line = strings.TrimSpace(line)
-			if line != "" {
-				arr.AppendString(line)
-			}
-		}
-		return nil
-	}))
+// StructuredStackCore 将自动堆栈编码为字符串数组
+type StructuredStackCore struct {
+	zapcore.Core
 }
 
-// getStackTrace 获取堆栈
-func getStackTrace(skip int) []string {
-	const maxDepth = 32
-	pc := make([]uintptr, maxDepth)
-	n := runtime.Callers(skip, pc)
-	pc = pc[:n]
+// Check 注册结构化堆栈核心
+func (c StructuredStackCore) Check(entry zapcore.Entry, checked *zapcore.CheckedEntry) *zapcore.CheckedEntry {
+	if !c.Enabled(entry.Level) {
+		return checked
+	}
+	return checked.AddCore(entry, c)
+}
 
-	var trace []string
-	for _, p := range pc {
-		fn := runtime.FuncForPC(p)
-		if fn == nil {
-			trace = append(trace, "unknown")
-			continue
-		}
-		file, line := fn.FileLine(p)
-		trace = append(trace, fmt.Sprintf("%s:%d %s", file, line, fn.Name()))
+// With 添加结构化堆栈核心字段
+func (c StructuredStackCore) With(fields []zapcore.Field) zapcore.Core {
+	return StructuredStackCore{Core: c.Core.With(fields)}
+}
+
+// Write 写入结构化堆栈
+func (c StructuredStackCore) Write(entry zapcore.Entry, fields []zapcore.Field) error {
+	if entry.Stack == "" {
+		return c.Core.Write(entry, fields)
 	}
 
-	return trace
+	lines := splitStack(entry.Stack)
+	entry.Stack = ""
+	fields = append(fields, zap.Array(StackTraceKey, zapcore.ArrayMarshalerFunc(func(enc zapcore.ArrayEncoder) error {
+		for _, line := range lines {
+			enc.AppendString(line)
+		}
+		return nil
+	})))
+
+	return c.Core.Write(entry, fields)
+}
+
+// splitStack 拆分堆栈行
+func splitStack(stack string) []string {
+	parts := strings.Split(strings.TrimSpace(stack), "\n")
+	lines := make([]string, 0, len(parts))
+	for _, line := range parts {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			lines = append(lines, line)
+		}
+	}
+	return lines
 }
