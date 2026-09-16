@@ -259,9 +259,9 @@ func esDocValue(name string, c Column) string {
 	case strings.Contains(t, "timestamp"),
 		strings.Contains(t, "datetime"),
 		t == "date":
-		return "s.Client().FormatDateTime(m." + name + ")"
+		return "facade.ES().FormatDateTime(m." + name + ")"
 	case t == "json", t == "jsonb":
-		return "s.Client().JsonValue(m." + name + ")"
+		return "facade.ES().JsonValue(m." + name + ")"
 	case strings.Contains(t, "blob"),
 		strings.Contains(t, "binary"),
 		strings.Contains(t, "bytea"):
