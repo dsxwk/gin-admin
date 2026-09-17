@@ -9,7 +9,7 @@ import (
 
 var (
 	printMu sync.Mutex
-	printed bool
+	silent  bool
 )
 
 // 预定义颜色函数
@@ -71,17 +71,40 @@ func Errorf(format string, args ...any) {
 
 // Warningf 警告日志
 func Warningf(format string, args ...any) {
+	if IsSilent() {
+		return
+	}
 	printLine(warningLabel, warningText, " WARNING ", format, args...)
 }
 
 // Successf 成功日志
 func Successf(format string, args ...any) {
+	if IsSilent() {
+		return
+	}
 	printLine(successLabel, successText, " SUCCESS ", format, args...)
 }
 
 // Infof 信息日志
 func Infof(format string, args ...any) {
+	if IsSilent() {
+		return
+	}
 	printLine(infoLabel, infoText, "   INFO  ", format, args...)
+}
+
+// SetSilent 设置静默模式
+func SetSilent(value bool) {
+	printMu.Lock()
+	defer printMu.Unlock()
+	silent = value
+}
+
+// IsSilent 判断是否处于静默模式
+func IsSilent() bool {
+	printMu.Lock()
+	defer printMu.Unlock()
+	return silent
 }
 
 // printLine 原子输出日志
