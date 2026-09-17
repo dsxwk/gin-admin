@@ -23,71 +23,63 @@ func setupTestServer() *httptest.Server {
 
 	// GET 测试接口
 	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "pong", "data": nil})
+		facade.Response().Success(c, errcode.Success().WithMsg("pong"))
 	})
 
 	// GET 带参数测试
 	r.GET("/echo", func(c *gin.Context) {
 		name := c.Query("name")
 		age := c.Query("age")
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "success",
-			"data": gin.H{"name": name, "age": age},
-		})
+		facade.Response().Success(c, errcode.Success().WithData(gin.H{
+			"name": name,
+			"age":  age,
+		}))
 	})
 
 	// POST JSON测试
 	r.POST("/echo", func(c *gin.Context) {
 		var body map[string]any
 		if err := c.BindJSON(&body); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			facade.Response().Error(c, errcode.ArgsError().WithMsg(err.Error()))
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "success",
-			"data": body,
-		})
+		facade.Response().Success(c, errcode.Success().WithData(body))
 	})
 
 	// POST 表单测试
 	r.POST("/form", func(c *gin.Context) {
 		name := c.PostForm("name")
 		email := c.PostForm("email")
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "success",
-			"data": gin.H{"name": name, "email": email},
-		})
+		facade.Response().Success(c, errcode.Success().WithData(gin.H{
+			"name":  name,
+			"email": email,
+		}))
 	})
 
 	// 单文件上传测试
 	r.POST("/upload", func(c *gin.Context) {
 		file, err := c.FormFile("file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			facade.Response().Error(c, errcode.ArgsError().WithMsg(err.Error()))
 			return
 		}
 
 		description := c.PostForm("description")
 
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "upload success",
-			"data": gin.H{
+		facade.Response().Success(c, errcode.Success().
+			WithMsg("upload success").
+			WithData(gin.H{
 				"filename":    file.Filename,
 				"size":        file.Size,
 				"description": description,
-			},
-		})
+			}))
 	})
 
 	// 多文件上传测试
 	r.POST("/multi-upload", func(c *gin.Context) {
 		form, err := c.MultipartForm()
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			facade.Response().Error(c, errcode.ArgsError().WithMsg(err.Error()))
 			return
 		}
 
@@ -100,40 +92,33 @@ func setupTestServer() *httptest.Server {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "multi upload success",
-			"data": gin.H{
+		facade.Response().Success(c, errcode.Success().
+			WithMsg("multi upload success").
+			WithData(gin.H{
 				"files":      fileInfos,
 				"file_count": len(fileInfos),
-			},
-		})
+			}))
 	})
 
 	// 带自定义字段名的文件上传
 	r.POST("/upload-custom", func(c *gin.Context) {
 		file, err := c.FormFile("custom_file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			facade.Response().Error(c, errcode.ArgsError().WithMsg(err.Error()))
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "upload success",
-			"data": gin.H{
+		facade.Response().Success(c, errcode.Success().
+			WithMsg("upload success").
+			WithData(gin.H{
 				"filename": file.Filename,
 				"size":     file.Size,
-			},
-		})
+			}))
 	})
 
 	// 错误响应测试
 	r.GET("/error", func(c *gin.Context) {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 500,
-			"msg":  "internal server error",
-		})
+		facade.Response().Error(c, errcode.SystemError().WithMsg("internal server error"))
 	})
 
 	// 延迟响应测试
@@ -143,7 +128,7 @@ func setupTestServer() *httptest.Server {
 			d, _ := time.ParseDuration(delay)
 			time.Sleep(d)
 		}
-		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "ok"})
+		facade.Response().Success(c, errcode.Success().WithMsg("ok"))
 	})
 
 	return httptest.NewServer(r)
@@ -168,6 +153,7 @@ func TestHttpRequest(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, float64(0), result["code"])
 	require.Equal(t, "pong", result["msg"])
+	require.Empty(t, result["data"])
 }
 
 // TestHttpTraceCollected 测试普通HTTP请求记录调试信息
@@ -391,10 +377,6 @@ func TestHttpMethods(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	type MethodResponse struct {
-		Method string `json:"method"`
-	}
-
 	getResp := facade.Http().Get(nil, ts.URL+"/method")
 	require.NoError(t, getResp.ErrMsg)
 	require.Contains(t, string(getResp.Body), http.MethodGet)
@@ -469,6 +451,7 @@ func TestHttpSendAsJsonJson(t *testing.T) {
 	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, "pong", resp.Msg)
+	require.Empty(t, resp.Data)
 }
 
 // TestHttpRequestWithQuery 测试带Query参数的请求
@@ -581,18 +564,15 @@ func TestHttpRequestWithHeaders(t *testing.T) {
 
 	ctx := t.Context()
 
-	// 创建一个可以读取 header 的测试服务器
+	// 创建一个可以读取header的测试服务器
 	r := gin.Default()
 	r.GET("/headers", func(c *gin.Context) {
 		customHeader := c.GetHeader("X-Custom-Header")
 		authHeader := c.GetHeader("Authorization")
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"data": gin.H{
-				"x-custom-header": customHeader,
-				"authorization":   authHeader,
-			},
-		})
+		facade.Response().Success(c, errcode.Success().WithData(gin.H{
+			"x-custom-header": customHeader,
+			"authorization":   authHeader,
+		}))
 	})
 	ts2 := httptest.NewServer(r)
 	defer ts2.Close()
@@ -916,14 +896,12 @@ func TestHttpUploadFileWithTimeout(t *testing.T) {
 		time.Sleep(500 * time.Millisecond)
 		file, err := c.FormFile("file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": err.Error()})
+			facade.Response().Error(c, errcode.ArgsError().WithMsg(err.Error()))
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "upload success",
-			"data": gin.H{"filename": file.Filename},
-		})
+		facade.Response().Success(c, errcode.Success().
+			WithMsg("upload success").
+			WithData(gin.H{"filename": file.Filename}))
 	})
 	ts := httptest.NewServer(r)
 	defer ts.Close()
