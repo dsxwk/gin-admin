@@ -13,6 +13,7 @@ import (
 	"gin/grpc/proto"
 	"gin/pkg"
 	"image/color"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
@@ -166,7 +167,12 @@ func (s *LoginController) Test(c *gin.Context) {
 	containsDesc2 := userEnum.Gender().ContainsDesc("男")
 	length2 := userEnum.Gender().Len()
 
-	httpRes, _ := facade.Http().SendAsJson[map[string]any](ctx, "GET", "http://127.0.0.1:"+pkg.IntToString[int64](facade.Config().App.Port)+"/ping", nil)
+	resp := facade.Http().Get(ctx, "http://127.0.0.1:"+pkg.IntToString[int64](facade.Config().App.Port)+"/ping")
+	httpRes, _ := facade.Http().SendAsJson[map[string]any](
+		ctx,
+		"GET",
+		"http://127.0.0.1:"+pkg.IntToString[int64](facade.Config().App.Port)+"/ping",
+	)
 
 	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})
 	_ = facade.Queue().Producer("kafka_delay_demo").Publish(ctx, consumer.KafkaDelayDemoPayload{Name: "kafka_test222"})
@@ -206,30 +212,31 @@ func (s *LoginController) Test(c *gin.Context) {
 		"containsDesc2":  containsDesc2,
 		"length2":        length2,
 		"grpcResp":       grpcResp,
+		"resp":           resp,
 		"httpRes":        httpRes,
 	}))
 }
 
 // generateCharset 生成字符串
 func (s *LoginController) generateCharset() string {
-	charset := ""
+	var charset strings.Builder
 
 	// 数字0-9
 	for i := '0'; i <= '9'; i++ {
-		charset += string(i)
+		charset.WriteString(string(i))
 	}
 
 	// 小写字母a-z
 	for i := 'a'; i <= 'z'; i++ {
-		charset += string(i)
+		charset.WriteString(string(i))
 	}
 
 	// 大写字母A-Z
 	for i := 'A'; i <= 'Z'; i++ {
-		charset += string(i)
+		charset.WriteString(string(i))
 	}
 
-	return charset
+	return charset.String()
 }
 
 // GetCaptcha 获取验证码
