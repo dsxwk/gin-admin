@@ -8,6 +8,7 @@ import (
 	"gin/app/model"
 	"gin/common/ctxkey"
 	"gin/config"
+	"gin/pkg/container"
 	eslib "gin/pkg/serviceprovider/es"
 	"maps"
 	"net/http"
@@ -229,13 +230,13 @@ func newTestESClient(t *testing.T) *eslib.Client {
 // registerTestESClient 注册测试ES客户端
 func registerTestESClient(t *testing.T, client *eslib.Client) {
 	previous := facade.ES()
-	facade.Register[*eslib.Client]("es", client)
+	container.Default().Set("es", client)
 	t.Cleanup(func() {
 		if previous != nil {
-			facade.Register[*eslib.Client]("es", previous)
+			container.Default().Set("es", previous)
 			return
 		}
-		facade.Unregister("es")
+		container.Default().Delete("es")
 	})
 }
 

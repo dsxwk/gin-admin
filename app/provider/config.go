@@ -1,15 +1,12 @@
 package provider
 
 import (
-	"gin/app/facade"
 	"gin/config"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 )
 
 func init() {
-	config.OnConfigUpdated = func(cfg *config.Config) {
-		facade.Register[*config.Config]("config", cfg)
-	}
 	serviceprovider.Register(&ConfigProvider{})
 }
 
@@ -18,17 +15,21 @@ type ConfigProvider struct{}
 
 // Name 服务提供者名称
 func (p *ConfigProvider) Name() string {
-	return "config"
+	return serviceprovider.ServiceConfig
 }
 
-// Register 注册服务到门面
-func (p *ConfigProvider) Register(app serviceprovider.App) {
-	// 注册到门面
-	facade.Register[*config.Config]("config", config.NewConfig())
+// Register 注册服务到容器
+func (p *ConfigProvider) Register(app *container.Container) {
+	cfg := config.NewConfig()
+	app.Set(serviceprovider.ServiceConfig, cfg)
+
+	config.OnConfigUpdated = func(updated *config.Config) {
+		app.Set(serviceprovider.ServiceConfig, updated)
+	}
 }
 
 // Boot 启动服务(配置服务无需额外启动逻辑)
-func (p *ConfigProvider) Boot(app serviceprovider.App) {}
+func (p *ConfigProvider) Boot(app *container.Container) {}
 
 // Dependencies 依赖服务
 func (p *ConfigProvider) Dependencies() []string {

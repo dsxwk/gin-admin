@@ -1,9 +1,10 @@
 package provider
 
 import (
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/request"
 )
 
 func init() {
@@ -15,20 +16,20 @@ type RequestProvider struct{}
 
 // Name 服务提供者名称
 func (p *RequestProvider) Name() string {
-	return "request"
+	return serviceprovider.ServiceRequest
 }
 
-// Register 注册服务到门面
-func (p *RequestProvider) Register(app serviceprovider.App) {
-	facade.Register("request", facade.Request())
+// Register 注册服务到容器
+func (p *RequestProvider) Register(app *container.Container) {
+	app.Set(serviceprovider.ServiceRequest, request.NewClient())
 }
 
 // Boot 启动服务
-func (p *RequestProvider) Boot(app serviceprovider.App) {
+func (p *RequestProvider) Boot(app *container.Container) {
 	flag.Infof("请求验证服务启动成功")
 }
 
 // Dependencies 依赖服务
 func (p *RequestProvider) Dependencies() []string {
-	return []string{"log"} // 依赖日志服务
+	return []string{serviceprovider.ServiceLog}
 }

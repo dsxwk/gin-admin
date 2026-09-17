@@ -3,16 +3,18 @@ package serviceprovider
 import (
 	"context"
 	"fmt"
+	"gin/pkg/container"
 	"sync"
 )
 
 // Application 应用实现
 type Application struct {
 	mu           sync.RWMutex
+	container    *container.Container
 	providers    []ServiceProvider  // 已注册的服务提供者列表
 	runners      []Runner           // 需要后台运行的任务
 	runnerCancel context.CancelFunc // 后台任务取消函数
-	runnerCtx    context.Context    // 后台任务上下文
+	registered   bool               // 服务是否已注册
 	initialized  bool               // 应用是否已启动
 }
 
@@ -21,75 +23,79 @@ var (
 	appOnce    sync.Once
 )
 
-// NewApplication 创建应用实例
-func NewApplication() *Application {
-	return &Application{
-		providers: make([]ServiceProvider, 0),
-		runners:   make([]Runner, 0),
-	}
-}
-
-// GetApp 获取应用单例(自动初始化)
-func GetApp() *Application {
+// NewApp 获取应用单例(自动初始化)
+func NewApp() *Application {
 	appOnce.Do(func() {
-		defaultApp = NewApplication()
+		defaultApp = &Application{
+			container: container.Default(),
+			providers: make([]ServiceProvider, 0),
+			runners:   make([]Runner, 0),
+		}
 	})
 	return defaultApp
 }
 
-// Register 注册服务提供者
-func (app *Application) Register(providers ...ServiceProvider) {
+// RegisterProviders 仅执行服务注册阶段,不启动后台任务
+func (app *Application) RegisterProviders() error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	app.providers = append(app.providers, providers...)
+
+	return app.registerProviders()
 }
 
-// Boot 启动应用,自动加载所有通过init注册的服务提供者
+// Boot 启动应用
 func (app *Application) Boot() error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
-	// 检查是否已启动,避免重复初始化
 	if app.initialized {
 		return nil
 	}
 
-	// 获取所有自动注册的服务提供者
-	providers := GetProviders()
-	if len(providers) == 0 {
-		return nil
+	if err := app.registerProviders(); err != nil {
+		return err
 	}
 
-	// 按依赖关系排序
-	// 确保依赖的服务先启动,例如:
-	//   DatabaseProvider依赖ConfigProvider→ConfigProvider先启动
-	//   CacheProvider依赖ConfigProvider→ConfigProvider先启动
-	//   RateLimitProvider依赖ConfigProvider和CacheProvider→两者都先启动
-	sortedProviders, err := app.sortProvidersByDependency(providers)
-	if err != nil {
-		return fmt.Errorf("failed to sort providers: %w", err)
-	}
+	for _, provider := range app.providers {
+		provider.Boot(app.container)
 
-	// 调用所有服务的Register方法
-	for _, provider := range sortedProviders {
-		provider.Register(app)
-	}
-
-	// 按顺序调用所有服务的Boot方法
-	for _, provider := range sortedProviders {
-		provider.Boot(app)
-
-		// 收集后台运行任务
 		if withRunners, ok := provider.(ServiceProviderWithRunners); ok {
 			app.runners = append(app.runners, withRunners.Runners()...)
 		}
 	}
 
-	// 启动所有后台任务
 	app.startRunners()
-	// 标记为已初始化,防止重复启动
 	app.initialized = true
 
+	return nil
+}
+
+// registerProviders 执行服务提供者注册阶段
+func (app *Application) registerProviders() error {
+	if app.registered {
+		return nil
+	}
+
+	providers := app.providers
+	if len(providers) == 0 {
+		providers = GetProviders()
+	}
+	if len(providers) == 0 {
+		app.registered = true
+		return nil
+	}
+
+	sortedProviders, err := app.sortProvidersByDependency(providers)
+	if err != nil {
+		return fmt.Errorf("failed to sort providers: %w", err)
+	}
+
+	for _, provider := range sortedProviders {
+		provider.Register(app.container)
+	}
+
+	app.providers = sortedProviders
+	app.registered = true
 	return nil
 }
 
@@ -121,104 +127,98 @@ func (app *Application) startRunners() {
 		return
 	}
 
-	app.runnerCtx, app.runnerCancel = context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	app.runnerCancel = cancel
 
 	for _, runner := range app.runners {
 		go func(r Runner) {
-			_ = r.Run(app.runnerCtx)
+			_ = r.Run(ctx)
 		}(runner)
 	}
 }
 
-// sortProvidersByDependency 根据依赖关系排序服务提供者(拓扑排序)
-// 确定服务提供者的启动顺序,确保依赖的服务先启动,被依赖的服务后启动
-// 参数:
-//   - providers: 待排序的服务提供者列表
-//
-// 返回:
-//   - []ServiceProvider: 排序后的服务提供者列表
-//   - error: 如果检测到循环依赖则返回错误
-//
-// 示例:
-//
-//	假设有3个服务: A(依赖B), B(依赖C), C(无依赖)
-//	排序结果: [C, B, A]
+// sortProvidersByDependency 根据依赖关系对服务提供者进行拓扑排序
+// 返回顺序保证被依赖的Provider先执行
+// 例如A依赖B,则结果一定是B在A之前
+// 算法使用Kahn拓扑排序
+// graph保存被依赖Provider指向依赖它的Provider的边
+// inDegree保存每个Provider尚未处理的依赖数量
 func (app *Application) sortProvidersByDependency(providers []ServiceProvider) ([]ServiceProvider, error) {
 	if len(providers) == 0 {
+		// 没有Provider时直接返回
 		return providers, nil
 	}
 
-	// 构建名称到索引的映射
-	// {"config":0, "log":1, "database":2}
+	// 建立Provider名称到切片下标的映射
+	// 后续通过依赖名称快速定位Provider
+	// 这里默认同名Provider只保留最后一个下标
 	nameToIndex := make(map[string]int)
 	for i, p := range providers {
 		nameToIndex[p.Name()] = i
 	}
 
-	// 构建依赖关系图
-	// graph[i] = []int 表示服 i被哪些服务依赖
-	// inDegree[i] 表示服务i依赖多少个其他服务
-	//
-	// 依赖关系示例:
-	//   服务A依赖服务B和C
-	//   则graph[B]和graph[C]包含A
-	//   inDegree[A] = 2
+	// graph[idx]保存依赖idx的所有Provider下标
+	// 例如A依赖B,则graph[B]包含A的下标
+	// 这样处理完B后可以继续处理A
 	graph := make([][]int, len(providers))
+
+	// inDegree[i]表示Provider i还依赖多少个Provider
+	// inDegree等于0说明Provider i没有未满足的依赖,可以立即执行
 	inDegree := make([]int, len(providers))
 
-	// 遍历所有服务提供者,收集依赖关系
+	// 遍历全部Provider并建立依赖关系
 	for i, provider := range providers {
-		// 检查服务提供者是否实现了依赖接口
+		// 只有实现依赖接口的Provider才需要解析依赖
 		if withDeps, ok := provider.(ServiceProviderWithDependencies); ok {
-			// 遍历该服务的所有依赖
 			for _, depName := range withDeps.Dependencies() {
-				// 查找依赖服务的索引
+				// 找不到依赖名称时忽略该依赖
+				// 这样允许Provider声明可选依赖
 				if idx, exists := nameToIndex[depName]; exists {
-					// idx->i(idx依赖的服务依赖于i)
+					// 增加一条idx指向i的边
 					graph[idx] = append(graph[idx], i)
-					// 依赖的服务数量
+
+					// 记录i存在一个尚未处理的依赖
 					inDegree[i]++
 				}
 			}
 		}
 	}
 
-	// 拓扑排序
-	// 使用Kahn算法进行拓扑排序
-	// 找到所有入度为0的节点(没有依赖的服务)
-	// 移除节点,并减少它们指向的节点的入度
-	// 重复直到所有节点都被处理
+	// result 保存最终排序结果
 	var result []ServiceProvider
+
+	// queue 保存所有当前入度为0的Provider
+	// 可以先用队列收集所有无依赖的Provider
 	queue := make([]int, 0)
 
-	// 找到所有入度为0的服务(没有依赖,可以最先启动)
+	// 将入度为0的Provider加入初始队列
 	for i, degree := range inDegree {
 		if degree == 0 {
 			queue = append(queue, i)
 		}
 	}
 
-	// 循环处理队列
+	// Kahn算法循环处理队列
 	for len(queue) > 0 {
-		// 取出首个元素
+		// 取出队首Provider并加入结果
 		idx := queue[0]
 		queue = queue[1:]
 		result = append(result, providers[idx])
 
-		// 遍历该服务被哪些服务依赖
+		// 当前Provider已经处理完成
+		// 因此依赖它的Provider可以减少一个未处理依赖
 		for _, neighbor := range graph[idx] {
-			// 减少邻居的入度(因为依赖的服务已经被处理了)
 			inDegree[neighbor]--
-			// 如果邻居的入度变为0,说明它的所有依赖都已处理,可以加入队列
+
+			// 入度变为0说明依赖已经全部满足,可以加入队列
 			if inDegree[neighbor] == 0 {
 				queue = append(queue, neighbor)
 			}
 		}
 	}
 
-	// 检测循环依赖
-	// 如果排序后的数量不等于原始数量,说明存在循环依赖
-	// 例如: A依赖B,B依赖A,则两者都无法被处理
+	// 如果结果数量不等于Provider总数,说明存在循环依赖
+	// 循环依赖中的Provider永远不会进入入度为0的队列
 	if len(result) != len(providers) {
 		return nil, fmt.Errorf("circular dependency detected")
 	}

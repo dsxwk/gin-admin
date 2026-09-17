@@ -1,9 +1,7 @@
 package serviceprovider
 
 import (
-	"fmt"
 	"gin/common/flag"
-	"os"
 	"sync"
 )
 
@@ -30,8 +28,8 @@ func Register(provider ServiceProvider) {
 	name := provider.Name()
 	// 防止重复注册
 	if globalRegistry.names[name] {
-		flag.Errorf("Provider %s already registered", name)
-		os.Exit(1)
+		flag.Errorf("provider %s already registered", name)
+		return
 	}
 
 	globalRegistry.providers = append(globalRegistry.providers, provider)
@@ -47,12 +45,4 @@ func GetProviders() []ServiceProvider {
 	providers := make([]ServiceProvider, len(globalRegistry.providers))
 	copy(providers, globalRegistry.providers)
 	return providers
-}
-
-// getProviderName 获取服务提供者名称
-func getProviderName(provider ServiceProvider) string {
-	if named, ok := provider.(interface{ Name() string }); ok {
-		return named.Name()
-	}
-	return fmt.Sprintf("%T", provider)
 }

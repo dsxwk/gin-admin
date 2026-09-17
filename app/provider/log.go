@@ -1,8 +1,9 @@
 package provider
 
 import (
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/config"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/logger"
 )
@@ -16,17 +17,17 @@ type LogProvider struct{}
 
 // Name 服务提供者名称
 func (p *LogProvider) Name() string {
-	return "log"
+	return serviceprovider.ServiceLog
 }
 
-// Register 注册日志服务到门面
-func (p *LogProvider) Register(app serviceprovider.App) {
-	// 注册到门面
-	facade.Register[*logger.Logger]("log", logger.NewLogger(facade.Config()))
+// Register 注册日志服务到容器
+func (p *LogProvider) Register(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	app.Set(serviceprovider.ServiceLog, logger.NewLogger(cfg))
 }
 
 // Boot 启动服务
-func (p *LogProvider) Boot(app serviceprovider.App) {
+func (p *LogProvider) Boot(app *container.Container) {
 	flag.Infof("日志服务启动成功")
 }
 

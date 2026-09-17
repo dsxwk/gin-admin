@@ -11,21 +11,17 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// 初始化门面和默认服务
-	facade.Init()
 	// 创建应用实例
-	app := serviceprovider.GetApp()
-	// 注册应用到门面
-	facade.Register("app", app)
+	app := serviceprovider.NewApp()
 
-	// 打印启动信息
-	facade.Log().Info("Testing Initialized")
 	err := app.Boot()
 	if err != nil {
 		flag.Errorf("初始化应用失败: %v", err)
 		os.Exit(1)
 	}
 
+	// 打印启动信息
+	facade.Log().Info("Testing Initialized")
 	errcode.SetLogger(facade.Log())
 
 	// 运行测试

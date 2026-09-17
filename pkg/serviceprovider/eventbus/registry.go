@@ -23,6 +23,13 @@ type Registry struct {
 	infos map[string]*EventInfo
 }
 
+var defaultRegistry = NewRegistry(NewBus())
+
+// DefaultRegistry 获取默认业务事件注册表
+func DefaultRegistry() *Registry {
+	return defaultRegistry
+}
+
 // NewRegistry 创建业务事件注册表
 func NewRegistry(bus *Bus) *Registry {
 	if bus == nil {

@@ -1,8 +1,9 @@
 package provider
 
 import (
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/config"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/mcp"
 )
@@ -16,12 +17,12 @@ type McpProvider struct{}
 
 // Name 服务提供者名称
 func (p *McpProvider) Name() string {
-	return "mcp"
+	return serviceprovider.ServiceMCP
 }
 
-// Register 注册服务到门面
-func (p *McpProvider) Register(app serviceprovider.App) {
-	cfg := facade.Config()
+// Register 注册服务到容器
+func (p *McpProvider) Register(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
 	if cfg == nil || !cfg.Mcp.Enabled {
 		return
 	}
@@ -31,16 +32,16 @@ func (p *McpProvider) Register(app serviceprovider.App) {
 		Version: cfg.App.CliVersion,
 	}, cfg)
 
-	facade.Register("mcp", handler)
+	app.Set(serviceprovider.ServiceMCP, handler)
 	flag.Infof("MCP服务注册成功,路径: %s", cfg.Mcp.Path)
 }
 
 // Boot 启动服务
-func (p *McpProvider) Boot(app serviceprovider.App) {
+func (p *McpProvider) Boot(app *container.Container) {
 	// 路由在LoadRouters中注册
 }
 
 // Dependencies 依赖配置服务
 func (p *McpProvider) Dependencies() []string {
-	return []string{"config"}
+	return []string{serviceprovider.ServiceConfig}
 }

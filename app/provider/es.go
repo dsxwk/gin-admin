@@ -2,8 +2,9 @@ package provider
 
 import (
 	"context"
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/config"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	esclient "gin/pkg/serviceprovider/es"
 )
@@ -19,12 +20,12 @@ type EsProvider struct {
 
 // Name 服务提供者名称
 func (p *EsProvider) Name() string {
-	return "es"
+	return serviceprovider.ServiceES
 }
 
-// Register 注册服务到门面
-func (p *EsProvider) Register(app serviceprovider.App) {
-	cfg := facade.Config()
+// Register 注册服务到容器
+func (p *EsProvider) Register(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
 	if cfg == nil || !cfg.Es.Enabled {
 		return
 	}
@@ -34,11 +35,11 @@ func (p *EsProvider) Register(app serviceprovider.App) {
 	}
 
 	p.client = esclient.NewClient(cfg.Es)
-	facade.Register[*esclient.Client]("es", p.client)
+	app.Set(serviceprovider.ServiceES, p.client)
 }
 
 // Boot 启动服务
-func (p *EsProvider) Boot(app serviceprovider.App) {
+func (p *EsProvider) Boot(app *container.Container) {
 	if p.client == nil {
 		return
 	}
@@ -51,5 +52,5 @@ func (p *EsProvider) Boot(app serviceprovider.App) {
 
 // Dependencies 依赖服务
 func (p *EsProvider) Dependencies() []string {
-	return []string{"config", "log", "http"}
+	return []string{serviceprovider.ServiceConfig, serviceprovider.ServiceLog, serviceprovider.ServiceHTTP}
 }

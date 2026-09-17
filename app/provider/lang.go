@@ -1,10 +1,12 @@
 package provider
 
 import (
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/config"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/lang"
+	"gin/pkg/serviceprovider/logger"
 )
 
 func init() {
@@ -12,27 +14,30 @@ func init() {
 }
 
 // LangProvider 翻译服务提供者
-type LangProvider struct{}
+type LangProvider struct {
+	service *lang.Service
+}
 
 // Name 服务提供者名称
 func (p *LangProvider) Name() string {
-	return "lang"
+	return serviceprovider.ServiceLang
 }
 
-// Register 注册服务到门面
-func (p *LangProvider) Register(app serviceprovider.App) {
-	// 翻译服务在Boot时加载,这里只做占位
-	facade.Register("lang", facade.Lang())
+// Register 注册服务到容器
+func (p *LangProvider) Register(app *container.Container) {
+	p.service = lang.New()
+	app.Set(serviceprovider.ServiceLang, p.service)
 }
 
 // Boot 启动服务
-func (p *LangProvider) Boot(app serviceprovider.App) {
-	// 加载翻译文件(会从facade.Config()获取配置)
-	lang.LoadLang(facade.Config(), facade.Log())
+func (p *LangProvider) Boot(app *container.Container) {
+	conf := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	log := app.Get[*logger.Logger](serviceprovider.ServiceLog)
+	p.service.Load(conf, log)
 	flag.Infof("翻译服务启动成功")
 }
 
 // Dependencies 依赖服务
 func (p *LangProvider) Dependencies() []string {
-	return []string{"config", "log"} // 依赖配置和日志
+	return []string{serviceprovider.ServiceConfig, serviceprovider.ServiceLog}
 }

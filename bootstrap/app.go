@@ -33,14 +33,8 @@ type App struct {
 
 // Init 初始化应用
 func Init() error {
-	// 初始化门面系统
-	facade.Init()
-	// 创建应用实例
-	app := serviceprovider.GetApp()
-	// 注册应用到门面
-	facade.Register("app", app)
-
 	// 启动应用(加载所有providers)
+	app := serviceprovider.NewApp()
 	return app.Boot()
 }
 
@@ -103,6 +97,20 @@ func (a *App) Run() {
 	a.gracefulShutdown(srv)
 
 	// select {}
+}
+
+// InitCLI 初始化CLI服务,不启动后台任务
+func InitCLI() error {
+	config.NewConfig()
+	flag.SetSilent(true)
+	defer flag.SetSilent(false)
+
+	app := serviceprovider.NewApp()
+	if err := app.RegisterProviders(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // printStartupInfo 打印启动信息
@@ -262,7 +270,7 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 	color.Yellow("服务正在关闭...")
 
 	defer func() {
-		app := serviceprovider.GetApp()
+		app := serviceprovider.NewApp()
 		err := app.Stop()
 		if err != nil {
 			flag.Errorf("关闭应用失败: %s", err.Error())

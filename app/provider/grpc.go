@@ -3,9 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/config"
 	_ "gin/grpc/service"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/grpcclient"
 )
@@ -22,50 +23,50 @@ type GrpcProvider struct {
 
 // Name 服务提供者名称
 func (p *GrpcProvider) Name() string {
-	return "grpc"
+	return serviceprovider.ServiceGRPC
 }
 
-// Register 注册服务到门面
-func (p *GrpcProvider) Register(app serviceprovider.App) {
-	cfg := facade.Config()
-	if cfg == nil || !cfg.Grpc.Enabled {
-		return
-	}
-
-	c, err := grpcclient.NewClient(fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port))
-	if err != nil {
-		flag.Errorf("grpc客户端创建失败: %v", err)
-		return
-	}
-	p.client = c
-	facade.Register[*grpcclient.Client]("grpc", c)
+// Register 注册服务到容器
+func (p *GrpcProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *GrpcProvider) Boot(app serviceprovider.App) {
-	cfg := facade.Config()
+func (p *GrpcProvider) Boot(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
 	if cfg == nil || !cfg.Grpc.Enabled {
 		return
 	}
 
 	grpcclient.SetJwtKey(cfg.Jwt.Key)
+	client, err := grpcclient.NewClient(fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port))
+	if err != nil {
+		flag.Errorf("grpc客户端创建失败: %v", err)
+		return
+	}
+
 	srv, err := grpcclient.NewServer(cfg.Grpc.Host, cfg.Grpc.Port)
 	if err != nil {
+		_ = client.Close()
 		flag.Errorf("grpc服务启动失败: %v", err)
 		return
 	}
 
-	p.server = srv
 	if err = srv.Start(); err != nil {
+		_ = srv.Stop()
+		_ = client.Close()
 		flag.Errorf("grpc服务启动失败: %v", err)
 		return
 	}
+
+	p.client = client
+	p.server = srv
+	app.Set(serviceprovider.ServiceGRPC, client)
 	flag.Infof("grpc服务启动成功: %s", srv.Addr())
 }
 
 // Runners 后台运行任务
 func (p *GrpcProvider) Runners() []serviceprovider.Runner {
-	if p.server == nil {
+	if p.server == nil && p.client == nil {
 		return nil
 	}
 	return []serviceprovider.Runner{
@@ -78,7 +79,7 @@ func (p *GrpcProvider) Runners() []serviceprovider.Runner {
 
 // Dependencies 依赖服务
 func (p *GrpcProvider) Dependencies() []string {
-	return []string{"config", "log", "db"}
+	return []string{serviceprovider.ServiceConfig, serviceprovider.ServiceLog, serviceprovider.ServiceDB}
 }
 
 // grpcShutdownRunner grpc关闭任务
@@ -95,15 +96,18 @@ func (r *grpcShutdownRunner) Run(ctx context.Context) error {
 
 // Stop 停止服务
 func (r *grpcShutdownRunner) Stop() error {
+	var serverErr error
 	if r.server != nil {
-		if err := r.server.Stop(); err != nil {
-			return err
-		}
+		serverErr = r.server.Stop()
 	}
+	var clientErr error
 	if r.client != nil {
-		return r.client.Close()
+		clientErr = r.client.Close()
 	}
-	return nil
+	if serverErr != nil {
+		return serverErr
+	}
+	return clientErr
 }
 
 // Name 任务名称

@@ -4,7 +4,8 @@ import (
 {{- if .HasRunner}}
 	"context"
 {{- end}}
-	"gin/app/facade"
+	"gin/common/flag"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 )
 
@@ -20,16 +21,16 @@ func (p *{{.ProviderName}}Provider) Name() string {
 	return "{{.ProviderVar}}"
 }
 
-// Register 注册服务到门面
-func (p *{{.ProviderName}}Provider) Register(app serviceprovider.App) {
-	// TODO: 注册服务到门面
-	// facade.Register("{{.ProviderVar}}", facade.{{.ProviderName}}Provider)
+// Register 注册服务到容器
+func (p *{{.ProviderName}}Provider) Register(app *container.Container) {
+	// TODO: 注册服务到容器
+	// app.Set("{{.ProviderVar}}", service)
 }
 
 // Boot 启动服务
-func (p *{{.ProviderName}}Provider) Boot(app serviceprovider.App) {
+func (p *{{.ProviderName}}Provider) Boot(app *container.Container) {
 	// TODO: 初始化服务
-	facade.Log().Info("{{.ProviderName}}服务启动成功")
+	flag.Infof("{{.ProviderName}}服务启动成功")
 }
 {{- if .HasRunner}}
 
@@ -60,7 +61,6 @@ func (r *{{.ProviderName}}CleanupRunner) Run(ctx context.Context) error {
 // Stop 停止时清理资源
 func (r *{{.ProviderName}}CleanupRunner) Stop() error {
 	// TODO: 清理资源
-	facade.Log().Info("{{.ProviderVar}}服务已关闭")
 	return nil
 }
 
