@@ -159,11 +159,12 @@ func TestHttpRequest(t *testing.T) {
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
 
 	// 测试GET请求
-	resp, err := facade.Http().Send(ctx, "GET", ts.URL+"/ping", nil)
-	require.NoError(t, err)
+	resp := facade.Http().Send(ctx, "GET", ts.URL+"/ping")
+	require.NoError(t, resp.ErrMsg)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var result map[string]any
-	err = json.Unmarshal(resp, &result)
+	err := json.Unmarshal(resp.Body, &result)
 	require.NoError(t, err)
 	require.Equal(t, float64(0), result["code"])
 	require.Equal(t, "pong", result["msg"])
@@ -182,12 +183,16 @@ func TestHttpTraceCollected(t *testing.T) {
 	})
 
 	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, traceID)
-	_, err := facade.Http().Send(ctx, http.MethodGet, ts.URL+"/ping", nil)
-	require.NoError(t, err)
+	resp := facade.Http().Send(ctx, http.MethodGet, ts.URL+"/ping")
+	require.NoError(t, resp.ErrMsg)
 
 	trace, ok := store.Get(traceID)
 	require.True(t, ok)
-	require.NotEmpty(t, trace.HTTP)
+	require.Len(t, trace.HTTP, 1)
+	require.Equal(t, http.MethodGet, trace.HTTP[0].Method)
+	require.Equal(t, ts.URL+"/ping", trace.HTTP[0].URL)
+	require.Equal(t, http.StatusOK, trace.HTTP[0].Status)
+	require.GreaterOrEqual(t, trace.HTTP[0].Ms, float64(0))
 }
 
 // TestHttpWithoutTrace 测试普通HTTP请求跳过调试信息
@@ -203,8 +208,8 @@ func TestHttpWithoutTrace(t *testing.T) {
 	})
 
 	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, traceID)
-	_, err := facade.Http().Send(h.WithoutTrace(ctx), http.MethodGet, ts.URL+"/ping", nil)
-	require.NoError(t, err)
+	resp := facade.Http().Send(h.WithoutTrace(ctx), http.MethodGet, ts.URL+"/ping")
+	require.NoError(t, resp.ErrMsg)
 
 	trace, ok := store.Get(traceID)
 	require.False(t, ok)
@@ -222,18 +227,18 @@ func TestHttpClientBuilder(t *testing.T) {
 		Data map[string]any `json:"data"`
 	}
 
-	queryResp, err := facade.Http().
+	queryResp, response := facade.Http().
 		WithQuery(map[string]any{"name": "张三", "age": "18"}).
 		SendAsJson[EchoResponse](t.Context(), http.MethodGet, ts.URL+"/echo")
-	require.NoError(t, err)
+	require.NoError(t, response.ErrMsg)
 	require.Equal(t, "张三", queryResp.Data["name"])
 	require.Equal(t, "18", queryResp.Data["age"])
 
-	bodyResp, err := facade.Http().
+	bodyResp, response := facade.Http().
 		WithHeader("Content-Type", "application/json").
 		WithBody(map[string]any{"name": "李四", "email": "lisi@example.com"}).
 		SendAsJson[EchoResponse](t.Context(), http.MethodPost, ts.URL+"/echo")
-	require.NoError(t, err)
+	require.NoError(t, response.ErrMsg)
 	require.Equal(t, "李四", bodyResp.Data["name"])
 	require.Equal(t, "lisi@example.com", bodyResp.Data["email"])
 
@@ -245,10 +250,10 @@ func TestHttpClientBuilder(t *testing.T) {
 		} `json:"data"`
 	}
 
-	formResp, err := facade.Http().
+	formResp, response := facade.Http().
 		WithForm(map[string]any{"name": "王五", "email": "wangwu@example.com"}).
 		SendAsJson[FormResponse](t.Context(), http.MethodPost, ts.URL+"/form")
-	require.NoError(t, err)
+	require.NoError(t, response.ErrMsg)
 	require.Equal(t, "王五", formResp.Data.Name)
 	require.Equal(t, "wangwu@example.com", formResp.Data.Email)
 
@@ -263,15 +268,187 @@ func TestHttpClientBuilder(t *testing.T) {
 	}))
 	defer headerServer.Close()
 
-	headerResp, err := facade.Http().
+	headerResp, response := facade.Http().
 		WithHeaders(map[string]string{
 			"X-Custom-Header": "custom-value",
 			"Authorization":   "Bearer token123",
 		}).
 		SendAsJson[EchoResponse](t.Context(), http.MethodGet, headerServer.URL)
-	require.NoError(t, err)
+	require.NoError(t, response.ErrMsg)
 	require.Equal(t, "custom-value", headerResp.Data["x-custom-header"])
 	require.Equal(t, "Bearer token123", headerResp.Data["authorization"])
+}
+
+// TestHttpClientBuilderIsolation 测试链式配置不会污染基础客户端
+func TestHttpClientBuilderIsolation(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
+				"base":   r.Header.Get("X-Base"),
+				"first":  r.Header.Get("X-First"),
+				"second": r.Header.Get("X-Second"),
+			},
+		})
+	}))
+	defer ts.Close()
+
+	type HeaderResponse struct {
+		Data map[string]any `json:"data"`
+	}
+
+	base := facade.Http().WithHeader("X-Base", "base")
+
+	first, response := base.
+		WithHeader("X-First", "first").
+		SendAsJson[HeaderResponse](t.Context(), http.MethodGet, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "base", first.Data["base"])
+	require.Equal(t, "first", first.Data["first"])
+	require.Empty(t, first.Data["second"])
+
+	second, response := base.
+		WithHeader("X-Second", "second").
+		SendAsJson[HeaderResponse](t.Context(), http.MethodGet, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "base", second.Data["base"])
+	require.Empty(t, second.Data["first"])
+	require.Equal(t, "second", second.Data["second"])
+
+	plain, response := base.SendAsJson[HeaderResponse](t.Context(), http.MethodGet, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "base", plain.Data["base"])
+	require.Empty(t, plain.Data["first"])
+	require.Empty(t, plain.Data["second"])
+}
+
+// TestHttpBuildURLMergesExistingQuery 测试query参数合并已有参数
+func TestHttpBuildURLMergesExistingQuery(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
+				"a":     r.URL.Query().Get("a"),
+				"keep":  r.URL.Query().Get("keep"),
+				"added": r.URL.Query().Get("added"),
+			},
+		})
+	}))
+	defer ts.Close()
+
+	type QueryResponse struct {
+		Data map[string]any `json:"data"`
+	}
+
+	resp, response := facade.Http().
+		WithQuery(map[string]any{"a": "new", "added": "yes"}).
+		SendAsJson[QueryResponse](t.Context(), http.MethodGet, ts.URL+"/query?keep=yes&a=old")
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "new", resp.Data["a"])
+	require.Equal(t, "yes", resp.Data["keep"])
+	require.Equal(t, "yes", resp.Data["added"])
+}
+
+// TestHttpSendAsJsonInvalidJson 测试非JSON响应解析失败
+func TestHttpSendAsJsonInvalidJson(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = w.Write([]byte("not-json"))
+	}))
+	defer ts.Close()
+
+	resp, response := facade.Http().
+		SendAsJson[map[string]any](t.Context(), http.MethodGet, ts.URL)
+	require.Error(t, response.ErrMsg)
+	require.Contains(t, response.ErrMsg.Error(), "json解析失败")
+	require.Nil(t, resp)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+}
+
+// TestHttpSendAsJsonEmptyBody 测试空响应体解析
+func TestHttpSendAsJsonEmptyBody(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer ts.Close()
+
+	type EmptyResponse struct {
+		Value string `json:"value"`
+	}
+
+	resp, response := facade.Http().
+		SendAsJson[EmptyResponse](t.Context(), http.MethodGet, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, http.StatusNoContent, response.StatusCode)
+	require.NotNil(t, resp)
+	require.Empty(t, resp.Value)
+}
+
+// TestHttpMethods 测试常用请求方法及nil上下文
+func TestHttpMethods(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"method": r.Method,
+		})
+	}))
+	defer ts.Close()
+
+	type MethodResponse struct {
+		Method string `json:"method"`
+	}
+
+	getResp := facade.Http().Get(nil, ts.URL+"/method")
+	require.NoError(t, getResp.ErrMsg)
+	require.Contains(t, string(getResp.Body), http.MethodGet)
+
+	postResp := facade.Http().Post(t.Context(), ts.URL+"/method")
+	require.NoError(t, postResp.ErrMsg)
+	require.Contains(t, string(postResp.Body), http.MethodPost)
+
+	putResp := facade.Http().Put(t.Context(), ts.URL+"/method")
+	require.NoError(t, putResp.ErrMsg)
+	require.Contains(t, string(putResp.Body), http.MethodPut)
+
+	deleteResp := facade.Http().Delete(t.Context(), ts.URL+"/method")
+	require.NoError(t, deleteResp.ErrMsg)
+	require.Contains(t, string(deleteResp.Body), http.MethodDelete)
+}
+
+// TestHttpContentType 测试请求体类型自动识别和自定义覆盖
+func TestHttpContentType(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"content_type": r.Header.Get("Content-Type"),
+		})
+	}))
+	defer ts.Close()
+
+	type ContentTypeResponse struct {
+		ContentType string `json:"content_type"`
+	}
+
+	jsonResp, response := facade.Http().
+		WithBody(map[string]any{"name": "test"}).
+		SendAsJson[ContentTypeResponse](t.Context(), http.MethodPost, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "application/json", jsonResp.ContentType)
+
+	formResp, response := facade.Http().
+		WithForm(map[string]any{"name": "test"}).
+		SendAsJson[ContentTypeResponse](t.Context(), http.MethodPost, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "application/x-www-form-urlencoded", formResp.ContentType)
+
+	textResp, response := facade.Http().
+		WithBody("plain text").
+		SendAsJson[ContentTypeResponse](t.Context(), http.MethodPost, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "text/plain", textResp.ContentType)
+
+	customResp, response := facade.Http().
+		WithHeader("Content-Type", "application/custom").
+		WithBody(map[string]any{"name": "test"}).
+		SendAsJson[ContentTypeResponse](t.Context(), http.MethodPost, ts.URL)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, "application/custom", customResp.ContentType)
 }
 
 // TestHttpSendAsJsonJson 测试JSON响应解析
@@ -284,13 +461,12 @@ func TestHttpSendAsJsonJson(t *testing.T) {
 	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
 
 	// 测试GET请求并解析JSON
-	resp, err := facade.Http().SendAsJson[errcode.SuccessResponse](
+	resp, response := facade.Http().SendAsJson[errcode.SuccessResponse](
 		ctx,
 		"GET",
 		ts.URL+"/ping",
-		nil,
 	)
-	require.NoError(t, err)
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, "pong", resp.Msg)
 }
@@ -302,26 +478,16 @@ func TestHttpRequestWithQuery(t *testing.T) {
 
 	ctx := t.Context()
 
-	opt := &h.Option{
-		Query: map[string]any{
-			"name": "张三",
-			"age":  "18",
-		},
-	}
-
 	type EchoResponse struct {
 		Code int            `json:"code"`
 		Msg  string         `json:"msg"`
 		Data map[string]any `json:"data"`
 	}
 
-	resp, err := facade.Http().SendAsJson[EchoResponse](
-		ctx,
-		"GET",
-		ts.URL+"/echo",
-		opt,
-	)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithQuery(map[string]any{"name": "张三", "age": "18"}).
+		SendAsJson[EchoResponse](ctx, "GET", ts.URL+"/echo")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "张三", resp.Data["name"])
@@ -335,15 +501,6 @@ func TestHttpForm(t *testing.T) {
 
 	ctx := t.Context()
 
-	// 使用普通表单接口
-	opt := &h.Option{
-		Form: map[string]any{
-			"name":  "张三",
-			"email": "zhangsan@example.com",
-		},
-		Timeout: 30 * time.Second,
-	}
-
 	type FormResponse struct {
 		Code int `json:"code"`
 		Data struct {
@@ -353,8 +510,11 @@ func TestHttpForm(t *testing.T) {
 		Msg string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[FormResponse](ctx, "POST", ts.URL+"/form", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithForm(map[string]any{"name": "张三", "email": "zhangsan@example.com"}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[FormResponse](ctx, "POST", ts.URL+"/form")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "张三", resp.Data.Name)
@@ -374,26 +534,17 @@ func TestHttpRequestWithBody(t *testing.T) {
 	}
 	body, _ := json.Marshal(bodyData)
 
-	opt := &h.Option{
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
-		Body: body,
-	}
-
 	type EchoResponse struct {
 		Code int            `json:"code"`
 		Msg  string         `json:"msg"`
 		Data map[string]any `json:"data"`
 	}
 
-	resp, err := facade.Http().SendAsJson[EchoResponse](
-		ctx,
-		"POST",
-		ts.URL+"/echo",
-		opt,
-	)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithHeader("Content-Type", "application/json").
+		WithBody(body).
+		SendAsJson[EchoResponse](ctx, "POST", ts.URL+"/echo")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "李四", resp.Data["name"])
@@ -407,26 +558,16 @@ func TestHttpRequestWithForm(t *testing.T) {
 
 	ctx := t.Context()
 
-	opt := &h.Option{
-		Form: map[string]any{
-			"name":  "王五",
-			"email": "wangwu@example.com",
-		},
-	}
-
 	type FormResponse struct {
 		Code int            `json:"code"`
 		Msg  string         `json:"msg"`
 		Data map[string]any `json:"data"`
 	}
 
-	resp, err := facade.Http().SendAsJson[FormResponse](
-		ctx,
-		"POST",
-		ts.URL+"/form",
-		opt,
-	)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithForm(map[string]any{"name": "王五", "email": "wangwu@example.com"}).
+		SendAsJson[FormResponse](ctx, "POST", ts.URL+"/form")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "王五", resp.Data["name"])
@@ -439,13 +580,6 @@ func TestHttpRequestWithHeaders(t *testing.T) {
 	defer ts.Close()
 
 	ctx := t.Context()
-
-	opt := &h.Option{
-		Headers: map[string]string{
-			"X-Custom-Header": "custom-value",
-			"Authorization":   "Bearer token123",
-		},
-	}
 
 	// 创建一个可以读取 header 的测试服务器
 	r := gin.Default()
@@ -468,13 +602,13 @@ func TestHttpRequestWithHeaders(t *testing.T) {
 		Data map[string]any `json:"data"`
 	}
 
-	resp, err := facade.Http().SendAsJson[HeaderResponse](
-		ctx,
-		"GET",
-		ts2.URL+"/headers",
-		opt,
-	)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithHeaders(map[string]string{
+			"X-Custom-Header": "custom-value",
+			"Authorization":   "Bearer token123",
+		}).
+		SendAsJson[HeaderResponse](ctx, "GET", ts2.URL+"/headers")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, "custom-value", resp.Data["x-custom-header"])
 	require.Equal(t, "Bearer token123", resp.Data["authorization"])
@@ -488,13 +622,11 @@ func TestHttpRequestWithTimeout(t *testing.T) {
 	ctx := t.Context()
 
 	// 设置100ms超时,但服务器会延迟200ms
-	opt := &h.Option{
-		Timeout: 100 * time.Millisecond,
-	}
-
-	_, err := facade.Http().Send(ctx, "GET", ts.URL+"/delay?delay=200ms", opt)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "请求失败")
+	response := facade.Http().
+		WithTimeout(100*time.Millisecond).
+		Send(ctx, "GET", ts.URL+"/delay?delay=200ms")
+	require.Error(t, response.ErrMsg)
+	require.Contains(t, response.ErrMsg.Error(), "请求失败")
 }
 
 // TestHttpRequestPostForm 测试POST表单请求(使用Request方法)
@@ -504,18 +636,13 @@ func TestHttpRequestPostForm(t *testing.T) {
 
 	ctx := t.Context()
 
-	opt := &h.Option{
-		Form: map[string]any{
-			"name":  "赵六",
-			"email": "zhaoliu@example.com",
-		},
-	}
-
-	resp, err := facade.Http().Send(ctx, "POST", ts.URL+"/form", opt)
-	require.NoError(t, err)
+	resp := facade.Http().
+		WithForm(map[string]any{"name": "赵六", "email": "zhaoliu@example.com"}).
+		Send(ctx, "POST", ts.URL+"/form")
+	require.NoError(t, resp.ErrMsg)
 
 	var result map[string]any
-	err = json.Unmarshal(resp, &result)
+	err := json.Unmarshal(resp.Body, &result)
 	require.NoError(t, err)
 
 	data := result["data"].(map[string]any)
@@ -523,36 +650,20 @@ func TestHttpRequestPostForm(t *testing.T) {
 	require.Equal(t, "zhaoliu@example.com", data["email"])
 }
 
-// TestHttpRequestErrorResponse 测试错误响应
-func TestHttpRequestErrorResponse(t *testing.T) {
+// TestHttpSendKeepsErrorStatus 测试保留错误状态码和响应体
+func TestHttpSendKeepsErrorStatus(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
 
 	ctx := t.Context()
 
-	_, err := facade.Http().Send(ctx, "GET", ts.URL+"/error", nil)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "状态码: 500")
-}
-
-// TestHttpSendResponseKeepsErrorStatus 测试保留错误状态码和响应体
-func TestHttpSendResponseKeepsErrorStatus(t *testing.T) {
-	ts := setupTestServer()
-	defer ts.Close()
-
-	response, err := facade.Http().SendResponse(
-		t.Context(),
-		http.MethodGet,
-		ts.URL+"/error",
-		nil,
-	)
-	require.NoError(t, err)
-	require.NotNil(t, response)
+	response := facade.Http().Send(ctx, "GET", ts.URL+"/error")
+	require.NoError(t, response.ErrMsg)
 	require.Equal(t, http.StatusInternalServerError, response.StatusCode)
 	require.Contains(t, string(response.Body), "internal server error")
 }
 
-// TestHttpSendToJsonErrorResponse 测试JSON解析错误响应
+// TestHttpSendToJsonErrorResponse 测试错误状态码JSON响应解析
 func TestHttpSendToJsonErrorResponse(t *testing.T) {
 	ts := setupTestServer()
 	defer ts.Close()
@@ -564,22 +675,24 @@ func TestHttpSendToJsonErrorResponse(t *testing.T) {
 		Msg  string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[ErrorResponse](
+	resp, response := facade.Http().SendAsJson[ErrorResponse](
 		ctx,
 		"GET",
 		ts.URL+"/error",
-		nil,
 	)
-	require.Error(t, err)
-	require.Nil(t, resp)
+	require.NoError(t, response.ErrMsg)
+	require.Equal(t, http.StatusInternalServerError, response.StatusCode)
+	require.NotNil(t, resp)
+	require.Equal(t, 500, resp.Code)
+	require.Equal(t, "internal server error", resp.Msg)
 }
 
 // TestHttpRequestInvalidURL 测试无效URL
 func TestHttpRequestInvalidURL(t *testing.T) {
 	ctx := t.Context()
 
-	_, err := facade.Http().Send(ctx, "GET", "http://invalid.url.that.does.not.exist", nil)
-	require.Error(t, err)
+	response := facade.Http().Send(ctx, "GET", "http://invalid.url.that.does.not.exist")
+	require.Error(t, response.ErrMsg)
 }
 
 // 创建测试文件
@@ -606,19 +719,6 @@ func TestHttpUploadFile(t *testing.T) {
 	testFilePath := createTestFile(t, testContent)
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
-			"file": {
-				FilePath:  testFilePath,
-				FieldName: "file",
-			},
-		},
-		Form: map[string]any{
-			"description": "测试文件上传",
-		},
-		Timeout: 30 * time.Second,
-	}
-
 	type UploadResponse struct {
 		Code int `json:"code"`
 		Data struct {
@@ -629,8 +729,17 @@ func TestHttpUploadFile(t *testing.T) {
 		Msg string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithFile("file", h.File{
+			FilePath:  testFilePath,
+			FieldName: "file",
+		}).
+		WithForm(map[string]any{
+			"description": "测试文件上传",
+		}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "upload success", resp.Msg)
@@ -649,20 +758,6 @@ func TestHttpUploadFileWithData(t *testing.T) {
 
 	fileData := []byte("This is file content from byte data")
 
-	opt := &h.Option{
-		Files: map[string]h.File{
-			"file": {
-				FileData:  fileData,
-				FileName:  "test.txt",
-				FieldName: "file",
-			},
-		},
-		Form: map[string]any{
-			"description": "使用字节数据上传",
-		},
-		Timeout: 30 * time.Second,
-	}
-
 	type UploadResponse struct {
 		Code int `json:"code"`
 		Data struct {
@@ -673,8 +768,20 @@ func TestHttpUploadFileWithData(t *testing.T) {
 		Msg string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithFiles(map[string]h.File{
+			"file": {
+				FileData:  fileData,
+				FileName:  "test.txt",
+				FieldName: "file",
+			},
+		}).
+		WithForm(map[string]any{
+			"description": "使用字节数据上传",
+		}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "test.txt", resp.Data.Filename)
@@ -700,8 +807,17 @@ func TestHttpUploadMultipleFiles(t *testing.T) {
 
 	file3Data := []byte("Content of file 3")
 
-	opt := &h.Option{
-		Files: map[string]h.File{
+	type MultiUploadResponse struct {
+		Code int `json:"code"`
+		Data struct {
+			Files     []gin.H `json:"files"`
+			FileCount int     `json:"file_count"`
+		} `json:"data"`
+		Msg string `json:"msg"`
+	}
+
+	resp, response := facade.Http().
+		WithFiles(map[string]h.File{
 			"file1": {
 				FilePath:  file1Path,
 				FieldName: "files",
@@ -715,21 +831,10 @@ func TestHttpUploadMultipleFiles(t *testing.T) {
 				FileName:  "file3.txt",
 				FieldName: "files",
 			},
-		},
-		Timeout: 30 * time.Second,
-	}
-
-	type MultiUploadResponse struct {
-		Code int `json:"code"`
-		Data struct {
-			Files     []gin.H `json:"files"`
-			FileCount int     `json:"file_count"`
-		} `json:"data"`
-		Msg string `json:"msg"`
-	}
-
-	resp, err := facade.Http().SendAsJson[MultiUploadResponse](ctx, "POST", ts.URL+"/multi-upload", opt)
-	require.NoError(t, err)
+		}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[MultiUploadResponse](ctx, "POST", ts.URL+"/multi-upload")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "multi upload success", resp.Msg)
@@ -747,16 +852,6 @@ func TestHttpUploadFileWithCustomFieldName(t *testing.T) {
 	testFilePath := createTestFile(t, testContent)
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
-			"myfile": {
-				FilePath:  testFilePath,
-				FieldName: "custom_file", // 自定义字段名
-			},
-		},
-		Timeout: 30 * time.Second,
-	}
-
 	type UploadResponse struct {
 		Code int `json:"code"`
 		Data struct {
@@ -766,8 +861,16 @@ func TestHttpUploadFileWithCustomFieldName(t *testing.T) {
 		Msg string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload-custom", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithFiles(map[string]h.File{
+			"myfile": {
+				FilePath:  testFilePath,
+				FieldName: "custom_file", // 自定义字段名
+			},
+		}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload-custom")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "upload success", resp.Msg)
@@ -784,24 +887,22 @@ func TestHttpUploadFileWithRequestMethod(t *testing.T) {
 	testFilePath := createTestFile(t, testContent)
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
+	resp := facade.Http().
+		WithFiles(map[string]h.File{
 			"file": {
 				FilePath:  testFilePath,
 				FieldName: "file",
 			},
-		},
-		Form: map[string]any{
+		}).
+		WithForm(map[string]any{
 			"description": "使用Request方法上传",
-		},
-		Timeout: 30 * time.Second,
-	}
-
-	resp, err := facade.Http().Send(ctx, "POST", ts.URL+"/upload", opt)
-	require.NoError(t, err)
+		}).
+		WithTimeout(30*time.Second).
+		Send(ctx, "POST", ts.URL+"/upload")
+	require.NoError(t, resp.ErrMsg)
 
 	var result map[string]any
-	err = json.Unmarshal(resp, &result)
+	err := json.Unmarshal(resp.Body, &result)
 	require.NoError(t, err)
 	require.Equal(t, float64(0), result["code"])
 	require.Equal(t, "upload success", result["msg"])
@@ -833,19 +934,17 @@ func TestHttpUploadFileWithTimeout(t *testing.T) {
 	testFilePath := createTestFile(t, testContent)
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
+	response := facade.Http().
+		WithFiles(map[string]h.File{
 			"file": {
 				FilePath:  testFilePath,
 				FieldName: "file",
 			},
-		},
-		Timeout: 100 * time.Millisecond, // 100ms超时,但服务器需要500ms
-	}
-
-	_, err := facade.Http().Send(ctx, "POST", ts.URL+"/slow-upload", opt)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "请求失败")
+		}).
+		WithTimeout(100*time.Millisecond). // 100ms超时,但服务器需要500ms
+		Send(ctx, "POST", ts.URL+"/slow-upload")
+	require.Error(t, response.ErrMsg)
+	require.Contains(t, response.ErrMsg.Error(), "请求失败")
 }
 
 // TestHttpUploadFileLargeFile 测试大文件上传(模拟)
@@ -864,19 +963,6 @@ func TestHttpUploadFileLargeFile(t *testing.T) {
 	testFilePath := createTestFile(t, string(largeContent))
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
-			"file": {
-				FilePath:  testFilePath,
-				FieldName: "file",
-			},
-		},
-		Form: map[string]any{
-			"description": "大文件上传测试",
-		},
-		Timeout: 60 * time.Second, // 大文件需要更长的超时时间
-	}
-
 	type UploadResponse struct {
 		Code int `json:"code"`
 		Data struct {
@@ -887,8 +973,19 @@ func TestHttpUploadFileLargeFile(t *testing.T) {
 		Msg string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithFiles(map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		}).
+		WithForm(map[string]any{
+			"description": "大文件上传测试",
+		}).
+		WithTimeout(60 * time.Second). // 大文件需要更长的超时时间
+		SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, int64(len(largeContent)), resp.Data.Size)
@@ -907,23 +1004,21 @@ func TestHttpUploadFileWithContext(t *testing.T) {
 	testFilePath := createTestFile(t, testContent)
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
-			"file": {
-				FilePath:  testFilePath,
-				FieldName: "file",
-			},
-		},
-		Timeout: 30 * time.Second,
-	}
-
 	type UploadResponse struct {
 		Code int    `json:"code"`
 		Msg  string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithFiles(map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 }
@@ -939,21 +1034,6 @@ func TestHttpUploadFileAndFormData(t *testing.T) {
 	testFilePath := createTestFile(t, testContent)
 	defer os.Remove(testFilePath)
 
-	opt := &h.Option{
-		Files: map[string]h.File{
-			"file": {
-				FilePath:  testFilePath,
-				FieldName: "file",
-			},
-		},
-		Form: map[string]any{
-			"description": "文件描述",
-			"user_id":     "12345",
-			"category":    "test",
-		},
-		Timeout: 30 * time.Second,
-	}
-
 	type UploadResponse struct {
 		Code int `json:"code"`
 		Data struct {
@@ -964,8 +1044,21 @@ func TestHttpUploadFileAndFormData(t *testing.T) {
 		Msg string `json:"msg"`
 	}
 
-	resp, err := facade.Http().SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload", opt)
-	require.NoError(t, err)
+	resp, response := facade.Http().
+		WithFiles(map[string]h.File{
+			"file": {
+				FilePath:  testFilePath,
+				FieldName: "file",
+			},
+		}).
+		WithForm(map[string]any{
+			"description": "文件描述",
+			"user_id":     "12345",
+			"category":    "test",
+		}).
+		WithTimeout(30 * time.Second).
+		SendAsJson[UploadResponse](ctx, "POST", ts.URL+"/upload")
+	require.NoError(t, response.ErrMsg)
 	require.NotNil(t, resp)
 	require.Equal(t, 0, resp.Code)
 	require.Equal(t, "文件描述", resp.Data.Description)

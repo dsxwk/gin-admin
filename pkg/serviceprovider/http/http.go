@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/goccy/go-json"
@@ -22,7 +23,10 @@ import (
 
 const defaultTimeout = 5 * time.Second
 
-var defaultClient *http.Client
+var (
+	defaultClient     *http.Client
+	defaultClientOnce sync.Once
+)
 
 type traceSkipKey struct{}
 
@@ -43,44 +47,42 @@ func skipTrace(ctx context.Context) bool {
 	return skip
 }
 
-// InitClient 初始化全局HTTP客户端
-func InitClient() {
-	if defaultClient == nil {
-		defaultClient = &http.Client{
-			Transport: &TracingTransport{
-				Transport: &http.Transport{
-					MaxConnsPerHost: 100,
-				},
-			},
-		}
-	}
-}
-
 // GetClient 获取全局HTTP客户端
 func GetClient() *http.Client {
-	if defaultClient == nil {
-		InitClient()
-	}
-	return defaultClient
-}
+	defaultClientOnce.Do(func() {
+		transport, ok := http.DefaultTransport.(*http.Transport)
+		if ok {
+			transport = transport.Clone()
+		} else {
+			transport = &http.Transport{}
+		}
+		transport.MaxConnsPerHost = 100
+		transport.MaxIdleConns = 100
+		transport.MaxIdleConnsPerHost = 100
+		transport.IdleConnTimeout = 90 * time.Second
 
-// Client HTTP客户端
-type Client struct {
-	timeout time.Duration
-	option  Option
+		defaultClient = &http.Client{
+			Transport: &TracingTransport{
+				Transport: transport,
+			},
+		}
+	})
+	return defaultClient
 }
 
 // NewClient 创建HTTP客户端
 func NewClient() *Client {
 	return &Client{
-		timeout: defaultTimeout,
+		option: Option{
+			Timeout: defaultTimeout,
+		},
 	}
 }
 
 // WithTimeout 自定义超时的HTTP客户端
 func (c *Client) WithTimeout(timeout time.Duration) *Client {
 	client := c.clone()
-	client.timeout = timeout
+	client.option.Timeout = timeout
 	return client
 }
 
@@ -170,96 +172,82 @@ type Option struct {
 	Timeout time.Duration     // 超时时间
 }
 
+type Client struct {
+	option Option // 请求配置
+}
+
 // Response HTTP响应
 type Response struct {
 	StatusCode int    // 状态码
 	Body       []byte // 响应体
-}
-
-// SendResponse 发送HTTP请求并返回状态码和响应体
-func (c *Client) SendResponse(ctx context.Context, method, uri string, opt ...*Option) (*Response, error) {
-	return c.send(ctx, method, uri, opt...)
-}
-
-// Send 发送HTTP请求
-func (c *Client) Send(ctx context.Context, method, uri string, opt ...*Option) ([]byte, error) {
-	response, err := c.send(ctx, method, uri, opt...)
-	if err != nil {
-		return nil, err
-	}
-	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("请求失败, 状态码: %d, 响应: %s", response.StatusCode, response.Body)
-	}
-	return response.Body, nil
+	ErrMsg     error  // 错误信息
 }
 
 // Get 发送GET请求
-func (c *Client) Get(ctx context.Context, uri string, opt ...*Option) ([]byte, error) {
-	return c.Send(ctx, "GET", uri, opt...)
+func (c *Client) Get(ctx context.Context, uri string) Response {
+	return c.Send(ctx, "GET", uri)
 }
 
 // Post 发送POST请求
-func (c *Client) Post(ctx context.Context, uri string, opt ...*Option) ([]byte, error) {
-	return c.Send(ctx, "POST", uri, opt...)
+func (c *Client) Post(ctx context.Context, uri string) Response {
+	return c.Send(ctx, "POST", uri)
 }
 
 // Put 发送PUT请求
-func (c *Client) Put(ctx context.Context, uri string, opt ...*Option) ([]byte, error) {
-	return c.Send(ctx, "PUT", uri, opt...)
+func (c *Client) Put(ctx context.Context, uri string) Response {
+	return c.Send(ctx, "PUT", uri)
 }
 
 // Delete 发送DELETE请求
-func (c *Client) Delete(ctx context.Context, uri string, opt ...*Option) ([]byte, error) {
-	return c.Send(ctx, "DELETE", uri, opt...)
-}
-
-// asJson 将响应体解析为T类型
-func (c *Client) asJson[T any](data []byte) (*T, error) {
-	var result T
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, data)
-	}
-	return &result, nil
+func (c *Client) Delete(ctx context.Context, uri string) Response {
+	return c.Send(ctx, "DELETE", uri)
 }
 
 // SendAsJson 发送请求并解析为T类型
-func (c *Client) SendAsJson[T any](ctx context.Context, method, uri string, opt ...*Option) (*T, error) {
-	data, err := c.Send(ctx, method, uri, opt...)
-	if err != nil {
-		return nil, err
+func (c *Client) SendAsJson[T any](ctx context.Context, method, uri string) (*T, Response) {
+	response := c.Send(ctx, method, uri)
+	if response.ErrMsg != nil {
+		return nil, response
 	}
-	return c.asJson[T](data)
+
+	var result T
+	if len(response.Body) == 0 {
+		return &result, response
+	}
+	if err := json.Unmarshal(response.Body, &result); err != nil {
+		response.ErrMsg = fmt.Errorf("json解析失败: %w\n响应内容:\n%s", err, response.Body)
+		return nil, response
+	}
+	return &result, response
 }
 
-// send 发送请求
-func (c *Client) send(ctx context.Context, method, uri string, options ...*Option) (*Response, error) {
-	opt := c.mergeOption(options...)
-
-	requestTimeout := opt.Timeout
-	if requestTimeout == 0 {
-		requestTimeout = c.timeout
+// Send 发送HTTP请求
+func (c *Client) Send(ctx context.Context, method, uri string) Response {
+	requestTimeout := c.option.Timeout
+	if requestTimeout <= 0 {
+		requestTimeout = defaultTimeout
 	}
 
 	method = strings.ToUpper(method)
-	uri = c.buildUrl(uri, opt.Query)
+	uri = c.buildURL(uri)
 
 	// 判断是否有文件上传
-	if opt.Files != nil && len(opt.Files) > 0 {
-		return c.doFileUpload(ctx, uri, opt, requestTimeout)
+	if len(c.option.Files) > 0 {
+		return c.doFileUpload(ctx, uri, requestTimeout)
 	}
 
 	// 构建请求体
 	var bodyReader io.Reader
 	contentType := ""
-	if opt.Form != nil && len(opt.Form) > 0 {
+	if len(c.option.Form) > 0 {
 		values := url.Values{}
-		for k, v := range opt.Form {
+		for k, v := range c.option.Form {
 			values.Set(k, fmt.Sprintf("%v", v))
 		}
 		bodyReader = strings.NewReader(values.Encode())
 		contentType = "application/x-www-form-urlencoded"
-	} else if opt.Body != nil {
-		switch v := opt.Body.(type) {
+	} else if c.option.Body != nil {
+		switch v := c.option.Body.(type) {
 		case []byte:
 			bodyReader = bytes.NewReader(v)
 			contentType = "application/octet-stream"
@@ -272,10 +260,13 @@ func (c *Client) send(ctx context.Context, method, uri string, options ...*Optio
 		case *strings.Reader:
 			bodyReader = v
 			contentType = "text/plain"
+		case io.Reader:
+			bodyReader = v
+			contentType = "application/octet-stream"
 		default:
 			jsonBytes, err := json.Marshal(v)
 			if err != nil {
-				return nil, fmt.Errorf("JSON序列化失败: %w", err)
+				return Response{ErrMsg: fmt.Errorf("JSON序列化失败: %w", err)}
 			}
 			bodyReader = bytes.NewReader(jsonBytes)
 			contentType = "application/json"
@@ -291,41 +282,36 @@ func (c *Client) send(ctx context.Context, method, uri string, options ...*Optio
 
 	req, err := http.NewRequestWithContext(ctx, method, uri, bodyReader)
 	if err != nil {
-		return nil, fmt.Errorf("创建请求失败: %w", err)
-	}
-
-	// 设置默认Content-Type
-	if opt.Headers == nil {
-		opt.Headers = make(map[string]string)
-	}
-	if contentType != "" && opt.Headers["Content-Type"] == "" {
-		opt.Headers["Content-Type"] = contentType
-	}
-	if contentType == "" && opt.Headers["Content-Type"] == "" {
-		opt.Headers["Content-Type"] = "application/json"
+		return Response{ErrMsg: fmt.Errorf("创建请求失败: %w", err)}
 	}
 
 	// 设置自定义headers
-	for k, v := range opt.Headers {
+	for k, v := range c.option.Headers {
 		req.Header.Set(k, v)
+	}
+	if contentType != "" && req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", contentType)
 	}
 
 	// 发送请求
 	resp, err := GetClient().Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("请求失败: %w", err)
+		return Response{ErrMsg: fmt.Errorf("请求失败: %w", err)}
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
+		return Response{
+			StatusCode: resp.StatusCode,
+			ErrMsg:     fmt.Errorf("读取响应失败: %w", err),
+		}
 	}
 
-	return &Response{
+	return Response{
 		StatusCode: resp.StatusCode,
 		Body:       respBody,
-	}, nil
+	}
 }
 
 // clone 复制HTTP客户端
@@ -335,7 +321,6 @@ func (c *Client) clone() *Client {
 	}
 
 	return &Client{
-		timeout: c.timeout,
 		option: Option{
 			Headers: maps.Clone(c.option.Headers),
 			Query:   maps.Clone(c.option.Query),
@@ -347,68 +332,19 @@ func (c *Client) clone() *Client {
 	}
 }
 
-// mergeOption 合并客户端配置和单次请求配置
-func (c *Client) mergeOption(options ...*Option) *Option {
-	result := c.clone().option
-	for _, opt := range options {
-		if opt == nil {
-			continue
-		}
-
-		if opt.Headers != nil {
-			if result.Headers == nil {
-				result.Headers = make(map[string]string, len(opt.Headers))
-			}
-			maps.Copy(result.Headers, opt.Headers)
-		}
-
-		if opt.Query != nil {
-			if result.Query == nil {
-				result.Query = make(map[string]any, len(opt.Query))
-			}
-			maps.Copy(result.Query, opt.Query)
-		}
-
-		hasForm := opt.Form != nil
-		if hasForm {
-			result.Form = maps.Clone(opt.Form)
-			result.Body = nil
-		}
-		if opt.Body != nil {
-			result.Body = opt.Body
-			if !hasForm {
-				result.Form = nil
-			}
-		}
-
-		if opt.Files != nil {
-			if result.Files == nil {
-				result.Files = make(map[string]File, len(opt.Files))
-			}
-			maps.Copy(result.Files, opt.Files)
-		}
-
-		if opt.Timeout != 0 {
-			result.Timeout = opt.Timeout
-		}
-	}
-
-	return &result
-}
-
 // doFileUpload 文件上传
-func (c *Client) doFileUpload(ctx context.Context, uri string, opt *Option, requestTimeout time.Duration) (*Response, error) {
+func (c *Client) doFileUpload(ctx context.Context, uri string, requestTimeout time.Duration) Response {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	for fieldName, file := range opt.Files {
+	for fieldName, file := range c.option.Files {
 		var fileData []byte
 		var fileName string
 
 		if file.FilePath != "" {
 			data, err := os.ReadFile(file.FilePath)
 			if err != nil {
-				return nil, fmt.Errorf("读取文件 %s 失败: %w", file.FilePath, err)
+				return Response{ErrMsg: fmt.Errorf("读取文件 %s 失败: %w", file.FilePath, err)}
 			}
 			fileData = data
 			fileName = filepath.Base(file.FilePath)
@@ -429,23 +365,23 @@ func (c *Client) doFileUpload(ctx context.Context, uri string, opt *Option, requ
 
 		part, err := writer.CreateFormFile(formFieldName, fileName)
 		if err != nil {
-			return nil, fmt.Errorf("创建表单文件失败: %w", err)
+			return Response{ErrMsg: fmt.Errorf("创建表单文件失败: %w", err)}
 		}
 
 		if _, err = part.Write(fileData); err != nil {
-			return nil, fmt.Errorf("写入文件数据失败: %w", err)
+			return Response{ErrMsg: fmt.Errorf("写入文件数据失败: %w", err)}
 		}
 	}
 
-	for k, v := range opt.Form {
+	for k, v := range c.option.Form {
 		if err := writer.WriteField(k, fmt.Sprintf("%v", v)); err != nil {
-			return nil, fmt.Errorf("写入表单字段失败: %w", err)
+			return Response{ErrMsg: fmt.Errorf("写入表单字段失败: %w", err)}
 		}
 	}
 
 	contentType := writer.FormDataContentType()
 	if err := writer.Close(); err != nil {
-		return nil, fmt.Errorf("关闭writer失败: %w", err)
+		return Response{ErrMsg: fmt.Errorf("关闭writer失败: %w", err)}
 	}
 
 	// 通过上下文应用超时
@@ -457,46 +393,55 @@ func (c *Client) doFileUpload(ctx context.Context, uri string, opt *Option, requ
 
 	req, err := http.NewRequestWithContext(ctx, "POST", uri, body)
 	if err != nil {
-		return nil, fmt.Errorf("创建请求失败: %w", err)
+		return Response{ErrMsg: fmt.Errorf("创建请求失败: %w", err)}
 	}
 
-	req.Header.Set("Content-Type", contentType)
-
-	for k, v := range opt.Headers {
+	for k, v := range c.option.Headers {
+		if strings.EqualFold(k, "Content-Type") {
+			continue
+		}
 		req.Header.Set(k, v)
 	}
+	req.Header.Set("Content-Type", contentType)
 
 	// 发送请求
 	resp, err := GetClient().Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("请求失败: %w", err)
+		return Response{ErrMsg: fmt.Errorf("请求失败: %w", err)}
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("读取响应失败: %w", err)
+		return Response{
+			StatusCode: resp.StatusCode,
+			ErrMsg:     fmt.Errorf("读取响应失败: %w", err),
+		}
 	}
 
-	return &Response{
+	return Response{
 		StatusCode: resp.StatusCode,
 		Body:       respBody,
-	}, nil
+	}
 }
 
 // buildURL 拼接get请求query参数
-func (c *Client) buildUrl(baseURL string, query map[string]any) string {
-	if len(query) == 0 {
+func (c *Client) buildURL(baseURL string) string {
+	if len(c.option.Query) == 0 {
 		return baseURL
 	}
-	q := url.Values{}
-	for k, v := range query {
+
+	parsedURL, err := url.Parse(baseURL)
+	if err != nil {
+		return baseURL
+	}
+
+	q := parsedURL.Query()
+	for k, v := range c.option.Query {
 		q.Set(k, fmt.Sprintf("%v", v))
 	}
-	if strings.Contains(baseURL, "?") {
-		return baseURL + "&" + q.Encode()
-	}
-	return baseURL + "?" + q.Encode()
+	parsedURL.RawQuery = q.Encode()
+	return parsedURL.String()
 }
 
 // TracingTransport 传输中间件追踪
@@ -506,8 +451,13 @@ type TracingTransport struct {
 
 // RoundTrip 实现http.RoundTripper
 func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	transport := t.Transport
+	if transport == nil {
+		transport = http.DefaultTransport
+	}
+
 	if skipTrace(req.Context()) {
-		return t.Transport.RoundTrip(req)
+		return transport.RoundTrip(req)
 	}
 
 	start := time.Now()
@@ -520,7 +470,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		req.Body = io.NopCloser(bytes.NewReader(reqBodyBytes))
 	}
 
-	resp, err := t.Transport.RoundTrip(req)
+	resp, err := transport.RoundTrip(req)
 
 	// 收集响应信息用于tracing
 	var (
@@ -548,7 +498,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 
 	var respJson any
 	if len(respBodyBytes) > 0 {
-		if err = json.Unmarshal(respBodyBytes, &respJson); err != nil {
+		if unmarshalErr := json.Unmarshal(respBodyBytes, &respJson); unmarshalErr != nil {
 			respJson = respBodyBytes
 		}
 	}

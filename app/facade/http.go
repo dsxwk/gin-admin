@@ -2,6 +2,8 @@ package facade
 
 import (
 	"context"
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/http"
 	"time"
 )
@@ -9,12 +11,12 @@ import (
 // Http 门面函数,返回门面实例
 // 使用示例:
 //
-//	user, err := facade.Http().SendAsJson[UserResponse](ctx, "https://api.example.com/user/1")
-//	data, err := facade.Http().Get(ctx, "https://api.example.com/user/1")
-//	resp, err := facade.Http().WithHeader("Authorization", "Bearer token").WithBody(data).Post(ctx, "https://api.example.com/user")
+//	user, response := facade.Http().SendAsJson[UserResponse](ctx, "https://api.example.com/user/1")
+//	response := facade.Http().Get(ctx, "https://api.example.com/user/1")
+//	response := facade.Http().WithHeader("Authorization", "Bearer token").WithBody(data).Post(ctx, "https://api.example.com/user")
 func Http() HttpFacade {
 	return HttpFacade{
-		client: http.NewClient(),
+		client: container.Default().Get[*http.Client](serviceprovider.ServiceHTTP),
 	}
 }
 
@@ -79,36 +81,31 @@ func (h HttpFacade) WithFile(field string, file http.File) HttpFacade {
 }
 
 // Send 发送HTTP请求
-func (h HttpFacade) Send(ctx context.Context, method, uri string, opt ...*http.Option) ([]byte, error) {
-	return h.instance().Send(ctx, method, uri, opt...)
-}
-
-// SendResponse 发送HTTP请求并返回状态码和响应体
-func (h HttpFacade) SendResponse(ctx context.Context, method, uri string, opt ...*http.Option) (*http.Response, error) {
-	return h.instance().SendResponse(ctx, method, uri, opt...)
+func (h HttpFacade) Send(ctx context.Context, method, uri string) http.Response {
+	return h.instance().Send(ctx, method, uri)
 }
 
 // Get 发送GET请求
-func (h HttpFacade) Get(ctx context.Context, uri string, opt ...*http.Option) ([]byte, error) {
-	return h.instance().Get(ctx, uri, opt...)
+func (h HttpFacade) Get(ctx context.Context, uri string) http.Response {
+	return h.instance().Get(ctx, uri)
 }
 
 // Post 发送POST请求
-func (h HttpFacade) Post(ctx context.Context, uri string, opt ...*http.Option) ([]byte, error) {
-	return h.instance().Post(ctx, uri, opt...)
+func (h HttpFacade) Post(ctx context.Context, uri string) http.Response {
+	return h.instance().Post(ctx, uri)
 }
 
 // Put 发送PUT请求
-func (h HttpFacade) Put(ctx context.Context, uri string, opt ...*http.Option) ([]byte, error) {
-	return h.instance().Put(ctx, uri, opt...)
+func (h HttpFacade) Put(ctx context.Context, uri string) http.Response {
+	return h.instance().Put(ctx, uri)
 }
 
 // Delete 发送DELETE请求
-func (h HttpFacade) Delete(ctx context.Context, uri string, opt ...*http.Option) ([]byte, error) {
-	return h.instance().Delete(ctx, uri, opt...)
+func (h HttpFacade) Delete(ctx context.Context, uri string) http.Response {
+	return h.instance().Delete(ctx, uri)
 }
 
 // SendAsJson 发送请求并解析为T类型
-func (h HttpFacade) SendAsJson[T any](ctx context.Context, method, uri string, opt ...*http.Option) (*T, error) {
-	return h.instance().SendAsJson[T](ctx, method, uri, opt...)
+func (h HttpFacade) SendAsJson[T any](ctx context.Context, method, uri string) (*T, http.Response) {
+	return h.instance().SendAsJson[T](ctx, method, uri)
 }
