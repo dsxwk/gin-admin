@@ -2,6 +2,8 @@ package facade
 
 import (
 	"context"
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/lang"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -13,27 +15,44 @@ import (
 //	msg := facade.Lang().Trans(ctx, "welcome", map[string]any{"name": "John"})
 //	localizer := facade.Lang().GetLocalizer("en")
 func Lang() *LangFacade {
-	return &LangFacade{}
+	return &LangFacade{
+		service: container.Default().Get[*lang.Service](serviceprovider.ServiceLang),
+	}
 }
 
-type LangFacade struct{}
+// LangFacade 翻译门面
+type LangFacade struct {
+	service *lang.Service
+}
 
 // Trans 翻译
 func (l *LangFacade) Trans(ctx context.Context, messageID string, data map[string]any) string {
-	return lang.Trans(ctx, messageID, data)
+	if l.service == nil {
+		return messageID
+	}
+	return l.service.Trans(ctx, messageID, data)
 }
 
 // GetLocalizer 获取指定语言的Localizer
 func (l *LangFacade) GetLocalizer(langCode string) *i18n.Localizer {
-	return lang.GetLocalizer(langCode)
+	if l.service == nil {
+		return nil
+	}
+	return l.service.GetLocalizer(langCode)
 }
 
 // GetBundle 获取翻译包
 func (l *LangFacade) GetBundle() *i18n.Bundle {
-	return lang.GetBundle()
+	if l.service == nil {
+		return nil
+	}
+	return l.service.GetBundle()
 }
 
 // IsLoaded 检查翻译是否已加载
 func (l *LangFacade) IsLoaded() bool {
-	return lang.IsLoaded()
+	if l.service == nil {
+		return false
+	}
+	return l.service.IsLoaded()
 }

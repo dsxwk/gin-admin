@@ -297,18 +297,13 @@ func (c *Client) request(ctx context.Context, action, index, method, path, conte
 	}
 
 	start := time.Now()
-	response, requestErr := c.client.SendResponse(ctx, method, fullURL, &httpclient.Option{
-		Headers: headers,
-		Body:    reqData,
-	})
-	var (
-		status int
-		data   []byte
-	)
-	if response != nil {
-		status = response.StatusCode
-		data = response.Body
-	}
+	response := c.client.
+		WithHeaders(headers).
+		WithBody(reqData).
+		Send(ctx, method, fullURL)
+	status := response.StatusCode
+	data := response.Body
+	requestErr := response.ErrMsg
 
 	costMs := float64(time.Since(start).Nanoseconds()) / 1e6
 	publishTrace(ctx, action, index, reqData, status, data, requestErr, costMs)

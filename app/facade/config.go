@@ -2,13 +2,11 @@ package facade
 
 import (
 	"gin/config"
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 )
 
 // Config 配置门面方法
 func Config() *config.Config {
-	cfg := Get[*config.Config]("config")
-	if cfg != nil {
-		return cfg
-	}
-	return config.NewConfig()
+	return container.Default().Get[*config.Config](serviceprovider.ServiceConfig)
 }

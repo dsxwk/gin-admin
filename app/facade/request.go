@@ -1,6 +1,8 @@
 package facade
 
 import (
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/request"
 
 	"github.com/gin-gonic/gin"
@@ -14,55 +16,87 @@ import (
 //	age := facade.Request().Path[int](ctx, "age", 18)
 //	userID := facade.Request().Path[int64](ctx, "id", 0)
 func Request() RequestFacade {
-	return RequestFacade{}
+	return RequestFacade{
+		client: container.Default().Get[*request.Client](serviceprovider.ServiceRequest),
+	}
 }
 
-type RequestFacade struct{}
+// RequestFacade 请求门面
+type RequestFacade struct {
+	client *request.Client
+}
 
 // Path 获取请求路径参数
 // 使用示例:
 //
 //	name := facade.Request().Path[string](ctx, "name", "default")
 func (r RequestFacade) Path[T any](ctx *gin.Context, key string, defaultValue T) T {
-	return request.NewClient().Path[T](ctx, key, defaultValue)
+	if r.client == nil {
+		return defaultValue
+	}
+	return r.client.Path[T](ctx, key, defaultValue)
 }
 
 // GetHeader 获取请求头
 func (r RequestFacade) GetHeader[T any](ctx *gin.Context, key string, defaultValue T) T {
-	return request.NewClient().GetHeader[T](ctx, key, defaultValue)
+	if r.client == nil {
+		return defaultValue
+	}
+	return r.client.GetHeader[T](ctx, key, defaultValue)
 }
 
 // Header 设置请求头
 func (r RequestFacade) Header[T any](ctx *gin.Context, key string, value T) {
-	request.NewClient().Header[T](ctx, key, value)
+	if r.client == nil {
+		return
+	}
+	r.client.Header[T](ctx, key, value)
 }
 
 // Bind 绑定请求参数
 func (r RequestFacade) Bind(ctx *gin.Context, v any) error {
-	return request.NewClient().Bind(ctx, v)
+	if r.client == nil {
+		return nil
+	}
+	return r.client.Bind(ctx, v)
 }
 
 // Validate 验证请求数据
 func (r RequestFacade) Validate(ctx *gin.Context, data any, scene string) error {
-	return request.NewClient().Validate(ctx.Request.Context(), data, scene)
+	if r.client == nil {
+		return nil
+	}
+	return r.client.Validate(ctx.Request.Context(), data, scene)
 }
 
 // BindValidate 绑定参数并验证
 func (r RequestFacade) BindValidate(ctx *gin.Context, v any, scene string) error {
-	return request.NewClient().BindValidate(ctx, v, scene)
+	if r.client == nil {
+		return nil
+	}
+	return r.client.BindValidate(ctx, v, scene)
 }
 
 // ValidateWithMessages 验证并自定义错误消息
 func (r RequestFacade) ValidateWithMessages(data any, scene string, messages map[string]string) error {
-	return request.NewClient().ValidateWithMessages(data, scene, messages)
+	if r.client == nil {
+		return nil
+	}
+	return r.client.ValidateWithMessages(data, scene, messages)
 }
 
 // ValidateWithTranslates 验证并自定义字段翻译
 func (r RequestFacade) ValidateWithTranslates(data any, scene string, translates map[string]string) error {
-	return request.NewClient().ValidateWithTranslates(data, scene, translates)
+	if r.client == nil {
+		return nil
+	}
+	return r.client.ValidateWithTranslates(data, scene, translates)
 }
 
 // GetValidator 获取验证器实例
 func (r RequestFacade) GetValidator(data any, scene string) *validate.Validation {
-	return request.NewClient().GetValidator(data, scene)
+	if r.client == nil {
+		return nil
+	}
+	return r.client.GetValidator(data, scene)
 }

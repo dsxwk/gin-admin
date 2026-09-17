@@ -7,7 +7,9 @@ import (
 	"gin/app/service"
 	_ "gin/docs"
 	"gin/pkg"
+	"gin/pkg/container"
 	"gin/pkg/errcode"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/mcp"
 	"net/http"
 
@@ -16,19 +18,22 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-var (
-	timeoutMiddleware     = middleware.Timeout{}.Handle(facade.Config().App.Timeout)
-	loggerMiddleware      = middleware.Logger{}.Handle()
-	corsMiddleware        = middleware.Cors{}.Handle()
-	jwtMiddleware         = middleware.Jwt{}.Handle()
-	recoverMiddleware     = middleware.Recover{}.Handle()
-	rateLimitMiddleware   = middleware.RateLimit{}
-	permissionMiddleware  = middleware.Permission{}.Handle()
-	operatorLogMiddleware = middleware.OperatorLog{}.Handle()
-)
-
 // LoadRouters 加载路由
 func LoadRouters(router *gin.Engine) {
+	cfg := facade.Config()
+	if cfg == nil {
+		return
+	}
+
+	timeoutMiddleware := middleware.Timeout{}.Handle(cfg.App.Timeout)
+	loggerMiddleware := middleware.Logger{}.Handle()
+	corsMiddleware := middleware.Cors{}.Handle()
+	jwtMiddleware := middleware.Jwt{}.Handle()
+	recoverMiddleware := middleware.Recover{}.Handle()
+	rateLimitMiddleware := middleware.RateLimit{}
+	permissionMiddleware := middleware.Permission{}.Handle()
+	operatorLogMiddleware := middleware.OperatorLog{}.Handle()
+
 	// 全局中间件
 	router.Use(corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware, operatorLogMiddleware)
 
@@ -52,8 +57,8 @@ func LoadRouters(router *gin.Engine) {
 	AutoLoads(public, auth)
 
 	// MCP服务路由(MCP自带认证,使用public分组)
-	if cfg := facade.Config(); cfg != nil && cfg.Mcp.Enabled {
-		mcpHandler := facade.Get[*mcp.Handler]("mcp")
+	if cfg.Mcp.Enabled {
+		mcpHandler := container.Default().Get[*mcp.Handler](serviceprovider.ServiceMCP)
 		if mcpHandler != nil {
 			mcpPath := cfg.Mcp.Path
 			if mcpPath == "" {

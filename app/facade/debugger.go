@@ -1,43 +1,49 @@
 package facade
 
 import (
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
 )
 
 // Debugger 调试器门面-调试器统一入口
 func Debugger() *DebuggerFacade {
-	return &DebuggerFacade{}
+	return &DebuggerFacade{
+		instance: container.Default().Get[*debugger.Debugger](serviceprovider.ServiceDebugger),
+	}
 }
 
-type DebuggerFacade struct{}
+// DebuggerFacade 调试器门面
+type DebuggerFacade struct {
+	instance *debugger.Debugger
+}
 
-// instance 从Manager获取调试器实例
-func (d *DebuggerFacade) instance() *debugger.Debugger {
-	dbg := Get[*debugger.Debugger]("debugger")
-	if dbg != nil {
-		return dbg
+// getInstance 获取调试器实例
+func (d *DebuggerFacade) getInstance() *debugger.Debugger {
+	if d == nil {
+		return nil
 	}
-	return debugger.New(Event().Bus())
+	return d.instance
 }
 
 // Start 启动调试器
 func (d *DebuggerFacade) Start() {
-	if inst := d.instance(); inst != nil {
+	if inst := d.getInstance(); inst != nil {
 		inst.Start()
 	}
 }
 
 // Stop 停止调试器
 func (d *DebuggerFacade) Stop() {
-	if inst := d.instance(); inst != nil {
+	if inst := d.getInstance(); inst != nil {
 		inst.Stop()
 	}
 }
 
 // IsRunning 检查调试器是否运行中
 func (d *DebuggerFacade) IsRunning() bool {
-	inst := d.instance()
+	inst := d.getInstance()
 	if inst == nil {
 		return false
 	}
@@ -46,7 +52,7 @@ func (d *DebuggerFacade) IsRunning() bool {
 
 // GetSubId 获取指定主题的订阅ID
 func (d *DebuggerFacade) GetSubId(topic string) (uint64, bool) {
-	inst := d.instance()
+	inst := d.getInstance()
 	if inst == nil {
 		return 0, false
 	}
@@ -55,12 +61,12 @@ func (d *DebuggerFacade) GetSubId(topic string) (uint64, bool) {
 
 // GetInstance 获取原始调试器实例
 func (d *DebuggerFacade) GetInstance() *debugger.Debugger {
-	return d.instance()
+	return d.getInstance()
 }
 
 // Bus 获取调试器使用的总线
 func (d *DebuggerFacade) Bus() *eventbus.Bus {
-	inst := d.instance()
+	inst := d.getInstance()
 	if inst == nil {
 		return nil
 	}
@@ -69,7 +75,7 @@ func (d *DebuggerFacade) Bus() *eventbus.Bus {
 
 // Store 获取调试器使用的追踪存储
 func (d *DebuggerFacade) Store() *debugger.TraceStore {
-	inst := d.instance()
+	inst := d.getInstance()
 	if inst == nil {
 		return nil
 	}

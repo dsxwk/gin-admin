@@ -6,6 +6,7 @@ import (
 	"gin/common/ctxkey"
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
+	"gin/pkg/container"
 	client "gin/pkg/serviceprovider/grpcclient"
 	"testing"
 	"time"
@@ -127,7 +128,7 @@ func TestGrpcUserService(t *testing.T) {
 	}
 	defer c.Close()
 
-	facade.Register[*client.Client]("grpc", c)
+	container.Default().Set("grpc", c)
 
 	user, err := facade.Grpc().Service(proto.NewUserServiceClient)
 	if err != nil {
