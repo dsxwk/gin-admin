@@ -1,13 +1,11 @@
 package provider
 
 import (
-	"gin/app/facade"
 	"gin/common/flag"
-	"gin/pkg"
+	"gin/config"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/orm"
-
-	"gorm.io/gorm"
 )
 
 func init() {
@@ -15,32 +13,27 @@ func init() {
 }
 
 // DbProvider 数据库服务提供者
-type DbProvider struct{}
+type DbProvider struct {
+	manager *orm.Manager
+}
 
 // Name 服务提供者名称
 func (p *DbProvider) Name() string {
-	return "db"
+	return serviceprovider.ServiceDB
 }
 
-// Register 注册服务到门面
-func (p *DbProvider) Register(app serviceprovider.App) {
-	cfg := facade.Config()
-	facade.Register[*gorm.DB]("db", orm.Connection(cfg.Databases.Driver, cfg))
+// Register 注册服务到容器
+func (p *DbProvider) Register(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	p.manager = orm.NewManager(cfg)
+	app.Set(serviceprovider.ServiceDB, p.manager)
 }
 
 // Boot 启动服务-测试数据库连接
-func (p *DbProvider) Boot(app serviceprovider.App) {
-	cfg := facade.Config()
-	// 测试默认连接是否正常
-	db := orm.Connection(cfg.Databases.Driver, cfg)
-	if db != nil {
-		sqlDB, err := db.DB()
-		if err == nil {
-			if err = sqlDB.Ping(); err == nil {
-				flag.Infof(pkg.Sprintf("%s数据库连接成功", cfg.Databases.Driver))
-			}
-		}
-	}
+func (p *DbProvider) Boot(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	p.manager.Connection(cfg.Databases.Driver)
+	flag.Infof("%s数据库连接成功", cfg.Databases.Driver)
 }
 
 // Dependencies 依赖配置和日志服务
