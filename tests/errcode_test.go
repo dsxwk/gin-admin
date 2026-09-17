@@ -3,7 +3,10 @@ package tests
 import (
 	"gin/pkg/errcode"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 )
 
 // 错误码添加前缀测试
@@ -277,4 +280,36 @@ func TestErrorCode_Concurrency(t *testing.T) {
 			t.Errorf("original object modified, expected 1, got %d", e.Code)
 		}
 	})
+}
+
+// TestResponse_WithHeader 测试响应头链式调用
+func TestResponse_WithHeader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.GET("/header", func(c *gin.Context) {
+		errcode.Response{}.
+			WithHeader("X-Trace-Id", "trace-123").
+			WithHeaders(map[string]string{
+				"X-Request-Id": "request-456",
+				"X-User-Id":    "user-789",
+			}).
+			Success(c, errcode.Success())
+	})
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/header", nil)
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("unexpected status: %d", recorder.Code)
+	}
+	if recorder.Header().Get("X-Trace-Id") != "trace-123" {
+		t.Fatalf("unexpected X-Trace-Id: %s", recorder.Header().Get("X-Trace-Id"))
+	}
+	if recorder.Header().Get("X-Request-Id") != "request-456" {
+		t.Fatalf("unexpected X-Request-Id: %s", recorder.Header().Get("X-Request-Id"))
+	}
+	if recorder.Header().Get("X-User-Id") != "user-789" {
+		t.Fatalf("unexpected X-User-Id: %s", recorder.Header().Get("X-User-Id"))
+	}
 }

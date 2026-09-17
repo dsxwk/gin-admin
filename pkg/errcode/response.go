@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gin/pkg/serviceprovider/lang"
 	"gin/pkg/serviceprovider/logger"
+	"maps"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,17 +16,42 @@ var (
 
 // Response 通用响应结构体
 type Response struct {
-	Code int64  `json:"code"` // 错误码
-	Msg  string `json:"msg"`  // 提示信息
-	Data any    `json:"data"` // 返回数据
+	Code    int64             `json:"code"` // 错误码
+	Msg     string            `json:"msg"`  // 提示信息
+	Data    any               `json:"data"` // 返回数据
+	headers map[string]string // 响应头
 }
 
 func SetLogger(l *logger.Logger) {
 	log = l
 }
 
+// WithHeader 设置响应头
+func (r Response) WithHeader(name, value string) Response {
+	if r.headers == nil {
+		r.headers = make(map[string]string)
+	}
+	r.headers[name] = value
+	return r
+}
+
+// WithHeaders 批量设置响应头
+func (r Response) WithHeaders(headers map[string]string) Response {
+	if len(headers) == 0 {
+		return r
+	}
+	if r.headers == nil {
+		r.headers = make(map[string]string, len(headers))
+	}
+	maps.Copy(r.headers, headers)
+	return r
+}
+
 // json 输出Json响应
 func (r Response) json(c *gin.Context, httpCode int) {
+	for name, value := range r.headers {
+		c.Header(name, value)
+	}
 	c.Header("Content-Type", "application/json")
 	c.JSON(httpCode, r)
 	c.Abort()
