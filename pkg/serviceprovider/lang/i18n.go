@@ -149,3 +149,36 @@ func GetBundle() *i18n.Bundle {
 func IsLoaded() bool {
 	return Bundle != nil && len(Localizers) > 0
 }
+
+// Service 翻译服务
+type Service struct{}
+
+// New 创建翻译服务
+func New() *Service {
+	return &Service{}
+}
+
+// Load 加载翻译文件
+func (s *Service) Load(conf *config.Config, logger *logger.Logger) {
+	LoadLang(conf, logger)
+}
+
+// Trans 翻译
+func (s *Service) Trans(ctx context.Context, messageID string, data map[string]any) string {
+	return Trans(ctx, messageID, data)
+}
+
+// GetLocalizer 获取指定语言
+func (s *Service) GetLocalizer(langCode string) *i18n.Localizer {
+	return GetLocalizer(langCode)
+}
+
+// GetBundle 获取翻译包
+func (s *Service) GetBundle() *i18n.Bundle {
+	return GetBundle()
+}
+
+// IsLoaded 检查翻译是否已加载
+func (s *Service) IsLoaded() bool {
+	return IsLoaded()
+}
