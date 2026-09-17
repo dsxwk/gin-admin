@@ -118,6 +118,7 @@
         - [Response Error With Message](#Response-Error-With-Message)
         - [Response Error With Data](#Response-Error-With-Data)
         - [Response Error With HTTP Code](#Response-Error-With-HTTP-Code)
+    - [Response With Header](#Response-With-Header)
 - [Log](#Log)
     - [Write Log](#Write-Log)
     - [Error Debug](#Error-Debug)
@@ -2431,6 +2432,7 @@ import (
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 	"time"
 )
@@ -2475,12 +2477,13 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if c := NewKafkaDemoConsumer(); c != nil {
-			facade.Queue().Register(c)
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDemoConsumer()
+	})
 }
 ```
 
@@ -2493,6 +2496,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -2525,12 +2529,13 @@ func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if p := NewKafkaDemoProducer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDemoProducer()
+	})
 }
 ```
 
@@ -2880,7 +2885,7 @@ Total 1 event
 $ go run ./cmd/cli.go listener:list
 
 ┌────────────────────────────────────────────────────────────┐
-│ Event Name             Description                           │
+│ Event Name             Description                         │
 ├────────────────────────────────────────────────────────────┤
 │ user.login             User Login Event                    │
 │                      ├─ *listener.TestListener             │
@@ -2898,6 +2903,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -2910,6 +2916,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Success(c, errcode.Success())
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Success(c, errcode.Success())
+}
 ```
 
 ### Response Success With Message
@@ -2919,6 +2929,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -2931,6 +2942,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Success(c, errcode.Success().WithMsg("Success"))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Success(c, errcode.Success().WithMsg("Success"))
+}
 ```
 
 ### Response Success With Data
@@ -2940,6 +2955,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -2952,6 +2968,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Success(c, errcode.Success().WithData([]string{"test data"}))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Success(c, errcode.Success().WithData([]string{"test data"}))
+}
 ```
 
 ## Response Error
@@ -2961,6 +2981,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -2973,6 +2994,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Error(c, errcode.SystemError())
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError())
+}
 ```
 
 ### Response Error With Code
@@ -2982,6 +3007,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -2994,6 +3020,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Error(c, errcode.SystemError().WithCode(500))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError().WithCode(500))
+}
 ```
 
 ### Response Error With Message
@@ -3003,6 +3033,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -3015,6 +3046,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Error(c, errcode.SystemError().WithMsg("System Error"))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError().WithMsg("System Error"))
+}
 ```
 
 ### Response Error With Data
@@ -3024,6 +3059,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
 	"gin/common/base"
 
 	"github.com/gin-gonic/gin"
@@ -3036,9 +3072,13 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Error(c, errcode.SystemError().WithData([]string{"test data"}))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError().WithData([]string{"test data"}))
+}
 ```
 
-## Response Error With HTTP Code
+### Response Error With HTTP Code
 
 ```go
 package v1
@@ -3057,6 +3097,33 @@ type TestController struct {
 
 func (s *TestController) Test(c *gin.Context) {
 	return s.Response.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
+}
+```
+
+## Response With Header
+
+```go
+package v1
+
+import (
+	"gin/app/errcode"
+    "gin/app/facade"
+    "gin/common/base"
+	"net/http"
+    
+    "github.com/gin-gonic/gin"
+)
+
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context) {
+    return s.Response.WithHeader("X-ID", "XXX").Error(c, errcode.ArgsError())
+}
+
+func (s *TestController) Test(c *gin.Context) {
+	return facade.Response().WithHeader("X-ID", "XXX").Error(c, errcode.ArgsError())
 }
 ```
 

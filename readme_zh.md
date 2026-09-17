@@ -118,6 +118,7 @@
         - [失败提示](#失败提示)
         - [失败数据](#失败数据)
         - [HTTP状态码](#HTTP状态码)
+    - [添加响应头](#添加响应头)
 - [日志](#日志)
     - [记录日志](#记录日志)
     - [错误调试](#错误调试)
@@ -2414,6 +2415,7 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 	"time"
 )
 
@@ -2457,12 +2459,13 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if c := NewKafkaDemoConsumer(); c != nil {
-			facade.Queue().Register(c)
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDemoConsumer()
+	})
 }
 
 ```
@@ -2476,6 +2479,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 )
 
 type KafkaDemoProducer struct {
@@ -2507,12 +2511,13 @@ func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if p := NewKafkaDemoProducer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDemoProducer()
+	})
 }
 
 ```
@@ -2873,6 +2878,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -2885,6 +2891,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Success(c, errcode.Success())
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Success(c, errcode.Success())
+}
 ```
 
 ### 成功提示
@@ -2894,6 +2904,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -2906,6 +2917,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Success(c, errcode.Success().WithMsg("Success"))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Success(c, errcode.Success().WithMsg("Success"))
+}
 ```
 
 ### 成功数据
@@ -2915,6 +2930,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -2927,6 +2943,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Success(c, errcode.Success().WithData([]string{"test data"}))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Success(c, errcode.Success().WithData([]string{"test data"}))
+}
 ```
 
 ## 失败响应
@@ -2936,6 +2956,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -2948,6 +2969,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Error(c, errcode.SystemError())
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError())
+}
 ```
 
 ### 失败错误码
@@ -2957,6 +2982,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -2969,6 +2995,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Error(c, errcode.SystemError().WithCode(500))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError().WithCode(500))
+}
 ```
 
 ### 失败提示
@@ -2978,6 +3008,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -2990,6 +3021,10 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Error(c, errcode.SystemError().WithMsg("System Error"))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError().WithMsg("System Error"))
+}
 ```
 
 ### 失败数据
@@ -2999,6 +3034,7 @@ package v1
 
 import (
 	"gin/app/errcode"
+	"gin/app/facade"
     "gin/common/base"
     
     "github.com/gin-gonic/gin"
@@ -3011,15 +3047,20 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Error(c, errcode.SystemError().WithData([]string{"test data"}))
 }
+
+func (s *TestController) Test1(c *gin.Context) {
+	return facade.Response().Error(c, errcode.SystemError().WithData([]string{"test data"}))
+}
 ```
 
-## HTTP状态码
+### HTTP状态码
 
 ```go
 package v1
 
 import (
 	"gin/app/errcode"
+    "gin/app/facade"
     "gin/common/base"
 	"net/http"
     
@@ -3033,13 +3074,44 @@ type TestController struct {
 func (s *TestController) Test(c *gin.Context) {
     return s.Response.Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
 }
+
+func (s *TestController) Test(c *gin.Context) {
+	return facade.Response().Error(c, errcode.ArgsError().WithHttpCode(http.StatusBadRequest).WithData([]string{"test data"}))
+}
+```
+
+## 添加响应头
+
+```go
+package v1
+
+import (
+	"gin/app/errcode"
+    "gin/app/facade"
+    "gin/common/base"
+	"net/http"
+    
+    "github.com/gin-gonic/gin"
+)
+
+type TestController struct {
+    base.BaseController
+}
+
+func (s *TestController) Test(c *gin.Context) {
+    return s.Response.WithHeader("X-ID", "XXX").Error(c, errcode.ArgsError())
+}
+
+func (s *TestController) Test(c *gin.Context) {
+	return facade.Response().WithHeader("X-ID", "XXX").Error(c, errcode.ArgsError())
+}
 ```
 
 # 日志
 
-> 使用 `zap` 包实现日志记录，日志文件存放路径为 `storage/logs`, 默认日志级别为 `debug`,
-> 返回错误码不为0时自动记录日志TraceId、堆栈、sql、http、redis、grpc等调用信息, 也可以直接调用日志记录也会自动记录调试信息。配置文件
-> `yaml`中`log.access`支持是否自动记录请求日志，如若开启会自动记录请求日志。
+> - 使用 `zap` 包实现日志记录，日志文件存放路径为 `storage/logs`, 默认日志级别为 `debug`。
+> - 返回错误码不为0时自动记录日志TraceId、堆栈、sql、http、redis、grpc等调用信息, 也可以直接调用日志记录也会自动记录调试信息。
+> - 配置文件`yaml`中`log.access`支持是否自动记录请求日志，如若开启会自动记录请求日志。
 
 ```json
 {
