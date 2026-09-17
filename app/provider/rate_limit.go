@@ -2,9 +2,11 @@ package provider
 
 import (
 	"context"
-	"gin/app/facade"
 	"gin/common/flag"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/ratelimit"
+	"time"
 )
 
 func init() {
@@ -12,22 +14,23 @@ func init() {
 }
 
 // RateLimitProvider 限流服务提供者
-type RateLimitProvider struct{}
+type RateLimitProvider struct {
+	manager *ratelimit.Manager
+}
 
 // Name 服务提供者名称
 func (p *RateLimitProvider) Name() string {
-	return "rate_limit"
+	return serviceprovider.ServiceRateLimit
 }
 
-// Register 注册服务到门面
-func (p *RateLimitProvider) Register(app serviceprovider.App) {
-	facade.Register("rate_limit", facade.RateLimiter)
+// Register 注册服务到容器
+func (p *RateLimitProvider) Register(app *container.Container) {
+	p.manager = ratelimit.NewManager(5*time.Minute, 100, 200)
+	app.Set(serviceprovider.ServiceRateLimit, p.manager)
 }
 
 // Boot 启动服务
-func (p *RateLimitProvider) Boot(app serviceprovider.App) {
-	// 初始化限流
-	facade.RateLimiter().Init()
+func (p *RateLimitProvider) Boot(app *container.Container) {
 	flag.Infof("限流服务启动成功")
 }
 
@@ -35,17 +38,19 @@ func (p *RateLimitProvider) Boot(app serviceprovider.App) {
 // 返回 Runner,serviceprovider会在应用停止时自动调用Stop()
 func (p *RateLimitProvider) Runners() []serviceprovider.Runner {
 	return []serviceprovider.Runner{
-		&RateLimitCleanupRunner{},
+		&RateLimitCleanupRunner{manager: p.manager},
 	}
 }
 
 // Dependencies 依赖服务
 func (p *RateLimitProvider) Dependencies() []string {
-	return []string{"config", "log"}
+	return nil
 }
 
 // RateLimitCleanupRunner 限流清理任务
-type RateLimitCleanupRunner struct{}
+type RateLimitCleanupRunner struct {
+	manager *ratelimit.Manager
+}
 
 // Run 运行清理任务
 func (r *RateLimitCleanupRunner) Run(ctx context.Context) error {
@@ -56,7 +61,7 @@ func (r *RateLimitCleanupRunner) Run(ctx context.Context) error {
 
 // Stop 停止时关闭限流器
 func (r *RateLimitCleanupRunner) Stop() error {
-	facade.RateLimiter().Shutdown()
+	r.manager.Close()
 	return nil
 }
 

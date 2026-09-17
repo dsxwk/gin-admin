@@ -1,129 +1,166 @@
 package tests
 
 import (
+	"context"
+	"gin/app/facade"
 	"gin/app/middleware"
+	"gin/common/ctxkey"
+	"gin/pkg/container"
 	"gin/pkg/errcode"
+	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/ratelimit"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
+	"golang.org/x/time/rate"
 )
 
-func TestRateLimitMiddleware(t *testing.T) {
+// useRateLimiter 替换测试使用的限流管理器
+func useRateLimiter(t *testing.T, manager *ratelimit.Manager) {
+	t.Helper()
+
+	previous := facade.RateLimiter()
+	container.Default().Set(serviceprovider.ServiceRateLimit, manager)
+
+	t.Cleanup(func() {
+		manager.Close()
+		if previous == nil {
+			container.Default().Delete(serviceprovider.ServiceRateLimit)
+			return
+		}
+		container.Default().Set(serviceprovider.ServiceRateLimit, previous)
+	})
+}
+
+// decodeRateLimitResponse 解析测试响应
+func decodeRateLimitResponse(t *testing.T, recorder *httptest.ResponseRecorder) errcode.Response {
+	t.Helper()
+
+	var response errcode.Response
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+		t.Fatalf("解析响应失败: %v", err)
+	}
+	return response
+}
+
+// performRequest 执行测试请求
+func performRequest(t *testing.T, engine *gin.Engine, method, path string) errcode.Response {
+	t.Helper()
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(method, path, nil)
+	engine.ServeHTTP(recorder, request)
+	return decodeRateLimitResponse(t, recorder)
+}
+
+func TestRateLimiterFacade(t *testing.T) {
+	if facade.RateLimiter() == nil {
+		t.Fatal("限流门面未返回管理器")
+	}
+}
+
+func TestRateLimitManager(t *testing.T) {
+	var nilManager *ratelimit.Manager
+	if !nilManager.AllowGlobal() {
+		t.Fatal("空管理器应允许请求")
+	}
+	if !nilManager.AllowIP("127.0.0.1", "/ping", 1, 1) {
+		t.Fatal("空管理器应允许IP请求")
+	}
+	if err := nilManager.WaitUser(context.Background(), "1", "/user", 1, 1); err != nil {
+		t.Fatalf("空管理器应允许用户请求: %v", err)
+	}
+	nilManager.Close()
+
+	manager := ratelimit.NewManager(time.Minute, 1, 1)
+	if !manager.AllowGlobal() {
+		t.Fatal("首次全局请求应通过")
+	}
+	if manager.AllowGlobal() {
+		t.Fatal("第二次全局请求应被限流")
+	}
+
+	if !manager.AllowIP("127.0.0.1", "/ping", 1, 1) {
+		t.Fatal("首次IP请求应通过")
+	}
+	if manager.AllowIP("127.0.0.1", "/ping", 1, 1) {
+		t.Fatal("第二次IP请求应被限流")
+	}
+
+	if err := manager.WaitUser(context.Background(), "1", "/user", 1, 1); err != nil {
+		t.Fatalf("首次用户请求应通过: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+	if err := manager.WaitUser(ctx, "1", "/user", 1, 1); err == nil {
+		t.Fatal("第二次用户请求应因等待超时被限流")
+	}
+
+	manager.Close()
+	manager.Close()
+}
+
+func TestRateLimitGlobalMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	useRateLimiter(t, ratelimit.NewManager(time.Minute, 1, 1))
 
-	r := gin.New()
-
-	var rateLimitMiddleware middleware.RateLimit
-	// 1QPS,最多1个突发
-	r.Use(rateLimitMiddleware.IpRateLimit(1, 1))
-
-	r.GET("/test", func(c *gin.Context) {
-		errcode.Response{}.Success(c, errcode.Success())
+	engine := gin.New()
+	var rateLimit middleware.RateLimit
+	engine.Use(rateLimit.Handle())
+	engine.GET("/global", func(c *gin.Context) {
+		facade.Response().Success(c, errcode.Success())
 	})
 
-	t.Run("limit trigger", func(t *testing.T) {
-		// 第一次请求
-		req1 := httptest.NewRequest(http.MethodGet, "/test", nil)
-		w1 := httptest.NewRecorder()
-		r.ServeHTTP(w1, req1)
+	if response := performRequest(t, engine, http.MethodGet, "/global"); response.Code != 0 {
+		t.Fatalf("首次请求应通过,实际错误码: %d", response.Code)
+	}
+	if response := performRequest(t, engine, http.MethodGet, "/global"); response.Code != 429 {
+		t.Fatalf("第二次请求应被限流,实际错误码: %d", response.Code)
+	}
+}
 
-		var resp errcode.Response
-		if err := json.Unmarshal(w1.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to unmarshal response: %v", err)
-		}
+func TestRateLimitIPMiddleware(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	useRateLimiter(t, ratelimit.NewManager(time.Minute, rate.Inf, 1))
 
-		if resp.Code != 0 {
-			t.Fatalf("first request should pass, got code %d", resp.Code)
-		}
-
-		// 第二次立刻请求(应该被限流)
-		req2 := httptest.NewRequest(http.MethodGet, "/test", nil)
-		w2 := httptest.NewRecorder()
-		r.ServeHTTP(w2, req2)
-
-		if err := json.Unmarshal(w2.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to unmarshal response: %v", err)
-		}
-
-		if resp.Code != 429 {
-			t.Fatalf("expected 429, got %d", resp.Code)
-		}
+	engine := gin.New()
+	var rateLimit middleware.RateLimit
+	engine.Use(rateLimit.IpRateLimit(1, 1))
+	engine.GET("/ip", func(c *gin.Context) {
+		facade.Response().Success(c, errcode.Success())
 	})
 
-	t.Run("recover after time", func(t *testing.T) {
-		// 等待限流器恢复(需要等待至少1秒)
-		time.Sleep(2 * time.Second)
+	if response := performRequest(t, engine, http.MethodGet, "/ip"); response.Code != 0 {
+		t.Fatalf("首次请求应通过,实际错误码: %d", response.Code)
+	}
+	if response := performRequest(t, engine, http.MethodGet, "/ip"); response.Code != 429 {
+		t.Fatalf("第二次请求应被限流,实际错误码: %d", response.Code)
+	}
+}
 
-		req := httptest.NewRequest(http.MethodGet, "/test", nil)
-		w := httptest.NewRecorder()
+func TestRateLimitUserMiddleware(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	useRateLimiter(t, ratelimit.NewManager(time.Minute, rate.Inf, 1))
 
-		r.ServeHTTP(w, req)
-		var resp errcode.Response
-		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to unmarshal response: %v", err)
-		}
-
-		if resp.Code != 0 {
-			t.Fatalf("should recover after 1s, got code %d", resp.Code)
-		}
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(ctxkey.UserIdKey, int64(1))
+		c.Next()
+	})
+	var rateLimit middleware.RateLimit
+	engine.Use(rateLimit.UserRateLimit(1, 1))
+	engine.GET("/user", func(c *gin.Context) {
+		facade.Response().Success(c, errcode.Success())
 	})
 
-	t.Run("concurrent test", func(t *testing.T) {
-		var wg sync.WaitGroup
-		var mu sync.Mutex
-		var success int
-		var fail int
-
-		// 等待限流器状态重置
-		time.Sleep(1 * time.Second)
-
-		// 并发10个请求
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
-
-			go func() {
-				defer wg.Done()
-
-				req := httptest.NewRequest(http.MethodGet, "/test", nil)
-				w := httptest.NewRecorder()
-
-				r.ServeHTTP(w, req)
-
-				var resp errcode.Response
-				if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-					t.Errorf("failed to unmarshal response: %v", err)
-					return
-				}
-
-				mu.Lock()
-				if resp.Code == 0 {
-					success++
-				} else if resp.Code == 429 {
-					fail++
-				}
-				mu.Unlock()
-			}()
-		}
-
-		wg.Wait()
-
-		t.Logf("success=%d fail=%d", success, fail)
-
-		// 由于是1QPS,并发10个请求,最多只有1-2个能成功
-		if success == 0 {
-			t.Errorf("should have at least one success request")
-		}
-		if success > 3 {
-			t.Logf("Warning: success count %d is higher than expected (should be <= 2)", success)
-		}
-		// 至少应该有一些请求被限流
-		if fail == 0 {
-			t.Errorf("should have some limited requests")
-		}
-	})
+	if response := performRequest(t, engine, http.MethodGet, "/user"); response.Code != 0 {
+		t.Fatalf("首次请求应通过,实际错误码: %d", response.Code)
+	}
+	if response := performRequest(t, engine, http.MethodGet, "/user"); response.Code != 429 {
+		t.Fatalf("第二次请求应被限流,实际错误码: %d", response.Code)
+	}
 }
