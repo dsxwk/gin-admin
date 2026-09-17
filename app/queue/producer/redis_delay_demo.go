@@ -2,19 +2,20 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RedisDelayDemoProducer Redis延迟生产者
 type RedisDelayDemoProducer struct {
-	*base.RedisProducer
+	*queue.RedisProducer
 }
 
 // NewRedisDelayDemoProducer 创建延迟生产者实例
 func NewRedisDelayDemoProducer() *RedisDelayDemoProducer {
 	p := &RedisDelayDemoProducer{
-		RedisProducer: &base.RedisProducer{
-			Queue: "redis_delay_demo",
+		RedisProducer: &queue.RedisProducer{
+			Queue:     "redis_delay_demo",
+			GetClient: facade.RedisClient,
 		},
 	}
 
@@ -37,5 +38,7 @@ func (p *RedisDelayDemoProducer) Description() string {
 }
 
 func init() {
-	facade.Queue().Register(NewRedisDelayDemoProducer())
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		return NewRedisDelayDemoProducer()
+	})
 }

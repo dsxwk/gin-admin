@@ -2,26 +2,26 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDemoProducer RabbitMQ普通生产者
 type RabbitmqDemoProducer struct {
-	*base.RabbitmqProducer
+	*queue.RabbitmqProducer
 }
 
 // NewRabbitmqDemoProducer 创建生产者实例
 func NewRabbitmqDemoProducer() *RabbitmqDemoProducer {
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
+	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
 	p := &RabbitmqDemoProducer{
-		RabbitmqProducer: &base.RabbitmqProducer{
+		RabbitmqProducer: &queue.RabbitmqProducer{
 			Mq:       mq,
 			Queue:    "rabbitmq_demo",
 			Exchange: "rabbitmq_demo_exchange",
@@ -48,10 +48,11 @@ func (p *RabbitmqDemoProducer) Description() string {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
-		if p := NewRabbitmqDemoProducer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
+			return nil
 		}
-	}
+		return NewRabbitmqDemoProducer()
+	})
 }

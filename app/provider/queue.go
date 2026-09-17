@@ -3,11 +3,12 @@ package provider
 import (
 	"context"
 	"gin/app/facade"
-	_ "gin/app/queue/consumer"
-	_ "gin/app/queue/producer"
 	"gin/common/flag"
+	"gin/config"
 	"gin/pkg"
+	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 )
 
@@ -19,26 +20,37 @@ func init() {
 type QueueProvider struct {
 	consumers []queue.Consumer
 	producers []queue.Producer
+	log       *logger.Logger
 }
 
 // Name 服务提供者名称
 func (p *QueueProvider) Name() string {
-	return "queue"
+	return serviceprovider.ServiceQueue
 }
 
-// Register 注册服务到门面
-func (p *QueueProvider) Register(app serviceprovider.App) {
-	// 注册队列门面
-	facade.Register("queue", facade.Queue())
-	p.consumers = queue.GetConsumerRegistry().GetAll()
-	p.producers = queue.GetProducerRegistry().GetAll()
+// Register 注册队列服务和队列定义
+func (p *QueueProvider) Register(app *container.Container) {
+	app.Set(serviceprovider.ServiceQueue, facade.NewQueueFacade())
+	consumers := queue.GetConsumerRegistry()
+	producers := queue.GetProducerRegistry()
+
+	if err := consumers.RegisterFactories(); err != nil {
+		flag.Errorf("%v", err)
+	}
+	if err := producers.RegisterFactories(); err != nil {
+		flag.Errorf("%v", err)
+	}
+
+	p.consumers = consumers.GetAll()
+	p.producers = producers.GetAll()
 	flag.Infof(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
 }
 
 // Boot 启动服务
-func (p *QueueProvider) Boot(app serviceprovider.App) {
-	cfg := facade.Config()
-	log := facade.Log()
+func (p *QueueProvider) Boot(app *container.Container) {
+	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	log := app.Get[*logger.Logger](serviceprovider.ServiceLog)
+	p.log = log
 	if cfg == nil {
 		return
 	}
@@ -52,7 +64,7 @@ func (p *QueueProvider) Boot(app serviceprovider.App) {
 		}
 	}
 
-	p.producers = facade.Queue().GetAllProducers()
+	p.producers = queue.GetProducerRegistry().GetAll()
 }
 
 // Runners 后台运行任务
@@ -61,19 +73,21 @@ func (p *QueueProvider) Runners() []serviceprovider.Runner {
 		&queueShutdownRunner{
 			consumers: p.consumers,
 			producers: p.producers,
+			log:       p.log,
 		},
 	}
 }
 
 // Dependencies 依赖服务
 func (p *QueueProvider) Dependencies() []string {
-	return []string{"config", "log"}
+	return []string{serviceprovider.ServiceConfig, serviceprovider.ServiceLog, serviceprovider.ServiceEvent}
 }
 
 // queueShutdownRunner 队列关闭任务
 type queueShutdownRunner struct {
 	consumers []queue.Consumer
 	producers []queue.Producer
+	log       *logger.Logger
 }
 
 // Run 运行等待任务
@@ -87,14 +101,14 @@ func (r *queueShutdownRunner) Stop() error {
 	// 停止消费者
 	for _, consumer := range r.consumers {
 		if err := consumer.Stop(); err != nil {
-			facade.Log().Error(pkg.Sprintf("停止消费者 %s 失败: %v", consumer.Name(), err))
+			r.log.Error(pkg.Sprintf("停止消费者 %s 失败: %v", consumer.Name(), err))
 		}
 	}
 
 	// 关闭生产者
 	for _, producer := range r.producers {
 		if err := producer.Close(); err != nil {
-			facade.Log().Error(pkg.Sprintf("关闭生产者 %s 失败: %v", producer.Name(), err))
+			r.log.Error(pkg.Sprintf("关闭生产者 %s 失败: %v", producer.Name(), err))
 		}
 	}
 

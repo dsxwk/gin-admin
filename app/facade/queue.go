@@ -4,55 +4,45 @@ import (
 	"context"
 	"fmt"
 	"gin/common/flag"
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/queue"
-	"sync"
 )
 
-var (
-	queueOnce   sync.Once
-	queueFacade *QueueFacade
-)
-
+// Queue 队列门面
 func Queue() *QueueFacade {
-	queueOnce.Do(func() {
-		queueFacade = &QueueFacade{
-			producers: make(map[string]queue.Producer),
-		}
-	})
-	return queueFacade
+	return container.Default().Get[*QueueFacade](serviceprovider.ServiceQueue)
 }
 
-type QueueFacade struct {
-	mu        sync.RWMutex
-	producers map[string]queue.Producer
+// NewQueueFacade 创建队列门面
+func NewQueueFacade() *QueueFacade {
+	return &QueueFacade{}
 }
+
+type QueueFacade struct{}
 
 // Register 注册队列消费者或生产者
 func (q *QueueFacade) Register[T queue.Named](item T) {
 	switch value := any(item).(type) {
 	case queue.Consumer:
-		queue.GetConsumerRegistry().Register(value)
+		if err := queue.GetConsumerRegistry().Register(value); err != nil {
+			flag.Errorf("%v", err)
+		}
 	case queue.Producer:
-		queue.GetProducerRegistry().Register(value)
+		if err := queue.GetProducerRegistry().Register(value); err != nil {
+			flag.Errorf("%v", err)
+		}
 	default:
 		flag.Errorf("queue register unsupported type: %T", item)
 	}
 }
 
 func (q *QueueFacade) Producer(name string) queue.Producer {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-
-	if p, ok := q.producers[name]; ok {
-		return p
-	}
-
-	registered := queue.GetProducerRegistry().Get(name)
-	if registered == nil {
+	registered, ok := queue.GetProducerRegistry().Get(name)
+	if !ok {
 		flag.Errorf(fmt.Sprintf("queue producer [%s] not registered", name))
 		return &nilProducer{name: name}
 	}
-	q.producers[name] = registered
 	return registered
 }
 
@@ -71,18 +61,12 @@ func (n *nilProducer) Publish(ctx context.Context, msg any) error {
 func (n *nilProducer) Close() error { return nil }
 
 func (q *QueueFacade) GetAllProducers() []queue.Producer {
-	q.mu.RLock()
-	defer q.mu.RUnlock()
-
-	producers := make([]queue.Producer, 0, len(q.producers))
-	for _, p := range q.producers {
-		producers = append(producers, p)
-	}
-	return producers
+	return queue.GetProducerRegistry().GetAll()
 }
 
 func (q *QueueFacade) Consumer(name string) queue.Consumer {
-	return queue.GetConsumerRegistry().Get(name)
+	consumer, _ := queue.GetConsumerRegistry().Get(name)
+	return consumer
 }
 
 func (q *QueueFacade) GetAllConsumers() []queue.Consumer {

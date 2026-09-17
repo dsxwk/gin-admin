@@ -2,20 +2,20 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 
 	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDemoProducer Kafka普通生产者
 type KafkaDemoProducer struct {
-	*base.KafkaProducer
+	*queue.KafkaProducer
 }
 
 // NewKafkaDemoProducer 创建生产者实例
 func NewKafkaDemoProducer() *KafkaDemoProducer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "kafka_demo",
@@ -24,7 +24,7 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 	}
 
 	p := &KafkaDemoProducer{
-		KafkaProducer: &base.KafkaProducer{
+		KafkaProducer: &queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Key:   "kafka_demo_key",
@@ -50,10 +50,11 @@ func (p *KafkaDemoProducer) Description() string {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if p := NewKafkaDemoProducer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDemoProducer()
+	})
 }

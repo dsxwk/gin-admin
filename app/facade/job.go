@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/common/flag"
+	"gin/pkg/container"
+	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/debugger"
 	jsjob "gin/pkg/serviceprovider/job"
+	"gin/pkg/serviceprovider/queue"
 	"sync"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/segmentio/kafka-go"
 )
@@ -23,17 +25,14 @@ const JobRabbitmqRouting = "job"
 const JobRabbitmqDelayExchange = "job_delay_exchange"
 const JobRabbitmqDelayQueue = "job_delay_queue"
 
-var (
-	jobOnce   sync.Once
-	jobFacade *JobFacade
-)
-
-// Job 任务门面实例(单例)
+// Job 任务门面实例
 func Job() *JobFacade {
-	jobOnce.Do(func() {
-		jobFacade = &JobFacade{}
-	})
-	return jobFacade
+	return container.Default().Get[*JobFacade](serviceprovider.ServiceJob)
+}
+
+// NewJobFacade 创建任务门面
+func NewJobFacade() *JobFacade {
+	return &JobFacade{}
 }
 
 type JobFacade struct {
@@ -107,7 +106,7 @@ func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) e
 	var dispatchErr error
 	switch conn {
 	case "sync":
-		dispatchErr = j.dispatchSync(jb, payloadBytes)
+		dispatchErr = j.dispatchSync(ctx, jobName, payloadBytes)
 	case "redis":
 		dispatchErr = j.dispatchRedis(ctx, jobName, payloadBytes, delayMs)
 	case "kafka":
@@ -133,12 +132,8 @@ func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) e
 	return dispatchErr
 }
 
-func (j *JobFacade) dispatchSync(jb jsjob.Job, payloadBytes []byte) error {
-	p := jb.NewPayload()
-	if err := json.Unmarshal(payloadBytes, p); err != nil {
-		return err
-	}
-	return jb.Handle(p)
+func (j *JobFacade) dispatchSync(ctx context.Context, jobName string, payloadBytes []byte) error {
+	return jsjob.Execute(ctx, jsjob.NewMessage(jobName, payloadBytes, 0))
 }
 
 func (j *JobFacade) dispatchRedis(ctx context.Context, jobName string, payloadBytes []byte, delayMs int64) error {
@@ -148,24 +143,27 @@ func (j *JobFacade) dispatchRedis(ctx context.Context, jobName string, payloadBy
 	}
 
 	if delayMs > 0 {
-		msg := DelayedMessage{
-			JobName: jobName,
-			Payload: payloadBytes,
-		}
+		msg := jsjob.NewMessage(jobName, payloadBytes, time.Duration(delayMs)*time.Millisecond)
 		msgBytes, err := json.Marshal(msg)
 		if err != nil {
 			return err
 		}
-		score := float64(time.Now().UnixMilli() + delayMs)
-		return client.ZAdd(ctx, "job:queue:delayed", &redis.Z{Score: score, Member: string(msgBytes)}).Err()
+		return queue.PublishRedisMessage(
+			ctx,
+			client,
+			"job:queue",
+			"job:queue:delayed",
+			msgBytes,
+			time.Duration(delayMs)*time.Millisecond,
+		)
 	}
 
-	msg := buildJobMessage(jobName, payloadBytes, 0)
+	msg := jsjob.NewMessage(jobName, payloadBytes, 0)
 	msgBytes, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
-	return client.LPush(ctx, "job:queue", string(msgBytes)).Err()
+	return queue.PublishRedisMessage(ctx, client, "job:queue", "job:queue:delayed", msgBytes, 0)
 }
 
 func (j *JobFacade) dispatchKafka(ctx context.Context, jobName string, payloadBytes []byte, delayMs int64) error {
@@ -177,7 +175,7 @@ func (j *JobFacade) dispatchKafka(ctx context.Context, jobName string, payloadBy
 	if j.kafkaWriter == nil {
 		return fmt.Errorf("kafka writer 未初始化")
 	}
-	msg := buildJobMessage(jobName, payloadBytes, delayMs)
+	msg := jsjob.NewMessage(jobName, payloadBytes, time.Duration(delayMs)*time.Millisecond)
 	msgBytes, err := json.Marshal(msg)
 	if err != nil {
 		return err
@@ -196,7 +194,7 @@ func (j *JobFacade) dispatchRabbitmq(ctx context.Context, jobName string, payloa
 	}
 	// 延迟消息: 发送到延迟exchange, 通过TTL+DLX自动到期后路由到普通队列
 	if delayMs > 0 {
-		msg := buildJobMessage(jobName, payloadBytes, 0)
+		msg := jsjob.NewMessage(jobName, payloadBytes, 0)
 		msgBytes, err := json.Marshal(msg)
 		if err != nil {
 			return err
@@ -215,7 +213,7 @@ func (j *JobFacade) dispatchRabbitmq(ctx context.Context, jobName string, payloa
 		)
 	}
 	// 普通消息: 直接发送到普通exchange
-	msg := buildJobMessage(jobName, payloadBytes, 0)
+	msg := jsjob.NewMessage(jobName, payloadBytes, 0)
 	msgBytes, err := json.Marshal(msg)
 	if err != nil {
 		return err
@@ -228,28 +226,6 @@ func (j *JobFacade) dispatchRabbitmq(ctx context.Context, jobName string, payloa
 		false,
 		amqp091.Publishing{ContentType: "application/json", Body: msgBytes},
 	)
-}
-
-func buildJobMessage(jobName string, payloadBytes []byte, delayMs int64) JobMessage {
-	msg := JobMessage{
-		JobName: jobName,
-		Payload: payloadBytes,
-	}
-	if delayMs > 0 {
-		msg.RunAt = time.Now().UnixMilli() + delayMs
-	}
-	return msg
-}
-
-type JobMessage struct {
-	JobName string          `json:"jobName"`
-	Payload json.RawMessage `json:"payload"`
-	RunAt   int64           `json:"runAt,omitempty"`
-}
-
-type DelayedMessage struct {
-	JobName string          `json:"jobName"`
-	Payload json.RawMessage `json:"payload"`
 }
 
 type JobStats struct {

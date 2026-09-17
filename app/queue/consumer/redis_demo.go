@@ -2,15 +2,15 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RedisDemoConsumer Redis普通消费者
 type RedisDemoConsumer struct {
-	*base.RedisConsumer
+	*queue.RedisConsumer
 }
 
 // RedisDemoPayload 消息体
@@ -30,8 +30,10 @@ func (c *RedisDemoConsumer) Handle(payload any) error {
 
 func NewRedisDemoConsumer() *RedisDemoConsumer {
 	return &RedisDemoConsumer{
-		RedisConsumer: &base.RedisConsumer{
-			Queue: "redis_demo",
+		RedisConsumer: &queue.RedisConsumer{
+			Queue:     "redis_demo",
+			GetClient: facade.RedisClient,
+			Log:       facade.Log(),
 		},
 	}
 }
@@ -65,5 +67,7 @@ func (c *RedisDemoConsumer) Enabled(cfg *config.Config) bool {
 }
 
 func init() {
-	facade.Queue().Register(NewRedisDemoConsumer())
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		return NewRedisDemoConsumer()
+	})
 }

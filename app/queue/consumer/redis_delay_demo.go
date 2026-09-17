@@ -2,15 +2,15 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RedisDelayDemoConsumer Redis延迟消费者
 type RedisDelayDemoConsumer struct {
-	*base.RedisConsumer
+	*queue.RedisConsumer
 }
 
 // RedisDelayDemoPayload 延迟消息体
@@ -30,8 +30,10 @@ func (c *RedisDelayDemoConsumer) Handle(payload any) error {
 
 func NewRedisDelayDemoConsumer() *RedisDelayDemoConsumer {
 	return &RedisDelayDemoConsumer{
-		RedisConsumer: &base.RedisConsumer{
-			Queue: "redis_delay_demo",
+		RedisConsumer: &queue.RedisConsumer{
+			Queue:     "redis_delay_demo",
+			GetClient: facade.RedisClient,
+			Log:       facade.Log(),
 		},
 	}
 }
@@ -65,5 +67,7 @@ func (c *RedisDelayDemoConsumer) Enabled(cfg *config.Config) bool {
 }
 
 func init() {
-	facade.Queue().Register(NewRedisDelayDemoConsumer())
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		return NewRedisDelayDemoConsumer()
+	})
 }

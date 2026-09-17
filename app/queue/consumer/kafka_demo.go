@@ -2,10 +2,10 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -13,7 +13,7 @@ import (
 
 // KafkaDemoConsumer Kafka普通消费者
 type KafkaDemoConsumer struct {
-	*base.KafkaConsumer
+	*queue.KafkaConsumer
 }
 
 // KafkaDemoPayload 消息体
@@ -39,7 +39,7 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "kafka_demo",
@@ -52,7 +52,7 @@ func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	})
 
 	return &KafkaDemoConsumer{
-		KafkaConsumer: &base.KafkaConsumer{
+		KafkaConsumer: &queue.KafkaConsumer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
@@ -83,10 +83,11 @@ func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if c := NewKafkaDemoConsumer(); c != nil {
-			facade.Queue().Register(c)
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDemoConsumer()
+	})
 }

@@ -2,20 +2,20 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 
 	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDelayDemoProducer Kafka延迟生产者
 type KafkaDelayDemoProducer struct {
-	*base.KafkaProducer
+	*queue.KafkaProducer
 }
 
 // NewKafkaDelayDemoProducer 创建延迟生产者实例
 func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "kafka_delay_demo",
@@ -24,7 +24,7 @@ func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 	}
 
 	p := &KafkaDelayDemoProducer{
-		KafkaProducer: &base.KafkaProducer{
+		KafkaProducer: &queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_delay_demo",
 			Key:   "kafka_delay_demo_key",
@@ -50,10 +50,11 @@ func (p *KafkaDelayDemoProducer) Description() string {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if p := NewKafkaDelayDemoProducer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
+		return NewKafkaDelayDemoProducer()
+	})
 }

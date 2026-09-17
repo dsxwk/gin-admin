@@ -3,9 +3,9 @@ package queue
 import (
 	"context"
 	"encoding/json"
-	"gin/common/flag"
+	"errors"
+	"fmt"
 	"gin/config"
-	"os"
 	"sync"
 )
 
@@ -26,15 +26,22 @@ type Consumer interface {
 type ConsumerStatus string
 
 const (
-	ConsumerStatusStopped ConsumerStatus = "stopped"
-	ConsumerStatusRunning ConsumerStatus = "running"
-	ConsumerStatusError   ConsumerStatus = "error"
+	ConsumerStatusStopped  ConsumerStatus = "stopped"
+	ConsumerStatusStarting ConsumerStatus = "starting"
+	ConsumerStatusRunning  ConsumerStatus = "running"
+	ConsumerStatusError    ConsumerStatus = "error"
 )
 
 // PayloadHandler 消息负载处理接口
 type PayloadHandler interface {
 	NewPayload() any
 	Handle(payload any) error
+}
+
+// ContextPayloadHandler 支持上下文的消息处理接口
+type ContextPayloadHandler interface {
+	PayloadHandler
+	HandleContext(ctx context.Context, payload any) error
 }
 
 // Producer 队列生产者接口
@@ -61,32 +68,66 @@ type ConsumerHandler interface {
 
 // Registry 泛型注册表
 type Registry[T Named] struct {
-	items map[string]T
-	mu    sync.RWMutex
+	items     map[string]T
+	factories []func() T
+	mu        sync.RWMutex
 }
 
 func NewRegistry[T Named]() *Registry[T] {
 	return &Registry[T]{items: make(map[string]T)}
 }
 
-func (r *Registry[T]) Register(item T) {
+func (r *Registry[T]) Register(item T) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	name := item.Name()
 
 	if _, exists := r.items[name]; exists {
-		flag.Errorf("Queue %s already registered", name)
-		os.Exit(1)
+		return fmt.Errorf("queue %s already registered", name)
 	}
 
 	r.items[name] = item
+	return nil
 }
 
-func (r *Registry[T]) Get(name string) T {
+// RegisterFactory 注册延迟创建工厂
+func (r *Registry[T]) RegisterFactory(factory func() T) {
+	if factory == nil {
+		return
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.factories = append(r.factories, factory)
+}
+
+// RegisterFactories 创建并注册全部延迟实例
+func (r *Registry[T]) RegisterFactories() error {
+	r.mu.Lock()
+	factories := r.factories
+	r.factories = nil
+	r.mu.Unlock()
+
+	var errs []error
+	for _, factory := range factories {
+		item := factory()
+		if any(item) == nil {
+			continue
+		}
+		if err := r.Register(item); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
+
+func (r *Registry[T]) Get(name string) (T, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return r.items[name]
+
+	item, exists := r.items[name]
+	return item, exists
 }
 
 func (r *Registry[T]) GetAll() []T {
@@ -137,9 +178,20 @@ func GetProducerRegistry() *Registry[Producer] {
 
 // TryHandle 自动反序列化并调用处理
 func TryHandle[T PayloadHandler](h T, body []byte) error {
+	return TryHandleContext(context.Background(), h, body)
+}
+
+// TryHandleContext 自动反序列化并调用处理,支持上下文
+func TryHandleContext[T PayloadHandler](ctx context.Context, h T, body []byte) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	payload := h.NewPayload()
 	if err := json.Unmarshal(body, payload); err != nil {
 		return err
+	}
+	if handler, ok := any(h).(ContextPayloadHandler); ok {
+		return handler.HandleContext(ctx, payload)
 	}
 	return h.Handle(payload)
 }

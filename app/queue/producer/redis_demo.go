@@ -2,19 +2,20 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RedisDemoProducer Redis普通生产者
 type RedisDemoProducer struct {
-	*base.RedisProducer
+	*queue.RedisProducer
 }
 
 // NewRedisDemoProducer 创建生产者实例
 func NewRedisDemoProducer() *RedisDemoProducer {
 	p := &RedisDemoProducer{
-		RedisProducer: &base.RedisProducer{
-			Queue: "redis_demo",
+		RedisProducer: &queue.RedisProducer{
+			Queue:     "redis_demo",
+			GetClient: facade.RedisClient,
 		},
 	}
 
@@ -37,5 +38,7 @@ func (p *RedisDemoProducer) Description() string {
 }
 
 func init() {
-	facade.Queue().Register(NewRedisDemoProducer())
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		return NewRedisDemoProducer()
+	})
 }

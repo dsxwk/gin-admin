@@ -2,15 +2,15 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDemoConsumer RabbitMQ普通消费者
 type RabbitmqDemoConsumer struct {
-	*base.RabbitmqConsumer
+	*queue.RabbitmqConsumer
 }
 
 // RabbitmqDemoPayload 示例消息体
@@ -36,14 +36,14 @@ func (c *RabbitmqDemoConsumer) Handle(payload any) error {
 
 func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
+	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
 	return &RabbitmqDemoConsumer{
-		RabbitmqConsumer: &base.RabbitmqConsumer{
+		RabbitmqConsumer: &queue.RabbitmqConsumer{
 			Mq:       mq,
 			Queue:    "rabbitmq_demo",
 			Exchange: "rabbitmq_demo_exchange",
@@ -75,10 +75,11 @@ func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
-		if c := NewRabbitmqDemoConsumer(); c != nil {
-			facade.Queue().Register(c)
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
+			return nil
 		}
-	}
+		return NewRabbitmqDemoConsumer()
+	})
 }

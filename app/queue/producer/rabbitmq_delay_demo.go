@@ -2,26 +2,26 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDelayDemoProducer RabbitMQ延迟生产者
 type RabbitmqDelayDemoProducer struct {
-	*base.RabbitmqProducer
+	*queue.RabbitmqProducer
 }
 
 // NewRabbitmqDelayDemoProducer 创建延迟生产者实例
 func NewRabbitmqDelayDemoProducer() *RabbitmqDelayDemoProducer {
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
+	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
 	p := &RabbitmqDelayDemoProducer{
-		RabbitmqProducer: &base.RabbitmqProducer{
+		RabbitmqProducer: &queue.RabbitmqProducer{
 			Mq:       mq,
 			Queue:    "rabbitmq_delay_demo",
 			Exchange: "rabbitmq_delay_demo_exchange",
@@ -48,10 +48,11 @@ func (p *RabbitmqDelayDemoProducer) Description() string {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
-		if p := NewRabbitmqDelayDemoProducer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
+			return nil
 		}
-	}
+		return NewRabbitmqDelayDemoProducer()
+	})
 }

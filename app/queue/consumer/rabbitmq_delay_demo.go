@@ -2,15 +2,15 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 )
 
 // RabbitmqDelayDemoConsumer RabbitMQ延迟消费者
 type RabbitmqDelayDemoConsumer struct {
-	*base.RabbitmqConsumer
+	*queue.RabbitmqConsumer
 }
 
 // RabbitmqDelayDemoPayload 延迟消息体
@@ -36,14 +36,14 @@ func (c *RabbitmqDelayDemoConsumer) Handle(payload any) error {
 
 func NewRabbitmqDelayDemoConsumer() *RabbitmqDelayDemoConsumer {
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
+	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
 	return &RabbitmqDelayDemoConsumer{
-		RabbitmqConsumer: &base.RabbitmqConsumer{
+		RabbitmqConsumer: &queue.RabbitmqConsumer{
 			Mq:       mq,
 			Queue:    "rabbitmq_delay_demo",
 			Exchange: "rabbitmq_delay_demo_exchange",
@@ -75,10 +75,11 @@ func (c *RabbitmqDelayDemoConsumer) Enabled(cfg *config.Config) bool {
 }
 
 func init() {
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
-		if c := NewRabbitmqDelayDemoConsumer(); c != nil {
-			facade.Queue().Register(c)
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
+			return nil
 		}
-	}
+		return NewRabbitmqDelayDemoConsumer()
+	})
 }
