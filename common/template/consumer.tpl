@@ -2,10 +2,10 @@ package {{.Package}}
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
+	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
 	"github.com/segmentio/kafka-go"
 	"time"
@@ -15,11 +15,11 @@ import (
 // {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {{.TypeTitle}}消费者
 type {{.Name}}{{if .IsDelay}}Delay{{end}}Consumer struct {
 	{{- if eq .Type "kafka"}}
-	*base.KafkaConsumer
+	*queue.KafkaConsumer
 	{{- else if eq .Type "rabbitmq"}}
-	*base.RabbitmqConsumer
+	*queue.RabbitmqConsumer
 	{{- else}}
-	*base.RedisConsumer
+	*queue.RedisConsumer
 	{{- end}}
 }
 
@@ -31,7 +31,7 @@ type {{.TypeTitle}}{{.Name}}Payload struct {
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {
 	{{- if eq .Type "kafka"}}
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "{{.Topic}}",
@@ -44,7 +44,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 	})
 
 	return &{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{
-		KafkaConsumer: &base.KafkaConsumer{
+		KafkaConsumer: &queue.KafkaConsumer{
 			Kafka: kfk,
 			Topic: "{{.Topic}}",
 			Group: "{{.Group}}",
@@ -52,14 +52,14 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 	}
 	{{- else if eq .Type "rabbitmq"}}
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
+	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
 	return &{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{
-		RabbitmqConsumer: &base.RabbitmqConsumer{
+		RabbitmqConsumer: &queue.RabbitmqConsumer{
 			Mq:      mq,
 			Queue:   "{{.Queue}}",
 			Exchange: "{{.Exchange}}",
@@ -68,8 +68,10 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *{{.Name}}{{if .IsDelay}}
 	}
 	{{- else}}
 	return &{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{
-		RedisConsumer: &base.RedisConsumer{
-			Queue: "{{.Queue}}",
+		RedisConsumer: &queue.RedisConsumer{
+			Queue:     "{{.Queue}}",
+			GetClient: facade.RedisClient,
+			Log:       facade.Log(),
 		},
 	}
 	{{- end}}
@@ -139,21 +141,18 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(payload any) error
 }
 
 func init() {
-	{{- if eq .Type "kafka"}}
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if c := New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer(); c != nil {
-			facade.Queue().Register(c)
+	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
+		{{- if eq .Type "kafka"}}
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
-	{{- else if eq .Type "rabbitmq"}}
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
-		if c := New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer(); c != nil {
-			facade.Queue().Register(c)
+		{{- else if eq .Type "rabbitmq"}}
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
+			return nil
 		}
-	}
-	{{- else}}
-	facade.Queue().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer())
-	{{- end}}
+		{{- end}}
+		return New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer()
+	})
 }

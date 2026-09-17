@@ -3,7 +3,7 @@ package {{.Package}}
 import (
 	"context"
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "rabbitmq"}}
 	"gin/pkg"
 	{{- end}}
@@ -15,11 +15,11 @@ import (
 // {{.Name}}{{if .IsDelay}}Delay{{end}}Producer {{.TypeTitle}}生产者
 type {{.Name}}{{if .IsDelay}}Delay{{end}}Producer struct {
 	{{- if eq .Type "kafka"}}
-	*base.KafkaProducer
+	*queue.KafkaProducer
 	{{- else if eq .Type "rabbitmq"}}
-	*base.RabbitmqProducer
+	*queue.RabbitmqProducer
 	{{- else}}
-	*base.RedisProducer
+	*queue.RedisProducer
 	{{- end}}
 }
 
@@ -27,7 +27,7 @@ type {{.Name}}{{if .IsDelay}}Delay{{end}}Producer struct {
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer {
 	{{- if eq .Type "kafka"}}
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "{{.Topic}}",
@@ -36,7 +36,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 	}
 
 	p := &{{.Name}}{{if .IsDelay}}Delay{{end}}Producer{
-		KafkaProducer: &base.KafkaProducer{
+		KafkaProducer: &queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "{{.Topic}}",
 			Key:   "{{.Key}}",
@@ -46,14 +46,14 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 	return p
 	{{- else if eq .Type "rabbitmq"}}
 	log := facade.Log()
-	mq, err := base.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
+	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
 		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
 	p := &{{.Name}}{{if .IsDelay}}Delay{{end}}Producer{
-		RabbitmqProducer: &base.RabbitmqProducer{
+		RabbitmqProducer: &queue.RabbitmqProducer{
 			Mq:      mq,
 			Queue:   "{{.Queue}}",
 			Exchange: "{{.Exchange}}",
@@ -64,8 +64,9 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *{{.Name}}{{if .IsDelay}}
 	return p
 	{{- else}}
 	p := &{{.Name}}{{if .IsDelay}}Delay{{end}}Producer{
-		RedisProducer: &base.RedisProducer{
-			Queue: "{{.Queue}}",
+		RedisProducer: &queue.RedisProducer{
+			Queue:     "{{.Queue}}",
+			GetClient: facade.RedisClient,
 		},
 	}
 	p.RedisProducer.Owner = p
@@ -114,21 +115,18 @@ func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Close() error {
 }
 
 func init() {
-	{{- if eq .Type "kafka"}}
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Kafka.Enabled {
-		if p := New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer(); p != nil {
-			facade.Queue().Register(p)
+	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
+		{{- if eq .Type "kafka"}}
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Kafka.Enabled {
+			return nil
 		}
-	}
-	{{- else if eq .Type "rabbitmq"}}
-	cfg := facade.Config()
-	if cfg != nil && cfg.Queue.Rabbitmq.Enabled {
-		if p := New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer(); p != nil {
-			facade.Queue().Register(p)
+		{{- else if eq .Type "rabbitmq"}}
+		cfg := facade.Config()
+		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
+			return nil
 		}
-	}
-	{{- else}}
-	facade.Queue().Register(New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer())
-	{{- end}}
+		{{- end}}
+		return New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer()
+	})
 }
