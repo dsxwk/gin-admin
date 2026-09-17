@@ -7,6 +7,7 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/logger"
+	"path/filepath"
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
@@ -24,7 +25,13 @@ func NewDiskCache(conf *config.Config) *CacheProxy {
 	if diskCache != nil {
 		return diskCache
 	}
-	opts := badger.DefaultOptions(conf.Cache.Disk.Path)
+	path := conf.Cache.Disk.Path
+	if path != "" && !filepath.IsAbs(path) {
+		if rootPath := config.GetRootPath(); rootPath != "" {
+			path = filepath.Join(rootPath, path)
+		}
+	}
+	opts := badger.DefaultOptions(path)
 	db, err := badger.Open(opts)
 	if err != nil {
 		logger.NewLogger(conf).Error(fmt.Sprintf("init disk cache failed: %s", err.Error()))
