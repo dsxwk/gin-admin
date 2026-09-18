@@ -199,6 +199,16 @@
 ![image](docs/images/Swagger_Api_04.png)
 ![image](docs/images/Swagger_Api_05.png)
 ![image](docs/images/Swagger_Api_06.png)
+![image](docs/images/Login_2026-08-07_16-38-36.png)
+![image](docs/images/Home_2026-08-07_16-40-04.png)
+![image](docs/images/Menu_2026-08-07_16-41-10.png)
+![image](docs/images/User_2026-08-07_16-41-45.png)
+![image](docs/images/Dept_2026-08-07_16-40-36.png)
+![image](docs/images/Role_2026-08-10_11-34-01.png)
+![image](docs/images/System_2026-08-10_11-34-26.png)
+![image](docs/images/Ai_assistant_2026-08-13_14-10-24_1.png)
+![image](docs/images/Ai_assistant_2026-08-13_14-08-37_2.png)
+![image](docs/images/Ai_assistant_2026-08-13_14-09-41_3.png)
 
 ## Gin框架介绍
 
