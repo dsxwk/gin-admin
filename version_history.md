@@ -1,5 +1,10 @@
 # Version History
 
+## v3.2.1
+> - Do not output console during permission initialization adjustment
+> - Update the Swagger documentation
+> - Add front-end effect preview image
+
 ## v3.2.0
 > - Public response has added a chained call for response headers.
 > - Adjust the disk cache to use absolute paths.
