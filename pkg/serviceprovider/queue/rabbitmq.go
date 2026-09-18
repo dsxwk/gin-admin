@@ -156,7 +156,7 @@ func (c *RabbitmqConsumer) handleMessage[T ConsumerHandler](msg amqp091.Delivery
 	maxRetry := h.Retry()
 	retry := 0
 	for {
-		err := TryHandleContext(c.ctx, h, msg.Body)
+		err := TryHandle(c.ctx, h, msg.Body)
 		if err == nil {
 			if ackErr := msg.Ack(false); ackErr != nil {
 				c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] Ack error: %v", ackErr))

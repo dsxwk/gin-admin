@@ -176,13 +176,8 @@ func GetProducerRegistry() *Registry[Producer] {
 	return Producers
 }
 
-// TryHandle 自动反序列化并调用处理
-func TryHandle[T PayloadHandler](h T, body []byte) error {
-	return TryHandleContext(context.Background(), h, body)
-}
-
-// TryHandleContext 自动反序列化并调用处理,支持上下文
-func TryHandleContext[T PayloadHandler](ctx context.Context, h T, body []byte) error {
+// TryHandle 自动反序列化并调用处理,支持上下文
+func TryHandle[T PayloadHandler](ctx context.Context, h T, body []byte) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}

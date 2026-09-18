@@ -130,7 +130,7 @@ func (c *RedisConsumer) handleMessage[T ConsumerHandler](body []byte, h T) {
 	retry := h.Retry()
 	var handleErr error
 	for attempt := 0; attempt < retry || attempt == 0; attempt++ {
-		handleErr = TryHandleContext(c.ctx, h, body)
+		handleErr = TryHandle(c.ctx, h, body)
 		if handleErr == nil {
 			return
 		}

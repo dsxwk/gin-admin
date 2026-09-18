@@ -98,7 +98,7 @@ func (c *KafkaConsumer) consumeLoop[T ConsumerHandler](h T) {
 
 	var handleErr error
 	for range retry {
-		handleErr = TryHandleContext(c.ctx, h, body)
+		handleErr = TryHandle(c.ctx, h, body)
 		if handleErr == nil {
 			break
 		}
