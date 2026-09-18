@@ -160,7 +160,7 @@
 >     - **Operation log statistics**: Query PV, UV, request method distribution, status code statistics, etc. for
         today/specified date
 >     - **System configuration query**: Query system configuration items such as site name and logo
->     - **User search**:[readme_zh.md](readme_zh.md) Search system users by name or username
+>     - **User search**: Search system users by name or username
 >     - **Department query**: Query department tree structure, specify superior sub departments, and number of
         department members
 >     - **Dict query**: Query gender, status, and other enumerated dictionary entries
