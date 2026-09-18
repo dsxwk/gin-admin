@@ -231,7 +231,7 @@
 
 # Version History
 
-> - Latest Version [v3.1.5](version_history.md#v315)
+> - Latest Version [v3.2.0](version_history.md#v320)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -324,6 +324,7 @@ $ ./cli demo:command --args=11
 │   ├── controller              # Controller
 │   ├── enum                    # Enum
 │   ├── errcode                 # Errcode
+│   ├── es                      # ES
 │   ├── event                   # Event
 │   ├── facade                  # Facade
 │   ├── job                     # Job
@@ -357,15 +358,20 @@ $ ./cli demo:command --args=11
 │   ├── cli                     # Command
 │   │   ├── grpcgen             # gRPC Code Generator
 │   │   └── make                # Make Command
+│   ├── container               # Container
 │   ├── errcode                 # Errcode
 │   ├── serviceprovider         # Service Providers Package
+│   │   ├── agent               # Agent Provider
 │   │   ├── cache               # Cache
 │   │   ├── debugger            # Debugger
+│   │   ├── es                  # ES
 │   │   ├── eventbus            # Event Bus
 │   │   ├── grpcclient          # gRPC Client
 │   │   ├── http                # Http Request
+│   │   ├── job                 # Task Schedule
 │   │   ├── lang                # Language
 │   │   ├── logger              # Logger
+│   │   ├── mcp                 # MCP Tool
 │   │   ├── orm                 # Orm Tool
 │   │   ├── queue               # Queue
 │   │   ├── ratelimit           # Rate Limit

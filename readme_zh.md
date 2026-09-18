@@ -220,7 +220,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.1.5](version_history_zh.md#v315)
+> - 最新版本 [v3.2.0](version_history_zh.md#v320)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -310,6 +310,7 @@ $ ./cli demo:command --args=11
 │   ├── controller            # 控制器
 │   ├── enum                  # 枚举
 │   ├── errcode               # 错误码
+│   ├── es                    # ES
 │   ├── event                 # 事件
 │   ├── facade                # 门面
 │   ├── job                   # 任务
@@ -343,15 +344,20 @@ $ ./cli demo:command --args=11
 │   ├── cli                   # 命令行
 │   │   ├── grpcgen           # gRPC代码生成
 │   │   └── make              # 生成命令
+│   ├── container             # 容器
 │   ├── errcode               # 错误码
 │   ├── serviceprovider       # 服务提供者相关包
+│   │   ├── agent             # Agent Provider
 │   │   ├── cache             # 缓存
 │   │   ├── debugger          # 调试器
+│   │   ├── es                # ES
 │   │   ├── eventbus          # 事件总线
 │   │   ├── grpcclient        # gRPC客户端
 │   │   ├── http              # http请求
+│   │   ├── job               # 任务调度
 │   │   ├── lang              # 语言包
 │   │   ├── logger            # 日志
+│   │   ├── mcp               # MCP工具
 │   │   ├── orm               # orm工具
 │   │   ├── queue             # 队列
 │   │   ├── ratelimit         # 限流

@@ -1,5 +1,18 @@
 # 版本记录
 
+## v3.2.0
+> - 公共响应新增响应头链式调用。
+> - 调整磁盘缓存使用绝对路径。
+> - 重构服务容器与服务提供者,新增pkg/container,统一容器注入、注册、启动和依赖排序。
+> - 删除旧app/facade/facade.go,各门面改为直接从容器解析服务。
+> - 调整全部Provider,统一服务初始化、默认连接、后台任务和优雅关闭。
+> - 重构队列与Job,新增 Kafka、RabbitMQ、Redis 驱动及统一 Consumer、Executor、Message。
+> - 删除旧队列Base和旧Job Worker,更新消费者、生产者示例及代码模板。
+> - 新增Cache Manager、ORM Manager,统一缓存和数据库连接管理。
+> - 重构限流模块,新增ratelimit.Manager,内部化Store,并重新划分门面、Provider和Gin中间件。
+> - 调整Application生命周期、EventBus、ES Client、CLI、Router和Bootstrap。
+> - 新增队列与限流测试,更新现有测试、README中英文文档。
+
 ## v3.1.5
 > - 移除mcp未使用的错误码
 > - es、logger、http包优化

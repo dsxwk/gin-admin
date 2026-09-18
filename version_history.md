@@ -1,5 +1,18 @@
 # Version History
 
+## v3.2.0
+> - Public response has added a chained call for response headers.
+> - Adjust the disk cache to use absolute paths.
+> - Refactor the service container and service provider, add pkg/container, and unify container injection, registration, startup, and dependency ordering.
+> - Delete the old app/facade/facade.go, and change each facade to directly resolve services from the container.
+> - Adjust all providers, unify service initialization, default connections, background tasks, and graceful shutdown.
+> - Refactor the queue and Job, add Kafka, RabbitMQ, and Redis drivers, and unify Consumer, Executor, and Message.
+> - Delete the old Base queue and Job Worker, and update the consumer and producer examples as well as the code templates.
+> - Added Cache Manager and ORM Manager to unify cache and database connection management.
+> - Refactor the rate limiting module, add a ratelimit.Manager, internalize the Store, and re-divide the facade, Provider, and Gin middleware.
+> - Adjust the Application lifecycle, EventBus, ES Client, CLI, Router, and Bootstrap.
+> - Added queue and throttling tests, updated existing tests and README documents in both Chinese and English.
+
 ## v3.1.5
 > - Remove unused error codes in mcp
 > - Optimization of es, logger, and http packages
