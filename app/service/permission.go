@@ -7,6 +7,9 @@ import (
 	"gin/app/request"
 	"gin/common/base"
 	"strings"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type PermissionService struct {
@@ -79,7 +82,9 @@ func (s *PermissionService) SyncRoutePermissions(ctx context.Context, permission
 	}
 
 	// 查询数据库中已有的权限
-	db.Model(&m).Where("`key` IN ?", routeKeyList).Find(&models)
+	db.Session(&gorm.Session{
+		Logger: logger.Default.LogMode(logger.Silent),
+	}).Model(&m).Where("`key` IN ?", routeKeyList).Find(&models)
 	existingMap := make(map[string]bool, len(models))
 	for _, p := range models {
 		existingMap[p.Key] = true
@@ -101,7 +106,9 @@ func (s *PermissionService) SyncRoutePermissions(ctx context.Context, permission
 	}
 
 	// 清理已删除的路由权限
-	db.Model(&model.Permission{}).
+	db.Session(&gorm.Session{
+		Logger: logger.Default.LogMode(logger.Silent),
+	}).Model(&model.Permission{}).
 		Where("`key` NOT IN ?", routeKeyList).
 		Delete(&model.Permission{})
 
