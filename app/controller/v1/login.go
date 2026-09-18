@@ -43,7 +43,7 @@ type CaptchaResponse struct {
 }
 
 // Login 登录
-// @Tags 登录相关swagger自动
+// @Tags 登录相关
 // @Summary 账号密码登录
 // @Description 用户账号密码登录
 // @Accept json

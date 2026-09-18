@@ -198,13 +198,12 @@
 ![image](docs/images/Cli_2026-08-07_16-30-09_3.png)
 ![image](docs/images/Cli_2026-08-07_16-16-42_8.png)
 ![image](docs/images/MCP__2026-08-13_14-01-16.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-11-03_1.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-12-06_2.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-12-44_3.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-13-30_4.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-14-00_5.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-14-28_6.png)
-![image](docs/images/SwaggerApi_2026-08-07_16-15-15_7.png)
+![image](docs/images/Swagger_Api_01.png)
+![image](docs/images/Swagger_Api_02.png)
+![image](docs/images/Swagger_Api_03.png)
+![image](docs/images/Swagger_Api_04.png)
+![image](docs/images/Swagger_Api_05.png)
+![image](docs/images/Swagger_Api_06.png)
 
 ## Introduction to the Gin Framework
 
