@@ -1,7 +1,6 @@
 package request
 
 import (
-	"context"
 	"fmt"
 	"gin/app/errcode"
 	"gin/common/base"
@@ -66,9 +65,7 @@ func (s SystemConfig) Validate(data SystemConfig, scene string) error {
 }
 
 // Validate 系统配置批量更新请求验证
-func (s SystemConfigUpdates) Validate(ctx context.Context) error {
-	s.SetContext(ctx)
-
+func (s SystemConfigUpdates) Validate() error {
 	if len(s.List) == 0 {
 		return errcode.ArgsError().WithMsg("配置列表不能为空")
 	}

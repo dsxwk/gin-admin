@@ -61,8 +61,8 @@ func (s Login) ConfigValidation(v *validate.Validation) {
 func (s Login) Messages() map[string]string {
 	return validate.MS{
 		"required": pkg.Sprintf("%s {field} %s",
-			s.Trans(s.Ctx, "validator.common.field", nil),
-			s.Trans(s.Ctx, "validator.common.required", nil),
+			s.Trans("validator.common.field", nil),
+			s.Trans("validator.common.required", nil),
 		),
 	}
 }
@@ -70,10 +70,10 @@ func (s Login) Messages() map[string]string {
 // Translates 字段翻译
 func (s Login) Translates() map[string]string {
 	return validate.MS{
-		"UserLogin.Username":  s.Trans(s.Ctx, "validator.login.username", nil),
-		"UserLogin.Password":  s.Trans(s.Ctx, "validator.login.password", nil),
-		"RefreshToken.Token":  s.Trans(s.Ctx, "validator.login.refreshToken", nil),
-		"UserLogin.CaptchaID": s.Trans(s.Ctx, "login.captchaId", nil),
-		"UserLogin.Code":      s.Trans(s.Ctx, "login.code", nil),
+		"UserLogin.Username":  s.Trans("validator.login.username", nil),
+		"UserLogin.Password":  s.Trans("validator.login.password", nil),
+		"RefreshToken.Token":  s.Trans("validator.login.refreshToken", nil),
+		"UserLogin.CaptchaID": s.Trans("login.captchaId", nil),
+		"UserLogin.Code":      s.Trans("login.code", nil),
 	}
 }

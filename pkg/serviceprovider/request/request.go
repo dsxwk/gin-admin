@@ -139,29 +139,12 @@ func (c Client) Bind(ctx *gin.Context, v any) error {
 	return nil
 }
 
-type requestContextSetter interface {
-	SetContext(context.Context)
-}
-
-// setRequestContext 设置请求上下文
-func setRequestContext(ctx context.Context, data any) {
-	if setter, ok := data.(requestContextSetter); ok {
-		setter.SetContext(ctx)
-	}
-}
-
 // BindValidate 绑定参数并验证
 func (c Client) BindValidate(ctx *gin.Context, v any, scene string) error {
 	if err := c.Bind(ctx, v); err != nil {
 		return errcode.ArgsError().WithMsg(err.Error())
 	}
-	setRequestContext(ctx.Request.Context(), v)
-
-	// 场景为空不验证
-	if scene == "" {
-		return nil
-	}
-	return c.validate(v, scene)
+	return c.withContext(ctx.Request.Context(), v, scene)
 }
 
 // ValidateWithMessages 验证并自定义错误消息
@@ -191,12 +174,25 @@ func (c Client) GetValidator(data any, scene string) *validate.Validation {
 
 // Validate 通用验证函数,自动注入请求上下文
 func (c Client) Validate(ctx context.Context, data any, scene string) error {
-	setRequestContext(ctx, data)
-	return c.validate(data, scene)
+	return c.withContext(ctx, data, scene)
 }
 
-// validate 执行验证
-func (c Client) validate(data any, scene string) error {
+// WithContext 请求上下文设置接口
+type contextSetter interface {
+	WithContext(context.Context)
+}
+
+// withContext 设置上下文并执行验证
+func (c Client) withContext(ctx context.Context, data any, scene string) error {
+	if setter, ok := data.(contextSetter); ok {
+		setter.WithContext(ctx)
+	}
+
+	// 场景为空不验证
+	if scene == "" {
+		return nil
+	}
+
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errcode.ArgsError().WithMsg(v.Errors.One())

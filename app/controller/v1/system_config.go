@@ -79,7 +79,7 @@ func (s *SystemConfigController) UpdateConfig(c *gin.Context) {
 		return
 	}
 
-	err = req.Validate(ctx)
+	err = req.Validate()
 	if err != nil {
 		s.Response.Error(c, err)
 		return

@@ -1560,8 +1560,6 @@ func (s *UserController) List(c *gin.Context) {
 
 # Service
 
-> Service methods take `ctx` as the first parameter and pass it explicitly to `s.DB(ctx, model)`, `s.Cache(ctx, ...)`, event publishing, and cross-service calls. `BaseService` no longer stores a request context, so shared service objects are safe under concurrent requests.
-
 ## Service Creation Help
 
 ```bash

@@ -1550,8 +1550,6 @@ func (s *UserController) List(c *gin.Context) {
 
 # 服务
 
-> Service方法统一把`ctx`作为第一个参数,并显式传给`s.DB(ctx,model)`、`s.Cache(ctx,...)`、事件发布以及跨Service调用。`BaseService`不再保存请求上下文,共享的Service对象在并发请求下不会互相覆盖。
-
 ## 服务创建帮助
 
 ```bash
@@ -1855,6 +1853,7 @@ package router
 
 import (
   "gin/app/controller/v1"
+  
   "github.com/gin-gonic/gin"
 )
 
@@ -3357,6 +3356,7 @@ package controller
 import (
     "gin/app/facade"
     "gin/common/base"
+	
     "github.com/gin-gonic/gin"
 )
 
