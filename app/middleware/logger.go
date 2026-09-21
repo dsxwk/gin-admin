@@ -31,7 +31,7 @@ func (s Logger) Handle() gin.HandlerFunc {
 		ctx := c.Request.Context()
 
 		// 注入追踪信息
-		ctx = ctxkey.WithValue(ctx, ctxkey.TraceIdKey, traceId)
+		ctx = ctxkey.WithValue(ctx, ctxkey.TraceIDKey, traceId)
 		ctx = ctxkey.WithValue(ctx, ctxkey.IpKey, c.ClientIP())
 		ctx = ctxkey.WithValue(ctx, ctxkey.PathKey, c.Request.URL.Path)
 		ctx = ctxkey.WithValue(ctx, ctxkey.MethodKey, c.Request.Method)
