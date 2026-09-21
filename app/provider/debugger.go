@@ -6,12 +6,7 @@ import (
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/debugger"
-	"gin/pkg/serviceprovider/eventbus"
 )
-
-func init() {
-	serviceprovider.Register(&DebuggerProvider{})
-}
 
 // DebuggerProvider 调试器服务提供者
 type DebuggerProvider struct {
@@ -25,9 +20,9 @@ func (p *DebuggerProvider) Name() string {
 
 // Register 创建调试器并注册到容器
 func (p *DebuggerProvider) Register(app *container.Container) {
-	registry := app.Get[*eventbus.Registry](serviceprovider.ServiceEvent)
+	registry := app.Event()
 	p.instance = debugger.New(registry.Bus())
-	app.Set(serviceprovider.ServiceDebugger, p.instance)
+	app.SetDebugger(p.instance)
 }
 
 // Boot 启动调试器
