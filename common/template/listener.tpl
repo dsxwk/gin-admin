@@ -3,7 +3,6 @@ package {{.Package}}
 import (
     "fmt"
     "gin/app/event"
-    "gin/app/facade"
     "time"
 )
 
@@ -17,8 +16,4 @@ func (l *{{.Name}}Listener) Handle(e event.{{.EventName}}) {
         e,
         time.Now().Format("2006-01-02 15:04:05"),
     )
-}
-
-func init() {
-	facade.Event().Register(&{{.Name}}Listener{}, event.{{.EventName}}{})
 }
