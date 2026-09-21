@@ -48,13 +48,3 @@ func (p *KafkaDemoProducer) DelayMs() int64 { return 0 }
 func (p *KafkaDemoProducer) Description() string {
 	return "kafka普通队列生产者"
 }
-
-func init() {
-	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		return NewKafkaDemoProducer()
-	})
-}

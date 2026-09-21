@@ -2,19 +2,14 @@ package provider
 
 import (
 	"context"
-	"gin/app/facade"
+	appqueue "gin/app/queue"
 	"gin/common/flag"
-	"gin/config"
 	"gin/pkg"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 )
-
-func init() {
-	serviceprovider.Register(&QueueProvider{})
-}
 
 // QueueProvider 队列服务提供者
 type QueueProvider struct {
@@ -30,26 +25,22 @@ func (p *QueueProvider) Name() string {
 
 // Register 注册队列服务和队列定义
 func (p *QueueProvider) Register(app *container.Container) {
-	app.Set(serviceprovider.ServiceQueue, facade.NewQueueFacade())
-	consumers := queue.GetConsumerRegistry()
-	producers := queue.GetProducerRegistry()
-
-	if err := consumers.RegisterFactories(); err != nil {
-		flag.Errorf("%v", err)
-	}
-	if err := producers.RegisterFactories(); err != nil {
-		flag.Errorf("%v", err)
+	manager, err := queue.NewManager(app.Config, appqueue.Consumers(), appqueue.Producers())
+	if err != nil {
+		flag.Errorf("队列服务注册失败: %v", err)
+		return
 	}
 
-	p.consumers = consumers.GetAll()
-	p.producers = producers.GetAll()
+	app.SetQueue(manager)
+	p.consumers = manager.Consumers()
+	p.producers = manager.Producers()
 	flag.Infof(pkg.Sprintf("已注册 %d 个消费者, %d 个生产者", len(p.consumers), len(p.producers)))
 }
 
 // Boot 启动服务
 func (p *QueueProvider) Boot(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
-	log := app.Get[*logger.Logger](serviceprovider.ServiceLog)
+	cfg := app.Config()
+	log := app.Log()
 	p.log = log
 	if cfg == nil {
 		return
@@ -64,7 +55,6 @@ func (p *QueueProvider) Boot(app *container.Container) {
 		}
 	}
 
-	p.producers = queue.GetProducerRegistry().GetAll()
 }
 
 // Runners 后台运行任务
@@ -80,7 +70,12 @@ func (p *QueueProvider) Runners() []serviceprovider.Runner {
 
 // Dependencies 依赖服务
 func (p *QueueProvider) Dependencies() []string {
-	return []string{serviceprovider.ServiceConfig, serviceprovider.ServiceLog, serviceprovider.ServiceEvent}
+	return []string{
+		serviceprovider.ServiceConfig,
+		serviceprovider.ServiceLog,
+		serviceprovider.ServiceCache,
+		serviceprovider.ServiceEvent,
+	}
 }
 
 // queueShutdownRunner 队列关闭任务

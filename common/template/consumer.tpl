@@ -139,20 +139,3 @@ func (c *{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(payload any) error
 	// todo 处理业务逻辑
 	return nil
 }
-
-func init() {
-	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
-		{{- if eq .Type "kafka"}}
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		{{- else if eq .Type "rabbitmq"}}
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
-			return nil
-		}
-		{{- end}}
-		return New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer()
-	})
-}

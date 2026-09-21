@@ -77,13 +77,13 @@ func TestQueueRegistryRegisterAndGet(t *testing.T) {
 	require.Equal(t, queueRegistryTestItem{}, missing)
 }
 
-// TestQueueRegistryRegisterFactory 测试注册表延迟创建工厂
-func TestQueueRegistryRegisterFactory(t *testing.T) {
+// TestQueueRegistryFactory 测试注册表延迟创建工厂
+func TestQueueRegistryFactory(t *testing.T) {
 	registry := queue.NewRegistry[queueRegistryTestItem]()
 	item := queueRegistryTestItem{name: "queue_registry_factory_test"}
 	created := false
 
-	registry.RegisterFactory(func() queueRegistryTestItem {
+	registry.Factory(func() queueRegistryTestItem {
 		created = true
 		return item
 	})
@@ -136,15 +136,15 @@ func TestRedisDelayedMessageAtomicClaim(t *testing.T) {
 	require.Empty(t, second)
 }
 
-// TestQueueFacadeGetAllProducers 测试门面获取全部生产者
-func TestQueueFacadeGetAllProducers(t *testing.T) {
+// TestQueueFacadeProducers 测试门面获取全部生产者
+func TestQueueFacadeProducers(t *testing.T) {
 	producer := &queueFacadeTestProducer{name: "queue_facade_test"}
 	facade.Queue().Register(producer)
 
 	current := facade.Queue().Producer(producer.Name())
 	require.Same(t, producer, current)
 
-	producers := facade.Queue().GetAllProducers()
+	producers := facade.Queue().Producers()
 	found := false
 	for _, item := range producers {
 		if item.Name() == producer.Name() {

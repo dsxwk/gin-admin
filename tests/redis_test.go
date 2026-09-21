@@ -14,7 +14,7 @@ import (
 
 // TestRedisQueuePublish Redis队列消息发布和消费
 func TestRedisQueuePublish(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-redis-queue")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-redis-queue")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -46,7 +46,7 @@ func TestRedisQueuePublish(t *testing.T) {
 
 // TestRedisQueueDelayPublish Redis队列延迟消息发布和消费
 func TestRedisQueueDelayPublish(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-redis-delay")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-redis-delay")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -74,7 +74,7 @@ func TestRedisQueueDelayPublish(t *testing.T) {
 func TestRedisQueueStatus(t *testing.T) {
 	cfg := facade.Config()
 
-	consumers := facade.Queue().GetAllConsumers()
+	consumers := facade.Queue().Consumers()
 	if len(consumers) == 0 {
 		t.Skip("未注册消费者")
 	}

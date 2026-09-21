@@ -19,7 +19,7 @@ func TestKafkaPublish(t *testing.T) {
 		t.Skip("Kafka未启用, 跳过测试")
 	}
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-kafka-publish")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-kafka-publish")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -56,7 +56,7 @@ func TestKafkaDelayPublish(t *testing.T) {
 		t.Skip("Kafka未启用, 跳过测试")
 	}
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-kafka-delay")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-kafka-delay")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -87,7 +87,7 @@ func TestKafkaConsumerStatus(t *testing.T) {
 		t.Skip("Kafka未启用, 跳过测试")
 	}
 
-	consumers := facade.Queue().GetAllConsumers()
+	consumers := facade.Queue().Consumers()
 	if len(consumers) == 0 {
 		t.Skip("未注册消费者")
 	}

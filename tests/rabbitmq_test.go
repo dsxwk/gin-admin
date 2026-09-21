@@ -19,7 +19,7 @@ func TestRabbitMQPublish(t *testing.T) {
 		t.Skip("RabbitMQ未启用, 跳过测试")
 	}
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-rabbitmq-publish")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-rabbitmq-publish")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -56,7 +56,7 @@ func TestRabbitMQDelayPublish(t *testing.T) {
 		t.Skip("RabbitMQ未启用, 跳过测试")
 	}
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-rabbitmq-delay")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-rabbitmq-delay")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -87,7 +87,7 @@ func TestRabbitMQBatchPublish(t *testing.T) {
 		t.Skip("RabbitMQ未启用, 跳过测试")
 	}
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-rabbitmq-batch")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-rabbitmq-batch")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -117,7 +117,7 @@ func TestRabbitMQConsumerStatus(t *testing.T) {
 		t.Skip("RabbitMQ未启用, 跳过测试")
 	}
 
-	consumers := facade.Queue().GetAllConsumers()
+	consumers := facade.Queue().Consumers()
 	if len(consumers) == 0 {
 		t.Skip("未注册消费者")
 	}

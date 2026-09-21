@@ -46,13 +46,3 @@ func (p *RabbitmqDelayDemoProducer) DelayMs() int64 { return 10000 }
 func (p *RabbitmqDelayDemoProducer) Description() string {
 	return "rabbitmq延迟队列生产者"
 }
-
-func init() {
-	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
-			return nil
-		}
-		return NewRabbitmqDelayDemoProducer()
-	})
-}

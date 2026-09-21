@@ -65,9 +65,3 @@ func (c *RedisDemoConsumer) Stop() error {
 func (c *RedisDemoConsumer) Enabled(cfg *config.Config) bool {
 	return true
 }
-
-func init() {
-	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
-		return NewRedisDemoConsumer()
-	})
-}

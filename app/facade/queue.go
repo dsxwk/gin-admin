@@ -1,134 +1,96 @@
 package facade
 
 import (
-	"context"
-	"fmt"
-	"gin/common/flag"
 	"gin/pkg/container"
-	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/queue"
 )
 
 // Queue 队列门面
 func Queue() *QueueFacade {
-	return container.Default().Get[*QueueFacade](serviceprovider.ServiceQueue)
+	return &QueueFacade{manager: container.Default().Queue()}
 }
 
 // NewQueueFacade 创建队列门面
 func NewQueueFacade() *QueueFacade {
-	return &QueueFacade{}
+	return Queue()
 }
 
-type QueueFacade struct{}
+// QueueFacade 队列门面
+type QueueFacade struct {
+	manager *queue.Manager
+}
 
 // Register 注册队列消费者或生产者
 func (q *QueueFacade) Register[T queue.Named](item T) {
-	switch value := any(item).(type) {
-	case queue.Consumer:
-		if err := queue.GetConsumerRegistry().Register(value); err != nil {
-			flag.Errorf("%v", err)
-		}
-	case queue.Producer:
-		if err := queue.GetProducerRegistry().Register(value); err != nil {
-			flag.Errorf("%v", err)
-		}
-	default:
-		flag.Errorf("queue register unsupported type: %T", item)
+	if q == nil {
+		return
 	}
+	q.manager.Register(item)
 }
 
 func (q *QueueFacade) Producer(name string) queue.Producer {
-	registered, ok := queue.GetProducerRegistry().Get(name)
-	if !ok {
-		flag.Errorf(fmt.Sprintf("queue producer [%s] not registered", name))
-		return &nilProducer{name: name}
+	if q == nil {
+		return nil
 	}
-	return registered
+	return q.manager.Producer(name)
 }
 
-type nilProducer struct {
-	name string
-}
-
-func (n *nilProducer) Name() string        { return n.name }
-func (n *nilProducer) Description() string { return "not registered" }
-func (n *nilProducer) Connection() string  { return "unknown" }
-func (n *nilProducer) IsDelay() bool       { return false }
-func (n *nilProducer) DelayMs() int64      { return 0 }
-func (n *nilProducer) Publish(ctx context.Context, msg any) error {
-	return fmt.Errorf("queue producer [%s] not registered", n.name)
-}
-func (n *nilProducer) Close() error { return nil }
-
-func (q *QueueFacade) GetAllProducers() []queue.Producer {
-	return queue.GetProducerRegistry().GetAll()
+func (q *QueueFacade) Producers() []queue.Producer {
+	if q == nil {
+		return nil
+	}
+	return q.manager.Producers()
 }
 
 func (q *QueueFacade) Consumer(name string) queue.Consumer {
-	consumer, _ := queue.GetConsumerRegistry().Get(name)
-	return consumer
-}
-
-func (q *QueueFacade) GetAllConsumers() []queue.Consumer {
-	return queue.GetConsumerRegistry().GetAll()
-}
-
-func (q *QueueFacade) GetAllConsumerNames() []string {
-	return queue.GetConsumerRegistry().GetNames()
-}
-
-func (q *QueueFacade) GetRunningConsumers() []queue.Consumer {
-	consumers := queue.GetConsumerRegistry().GetAll()
-	running := make([]queue.Consumer, 0)
-	for _, c := range consumers {
-		if c.Status() == queue.ConsumerStatusRunning {
-			running = append(running, c)
-		}
+	if q == nil {
+		return nil
 	}
-	return running
+	return q.manager.Consumer(name)
 }
 
-func (q *QueueFacade) GetStoppedConsumers() []queue.Consumer {
-	consumers := queue.GetConsumerRegistry().GetAll()
-	stopped := make([]queue.Consumer, 0)
-	for _, c := range consumers {
-		if c.Status() == queue.ConsumerStatusStopped {
-			stopped = append(stopped, c)
-		}
+func (q *QueueFacade) Consumers() []queue.Consumer {
+	if q == nil {
+		return nil
 	}
-	return stopped
+	return q.manager.Consumers()
 }
 
-type ConsumerStats struct {
-	Name    string               `json:"name"`
-	Status  queue.ConsumerStatus `json:"status"`
-	Enabled bool                 `json:"enabled"`
-}
-
-func (q *QueueFacade) GetAllConsumerStats() []ConsumerStats {
-	consumers := queue.GetConsumerRegistry().GetAll()
-	stats := make([]ConsumerStats, 0, len(consumers))
-	for _, c := range consumers {
-		stats = append(stats, ConsumerStats{
-			Name:    c.Name(),
-			Status:  c.Status(),
-			Enabled: c.Enabled(Config()),
-		})
+func (q *QueueFacade) ConsumerNames() []string {
+	if q == nil {
+		return nil
 	}
-	return stats
+	return q.manager.ConsumerNames()
 }
 
-type ProducerStats struct {
-	Name string `json:"name"`
-}
-
-func (q *QueueFacade) GetAllProducerStats() []ProducerStats {
-	producers := queue.GetProducerRegistry().GetAll()
-	stats := make([]ProducerStats, 0, len(producers))
-	for _, p := range producers {
-		stats = append(stats, ProducerStats{
-			Name: p.Name(),
-		})
+func (q *QueueFacade) RunningConsumers() []queue.Consumer {
+	if q == nil {
+		return nil
 	}
-	return stats
+	return q.manager.RunningConsumers()
+}
+
+func (q *QueueFacade) StoppedConsumers() []queue.Consumer {
+	if q == nil {
+		return nil
+	}
+	return q.manager.StoppedConsumers()
+}
+
+type ConsumerStatus = queue.ConsumerStatus
+
+func (q *QueueFacade) ConsumerStatus() []ConsumerStatus {
+	if q == nil {
+		return nil
+	}
+	return q.manager.ConsumerStatus()
+}
+
+type ProducerStatus = queue.ProducerStatus
+
+func (q *QueueFacade) ProducerStatus() []ProducerStatus {
+	if q == nil {
+		return nil
+	}
+	return q.manager.ProducerStatus()
 }

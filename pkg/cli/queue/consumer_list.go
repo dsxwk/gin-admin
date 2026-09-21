@@ -2,9 +2,9 @@ package queue
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/serviceprovider/queue"
 	"sort"
 	"strings"
 
@@ -19,7 +19,7 @@ func (s *ConsumerList) Description() string        { return "消费者列表" }
 func (s *ConsumerList) Help() []base.CommandOption { return []base.CommandOption{} }
 
 func (s *ConsumerList) Execute(values map[string]string) {
-	consumers := queue.GetConsumerRegistry().GetAll()
+	consumers := facade.Queue().Consumers()
 	if len(consumers) == 0 {
 		color.Yellow("no registered consumers")
 		return

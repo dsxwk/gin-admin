@@ -81,13 +81,3 @@ func (c *KafkaDemoConsumer) Stop() error {
 func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
 	return cfg.Queue.Kafka.Enabled
 }
-
-func init() {
-	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		return NewKafkaDemoConsumer()
-	})
-}

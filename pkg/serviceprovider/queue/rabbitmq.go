@@ -59,13 +59,13 @@ type RabbitmqConsumer struct {
 	Queue    string
 	Exchange string
 	Routing  string
-	status   ConsumerStatus
+	status   string
 	statusMu sync.RWMutex
 	ctx      context.Context
 	cancel   context.CancelFunc
 }
 
-func (c *RabbitmqConsumer) Status() ConsumerStatus {
+func (c *RabbitmqConsumer) Status() string {
 	c.statusMu.RLock()
 	defer c.statusMu.RUnlock()
 	if c.status == "" {
@@ -74,7 +74,7 @@ func (c *RabbitmqConsumer) Status() ConsumerStatus {
 	return c.status
 }
 
-func (c *RabbitmqConsumer) setStatus(status ConsumerStatus) {
+func (c *RabbitmqConsumer) setStatus(status string) {
 	c.statusMu.Lock()
 	defer c.statusMu.Unlock()
 	c.status = status
@@ -259,14 +259,14 @@ func (p *RabbitmqProducer) Publish(ctx context.Context, msg any) error {
 
 	traceId := "unknown"
 	if ctx != nil {
-		if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+		if id := ctx.Value(ctxkey.TraceIDKey); id != nil {
 			if s, ok := id.(string); ok && s != "" {
 				traceId = s
 			}
 		}
 	}
 
-	p.Mq.Bus.Publish(debugger.TopicMQ, debugger.MQEvent{
+	p.Mq.Bus.Publish(ctx, debugger.TopicMQ, debugger.MQEvent{
 		TraceID: traceId,
 		Driver:  "rabbitmq",
 		Topic:   p.Exchange + ":" + p.Routing,

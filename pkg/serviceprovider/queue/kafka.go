@@ -35,13 +35,13 @@ type KafkaConsumer struct {
 	Kafka    *Kafka
 	Topic    string
 	Group    string
-	status   ConsumerStatus
+	status   string
 	statusMu sync.RWMutex
 	ctx      context.Context
 	cancel   context.CancelFunc
 }
 
-func (c *KafkaConsumer) Status() ConsumerStatus {
+func (c *KafkaConsumer) Status() string {
 	c.statusMu.RLock()
 	defer c.statusMu.RUnlock()
 	if c.status == "" {
@@ -50,7 +50,7 @@ func (c *KafkaConsumer) Status() ConsumerStatus {
 	return c.status
 }
 
-func (c *KafkaConsumer) setStatus(status ConsumerStatus) {
+func (c *KafkaConsumer) setStatus(status string) {
 	c.statusMu.Lock()
 	defer c.statusMu.Unlock()
 	c.status = status
@@ -186,14 +186,14 @@ func (p *KafkaProducer) Publish(ctx context.Context, msg any) error {
 
 	traceId := "unknown"
 	if ctx != nil {
-		if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+		if id := ctx.Value(ctxkey.TraceIDKey); id != nil {
 			if s, ok := id.(string); ok && s != "" {
 				traceId = s
 			}
 		}
 	}
 
-	p.Kafka.Bus.Publish(debugger.TopicMQ, debugger.MQEvent{
+	p.Kafka.Bus.Publish(ctx, debugger.TopicMQ, debugger.MQEvent{
 		TraceID: traceId,
 		Driver:  "kafka",
 		Topic:   p.Topic,

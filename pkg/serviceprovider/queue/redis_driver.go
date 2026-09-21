@@ -19,13 +19,13 @@ type RedisConsumer struct {
 	GetClient    func() *redis.Client
 	Log          *logger.Logger
 	Dual         bool
-	status       ConsumerStatus
+	status       string
 	statusMu     sync.RWMutex
 	ctx          context.Context
 	cancel       context.CancelFunc
 }
 
-func (c *RedisConsumer) Status() ConsumerStatus {
+func (c *RedisConsumer) Status() string {
 	c.statusMu.RLock()
 	defer c.statusMu.RUnlock()
 	if c.status == "" {
@@ -34,7 +34,7 @@ func (c *RedisConsumer) Status() ConsumerStatus {
 	return c.status
 }
 
-func (c *RedisConsumer) setStatus(status ConsumerStatus) {
+func (c *RedisConsumer) setStatus(status string) {
 	c.statusMu.Lock()
 	defer c.statusMu.Unlock()
 	c.status = status

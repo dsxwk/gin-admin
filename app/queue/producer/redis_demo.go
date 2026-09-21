@@ -36,9 +36,3 @@ func (p *RedisDemoProducer) DelayMs() int64 { return 0 }
 func (p *RedisDemoProducer) Description() string {
 	return "redis普通队列生产者"
 }
-
-func init() {
-	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
-		return NewRedisDemoProducer()
-	})
-}

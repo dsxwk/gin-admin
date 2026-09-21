@@ -73,13 +73,3 @@ func (c *RabbitmqDelayDemoConsumer) Stop() error {
 func (c *RabbitmqDelayDemoConsumer) Enabled(cfg *config.Config) bool {
 	return cfg.Queue.Rabbitmq.Enabled
 }
-
-func init() {
-	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
-			return nil
-		}
-		return NewRabbitmqDelayDemoConsumer()
-	})
-}

@@ -19,17 +19,14 @@ type Consumer interface {
 	Start() error
 	Stop() error
 	Enabled(cfg *config.Config) bool
-	Status() ConsumerStatus
+	Status() string
 }
 
-// ConsumerStatus 消费者状态
-type ConsumerStatus string
-
 const (
-	ConsumerStatusStopped  ConsumerStatus = "stopped"
-	ConsumerStatusStarting ConsumerStatus = "starting"
-	ConsumerStatusRunning  ConsumerStatus = "running"
-	ConsumerStatusError    ConsumerStatus = "error"
+	ConsumerStatusStopped  string = "stopped"
+	ConsumerStatusStarting string = "starting"
+	ConsumerStatusRunning  string = "running"
+	ConsumerStatusError    string = "error"
 )
 
 // PayloadHandler 消息负载处理接口
@@ -91,8 +88,8 @@ func (r *Registry[T]) Register(item T) error {
 	return nil
 }
 
-// RegisterFactory 注册延迟创建工厂
-func (r *Registry[T]) RegisterFactory(factory func() T) {
+// Factory 注册延迟创建工厂
+func (r *Registry[T]) Factory(factory func() T) {
 	if factory == nil {
 		return
 	}
@@ -161,19 +158,6 @@ func (r *Registry[T]) Exists(name string) bool {
 	defer r.mu.RUnlock()
 	_, exists := r.items[name]
 	return exists
-}
-
-var (
-	Consumers = NewRegistry[Consumer]()
-	Producers = NewRegistry[Producer]()
-)
-
-func GetConsumerRegistry() *Registry[Consumer] {
-	return Consumers
-}
-
-func GetProducerRegistry() *Registry[Producer] {
-	return Producers
 }
 
 // TryHandle 自动反序列化并调用处理,支持上下文
