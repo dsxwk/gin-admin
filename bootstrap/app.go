@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"gin/app/facade"
+	"gin/app/provider"
 	"gin/common/flag"
-	_ "gin/common/imports"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/errcode"
@@ -28,25 +28,31 @@ import (
 
 // App 应用结构
 type App struct {
-	Engine *gin.Engine
+	Engine      *gin.Engine
+	application *serviceprovider.Application
 }
 
 // Init 初始化应用
-func Init() error {
+func Init() (*serviceprovider.Application, error) {
 	// 启动应用(加载所有providers)
-	app := serviceprovider.NewApp()
-	return app.Boot()
+	app := serviceprovider.NewApp(provider.Providers()...)
+	if err := app.Boot(); err != nil {
+		return nil, err
+	}
+	return app, nil
 }
 
 // NewApp 创建应用实例
 func NewApp() *App {
-	if err := Init(); err != nil {
+	app, err := Init()
+	if err != nil {
 		flag.Errorf("初始化应用失败: %v", err)
 		os.Exit(1)
 	}
 
 	return &App{
-		Engine: setupEngine(),
+		Engine:      setupEngine(),
+		application: app,
 	}
 }
 
@@ -105,7 +111,7 @@ func InitCLI() error {
 	flag.SetSilent(true)
 	defer flag.SetSilent(false)
 
-	app := serviceprovider.NewApp()
+	app := serviceprovider.NewApp(provider.Providers()...)
 	if err := app.RegisterProviders(); err != nil {
 		return err
 	}
@@ -270,8 +276,7 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 	color.Yellow("服务正在关闭...")
 
 	defer func() {
-		app := serviceprovider.NewApp()
-		err := app.Stop()
+		err := a.application.Stop()
 		if err != nil {
 			flag.Errorf("关闭应用失败: %s", err.Error())
 			return
