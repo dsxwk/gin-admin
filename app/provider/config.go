@@ -6,10 +6,6 @@ import (
 	"gin/pkg/serviceprovider"
 )
 
-func init() {
-	serviceprovider.Register(&ConfigProvider{})
-}
-
 // ConfigProvider 配置服务提供者
 type ConfigProvider struct{}
 
@@ -21,10 +17,10 @@ func (p *ConfigProvider) Name() string {
 // Register 注册服务到容器
 func (p *ConfigProvider) Register(app *container.Container) {
 	cfg := config.NewConfig()
-	app.Set(serviceprovider.ServiceConfig, cfg)
+	app.SetConfig(cfg)
 
 	config.OnConfigUpdated = func(updated *config.Config) {
-		app.Set(serviceprovider.ServiceConfig, updated)
+		app.SetConfig(updated)
 	}
 }
 
