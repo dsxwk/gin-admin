@@ -2,9 +2,9 @@ package job
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/serviceprovider/job"
 	"sort"
 	"strings"
 
@@ -27,7 +27,7 @@ func (s *JobList) Help() []base.CommandOption {
 }
 
 func (s *JobList) Execute(values map[string]string) {
-	jobs := job.GetAll()
+	jobs := facade.Job().Jobs()
 	if len(jobs) == 0 {
 		color.Yellow("暂无注册的Job")
 		return

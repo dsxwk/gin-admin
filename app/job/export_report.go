@@ -3,7 +3,6 @@ package job
 import (
 	"gin/app/facade"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/job"
 )
 
 // ExportReportJob 导出报表任务
@@ -28,8 +27,4 @@ func (j *ExportReportJob) Handle(payload any) error {
 	data := payload.(*ExportReport)
 	facade.Log().Info(pkg.Sprintf("Job [export_report] 导出报表: type=%s user=%d", data.ReportType, data.UserID))
 	return nil
-}
-
-func init() {
-	job.Register(&ExportReportJob{})
 }

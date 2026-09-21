@@ -3,7 +3,6 @@ package job
 import (
 	"gin/app/facade"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/job"
 )
 
 // SyncUserJob 同步用户任务
@@ -26,8 +25,4 @@ func (j *SyncUserJob) Handle(payload any) error {
 	data := payload.(*SyncUser)
 	facade.Log().Info(pkg.Sprintf("Job [sync_user] 同步用户: user=%d action=%s", data.UserID, data.Action))
 	return nil
-}
-
-func init() {
-	job.Register(&SyncUserJob{})
 }

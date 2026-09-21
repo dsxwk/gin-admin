@@ -14,7 +14,7 @@ import (
 
 // TestJobDispatchSync 同步Job投递(立即执行)
 func TestJobDispatchSync(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-sync")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-job-sync")
 
 	err := facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{
 		UserID: 1001,
@@ -26,7 +26,7 @@ func TestJobDispatchSync(t *testing.T) {
 
 // TestJobDispatchRedis Redis Job投递
 func TestJobDispatchRedis(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-redis")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-job-redis")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -45,7 +45,7 @@ func TestJobDispatchRabbitmq(t *testing.T) {
 		t.Skip("RabbitMQ未启用")
 	}
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-rabbitmq")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-job-rabbitmq")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -72,7 +72,7 @@ func TestJobList(t *testing.T) {
 
 // TestJobDispatchUnregistered 投递未注册Job
 func TestJobDispatchUnregistered(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-unreg")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-job-unreg")
 
 	err := facade.Job().Dispatch(ctx, "nonexistent_job", nil)
 	assert.Error(t, err, "未注册Job应该返回错误")
@@ -81,7 +81,7 @@ func TestJobDispatchUnregistered(t *testing.T) {
 
 // TestJobDelayVerify 验证延迟Job(Redis)确实在延迟队列等待
 func TestJobDelayVerify(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-delay-verify")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-job-delay-verify")
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -115,7 +115,7 @@ func TestJobDelayVerify(t *testing.T) {
 
 // TestJobRedisCountClear Redis Job计数和清除
 func TestJobRedisCountClear(t *testing.T) {
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, "test-job-count")
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, "test-job-count")
 
 	time.Sleep(500 * time.Millisecond)
 

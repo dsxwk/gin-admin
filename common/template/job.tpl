@@ -3,7 +3,6 @@
 import (
     "gin/app/facade"
     "gin/pkg"
-    "gin/pkg/serviceprovider/job"
 )
 
 // {{.CamelName}}Job {{.Description}}
@@ -24,8 +23,4 @@ func (j *{{.CamelName}}Job) Handle(payload any) error {
     data := payload.(*{{.CamelName}})
     facade.Log().Info(pkg.Sprintf("Job [{{.Name}}] 处理: %v", data))
     return nil
-}
-
-func init() {
-    job.Register(&{{.CamelName}}Job{})
 }

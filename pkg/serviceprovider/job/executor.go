@@ -8,8 +8,7 @@ import (
 )
 
 // Execute 执行任务消息
-func Execute(ctx context.Context, message Message) error {
-	item := Get(message.JobName)
+func Execute(ctx context.Context, item Job, message Message) error {
 	if item == nil {
 		return fmt.Errorf("job [%s] 未注册", message.JobName)
 	}

@@ -2,24 +2,20 @@ package provider
 
 import (
 	"context"
-	"gin/app/facade"
-	_ "gin/app/job"
+	appjob "gin/app/job"
 	"gin/common/flag"
-	"gin/config"
 	"gin/pkg"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
+	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/job"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/segmentio/kafka-go"
 )
-
-func init() {
-	serviceprovider.Register(&JobProvider{})
-}
 
 // JobProvider 任务服务提供者
 type JobProvider struct {
@@ -34,21 +30,56 @@ func (p *JobProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *JobProvider) Register(app *container.Container) {
-	app.Set(serviceprovider.ServiceJob, facade.NewJobFacade())
-	flag.Infof(pkg.Sprintf("已注册 %d 个Job", job.Count()))
+	registry := app.Event()
+	var bus *eventbus.Bus
+	if registry != nil {
+		bus = registry.Bus()
+	}
+
+	jobs := appjob.Jobs()
+	manager, err := job.NewManager(
+		app.Config,
+		app.Log(),
+		func() *redis.Client {
+			redisCache := app.Redis()
+			if redisCache == nil {
+				return nil
+			}
+			return redisCache.Client()
+		},
+		bus,
+		jobs,
+	)
+	if err != nil {
+		flag.Errorf("Job服务注册失败: %v", err)
+		return
+	}
+
+	app.SetJob(manager)
+	flag.Infof(pkg.Sprintf("已注册 %d 个Job", len(jobs)))
 }
 
 // Boot 启动服务
 func (p *JobProvider) Boot(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
-	p.log = app.Get[*logger.Logger](serviceprovider.ServiceLog)
+	cfg := app.Config()
+	p.log = app.Log()
 	if cfg == nil {
+		return
+	}
+
+	var bus *eventbus.Bus
+	if registry := app.Event(); registry != nil {
+		bus = registry.Bus()
+	}
+
+	manager := app.Job()
+	if manager == nil {
 		return
 	}
 
 	// 收集所有注册job使用的connection
 	connSet := make(map[string]bool)
-	for _, jb := range job.GetAll() {
+	for _, jb := range manager.Jobs() {
 		c := jb.Connection()
 		if c == "" {
 			c = "redis"
@@ -60,16 +91,22 @@ func (p *JobProvider) Boot(app *container.Container) {
 	for conn := range connSet {
 		switch conn {
 		case "redis":
-			p.consumers = append(p.consumers, job.NewRedisConsumer(&queue.RedisConsumer{
+			p.consumers = append(p.consumers, job.NewRedisConsumer(manager, &queue.RedisConsumer{
 				Queue:        "job:queue",
 				DelayedQueue: "job:queue:delayed",
-				GetClient:    facade.RedisClient,
-				Log:          p.log,
-				Dual:         true,
+				GetClient: func() *redis.Client {
+					redisCache := app.Redis()
+					if redisCache == nil {
+						return nil
+					}
+					return redisCache.Client()
+				},
+				Log:  p.log,
+				Dual: true,
 			}))
 		case "kafka":
 			if cfg.Queue.Kafka.Enabled {
-				driver := queue.NewKafka(cfg, p.log, facade.Event().Bus())
+				driver := queue.NewKafka(cfg, p.log, bus)
 				driver.Reader = kafka.NewReader(kafka.ReaderConfig{
 					Brokers:        cfg.Queue.Kafka.Brokers,
 					Topic:          "job",
@@ -80,7 +117,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 					CommitInterval: 0,
 					MaxWait:        5 * time.Second,
 				})
-				p.consumers = append(p.consumers, job.NewKafkaConsumer(&queue.KafkaConsumer{
+				p.consumers = append(p.consumers, job.NewKafkaConsumer(manager, &queue.KafkaConsumer{
 					Kafka: driver,
 					Topic: "job",
 					Group: "job_group",
@@ -90,12 +127,12 @@ func (p *JobProvider) Boot(app *container.Container) {
 			}
 		case "rabbitmq":
 			if cfg.Queue.Rabbitmq.Enabled {
-				driver, err := queue.NewRabbitMQ(cfg, p.log, facade.Event().Bus())
+				driver, err := queue.NewRabbitMQ(cfg, p.log, bus)
 				if err != nil {
 					p.log.Error(pkg.Sprintf("Job RabbitMQ 连接失败: %v", err))
 					continue
 				}
-				p.consumers = append(p.consumers, job.NewRabbitmqConsumer(&queue.RabbitmqConsumer{
+				p.consumers = append(p.consumers, job.NewRabbitmqConsumer(manager, &queue.RabbitmqConsumer{
 					Mq:       driver,
 					Queue:    "job",
 					Exchange: "job_exchange",

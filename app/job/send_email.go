@@ -3,7 +3,6 @@ package job
 import (
 	"gin/app/facade"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/job"
 )
 
 // SendEmailJob 发送邮件任务
@@ -27,8 +26,4 @@ func (j *SendEmailJob) Handle(payload any) error {
 	data := payload.(*SendEmail)
 	facade.Log().Info(pkg.Sprintf("Job [send_email] 发送邮件: to=%s subject=%s", data.To, data.Subject))
 	return nil
-}
-
-func init() {
-	job.Register(&SendEmailJob{})
 }
