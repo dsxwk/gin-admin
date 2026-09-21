@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-func init() {
-	serviceprovider.Register(&RateLimitProvider{})
-}
-
 // RateLimitProvider 限流服务提供者
 type RateLimitProvider struct {
 	manager *ratelimit.Manager
@@ -26,7 +22,7 @@ func (p *RateLimitProvider) Name() string {
 // Register 注册服务到容器
 func (p *RateLimitProvider) Register(app *container.Container) {
 	p.manager = ratelimit.NewManager(5*time.Minute, 100, 200)
-	app.Set(serviceprovider.ServiceRateLimit, p.manager)
+	app.SetRateLimit(p.manager)
 }
 
 // Boot 启动服务

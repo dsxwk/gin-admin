@@ -7,7 +7,6 @@ import (
 	"gin/common/ctxkey"
 	"gin/pkg/container"
 	"gin/pkg/errcode"
-	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/ratelimit"
 	"net/http"
 	"net/http/httptest"
@@ -24,15 +23,11 @@ func useRateLimiter(t *testing.T, manager *ratelimit.Manager) {
 	t.Helper()
 
 	previous := facade.RateLimiter()
-	container.Default().Set(serviceprovider.ServiceRateLimit, manager)
+	container.Default().SetRateLimit(manager)
 
 	t.Cleanup(func() {
 		manager.Close()
-		if previous == nil {
-			container.Default().Delete(serviceprovider.ServiceRateLimit)
-			return
-		}
-		container.Default().Set(serviceprovider.ServiceRateLimit, previous)
+		container.Default().SetRateLimit(previous)
 	})
 }
 
