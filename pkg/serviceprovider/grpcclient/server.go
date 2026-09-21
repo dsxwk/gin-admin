@@ -18,25 +18,22 @@ type Server struct {
 }
 
 // NewServer 创建grpc服务端
-func NewServer(host string, port int, registrars ...ServiceRegistrar) (*Server, error) {
+func NewServer(host string, port int, jwtKey string, services ...Service) (*Server, error) {
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		return nil, err
 	}
 
+	auth := NewAuth(jwtKey, services...)
 	s := grpclib.NewServer(
-		grpclib.ChainUnaryInterceptor(authUnaryServerInterceptor, unaryServerInterceptor),
+		grpclib.ChainUnaryInterceptor(auth.unaryServerInterceptor, unaryServerInterceptor),
 	)
 	reflection.Register(s)
-	// 显式传入注册器时仅注册当前服务,避免覆盖默认服务时重复注册
-	if len(registrars) > 0 {
-		for _, register := range registrars {
-			register(s)
+	for _, service := range services {
+		if service == nil {
+			continue
 		}
-	} else {
-		for _, register := range Registrars() {
-			register(s)
-		}
+		service.Register(s)
 	}
 
 	return &Server{

@@ -14,8 +14,8 @@ import (
 
 // publishGrpcTrace 记录grpc调用调试信息
 func publishGrpcTrace(ctx context.Context, method string, req, resp any, err error, ms float64) {
-	eventbus.NewBus().Publish(debugger.TopicGRPC, debugger.GRPCEvent{
-		TraceID:  ctxkey.GetTraceId(ctx),
+	eventbus.Default().Publish(ctx, debugger.TopicGRPC, debugger.GRPCEvent{
+		TraceID:  ctxkey.TraceID(ctx),
 		Method:   method,
 		Request:  req,
 		Response: resp,
@@ -26,7 +26,7 @@ func publishGrpcTrace(ctx context.Context, method string, req, resp any, err err
 
 // unaryClientInterceptor 客户端一元拦截器
 func unaryClientInterceptor(ctx context.Context, method string, req, reply any, cc *grpclib.ClientConn, invoker grpclib.UnaryInvoker, opts ...grpclib.CallOption) error {
-	traceId := ctxkey.GetTraceId(ctx)
+	traceId := ctxkey.TraceID(ctx)
 	if traceId != "" && traceId != "unknown" {
 		ctx = metadata.AppendToOutgoingContext(ctx, "trace-id", traceId)
 	}
@@ -41,7 +41,7 @@ func unaryClientInterceptor(ctx context.Context, method string, req, reply any, 
 func unaryServerInterceptor(ctx context.Context, req any, info *grpclib.UnaryServerInfo, handler grpclib.UnaryHandler) (any, error) {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if values := md.Get("trace-id"); len(values) > 0 && values[0] != "" {
-			ctx = ctxkey.WithValue(ctx, ctxkey.TraceIdKey, values[0])
+			ctx = ctxkey.WithValue(ctx, ctxkey.TraceIDKey, values[0])
 		}
 	}
 
