@@ -15,15 +15,15 @@ type ServiceProvider interface {
 	Boot(app *container.Container)
 }
 
-// ServiceProviderWithDependencies 带依赖关系的服务提供者
-type ServiceProviderWithDependencies interface {
+// Dependencies 依赖关系
+type Dependencies interface {
 	ServiceProvider
 	// Dependencies 依赖其他服务提供者名称列表
 	Dependencies() []string
 }
 
-// ServiceProviderWithRunners 后台运行任务的服务提供者
-type ServiceProviderWithRunners interface {
+// Runners 后台运行任务
+type Runners interface {
 	ServiceProvider
 	// Runners 后台运行任务
 	Runners() []Runner

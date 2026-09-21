@@ -9,10 +9,6 @@ import (
 	"gin/pkg/serviceprovider"
 )
 
-func init() {
-	serviceprovider.Register(&{{.ProviderName}}Provider{})
-}
-
 // {{.ProviderName}}Provider {{.Desc}}服务提供者
 type {{.ProviderName}}Provider struct{}
 
@@ -24,7 +20,7 @@ func (p *{{.ProviderName}}Provider) Name() string {
 // Register 注册服务到容器
 func (p *{{.ProviderName}}Provider) Register(app *container.Container) {
 	// TODO: 注册服务到容器
-	// app.Set("{{.ProviderVar}}", service)
+	// app.SetXxx(service)
 }
 
 // Boot 启动服务
