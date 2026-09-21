@@ -4,16 +4,11 @@ import (
 	"context"
 	"fmt"
 	"gin/common/flag"
-	"gin/config"
-	_ "gin/grpc/service"
+	grpcservice "gin/grpc/service"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/grpcclient"
 )
-
-func init() {
-	serviceprovider.Register(&GrpcProvider{})
-}
 
 // GrpcProvider grpc服务提供者
 type GrpcProvider struct {
@@ -32,19 +27,23 @@ func (p *GrpcProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *GrpcProvider) Boot(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	cfg := app.Config()
 	if cfg == nil || !cfg.Grpc.Enabled {
 		return
 	}
 
-	grpcclient.SetJwtKey(cfg.Jwt.Key)
 	client, err := grpcclient.NewClient(fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port))
 	if err != nil {
 		flag.Errorf("grpc客户端创建失败: %v", err)
 		return
 	}
 
-	srv, err := grpcclient.NewServer(cfg.Grpc.Host, cfg.Grpc.Port)
+	srv, err := grpcclient.NewServer(
+		cfg.Grpc.Host,
+		cfg.Grpc.Port,
+		cfg.Jwt.Key,
+		grpcservice.Services()...,
+	)
 	if err != nil {
 		_ = client.Close()
 		flag.Errorf("grpc服务启动失败: %v", err)
@@ -60,7 +59,7 @@ func (p *GrpcProvider) Boot(app *container.Container) {
 
 	p.client = client
 	p.server = srv
-	app.Set(serviceprovider.ServiceGRPC, client)
+	app.SetGRPC(client)
 	flag.Infof("grpc服务启动成功: %s", srv.Addr())
 }
 

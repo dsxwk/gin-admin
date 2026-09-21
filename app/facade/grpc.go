@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"gin/pkg/container"
-	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/grpcclient"
 
 	grpclib "google.golang.org/grpc"
@@ -16,7 +15,7 @@ import (
 //	user, err := facade.Grpc().Service(proto.NewUserServiceClient)
 //	resp, err := user.Detail(ctx, req)
 func Grpc() GrpcFacade {
-	return GrpcFacade{client: container.Default().Get[*grpcclient.Client](serviceprovider.ServiceGRPC)}
+	return GrpcFacade{client: container.Default().GRPC()}
 }
 
 type GrpcFacade struct {
