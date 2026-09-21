@@ -107,6 +107,12 @@ func (m *MakeJob) Execute(values map[string]string) {
 		os.Exit(1)
 	}
 
+	jobsFile := filepath.Join("app", "job", "jobs.go")
+	if err = addRegistryItem(jobsFile, "return []servicejob.Job{", "&"+camelName+"Job{}"); err != nil {
+		flag.Errorf("自动注册Job失败: %s", err.Error())
+		return
+	}
+
 	flag.Successf("Job文件: %s 生成成功!", outFile)
 }
 

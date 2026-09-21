@@ -99,5 +99,14 @@ func (m *MakeCommand) generateFile(_make, file, name, desc string) {
 		os.Exit(1)
 	}
 
+	commandDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
+	if commandDir != "app/command" {
+		importFile := filepath.Join("common", "imports", "import.go")
+		if err = addBlankImport(importFile, registryImportPath(file)); err != nil {
+			flag.Errorf("自动导入命令行失败: %s", err.Error())
+			os.Exit(1)
+		}
+	}
+
 	flag.Successf("命令行文件: " + file + " 生成成功!")
 }

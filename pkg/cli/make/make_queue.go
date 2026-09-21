@@ -1,6 +1,7 @@
 package make
 
 import (
+	"fmt"
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
@@ -153,6 +154,33 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 	if err != nil {
 		flag.Errorf("Error executing producer template: %s", err.Error())
 		os.Exit(1)
+	}
+
+	consumerName := camelName
+	producerName := camelName
+	if isDelay {
+		consumerName += "Delay"
+		producerName += "Delay"
+	}
+
+	consumerItem := fmt.Sprintf(
+		"ConsumerFactory(%q, appconsumer.New%sConsumer)",
+		conn,
+		consumerName,
+	)
+	if err = addRegistryItem(filepath.Join("app", "queue", "consumers.go"), "return []func() servicequeue.Consumer{", consumerItem); err != nil {
+		flag.Errorf("自动注册消费者失败: %s", err.Error())
+		return
+	}
+
+	producerItem := fmt.Sprintf(
+		"ProducerFactory(%q, appproducer.New%sProducer)",
+		conn,
+		producerName,
+	)
+	if err = addRegistryItem(filepath.Join("app", "queue", "producers.go"), "return []func() servicequeue.Producer{", producerItem); err != nil {
+		flag.Errorf("自动注册生产者失败: %s", err.Error())
+		return
 	}
 
 	flag.Successf("消费者文件: %s 生成成功!", f1)

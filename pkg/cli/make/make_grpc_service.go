@@ -171,6 +171,21 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, aut
 		os.Exit(1)
 	}
 
+	servicesFile := filepath.Join("grpc", "service", "services.go")
+	qualifier := ""
+	if filepath.ToSlash(filepath.Clean(outDir)) != "grpc/service" {
+		alias, importErr := addRegistryImport(servicesFile, registryImportPath(file))
+		if importErr != nil {
+			flag.Errorf("自动导入grpc服务失败: %s", importErr.Error())
+			os.Exit(1)
+		}
+		qualifier = alias + "."
+	}
+	if err = addRegistryItem(servicesFile, "return []grpcclient.Service{", qualifier+name+"Service{}"); err != nil {
+		flag.Errorf("自动注册grpc服务失败: %s", err.Error())
+		os.Exit(1)
+	}
+
 	flag.Successf("grpc服务文件: " + file + " 生成成功!")
 }
 

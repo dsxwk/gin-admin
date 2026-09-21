@@ -1,6 +1,7 @@
 package make
 
 import (
+	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
@@ -85,6 +86,29 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 	if err != nil {
 		flag.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
+	}
+
+	listenersFile := filepath.Join("app", "listener", "listeners.go")
+	qualifier := ""
+	listenerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
+	if listenerDir != "app/listener" {
+		alias, importErr := addRegistryImport(listenersFile, registryImportPath(file))
+		if importErr != nil {
+			flag.Errorf("自动添加监听器导入失败: %s", importErr.Error())
+			return
+		}
+		qualifier = alias + "."
+	}
+
+	item := fmt.Sprintf(
+		"listenerRegister(&%s%sListener{}, event.%s{})",
+		qualifier,
+		data.Name,
+		eventName,
+	)
+	if err = addRegistryItem(listenersFile, "return []listenerEntry{", item); err != nil {
+		flag.Errorf("自动注册监听器失败: %s", err.Error())
+		return
 	}
 
 	flag.Successf("监听文件: %s 生成成功!", file)

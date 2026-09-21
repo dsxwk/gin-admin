@@ -131,5 +131,22 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 		os.Exit(1)
 	}
 
+	providersFile := filepath.Join("app", "provider", "providers.go")
+	qualifier := ""
+	providerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
+	if providerDir != "app/provider" {
+		alias, importErr := addRegistryImport(providersFile, registryImportPath(file))
+		if importErr != nil {
+			flag.Errorf("自动添加服务提供者导入失败: %s", importErr.Error())
+			return
+		}
+		qualifier = alias + "."
+	}
+	providerItem := "&" + qualifier + providerName + "Provider{}"
+	if err = addRegistryItem(providersFile, "return []serviceprovider.ServiceProvider{", providerItem); err != nil {
+		flag.Errorf("自动注册服务提供者失败: %s", err.Error())
+		return
+	}
+
 	flag.Successf("服务提供者文件: " + file + " 生成成功!")
 }
