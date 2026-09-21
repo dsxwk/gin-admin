@@ -1,5 +1,12 @@
 # Version History
 
+## v3.3.0
+> - Refactor containers, facades, and providers to unify service resolution, lifecycle management, dependency ordering, and graceful shutdown
+> - Unify Queue and Job managers, as well as Kafka, RabbitMQ, and Redis drivers, and improve consumption, production, and status querying
+> - Optimize EventBus, Debugger, and Trace, unifying event publishing, debugging collection, and TraceID recording
+> - Adjust GRPC, MCP, Listener, Job, and Queue to automatically register as lists, and synchronously maintain the registration list with CLI-generated code
+> - Validation request context optimization and route optimization
+
 ## v3.2.1
 > - Do not output console during permission initialization adjustment
 > - Update the Swagger documentation

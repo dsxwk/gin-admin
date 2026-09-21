@@ -1,5 +1,12 @@
 # 版本记录
 
+## v3.3.0
+> - 重构容器、Facade和Provider,统一服务解析、生命周期、依赖排序与优雅关闭
+> - 统一Queue、Job管理器和Kafka、RabbitMQ、Redis驱动,完善消费、生产及状态查询
+> - 优化EventBus、Debugger和Trace，统一事件发布、调试收集与TraceID记录
+> - 调整GRPC、MCP、Listener、Job、Queue为列表自动注册,CLI生成代码同步维护注册列表
+> - 验证请求上下文优化、路由优化
+
 ## v3.2.1 
 > - 调整权限初始化时不输出控制台
 > - 更新swagger文档
