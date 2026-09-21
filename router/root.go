@@ -7,10 +7,8 @@ import (
 	"gin/app/service"
 	_ "gin/docs"
 	"gin/pkg"
-	"gin/pkg/container"
 	"gin/pkg/errcode"
-	"gin/pkg/serviceprovider"
-	"gin/pkg/serviceprovider/mcp"
+	"gin/pkg/route"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -54,11 +52,11 @@ func LoadRouters(router *gin.Engine) {
 	})
 
 	// 自动注册
-	AutoLoads(public, auth)
+	route.Mount(public, auth)
 
 	// MCP服务路由(MCP自带认证,使用public分组)
 	if cfg.Mcp.Enabled {
-		mcpHandler := container.Default().Get[*mcp.Handler](serviceprovider.ServiceMCP)
+		mcpHandler := facade.MCP()
 		if mcpHandler != nil {
 			mcpPath := cfg.Mcp.Path
 			if mcpPath == "" {
@@ -71,7 +69,7 @@ func LoadRouters(router *gin.Engine) {
 
 // SyncPermissionRoutes 同步路由权限到数据库(仅服务器启动时调用)
 func SyncPermissionRoutes() {
-	permissionKeys := GenerateAuthPermissionKeys()
+	permissionKeys := route.PermissionKeys()
 	if len(permissionKeys) > 0 {
 		svc := service.PermissionService{}
 		_ = svc.SyncRoutePermissions(context.Background(), permissionKeys)

@@ -3,13 +3,14 @@ package router
 import (
 	v1 "gin/app/controller/v1"
 	"gin/app/middleware"
+	"gin/pkg/route"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	Register(&AgentRouter{})
+	route.Register(&AgentRouter{})
 }
 
 // AgentRouter Agent路由

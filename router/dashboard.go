@@ -2,6 +2,7 @@ package router
 
 import (
 	"gin/app/controller/v1"
+	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 type DashboardRouter struct{}
 
 func init() {
-	Register(&DashboardRouter{})
+	route.Register(&DashboardRouter{})
 }
 
 // RegisterRoutes 注册路由

@@ -2,6 +2,7 @@ package router
 
 import (
 	v1 "gin/app/controller/v1"
+	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 type RoleRouter struct{}
 
 func init() {
-	Register(&RoleRouter{})
+	route.Register(&RoleRouter{})
 }
 
 // RegisterRoutes 注册路由

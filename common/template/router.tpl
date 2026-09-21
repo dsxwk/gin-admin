@@ -1,10 +1,8 @@
 package {{.Package}}
 
 import (
-    {{- if ne .Package "router" }}
-    "gin/router"
-    {{- end }}
     "gin/app/controller/v1"
+    "gin/pkg/route"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,11 +10,7 @@ import (
 type {{.Name}}Router struct {}
 
 func init() {
-	{{- if eq .Package "router" }}
-	Register(&{{.Name}}Router{})
-	{{- else }}
-	router.Register(&{{.Name}}Router{})
-	{{- end }}
+	route.Register(&{{.Name}}Router{})
 }
 
 // RegisterRoutes 注册路由

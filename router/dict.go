@@ -2,6 +2,7 @@ package router
 
 import (
 	"gin/app/controller/v1"
+	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 type DictRouter struct{}
 
 func init() {
-	Register(&DictRouter{})
+	route.Register(&DictRouter{})
 }
 
 // RegisterRoutes 注册路由

@@ -2,6 +2,7 @@ package router
 
 import (
 	"gin/app/controller/v1"
+	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +11,7 @@ import (
 type SystemConfigRouter struct{}
 
 func init() {
-	Register(&SystemConfigRouter{})
+	route.Register(&SystemConfigRouter{})
 }
 
 // RegisterRoutes 注册路由
