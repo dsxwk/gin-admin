@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"gin/common/ctxkey"
+	"maps"
 	"strings"
-	"sync"
 
 	"github.com/golang-jwt/jwt/v5"
 	grpclib "google.golang.org/grpc"
@@ -19,22 +19,32 @@ type MethodAuthService interface {
 	AuthMethods() map[string]bool // RPC方法名 -> 是否需要鉴权
 }
 
-var (
-	authMethodServices = make(map[string]map[string]bool)
-	authServicesMu     sync.RWMutex
-	jwtKey             string
-)
-
-// RegisterAuth 注册grpc服务方法鉴权配置
-func RegisterAuth(serviceName string, service MethodAuthService) {
-	authServicesMu.Lock()
-	defer authServicesMu.Unlock()
-	authMethodServices[serviceName] = service.AuthMethods()
+// Auth grpc鉴权配置
+type Auth struct {
+	jwtKey      string
+	authMethods map[string]map[string]bool
 }
 
-// SetJwtKey 设置JWT密钥
-func SetJwtKey(key string) {
-	jwtKey = key
+// NewAuth 创建鉴权配置
+func NewAuth(jwtKey string, services ...Service) *Auth {
+	methods := make(map[string]map[string]bool)
+	for _, service := range services {
+		if service == nil {
+			continue
+		}
+		authService, ok := service.(MethodAuthService)
+		if !ok {
+			continue
+		}
+
+		serviceMethods := authService.AuthMethods()
+		methods[service.Name()] = copyAuthMethods(serviceMethods)
+	}
+
+	return &Auth{
+		jwtKey:      jwtKey,
+		authMethods: methods,
+	}
 }
 
 // WithToken 在上下文中携带Token
@@ -43,8 +53,8 @@ func WithToken(ctx context.Context, token string) context.Context {
 }
 
 // authUnaryServerInterceptor 服务端鉴权拦截器
-func authUnaryServerInterceptor(ctx context.Context, req any, info *grpclib.UnaryServerInfo, handler grpclib.UnaryHandler) (any, error) {
-	ctx, err := authContext(ctx, info.FullMethod)
+func (a *Auth) unaryServerInterceptor(ctx context.Context, req any, info *grpclib.UnaryServerInfo, handler grpclib.UnaryHandler) (any, error) {
+	ctx, err := a.authContext(ctx, info.FullMethod)
 	if err != nil {
 		return nil, err
 	}
@@ -52,9 +62,9 @@ func authUnaryServerInterceptor(ctx context.Context, req any, info *grpclib.Unar
 }
 
 // authContext 校验方法鉴权并返回带用户ID的上下文
-func authContext(ctx context.Context, fullMethod string) (context.Context, error) {
+func (a *Auth) authContext(ctx context.Context, fullMethod string) (context.Context, error) {
 	serviceName, methodName := splitFullMethod(fullMethod)
-	if !methodAuthRequired(serviceName, methodName) {
+	if !a.methodAuthRequired(serviceName, methodName) {
 		return ctx, nil
 	}
 
@@ -63,7 +73,7 @@ func authContext(ctx context.Context, fullMethod string) (context.Context, error
 		return ctx, status.Error(codes.Unauthenticated, "Token不存在")
 	}
 
-	claims, err := decodeAuthToken(token)
+	claims, err := a.decodeAuthToken(token)
 	if err != nil {
 		return ctx, status.Error(codes.Unauthenticated, "Token无效或已过期")
 	}
@@ -85,10 +95,8 @@ func splitFullMethod(fullMethod string) (string, string) {
 }
 
 // methodAuthRequired 判断方法是否需要鉴权,未配置的方法默认不鉴权
-func methodAuthRequired(serviceName, methodName string) bool {
-	authServicesMu.RLock()
-	defer authServicesMu.RUnlock()
-	if methods, ok := authMethodServices[serviceName]; ok {
+func (a *Auth) methodAuthRequired(serviceName, methodName string) bool {
+	if methods, ok := a.authMethods[serviceName]; ok {
 		return methods[methodName]
 	}
 	return false
@@ -110,8 +118,8 @@ func authToken(ctx context.Context) string {
 }
 
 // decodeAuthToken 解析JWT
-func decodeAuthToken(token string) (map[string]any, error) {
-	if jwtKey == "" {
+func (a *Auth) decodeAuthToken(token string) (map[string]any, error) {
+	if a.jwtKey == "" {
 		return nil, errors.New("jwt key not configured")
 	}
 
@@ -119,7 +127,7 @@ func decodeAuthToken(token string) (map[string]any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unsupported signing method")
 		}
-		return []byte(jwtKey), nil
+		return []byte(a.jwtKey), nil
 	})
 	if err != nil || !parsed.Valid {
 		return nil, errors.New("invalid token")
@@ -130,4 +138,11 @@ func decodeAuthToken(token string) (map[string]any, error) {
 		return nil, errors.New("invalid claims")
 	}
 	return claims, nil
+}
+
+// copyAuthMethods 复制方法鉴权配置
+func copyAuthMethods(methods map[string]bool) map[string]bool {
+	result := make(map[string]bool, len(methods))
+	maps.Copy(result, methods)
+	return result
 }
