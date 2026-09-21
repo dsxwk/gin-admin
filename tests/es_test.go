@@ -230,13 +230,9 @@ func newTestESClient(t *testing.T) *eslib.Client {
 // registerTestESClient 注册测试ES客户端
 func registerTestESClient(t *testing.T, client *eslib.Client) {
 	previous := facade.ES()
-	container.Default().Set("es", client)
+	container.Default().SetES(client)
 	t.Cleanup(func() {
-		if previous != nil {
-			container.Default().Set("es", previous)
-			return
-		}
-		container.Default().Delete("es")
+		container.Default().SetES(previous)
 	})
 }
 
@@ -245,7 +241,7 @@ func TestESClientCRUD(t *testing.T) {
 	client := newTestESClient(t)
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-es-client-crud")
+	ctx = context.WithValue(ctx, ctxkey.TraceIDKey, "test-es-client-crud")
 
 	index := "test_es_client_crud"
 	defer func() {
@@ -272,7 +268,7 @@ func TestESClientCRUD(t *testing.T) {
 		"nickname": "小张",
 	}))
 
-	doc, err := client.GetDocument[map[string]any](ctx, index, "1")
+	doc, err := client.Document[map[string]any](ctx, index, "1")
 	require.NoError(t, err)
 	require.True(t, doc.Found)
 	require.Equal(t, "zhangsan", doc.Source["username"])
@@ -281,7 +277,7 @@ func TestESClientCRUD(t *testing.T) {
 		"nickname": "张三",
 	}))
 
-	doc, err = client.GetDocument[map[string]any](ctx, index, "1")
+	doc, err = client.Document[map[string]any](ctx, index, "1")
 	require.NoError(t, err)
 	require.Equal(t, "张三", doc.Source["nickname"])
 
@@ -296,7 +292,7 @@ func TestESClientCRUD(t *testing.T) {
 	require.Equal(t, "zhangsan", result.Hits.Hits[0].Source["username"])
 
 	require.NoError(t, client.Delete(ctx, index, "1"))
-	_, err = client.GetDocument[map[string]any](ctx, index, "1")
+	_, err = client.Document[map[string]any](ctx, index, "1")
 	require.Error(t, err)
 
 	require.NoError(t, client.DeleteIndex(ctx, index))
@@ -314,7 +310,7 @@ func TestESRequestTraceOnlyRecordsES(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, traceID)
+	ctx = context.WithValue(ctx, ctxkey.TraceIDKey, traceID)
 
 	require.NoError(t, client.Ping(ctx))
 
@@ -331,7 +327,7 @@ func TestESUserSearch(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
-	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-es-user-search")
+	ctx = context.WithValue(ctx, ctxkey.TraceIDKey, "test-es-user-search")
 
 	search := &appes.UserSearch{}
 	mapping := search.Mapping()

@@ -125,7 +125,7 @@ func (s *UserSearch) Detail(ctx context.Context, id int64) (map[string]any, erro
 		return nil, errors.New("用户ID必须大于0")
 	}
 
-	doc, err := facade.ES().GetDocument[map[string]any](ctx, s.IndexName(), strconv.FormatInt(id, 10))
+	doc, err := facade.ES().Document[map[string]any](ctx, s.IndexName(), strconv.FormatInt(id, 10))
 	if err != nil {
 		return nil, err
 	}

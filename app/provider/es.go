@@ -3,15 +3,10 @@ package provider
 import (
 	"context"
 	"gin/common/flag"
-	"gin/config"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	esclient "gin/pkg/serviceprovider/es"
 )
-
-func init() {
-	serviceprovider.Register(&EsProvider{})
-}
 
 // EsProvider ES服务提供者
 type EsProvider struct {
@@ -25,7 +20,7 @@ func (p *EsProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *EsProvider) Register(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	cfg := app.Config()
 	if cfg == nil || !cfg.Es.Enabled {
 		return
 	}
@@ -35,7 +30,7 @@ func (p *EsProvider) Register(app *container.Container) {
 	}
 
 	p.client = esclient.NewClient(cfg.Es)
-	app.Set(serviceprovider.ServiceES, p.client)
+	app.SetES(p.client)
 }
 
 // Boot 启动服务

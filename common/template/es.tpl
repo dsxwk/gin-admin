@@ -102,7 +102,7 @@ func (s *{{.Name}}Search) Detail(ctx context.Context, id int64) (map[string]any,
 		return nil, errors.New("{{.Description}}ID必须大于0")
 	}
 
-	doc, err := facade.ES().GetDocument[map[string]any](ctx, s.IndexName(), strconv.FormatInt(id, 10))
+	doc, err := facade.ES().Document[map[string]any](ctx, s.IndexName(), strconv.FormatInt(id, 10))
 	if err != nil {
 		return nil, err
 	}

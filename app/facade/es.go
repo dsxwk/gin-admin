@@ -2,7 +2,6 @@ package facade
 
 import (
 	"gin/pkg/container"
-	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/es"
 )
 
@@ -11,5 +10,5 @@ import (
 //
 //	client := facade.ES()
 func ES() *es.Client {
-	return container.Default().Get[*es.Client](serviceprovider.ServiceES)
+	return container.Default().ES()
 }
