@@ -35,7 +35,7 @@ func (s OperatorLog) Handle() gin.HandlerFunc {
 
 			// 从request上下文获取traceId、lang、params
 			ctx := c.Request.Context()
-			traceId, _ := ctx.Value(ctxkey.TraceIdKey).(string)
+			traceId, _ := ctx.Value(ctxkey.TraceIDKey).(string)
 			lang, _ := ctx.Value(ctxkey.LangKey).(string)
 			params := ctx.Value(ctxkey.ParamsKey)
 			header, _ := json.Marshal(c.Request.Header)
