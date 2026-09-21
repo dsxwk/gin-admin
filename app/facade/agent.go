@@ -15,7 +15,7 @@ func Agent(name ...string) *agent.Agent {
 	cfg := Config()
 	providerCfg := cfg.Agent.Providers[providerName]
 	provider := providers.NewOpenAICompat(providerName, providerCfg, cfg.Agent.MaxTokens, cfg.Agent.Temperature)
-	return agent.New(provider)
+	return agent.New(provider, MCP().Tools())
 }
 
 // AgentProvider 解析AI提供商信息,返回提供商名称和模型名

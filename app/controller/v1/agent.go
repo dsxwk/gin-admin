@@ -46,7 +46,7 @@ func (s *AgentController) Ask(c *gin.Context) {
 
 	// 获取用户ID和追踪ID
 	userId := s.GetUserId(c)
-	traceId, _ := ctx.Value(ctxkey.TraceIdKey).(string)
+	traceId, _ := ctx.Value(ctxkey.TraceIDKey).(string)
 
 	// 创建或加载会话
 	sessionId := req.SessionId
@@ -76,7 +76,7 @@ func (s *AgentController) Ask(c *gin.Context) {
 		s.Response.Error(c, errors.New("agent未启用或配置错误"))
 		return
 	}
-	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手")).
+	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", facade.MCP().Tools())).
 		WithSession(sessionId, &s.service).
 		WithHistory(history).
 		WithUserId(userId).

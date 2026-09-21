@@ -24,14 +24,14 @@ type Agent struct {
 }
 
 // New 创建Agent
-func New(provider Provider) *Agent {
-	return &Agent{
+func New(provider Provider, tools []mcp.Tool) *Agent {
+	agent := &Agent{
 		provider: provider,
 		ctx:      context.Background(),
 		maxSteps: 5,
-		tools:    mcp.GetAll(),
-		toolDefs: mcp.GetAllDefs(),
 	}
+	agent.WithTools(tools)
+	return agent
 }
 
 // WithSystemPrompt 设置系统提示语
@@ -43,15 +43,14 @@ func (a *Agent) WithSystemPrompt(prompt string) *Agent {
 // WithTools 设置可用工具
 func (a *Agent) WithTools(tools []mcp.Tool) *Agent {
 	a.tools = tools
-	defs := make([]mcp.ToolDef, 0, len(tools))
+	a.toolDefs = make([]mcp.ToolDef, 0, len(tools))
 	for _, t := range tools {
-		defs = append(defs, mcp.ToolDef{
+		a.toolDefs = append(a.toolDefs, mcp.ToolDef{
 			Name:        t.Name(),
 			Description: t.Description(),
 			InputSchema: t.InputSchema(),
 		})
 	}
-	a.toolDefs = defs
 	return a
 }
 
@@ -197,11 +196,12 @@ func (a *Agent) buildMessages(question string) []Message {
 
 // callTool 调用工具
 func (a *Agent) callTool(name string, args map[string]any) (any, error) {
-	tool, ok := mcp.Get(name)
-	if !ok {
-		return nil, errors.New("tool not found: " + name)
+	for _, tool := range a.tools {
+		if tool.Name() == name {
+			return mcp.CallTool(a.ctx, a.userId, tool, args)
+		}
 	}
-	return mcp.CallTool(a.ctx, a.userId, tool, args)
+	return nil, errors.New("tool not found: " + name)
 }
 
 // Reset 重置对话历史
