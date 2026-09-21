@@ -7,10 +7,6 @@ import (
 	"gin/pkg/serviceprovider/request"
 )
 
-func init() {
-	serviceprovider.Register(&RequestProvider{})
-}
-
 // RequestProvider 请求验证服务提供者
 type RequestProvider struct{}
 
@@ -21,7 +17,7 @@ func (p *RequestProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *RequestProvider) Register(app *container.Container) {
-	app.Set(serviceprovider.ServiceRequest, request.NewClient())
+	app.SetRequest(request.NewClient())
 }
 
 // Boot 启动服务

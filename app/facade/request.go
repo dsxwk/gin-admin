@@ -2,7 +2,6 @@ package facade
 
 import (
 	"gin/pkg/container"
-	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/request"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +16,7 @@ import (
 //	userID := facade.Request().Path[int64](ctx, "id", 0)
 func Request() RequestFacade {
 	return RequestFacade{
-		client: container.Default().Get[*request.Client](serviceprovider.ServiceRequest),
+		client: container.Default().Request(),
 	}
 }
 
