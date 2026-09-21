@@ -3,7 +3,6 @@ package listener
 import (
 	"fmt"
 	"gin/app/event"
-	"gin/app/facade"
 	"time"
 )
 
@@ -17,8 +16,4 @@ func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
 		e,
 		time.Now().Format("2006-01-02 15:04:05"),
 	)
-}
-
-func init() {
-	facade.Event().Register(&UserLoginListener{}, event.UserLoginEvent{})
 }
