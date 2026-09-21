@@ -218,12 +218,12 @@ func after(db *gorm.DB) {
 		)
 	}
 
-	traceId, ok := ctx.Value(ctxkey.TraceIdKey).(string)
+	traceId, ok := ctx.Value(ctxkey.TraceIDKey).(string)
 	if !ok || traceId == "" {
 		traceId = "unknown"
 	}
 
-	eventbus.NewBus().Publish(debugger.TopicSQL, debugger.SQLEvent{
+	eventbus.Default().Publish(ctx, debugger.TopicSQL, debugger.SQLEvent{
 		TraceID: traceId,
 		SQL:     sql,
 		Rows:    db.Statement.RowsAffected,

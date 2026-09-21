@@ -2,15 +2,13 @@ package facade
 
 import (
 	"gin/pkg/container"
-	"gin/pkg/serviceprovider"
-	"gin/pkg/serviceprovider/orm"
 
 	"gorm.io/gorm"
 )
 
 // DB 数据库门面-数据库访问统一入口
 func DB(conn ...string) *gorm.DB {
-	manager := container.Default().Get[*orm.Manager](serviceprovider.ServiceDB)
+	manager := container.Default().DB()
 	if manager == nil {
 		return nil
 	}
@@ -34,7 +32,7 @@ func DB(conn ...string) *gorm.DB {
 // ResetDB 重置数据库连接,关闭旧连接并重建
 func ResetDB(db *gorm.DB) *gorm.DB {
 	conf := Config()
-	manager := container.Default().Get[*orm.Manager](serviceprovider.ServiceDB)
+	manager := container.Default().DB()
 	if manager == nil || conf == nil {
 		return nil
 	}
