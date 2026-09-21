@@ -9,7 +9,6 @@ import (
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
 	"gin/pkg"
-	client "gin/pkg/serviceprovider/grpcclient"
 	"time"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -20,17 +19,20 @@ import (
 	"gorm.io/gorm"
 )
 
-func init() {
-	client.Register(func(s *grpclib.Server) {
-		proto.RegisterUserServiceServer(s, UserService{})
-	})
-	client.RegisterAuth("grpc.UserService", UserService{})
-}
-
 // UserService 用户grpc服务
 type UserService struct {
 	base.BaseService
 	proto.UnimplementedUserServiceServer
+}
+
+// Name 服务名称
+func (UserService) Name() string {
+	return "grpc.UserService"
+}
+
+// Register 注册服务
+func (UserService) Register(s *grpclib.Server) {
+	proto.RegisterUserServiceServer(s, UserService{})
 }
 
 // AuthMethods 方法鉴权配置
