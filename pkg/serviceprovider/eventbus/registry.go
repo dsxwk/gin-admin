@@ -3,6 +3,7 @@ package eventbus
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 )
 
@@ -23,17 +24,10 @@ type Registry struct {
 	infos map[string]*EventInfo
 }
 
-var defaultRegistry = NewRegistry(NewBus())
-
-// DefaultRegistry 获取默认业务事件注册表
-func DefaultRegistry() *Registry {
-	return defaultRegistry
-}
-
 // NewRegistry 创建业务事件注册表
 func NewRegistry(bus *Bus) *Registry {
 	if bus == nil {
-		bus = NewBus()
+		bus = Default()
 	}
 
 	return &Registry{
@@ -47,21 +41,16 @@ func (r *Registry) Bus() *Bus {
 	return r.bus
 }
 
-// Register 注册业务事件监听器
-func (r *Registry) Register[T Event](listener Listener[T], event T) {
+// Register 注册业务事件监听器,返回是否注册成功
+func (r *Registry) Register[T Event](listener Listener[T], event T) bool {
 	if r == nil || r.bus == nil || listener == nil {
-		return
+		return false
 	}
 
 	name := event.Name()
-	r.bus.SubscribeAsync(name, func(data any) {
-		value, ok := data.(T)
-		if !ok {
-			return
-		}
-
-		listener.Handle(value)
-	})
+	if name == "" {
+		return false
+	}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -75,7 +64,25 @@ func (r *Registry) Register[T Event](listener Listener[T], event T) {
 		r.infos[name] = info
 	}
 
-	info.Listeners = append(info.Listeners, fmt.Sprintf("%T", listener))
+	listenerName := fmt.Sprintf("%T", listener)
+	if slices.Contains(info.Listeners, listenerName) {
+		return false
+	}
+
+	subscription := r.bus.SubscribeAsync(name, func(_ context.Context, data any) {
+		value, ok := data.(T)
+		if !ok {
+			return
+		}
+
+		listener.Handle(value)
+	})
+	if subscription == nil {
+		return false
+	}
+	info.Listeners = append(info.Listeners, listenerName)
+
+	return true
 }
 
 // Publish 发布业务事件
@@ -87,13 +94,13 @@ func (r *Registry) Publish[T Event](ctx context.Context, event T) {
 		ctx = context.Background()
 	}
 
-	r.bus.PublishWithContext(ctx, TopicEvent, PublishedEvent{
+	r.bus.Publish(ctx, TopicEvent, PublishedEvent{
 		Context:     ctx,
 		Name:        event.Name(),
 		Description: event.Description(),
 		Data:        event,
 	})
-	r.bus.PublishWithContext(ctx, event.Name(), event)
+	r.bus.Publish(ctx, event.Name(), event)
 }
 
 // EventList 获取全部业务事件信息

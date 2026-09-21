@@ -5,6 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/serviceprovider/eventbus"
 	"testing"
 	"time"
 )
@@ -15,20 +16,20 @@ func TestBusPublishAndUnsubscribe(t *testing.T) {
 
 	topic := "test:bus:unsubscribe"
 	got := 0
-	id := bus.Subscribe(topic, func(value int) {
+	subscription := bus.Subscribe(topic, func(_ context.Context, value int) {
 		got = value
 	})
 
-	bus.Publish(topic, 1)
+	bus.Publish(context.Background(), topic, 1)
 	if got != 1 {
 		t.Fatalf("expected 1, got %d", got)
 	}
 
-	if !bus.Unsubscribe(topic, id) {
+	if !subscription.Unsubscribe() {
 		t.Fatal("expected unsubscribe success")
 	}
 
-	bus.Publish(topic, 2)
+	bus.Publish(context.Background(), topic, 2)
 	if got != 1 {
 		t.Fatalf("expected 1 after unsubscribe, got %d", got)
 	}
@@ -40,15 +41,15 @@ func TestBusAsyncPublish(t *testing.T) {
 	done := make(chan struct{})
 
 	topic := "test:bus:async"
-	id := bus.SubscribeAsync(topic, func(value int) {
+	subscription := bus.SubscribeAsync(topic, func(_ context.Context, value int) {
 		time.Sleep(20 * time.Millisecond)
 		if value == 1 {
 			close(done)
 		}
 	})
-	defer bus.Unsubscribe(topic, id)
+	defer subscription.Unsubscribe()
 
-	bus.Publish(topic, 1)
+	bus.Publish(context.Background(), topic, 1)
 
 	select {
 	case <-done:
@@ -63,6 +64,32 @@ func TestBusAsyncPublish(t *testing.T) {
 	}
 }
 
+// 事件处理panic回调测试
+func TestBusPanicHandler(t *testing.T) {
+	called := make(chan struct{})
+	bus := eventbus.NewBus(
+		eventbus.WithWorkers(1),
+		eventbus.WithQueueSize(1),
+		eventbus.WithPanicHandler(func(topic string, event any, recovered any) {
+			close(called)
+		}),
+	)
+	t.Cleanup(func() { _ = bus.Close(context.Background()) })
+
+	subscription := bus.SubscribeAsync("test:bus:panic", func(_ context.Context, _ int) {
+		panic("test panic")
+	})
+	defer subscription.Unsubscribe()
+
+	bus.Publish(context.Background(), "test:bus:panic", 1)
+
+	select {
+	case <-called:
+	case <-time.After(time.Second):
+		t.Fatal("expected panic handler called")
+	}
+}
+
 // 事件总线上下文取消测试
 func TestBusPublishWithCanceledContext(t *testing.T) {
 	bus := facade.Event().Bus()
@@ -71,12 +98,12 @@ func TestBusPublishWithCanceledContext(t *testing.T) {
 
 	topic := "test:bus:cancel"
 	called := false
-	id := bus.Subscribe(topic, func(value int) {
+	subscription := bus.Subscribe(topic, func(_ context.Context, value int) {
 		called = true
 	})
-	defer bus.Unsubscribe(topic, id)
+	defer subscription.Unsubscribe()
 
-	bus.PublishWithContext(ctx, topic, 1)
+	bus.Publish(ctx, topic, 1)
 	if called {
 		t.Fatal("expected canceled context to stop publish")
 	}
@@ -96,8 +123,36 @@ type eventListTestListener struct{}
 
 func (l eventListTestListener) Handle(event eventListTestEvent) {}
 
-// 初始化监听器注册测试
-func TestInitListenerRegistered(t *testing.T) {
+type duplicateEventTestEvent struct{}
+
+func (e duplicateEventTestEvent) Name() string {
+	return "test:event-duplicate"
+}
+
+func (e duplicateEventTestEvent) Description() string {
+	return "重复监听器测试"
+}
+
+type duplicateEventTestListener struct{}
+
+func (l duplicateEventTestListener) Handle(event duplicateEventTestEvent) {}
+
+type emptyEventTestEvent struct{}
+
+func (e emptyEventTestEvent) Name() string {
+	return ""
+}
+
+func (e emptyEventTestEvent) Description() string {
+	return "空事件名称测试"
+}
+
+type emptyEventTestListener struct{}
+
+func (l emptyEventTestListener) Handle(event emptyEventTestEvent) {}
+
+// 默认监听器注册测试
+func TestDefaultListenerRegistered(t *testing.T) {
 	list := facade.Event().List()
 	for _, item := range list {
 		if item.Name == "user.login" && len(item.Listeners) >= 2 {
@@ -105,7 +160,42 @@ func TestInitListenerRegistered(t *testing.T) {
 		}
 	}
 
-	t.Fatal("expected user.login init listeners")
+	t.Fatal("expected user.login listeners")
+}
+
+// 重复监听器注册测试
+func TestRegistryRegisterDuplicate(t *testing.T) {
+	bus := eventbus.NewBus()
+	t.Cleanup(func() { _ = bus.Close(context.Background()) })
+	registry := eventbus.NewRegistry(bus)
+	listener := duplicateEventTestListener{}
+	e := duplicateEventTestEvent{}
+
+	if !registry.Register(listener, e) {
+		t.Fatal("expected first listener registered")
+	}
+	if registry.Register(listener, e) {
+		t.Fatal("expected duplicate listener skipped")
+	}
+
+	list := registry.EventList()
+	if len(list) != 1 || len(list[0].Listeners) != 1 {
+		t.Fatalf("expected one listener, got %+v", list)
+	}
+}
+
+// 空事件名称注册测试
+func TestRegistryRegisterEmptyName(t *testing.T) {
+	bus := eventbus.NewBus()
+	t.Cleanup(func() { _ = bus.Close(context.Background()) })
+	registry := eventbus.NewRegistry(bus)
+
+	if registry.Register(emptyEventTestListener{}, emptyEventTestEvent{}) {
+		t.Fatal("expected empty event name rejected")
+	}
+	if len(registry.EventList()) != 0 {
+		t.Fatal("expected empty event not registered")
+	}
 }
 
 // 事件列表监听器切片副本测试
@@ -141,7 +231,7 @@ func TestBusinessEventCollected(t *testing.T) {
 	debugger.Store.Delete(traceID)
 	defer debugger.Store.Delete(traceID)
 
-	ctx := context.WithValue(context.Background(), ctxkey.TraceIdKey, traceID)
+	ctx := context.WithValue(context.Background(), ctxkey.TraceIDKey, traceID)
 	facade.Event().Publish(ctx, eventListTestEvent{})
 
 	trace, ok := debugger.Store.Get(traceID)

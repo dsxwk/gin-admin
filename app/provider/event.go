@@ -1,15 +1,12 @@
 package provider
 
 import (
+	applistener "gin/app/listener"
 	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/eventbus"
 )
-
-func init() {
-	serviceprovider.Register(&EventProvider{})
-}
 
 // EventProvider 事件服务提供者
 type EventProvider struct{}
@@ -21,11 +18,9 @@ func (p *EventProvider) Name() string {
 
 // Register 创建事件总线并注册业务事件表
 func (p *EventProvider) Register(app *container.Container) {
-	registry := eventbus.DefaultRegistry()
-	bus := registry.Bus()
-
-	app.Set(serviceprovider.ServiceEvent, registry)
-	app.Set("eventbus", bus)
+	registry := eventbus.NewRegistry(eventbus.Default())
+	app.SetEvent(registry)
+	applistener.Register(registry)
 }
 
 // Boot 启动事件服务

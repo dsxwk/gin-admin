@@ -99,5 +99,14 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 		os.Exit(1)
 	}
 
+	routerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
+	if routerDir != "router" {
+		importFile := filepath.Join("common", "imports", "import.go")
+		if err = addBlankImport(importFile, registryImportPath(file)); err != nil {
+			flag.Errorf("自动导入路由失败: %s", err.Error())
+			os.Exit(1)
+		}
+	}
+
 	flag.Successf("路由文件: " + file + " 生成成功!")
 }

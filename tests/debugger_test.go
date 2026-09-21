@@ -10,7 +10,7 @@ import (
 // 调试器重复启动测试
 func TestDebuggerStartIdempotent(t *testing.T) {
 	bus := facade.Event().Bus()
-	instance := facade.Debugger().GetInstance()
+	instance := facade.Debugger()
 	defer func() {
 		if !instance.IsRunning() {
 			instance.Start()
@@ -18,20 +18,13 @@ func TestDebuggerStartIdempotent(t *testing.T) {
 	}()
 
 	instance.Start()
-	firstIds := instance.SubIds()
-	instance.Start()
-	secondIds := instance.SubIds()
-
-	if len(firstIds) != len(secondIds) {
-		t.Fatalf("expected idempotent start, got %d and %d subscriptions", len(firstIds), len(secondIds))
-	}
-	for topic, id := range firstIds {
-		if secondIds[topic] != id {
-			t.Fatalf("expected subscription %s to keep id %d, got %d", topic, id, secondIds[topic])
-		}
-	}
 	if count := bus.Count(debugger.TopicSQL); count != 1 {
 		t.Fatalf("expected one sql subscription, got %d", count)
+	}
+
+	instance.Start()
+	if count := bus.Count(debugger.TopicSQL); count != 1 {
+		t.Fatalf("expected idempotent start to keep one sql subscription, got %d", count)
 	}
 
 	instance.Stop()
@@ -49,8 +42,8 @@ func TestDebuggerStartIdempotent(t *testing.T) {
 }
 
 // 追踪数据过期清理测试
-func TestTraceStoreCleanExpired(t *testing.T) {
-	store := debugger.NewTraceStore()
+func TestTraceCleanExpired(t *testing.T) {
+	store := debugger.NewTrace()
 	store.GetOrCreate("clean-expired")
 
 	if cleaned := store.CleanExpired(time.Hour); cleaned != 0 {
@@ -65,13 +58,13 @@ func TestTraceStoreCleanExpired(t *testing.T) {
 
 // 追踪数据写入测试
 func TestDebuggerAddTraceEvent(t *testing.T) {
-	store := debugger.NewTraceStore()
+	store := debugger.NewTrace()
 	trace := store.GetOrCreate("trace-event")
-	trace.AddSQL(debugger.SQLEvent{
+	trace.Append(debugger.SQLEvent{
 		TraceID: "trace-event",
 		SQL:     "select 1",
 	})
-	trace.AddCache(debugger.CacheEvent{
+	trace.Append(debugger.CacheEvent{
 		TraceID: "trace-event",
 		Name:    "user",
 	})

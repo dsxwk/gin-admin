@@ -1,6 +1,8 @@
 package debugger
 
 import (
+	"context"
+	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/eventbus"
 	"sync"
 	"time"
@@ -11,33 +13,43 @@ const (
 	traceExpire          = 30 * time.Minute
 )
 
+var debugTopics = [...]string{
+	TopicSQL,
+	TopicCache,
+	TopicHTTP,
+	TopicMQ,
+	TopicGRPC,
+	TopicListener,
+	TopicJob,
+	TopicES,
+}
+
 // Debugger 调试器入口
 type Debugger struct {
-	mu          sync.RWMutex
-	bus         *eventbus.Bus
-	store       *TraceStore
-	collector   *Collector
-	cleanupStop chan struct{}
+	mu            sync.RWMutex
+	bus           *eventbus.Bus
+	store         *Trace
+	subscriptions []*eventbus.Subscription
+	cleanupStop   chan struct{}
 }
 
 // New 创建调试器
 func New(bus *eventbus.Bus) *Debugger {
-	return NewWithStore(bus, Store)
+	return WithStore(bus, Store)
 }
 
-// NewWithStore 使用指定存储创建调试器
-func NewWithStore(bus *eventbus.Bus, store *TraceStore) *Debugger {
+// WithStore 使用指定存储创建调试器
+func WithStore(bus *eventbus.Bus, store *Trace) *Debugger {
 	if bus == nil {
-		bus = eventbus.NewBus()
+		bus = eventbus.Default()
 	}
 	if store == nil {
-		store = NewTraceStore()
+		store = NewTrace()
 	}
 
 	return &Debugger{
-		bus:       bus,
-		store:     store,
-		collector: NewCollector(bus, store),
+		bus:   bus,
+		store: store,
 	}
 }
 
@@ -50,15 +62,13 @@ func (d *Debugger) Start() {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	if d.collector.IsRunning() {
+	if d.cleanupStop != nil {
 		return
 	}
 
-	d.collector.Register()
-	if d.cleanupStop == nil {
-		d.cleanupStop = make(chan struct{})
-		d.store.StartCleanup(traceCleanupInterval, traceExpire, d.cleanupStop)
-	}
+	d.subscribe()
+	d.cleanupStop = make(chan struct{})
+	d.store.StartCleanup(traceCleanupInterval, traceExpire, d.cleanupStop)
 }
 
 // Stop 停止调试器
@@ -70,38 +80,22 @@ func (d *Debugger) Stop() {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	d.collector.Unregister()
-	if d.cleanupStop != nil {
-		close(d.cleanupStop)
-		d.cleanupStop = nil
-	}
-}
-
-// Bus 获取调试器使用的总线
-func (d *Debugger) Bus() *eventbus.Bus {
-	if d == nil {
-		return nil
+	if d.cleanupStop == nil {
+		return
 	}
 
-	return d.bus
+	d.unsubscribe()
+	close(d.cleanupStop)
+	d.cleanupStop = nil
 }
 
 // Store 获取调试器使用的追踪存储
-func (d *Debugger) Store() *TraceStore {
+func (d *Debugger) Store() *Trace {
 	if d == nil {
 		return nil
 	}
 
 	return d.store
-}
-
-// SubIds 获取全部订阅ID
-func (d *Debugger) SubIds() map[string]uint64 {
-	if d == nil {
-		return nil
-	}
-
-	return d.collector.SubIDs()
 }
 
 // IsRunning 判断调试器是否运行中
@@ -110,14 +104,53 @@ func (d *Debugger) IsRunning() bool {
 		return false
 	}
 
-	return d.collector.IsRunning()
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	return d.cleanupStop != nil
 }
 
-// GetSubId 获取指定主题的订阅ID
-func (d *Debugger) GetSubId(topic string) (uint64, bool) {
-	if d == nil {
-		return 0, false
+// subscribe 订阅全部调试事件
+func (d *Debugger) subscribe() {
+	for _, topic := range debugTopics {
+		d.subscriptions = append(d.subscriptions, d.bus.Subscribe[any](topic, d.handleEvent))
+	}
+}
+
+// unsubscribe 取消全部调试事件
+func (d *Debugger) unsubscribe() {
+	for _, subscription := range d.subscriptions {
+		subscription.Unsubscribe()
 	}
 
-	return d.collector.GetSubID(topic)
+	d.subscriptions = nil
+}
+
+// handleEvent 处理调试事件
+func (d *Debugger) handleEvent(_ context.Context, event any) {
+	switch value := event.(type) {
+	case SQLEvent:
+		d.store.Record(value.TraceID, value)
+	case CacheEvent:
+		d.store.Record(value.TraceID, value)
+	case HTTPEvent:
+		d.store.Record(value.TraceID, value)
+	case MQEvent:
+		d.store.Record(value.TraceID, value)
+	case GRPCEvent:
+		d.store.Record(value.TraceID, value)
+	case JobEvent:
+		d.store.Record(value.TraceID, value)
+	case ESEvent:
+		d.store.Record(value.TraceID, value)
+	case eventbus.PublishedEvent:
+		traceID := ctxkey.TraceID(value.Context)
+
+		d.store.Record(traceID, ListenerEvent{
+			TraceID:     traceID,
+			Name:        value.Name,
+			Description: value.Description,
+			Data:        value.Data,
+		})
+	}
 }
