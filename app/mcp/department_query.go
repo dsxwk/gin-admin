@@ -8,8 +8,6 @@ import (
 	"strconv"
 )
 
-func init() { mcp.Register(&DepartmentQuery{}) }
-
 // DepartmentQuery 部门查询工具
 type DepartmentQuery struct{}
 

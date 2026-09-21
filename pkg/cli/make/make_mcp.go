@@ -109,5 +109,21 @@ func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {
 		os.Exit(1)
 	}
 
+	toolsFile := filepath.Join("app", "mcp", "tools.go")
+	qualifier := ""
+	mcpDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
+	if mcpDir != "app/mcp" {
+		alias, importErr := addRegistryImport(toolsFile, registryImportPath(file))
+		if importErr != nil {
+			flag.Errorf("自动添加MCP工具导入失败: %s", importErr.Error())
+			return
+		}
+		qualifier = alias + "."
+	}
+	if err = addRegistryItem(toolsFile, "return []servicemcp.Tool{", "&"+qualifier+structName+"{}"); err != nil {
+		flag.Errorf("自动注册MCP工具失败: %s", err.Error())
+		return
+	}
+
 	flag.Successf("MCP工具文件: %s 生成成功!", file)
 }

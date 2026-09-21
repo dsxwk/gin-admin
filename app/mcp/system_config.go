@@ -7,8 +7,6 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-func init() { mcp.Register(&SystemConfigQuery{}) }
-
 // SystemConfigQuery 系统配置查询工具
 type SystemConfigQuery struct{}
 

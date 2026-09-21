@@ -7,8 +7,6 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-func init() { mcp.Register(&UserSearch{}) }
-
 // UserSearch 用户搜索工具
 type UserSearch struct{}
 

@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-func init() { mcp.Register(&CliExec{}) }
-
 // CliExec CLI命令执行工具
 type CliExec struct{}
 
@@ -58,7 +56,7 @@ func (t *CliExec) Call(ctx context.Context, args map[string]any) (any, error) {
 	// 解析参数
 	values := make(map[string]string)
 	if argsStr, ok := args["args"].(string); ok && argsStr != "" {
-		for _, pair := range strings.Split(argsStr, "&") {
+		for pair := range strings.SplitSeq(argsStr, "&") {
 			kv := strings.SplitN(pair, "=", 2)
 			if len(kv) == 2 {
 				values[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])

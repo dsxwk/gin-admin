@@ -7,8 +7,6 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-func init() { mcp.Register(&OperatorStats{}) }
-
 // OperatorStats 操作日志统计工具
 type OperatorStats struct{}
 

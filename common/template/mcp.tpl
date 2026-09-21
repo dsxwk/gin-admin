@@ -5,8 +5,6 @@ import (
     "gin/pkg/serviceprovider/mcp"
 )
 
-func init() { mcp.Register(&{{.Name}}{}) }
-
 // {{.Name}} {{.Description}}工具
 type {{.Name}} struct{}
 

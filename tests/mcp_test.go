@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"gin/config"
 	"gin/pkg/serviceprovider/mcp"
@@ -13,10 +14,14 @@ import (
 )
 
 func newTestHandler() *mcp.Handler {
-	return mcp.NewHandler(mcp.ServerInfo{Name: "test", Version: "1.0.0"}, &config.Config{
+	handler, err := mcp.NewHandler(mcp.ServerInfo{Name: "test", Version: "1.0.0"}, &config.Config{
 		Mcp: config.Mcp{Auth: config.McpAuth{Enabled: true, Token: "secret"}},
 		Jwt: config.Jwt{Key: "jwt-key"},
-	})
+	}, []mcp.Tool{})
+	if err != nil {
+		panic(err)
+	}
+	return handler
 }
 
 func postJson(t *testing.T, h *mcp.Handler, token string, body any) *httptest.ResponseRecorder {
@@ -109,4 +114,27 @@ func TestMcpToolNotFound(t *testing.T) {
 	resp := decodeResponse(t, w)
 	assert.NotNil(t, resp.Error)
 	assert.Equal(t, -32100, resp.Error.Code)
+}
+
+// TestMcpDuplicateRegister 测试MCP工具重复注册
+func TestMcpDuplicateRegister(t *testing.T) {
+	_, err := mcp.NewHandler(mcp.ServerInfo{}, &config.Config{}, []mcp.Tool{
+		&duplicateMcpTool{},
+		&duplicateMcpTool{},
+	})
+	assert.Error(t, err)
+}
+
+type duplicateMcpTool struct{}
+
+func (t *duplicateMcpTool) Name() string { return "test_duplicate_tool" }
+
+func (t *duplicateMcpTool) Description() string { return "重复注册测试工具" }
+
+func (t *duplicateMcpTool) InputSchema() mcp.InputSchema {
+	return mcp.InputSchema{Type: "object"}
+}
+
+func (t *duplicateMcpTool) Call(ctx context.Context, args map[string]any) (any, error) {
+	return nil, nil
 }

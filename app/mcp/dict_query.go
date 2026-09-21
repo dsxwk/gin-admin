@@ -7,8 +7,6 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-func init() { mcp.Register(&DictQuery{}) }
-
 // DictQuery 字典查询工具
 type DictQuery struct{}
 

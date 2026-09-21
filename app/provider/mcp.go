@@ -1,16 +1,12 @@
 package provider
 
 import (
+	appmcp "gin/app/mcp"
 	"gin/common/flag"
-	"gin/config"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
-	"gin/pkg/serviceprovider/mcp"
+	servicemcp "gin/pkg/serviceprovider/mcp"
 )
-
-func init() {
-	serviceprovider.Register(&McpProvider{})
-}
 
 // McpProvider MCP服务提供者
 type McpProvider struct{}
@@ -22,17 +18,21 @@ func (p *McpProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *McpProvider) Register(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
+	cfg := app.Config()
 	if cfg == nil || !cfg.Mcp.Enabled {
 		return
 	}
 
-	handler := mcp.NewHandler(mcp.ServerInfo{
+	handler, err := servicemcp.NewHandler(servicemcp.ServerInfo{
 		Name:    cfg.App.Name,
 		Version: cfg.App.CliVersion,
-	}, cfg)
+	}, cfg, appmcp.Tools())
+	if err != nil {
+		flag.Errorf("MCP服务注册失败: %v", err)
+		return
+	}
 
-	app.Set(serviceprovider.ServiceMCP, handler)
+	app.SetMCP(handler)
 	flag.Infof("MCP服务注册成功,路径: %s", cfg.Mcp.Path)
 }
 

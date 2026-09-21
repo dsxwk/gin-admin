@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"errors"
+	"fmt"
 	"gin/app/errcode"
 	"gin/config"
 	errCode "gin/pkg/errcode"
@@ -15,13 +16,55 @@ import (
 
 // Handler MCP HTTP处理器
 type Handler struct {
-	Info   ServerInfo
-	Config *config.Config
+	Info     ServerInfo
+	Config   *config.Config
+	tools    map[string]Tool
+	toolDefs []ToolDef
 }
 
 // NewHandler 创建MCP处理器
-func NewHandler(info ServerInfo, cfg *config.Config) *Handler {
-	return &Handler{Info: info, Config: cfg}
+func NewHandler(info ServerInfo, cfg *config.Config, tools []Tool) (*Handler, error) {
+	h := &Handler{
+		Info:   info,
+		Config: cfg,
+		tools:  make(map[string]Tool, len(tools)),
+	}
+
+	for _, tool := range tools {
+		if tool == nil {
+			return nil, fmt.Errorf("MCP工具不能为空")
+		}
+
+		name := tool.Name()
+		if strings.TrimSpace(name) == "" {
+			return nil, fmt.Errorf("MCP工具名称不能为空")
+		}
+		if _, exists := h.tools[name]; exists {
+			return nil, fmt.Errorf("MCP工具 [%s] 重复注册", name)
+		}
+
+		h.tools[name] = tool
+		h.toolDefs = append(h.toolDefs, ToolDef{
+			Name:        name,
+			Description: tool.Description(),
+			InputSchema: tool.InputSchema(),
+		})
+	}
+
+	return h, nil
+}
+
+// Tools 获取已注册工具
+func (h *Handler) Tools() []Tool {
+	if h == nil {
+		return nil
+	}
+
+	result := make([]Tool, 0, len(h.tools))
+	for _, tool := range h.tools {
+		result = append(result, tool)
+	}
+	return result
 }
 
 // ServeHTTP 纯HTTP处理器,处理JSONRPC请求
@@ -88,7 +131,7 @@ func (h *Handler) handleInitialize(w http.ResponseWriter, req JsonRpcRequest) {
 // handleToolsList 处理tools/list请求
 func (h *Handler) handleToolsList(w http.ResponseWriter, req JsonRpcRequest) {
 	h.writeResult(w, req.Id, map[string]any{
-		"tools": GetAllDefs(),
+		"tools": h.toolDefs,
 	})
 }
 
@@ -100,7 +143,7 @@ func (h *Handler) handleToolsCall(w http.ResponseWriter, r *http.Request, req Js
 		return
 	}
 
-	tool, ok := Get(name)
+	tool, ok := h.tools[name]
 	if !ok {
 		h.writeErrorCode(w, req.Id, errcode.McpToolNotFound().WithMsg("Tool not found: "+name))
 		return

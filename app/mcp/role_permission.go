@@ -6,8 +6,6 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-func init() { mcp.Register(&RolePermission{}) }
-
 // RolePermission 角色权限设置工具
 type RolePermission struct{}
 

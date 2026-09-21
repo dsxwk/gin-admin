@@ -2,9 +2,9 @@ package mcp
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	svcmcp "gin/pkg/serviceprovider/mcp"
 	"sort"
 	"strings"
 
@@ -33,7 +33,7 @@ func (s *McpList) Help() []base.CommandOption {
 }
 
 func (s *McpList) Execute(values map[string]string) {
-	tools := svcmcp.GetAll()
+	tools := facade.MCP().Tools()
 	if len(tools) == 0 {
 		color.Yellow("暂无注册的MCP工具")
 		return
