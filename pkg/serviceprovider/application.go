@@ -5,34 +5,27 @@ import (
 	"fmt"
 	"gin/pkg/container"
 	"sync"
+	"time"
 )
 
 // Application 应用实现
 type Application struct {
 	mu           sync.RWMutex
 	container    *container.Container
-	providers    []ServiceProvider  // 已注册的服务提供者列表
+	providers    []ServiceProvider  // 服务提供者列表
 	runners      []Runner           // 需要后台运行的任务
 	runnerCancel context.CancelFunc // 后台任务取消函数
 	registered   bool               // 服务是否已注册
 	initialized  bool               // 应用是否已启动
 }
 
-var (
-	defaultApp *Application
-	appOnce    sync.Once
-)
-
-// NewApp 获取应用单例(自动初始化)
-func NewApp() *Application {
-	appOnce.Do(func() {
-		defaultApp = &Application{
-			container: container.Default(),
-			providers: make([]ServiceProvider, 0),
-			runners:   make([]Runner, 0),
-		}
-	})
-	return defaultApp
+// NewApp 创建应用实例
+func NewApp(providers ...ServiceProvider) *Application {
+	return &Application{
+		container: container.Default(),
+		providers: append([]ServiceProvider(nil), providers...),
+		runners:   make([]Runner, 0),
+	}
 }
 
 // RegisterProviders 仅执行服务注册阶段,不启动后台任务
@@ -59,7 +52,7 @@ func (app *Application) Boot() error {
 	for _, provider := range app.providers {
 		provider.Boot(app.container)
 
-		if withRunners, ok := provider.(ServiceProviderWithRunners); ok {
+		if withRunners, ok := provider.(Runners); ok {
 			app.runners = append(app.runners, withRunners.Runners()...)
 		}
 	}
@@ -77,9 +70,6 @@ func (app *Application) registerProviders() error {
 	}
 
 	providers := app.providers
-	if len(providers) == 0 {
-		providers = GetProviders()
-	}
 	if len(providers) == 0 {
 		app.registered = true
 		return nil
@@ -112,6 +102,16 @@ func (app *Application) Stop() error {
 	for _, runner := range app.runners {
 		if err := runner.Stop(); err != nil {
 			errs = append(errs, fmt.Errorf("%s: %w", runner.Name(), err))
+		}
+	}
+
+	if registry := app.container.Event(); registry != nil {
+		if bus := registry.Bus(); bus != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			if err := bus.Close(ctx); err != nil {
+				errs = append(errs, fmt.Errorf("eventbus: %w", err))
+			}
+			cancel()
 		}
 	}
 
@@ -151,10 +151,14 @@ func (app *Application) sortProvidersByDependency(providers []ServiceProvider) (
 
 	// 建立Provider名称到切片下标的映射
 	// 后续通过依赖名称快速定位Provider
-	// 这里默认同名Provider只保留最后一个下标
+	// 同时检测重复Provider避免依赖关系产生歧义
 	nameToIndex := make(map[string]int)
 	for i, p := range providers {
-		nameToIndex[p.Name()] = i
+		name := p.Name()
+		if _, exists := nameToIndex[name]; exists {
+			return nil, fmt.Errorf("duplicate provider: %s", name)
+		}
+		nameToIndex[name] = i
 	}
 
 	// graph[idx]保存依赖idx的所有Provider下标
@@ -169,7 +173,7 @@ func (app *Application) sortProvidersByDependency(providers []ServiceProvider) (
 	// 遍历全部Provider并建立依赖关系
 	for i, provider := range providers {
 		// 只有实现依赖接口的Provider才需要解析依赖
-		if withDeps, ok := provider.(ServiceProviderWithDependencies); ok {
+		if withDeps, ok := provider.(Dependencies); ok {
 			for _, depName := range withDeps.Dependencies() {
 				// 找不到依赖名称时忽略该依赖
 				// 这样允许Provider声明可选依赖
