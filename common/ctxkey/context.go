@@ -4,7 +4,7 @@ import "context"
 
 const (
 	UserIdKey    string = "userId"
-	TraceIdKey   string = "traceId"
+	TraceIDKey   string = "traceId"
 	IpKey        string = "ip"
 	PathKey      string = "path"
 	MethodKey    string = "method"
@@ -20,17 +20,17 @@ func WithValue(ctx context.Context, key string, value any) context.Context {
 	return context.WithValue(ctx, key, value)
 }
 
-// GetValue 从context获取值
-func GetValue(ctx context.Context, key string) any {
+// Value 从context获取值
+func Value(ctx context.Context, key string) any {
 	return ctx.Value(key)
 }
 
-// GetTraceId 获取tracId
-func GetTraceId(ctx context.Context) string {
+// TraceID 获取tracId
+func TraceID(ctx context.Context) string {
 	if ctx == nil {
 		return "unknown"
 	}
-	if id := ctx.Value(TraceIdKey); id != nil {
+	if id := ctx.Value(TraceIDKey); id != nil {
 		if s, ok := id.(string); ok && s != "" {
 			return s
 		}
