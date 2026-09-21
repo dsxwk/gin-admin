@@ -864,7 +864,7 @@ $ go run ./cmd/cli.go grpc-make:service --table=user
 - `--connection=mysql` 数据库连接
 - `--auth=true` 是否需要鉴权 (默认, `--auth=false` 关闭)
 
-grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。更新请求使用`google.protobuf.Struct`接收`data`,按需转成请求结构体做自定义校验,更新时只处理显式传入的字段,和controller的map更新方式一致。
+grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。生成的服务会实现`Name()`、`Register()`和`AuthMethods()`方法,并自动追加到`grpc/service/services.go`服务列表。更新请求使用`google.protobuf.Struct`接收`data`,按需转成请求结构体做自定义校验,更新时只处理显式传入的字段,和controller的map更新方式一致。
 
 ## grpc内部调用
 
@@ -1853,6 +1853,7 @@ package router
 
 import (
   "gin/app/controller/v1"
+  "gin/pkg/route"
   
   "github.com/gin-gonic/gin"
 )
@@ -1861,7 +1862,7 @@ import (
 type UserRouter struct{}
 
 func init() {
-  Register(&UserRouter{})
+  route.Register(&UserRouter{})
 }
 
 // RegisterRoutes 注册路由
@@ -2331,7 +2332,6 @@ package listener
 import (
     "fmt"
     "gin/app/event"
-    "gin/app/facade"
     "time"
 )
 
@@ -2344,11 +2344,7 @@ func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
     e.Description(),
     e,
     time.Now().Format("2006-01-02 15:04:05"),
-  )
-}
-
-func init() {
-  facade.Event().Register(&UserLoginListener{}, event.UserLoginEvent{})
+    )
 }
 
 ```
@@ -2359,11 +2355,18 @@ func init() {
 - `eventbus.Registry`: 负责业务事件注册、监听器分发以及 `PublishedEvent` 发布.
 
 调试器作为总线消费者收集调试事件和业务事件, `eventbus` 不再反向依赖 `debugger`.
+业务监听器由 `app/listener/listeners.go` 统一注册, `EventProvider` 启动时执行 `listener.Register(registry)`。
+
+`make:listener` 会自动将生成的监听器追加到 `app/listener/listeners.go`:
+
+```go
+listenerRegister(&UserLoginListener{}, event.UserLoginEvent{})
+```
 
 # 队列
 
 > 执行队列创建命令会根据连接类型 (kafka/rabbitmq/redis)同时创建消费者和生产者. 你只需要实现`Handle`方法完善业务逻辑即可,
-> 支持自动错误重试以及延迟队列.
+> 支持自动错误重试以及延迟队列.生成的消费者和生产者也会被添加到注册表中,在`app/queue/consumers.go`和`app/queue/producers.go`中的列表。
 
 ## 队列创建帮助
 
@@ -2427,15 +2430,18 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/common/flag"
+	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
 	"time"
+
+	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDemoConsumer Kafka消费者
 type KafkaDemoConsumer struct {
-	*base.KafkaConsumer
+	*queue.KafkaConsumer
 }
 
 // KafkaDemoPayload 消息体
@@ -2445,7 +2451,7 @@ type KafkaDemoPayload struct {
 
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "kafka_demo",
@@ -2457,12 +2463,50 @@ func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 		MaxWait:        5 * time.Second,
 	})
 	return &KafkaDemoConsumer{
-		KafkaConsumer: &base.KafkaConsumer{
+		KafkaConsumer: &queue.KafkaConsumer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
 	}
+}
+
+func (c *KafkaDemoConsumer) Name() string {
+	return "kafka_demo"
+}
+
+func (c *KafkaDemoConsumer) Description() string {
+	return "kafka普通队列消费者"
+}
+
+func (c *KafkaDemoConsumer) Connection() string {
+	return "kafka"
+}
+
+func (c *KafkaDemoConsumer) Retry() int {
+	return 3
+}
+
+func (c *KafkaDemoConsumer) IsDelay() bool {
+	return false
+}
+
+func (c *KafkaDemoConsumer) Start() error {
+	c.KafkaConsumer.Start(c)
+	flag.Infof("Kafka消费者启动成功: %s", c.Name())
+	return nil
+}
+
+func (c *KafkaDemoConsumer) Stop() error {
+	return c.KafkaConsumer.Stop()
+}
+
+func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
+	return cfg.Queue.Kafka.Enabled
+}
+
+func (c *KafkaDemoConsumer) NewPayload() any {
+	return &KafkaDemoPayload{}
 }
 
 func (c *KafkaDemoConsumer) Handle(payload any) error {
@@ -2471,17 +2515,12 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 	// todo 处理业务逻辑
 	return nil
 }
+```
 
-func init() {
-	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		return NewKafkaDemoConsumer()
-	})
-}
+`make:queue` 会自动将生成的消费者追加到 `app/queue/consumers.go`:
 
+```go
+ConsumerFactory("kafka", appconsumer.NewKafkaDemoConsumer)
 ```
 
 ### 生成的生产者示例 (Kafka)
@@ -2492,17 +2531,18 @@ package producer
 import (
 	"context"
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg/serviceprovider/queue"
+
+	"github.com/segmentio/kafka-go"
 )
 
 type KafkaDemoProducer struct {
-	*base.KafkaProducer
+	*queue.KafkaProducer
 }
 
 func NewKafkaDemoProducer() *KafkaDemoProducer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "kafka_demo",
@@ -2510,7 +2550,7 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 		RequiredAcks: kafka.RequireAll,
 	}
 	p := &KafkaDemoProducer{
-		KafkaProducer: &base.KafkaProducer{
+		KafkaProducer: &queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Key:   "kafka_demo_key",
@@ -2520,20 +2560,39 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 	return p
 }
 
+func (p *KafkaDemoProducer) Name() string {
+	return "kafka_demo"
+}
+
+func (p *KafkaDemoProducer) Description() string {
+	return "kafka普通队列生产者"
+}
+
+func (p *KafkaDemoProducer) Connection() string {
+	return "kafka"
+}
+
+func (p *KafkaDemoProducer) IsDelay() bool {
+	return false
+}
+
+func (p *KafkaDemoProducer) DelayMs() int64 {
+	return 0
+}
+
 func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
 	return p.KafkaProducer.Publish(ctx, msg)
 }
 
-func init() {
-	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		return NewKafkaDemoProducer()
-	})
+func (p *KafkaDemoProducer) Close() error {
+	return p.KafkaProducer.Close()
 }
+```
 
+`make:queue` 会自动将生成的生产者追加到 `app/queue/producers.go`:
+
+```go
+ProducerFactory("kafka", appproducer.NewKafkaDemoProducer)
 ```
 
 ## 队列使用
@@ -2566,6 +2625,21 @@ func (s *TestController) Test(ctx context.Context) {
     _ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
     _ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
 }
+```
+
+消费者和生产者可通过当前门面方法查询:
+
+```go
+consumers := facade.Queue().Consumers()
+producers := facade.Queue().Producers()
+consumerNames := facade.Queue().ConsumerNames()
+runningConsumers := facade.Queue().RunningConsumers()
+stoppedConsumers := facade.Queue().StoppedConsumers()
+consumerStatuses := facade.Queue().ConsumerStatus()
+producerStatuses := facade.Queue().ProducerStatus()
+
+consumer := facade.Queue().Consumer("kafka_demo")
+producer := facade.Queue().Producer("kafka_demo")
 ```
 
 ## 消费者列表
@@ -2610,7 +2684,7 @@ $ go run ./cmd/cli.go producer:list
 
 ### Job创建
 
-> 同模型、控制器等使用命令行创建,具体参考之前文档。
+> 同模型、控制器等使用命令行创建,具体参考之前文档。生成的 Job 会自动追加到 `app/job/jobs.go` 注册列表。
 
 ### Job结构
 
@@ -2620,7 +2694,6 @@ package job
 import (
     "gin/app/facade"
     "gin/pkg"
-    "gin/pkg/serviceprovider/job"
 )
 
 type SendEmailJob struct{}
@@ -2644,9 +2717,13 @@ func (j *SendEmailJob) Handle(payload any) error {
     facade.Log().Info(pkg.Sprintf("发送邮件至: %s, 主题: %s", data.To, data.Subject))
     return nil
 }
+```
 
-func init() {
-    job.Register(&SendEmailJob{})
+`make:job` 会自动将生成的 Job 追加到 `app/job/jobs.go`:
+
+```go
+return []servicejob.Job{
+    &SendEmailJob{},
 }
 ```
 
@@ -2679,6 +2756,14 @@ func (s *TestController) Test(c *gin.Context) {
 }
 ```
 
+已注册Job、Job统计以及Redis待处理Job数量可通过门面查询:
+
+```go
+jobs := facade.Job().Jobs()
+stats := facade.Job().GetAllJobs()
+count, err := facade.Job().Count(ctx)
+```
+
 ### Job接口
 
 | 方法                        | 说明                                                                    |
@@ -2702,7 +2787,7 @@ $ go run ./cmd/cli.go job:list
 │ send_email      redis      3          3000ms     发送邮件任务 │
 │ sync_user       sync       1          0ms        同步用户任务 │
 └───────────────────────────────────────────────────────────────┘
-总计 4 个Job
+总计 3 个Job
 ```
 
 ### Job清除
@@ -3124,7 +3209,7 @@ func (s *TestController) Test(c *gin.Context) {
 # 日志
 
 > - 使用 `zap` 包实现日志记录，日志文件存放路径为 `storage/logs`, 默认日志级别为 `debug`。
-> - 返回错误码不为0时自动记录日志TraceId、堆栈、sql、http、redis、grpc等调用信息, 也可以直接调用日志记录也会自动记录调试信息。
+> - 返回错误码不为0时自动记录日志TraceID、堆栈、sql、http、redis、grpc等调用信息, 也可以直接调用日志记录也会自动记录调试信息。
 > - 配置文件`yaml`中`log.access`支持是否自动记录请求日志，如若开启会自动记录请求日志。
 
 ```json
@@ -3186,7 +3271,7 @@ func (s *TestController) Test(c *gin.Context) {
 
 ## 错误调试
 
-> 使用公共返回错误以及调用WithDebugger ()方法时会自动记录日志TraceId、堆栈、sql、http、redis、grpc等调用信息,
+> 使用公共返回错误以及调用WithDebugger ()方法时会自动记录日志TraceID、堆栈、sql、http、redis、grpc等调用信息,
 > 可根据debug调试信息和trace堆栈信息调试, 日志文件存放路径为 `storage/logs`。
 
 ```go

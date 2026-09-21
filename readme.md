@@ -881,7 +881,7 @@ Options:
 - `--connection=mysql` Database connection
 - `--auth=true` Require authentication (default, use `--auth=false` to disable)
 
-The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc-gen`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
+The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc-gen`. The generated service implements `Name()`, `Register()`, and `AuthMethods()`, and is automatically appended to `grpc/service/services.go`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
 
 ## Call From Go
 
@@ -1864,6 +1864,7 @@ package router
 
 import (
 	"gin/app/controller/v1"
+	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -1872,7 +1873,7 @@ import (
 type UserRouter struct{}
 
 func init() {
-	Register(&UserRouter{})
+	route.Register(&UserRouter{})
 }
 
 // RegisterRoutes Register Routes
@@ -2342,7 +2343,6 @@ package listener
 import (
 	"fmt"
 	"gin/app/event"
-	"gin/app/facade"
 	"time"
 )
 
@@ -2358,10 +2358,6 @@ func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
 	)
 }
 
-func init() {
-	facade.Event().Register(&UserLoginListener{}, event.UserLoginEvent{})
-}
-
 ```
 
 The event system is split into two layers:
@@ -2371,12 +2367,21 @@ The event system is split into two layers:
 
 The debugger is a consumer of the bus. It collects debug events and business events without becoming a dependency of
 `eventbus`.
+Business listeners are registered through `app/listener/listeners.go`, and `EventProvider` runs
+`listener.Register(registry)` during startup.
+
+`make:listener` automatically appends the generated listener to `app/listener/listeners.go`:
+
+```go
+listenerRegister(&UserLoginListener{}, event.UserLoginEvent{})
+```
 
 # Queue
 
 > Executing the queue creation command will create both consumers and producers based on the connection type
 > (kafka/rabbitmq/redis). You only need to implement the `Handle` method to process your business logic, with automatic
-> error retries and delayed queue support.
+> error retries and delayed queue support. Generated consumers and producers are also appended to the registration
+> lists in `app/queue/consumers.go` and `app/queue/producers.go`.
 
 ## Queue Creation Help
 
@@ -2441,18 +2446,18 @@ package consumer
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
-	"github.com/segmentio/kafka-go"
 	"time"
+
+	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDemoConsumer Kafka consumer
 type KafkaDemoConsumer struct {
-	*base.KafkaConsumer
+	*queue.KafkaConsumer
 }
 
 // KafkaDemoPayload message payload
@@ -2462,7 +2467,7 @@ type KafkaDemoPayload struct {
 
 func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        cfg.Queue.Kafka.Brokers,
 		Topic:          "kafka_demo",
@@ -2474,12 +2479,50 @@ func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 		MaxWait:        5 * time.Second,
 	})
 	return &KafkaDemoConsumer{
-		KafkaConsumer: &base.KafkaConsumer{
+		KafkaConsumer: &queue.KafkaConsumer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
 	}
+}
+
+func (c *KafkaDemoConsumer) Name() string {
+	return "kafka_demo"
+}
+
+func (c *KafkaDemoConsumer) Description() string {
+	return "kafka demo"
+}
+
+func (c *KafkaDemoConsumer) Connection() string {
+	return "kafka"
+}
+
+func (c *KafkaDemoConsumer) Retry() int {
+	return 3
+}
+
+func (c *KafkaDemoConsumer) IsDelay() bool {
+	return false
+}
+
+func (c *KafkaDemoConsumer) Start() error {
+	c.KafkaConsumer.Start(c)
+	flag.Infof("Kafka consumer started: %s", c.Name())
+	return nil
+}
+
+func (c *KafkaDemoConsumer) Stop() error {
+	return c.KafkaConsumer.Stop()
+}
+
+func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
+	return cfg.Queue.Kafka.Enabled
+}
+
+func (c *KafkaDemoConsumer) NewPayload() any {
+	return &KafkaDemoPayload{}
 }
 
 func (c *KafkaDemoConsumer) Handle(payload any) error {
@@ -2488,16 +2531,12 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 	// todo business logic
 	return nil
 }
+```
 
-func init() {
-	queue.GetConsumerRegistry().RegisterFactory(func() queue.Consumer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		return NewKafkaDemoConsumer()
-	})
-}
+`make:queue` automatically appends the generated consumer to `app/queue/consumers.go`:
+
+```go
+ConsumerFactory("kafka", appconsumer.NewKafkaDemoConsumer)
 ```
 
 ### Generated Producer Example (Kafka)
@@ -2508,18 +2547,18 @@ package producer
 import (
 	"context"
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg/serviceprovider/queue"
+
 	"github.com/segmentio/kafka-go"
 )
 
 type KafkaDemoProducer struct {
-	*base.KafkaProducer
+	*queue.KafkaProducer
 }
 
 func NewKafkaDemoProducer() *KafkaDemoProducer {
 	cfg := facade.Config()
-	kfk := base.NewKafka(cfg, facade.Log(), facade.Event().Bus())
+	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Queue.Kafka.Brokers...),
 		Topic:        "kafka_demo",
@@ -2527,7 +2566,7 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 		RequiredAcks: kafka.RequireAll,
 	}
 	p := &KafkaDemoProducer{
-		KafkaProducer: &base.KafkaProducer{
+		KafkaProducer: &queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Key:   "kafka_demo_key",
@@ -2537,19 +2576,39 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 	return p
 }
 
+func (p *KafkaDemoProducer) Name() string {
+	return "kafka_demo"
+}
+
+func (p *KafkaDemoProducer) Description() string {
+	return "kafka demo"
+}
+
+func (p *KafkaDemoProducer) Connection() string {
+	return "kafka"
+}
+
+func (p *KafkaDemoProducer) IsDelay() bool {
+	return false
+}
+
+func (p *KafkaDemoProducer) DelayMs() int64 {
+	return 0
+}
+
 func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
 	return p.KafkaProducer.Publish(ctx, msg)
 }
 
-func init() {
-	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		return NewKafkaDemoProducer()
-	})
+func (p *KafkaDemoProducer) Close() error {
+	return p.KafkaProducer.Close()
 }
+```
+
+`make:queue` automatically appends the generated producer to `app/queue/producers.go`:
+
+```go
+ProducerFactory("kafka", appproducer.NewKafkaDemoProducer)
 ```
 
 ## Queue Usage
@@ -2582,6 +2641,21 @@ func (s *TestController) Test(ctx context.Context) {
 	_ = facade.Queue().Producer("redis_demo").Publish(ctx, consumer.RedisDemoPayload{Name: "redis_test111"})
 	_ = facade.Queue().Producer("redis_delay_demo").Publish(ctx, consumer.RedisDelayDemoPayload{Name: "redis_test222"})
 }
+```
+
+Queue consumers and producers can be queried through the current facade methods:
+
+```go
+consumers := facade.Queue().Consumers()
+producers := facade.Queue().Producers()
+consumerNames := facade.Queue().ConsumerNames()
+runningConsumers := facade.Queue().RunningConsumers()
+stoppedConsumers := facade.Queue().StoppedConsumers()
+consumerStatuses := facade.Queue().ConsumerStatus()
+producerStatuses := facade.Queue().ProducerStatus()
+
+consumer := facade.Queue().Consumer("kafka_demo")
+producer := facade.Queue().Producer("kafka_demo")
 ```
 
 ## Consumer List
@@ -2627,7 +2701,8 @@ Total 6 producers
 
 ### Job Creation
 
-> Create models, controllers, etc. using the command line, refer to the previous documentation for details.
+> Create models, controllers, etc. using the command line, refer to the previous documentation for details. Generated
+> Jobs are automatically appended to the registration list in `app/job/jobs.go`.
 
 | Argument       | Short | Required | Default                   | Description                                  |
 |----------------|-------|----------|---------------------------|----------------------------------------------|
@@ -2645,7 +2720,6 @@ package job
 import (
 	"gin/app/facade"
 	"gin/pkg"
-	"gin/pkg/serviceprovider/job"
 )
 
 type SendEmailJob struct{}
@@ -2669,9 +2743,13 @@ func (j *SendEmailJob) Handle(payload any) error {
 	facade.Log().Info(pkg.Sprintf("Sending email to: %s, subject: %s", data.To, data.Subject))
 	return nil
 }
+```
 
-func init() {
-	job.Register(&SendEmailJob{})
+`make:job` automatically appends the generated Job to `app/job/jobs.go`:
+
+```go
+return []servicejob.Job{
+	&SendEmailJob{},
 }
 ```
 
@@ -2702,6 +2780,14 @@ func (s *TestController) Test(c *gin.Context) {
 		Action: "update",
 	})
 }
+```
+
+Registered Jobs, Job statistics, and pending Redis Jobs can be queried through the facade:
+
+```go
+jobs := facade.Job().Jobs()
+stats := facade.Job().GetAllJobs()
+count, err := facade.Job().Count(ctx)
 ```
 
 ### Job Interface
@@ -3143,7 +3229,7 @@ func (s *TestController) Test(c *gin.Context) {
 # Log
 
 > Use the `zap` package to implement logging. The storage path for log files is `storage/logs`, and the default log
-> level is `debug`. When the error code returned is not 0, it automatically records log TraceId, stack, SQL, HTTP,
+> level is `debug`. When the error code returned is not 0, it automatically records log TraceID, stack, SQL, HTTP,
 > Redis,
 > GRPC, and other call information. Logging can also be directly called to automatically record debugging information.
 > Does `log.access` in the configuration file `yaml` support automatic recording of request logs? If enabled, it will
@@ -3208,7 +3294,7 @@ func (s *TestController) Test(c *gin.Context) {
 
 ## Error Debug
 
-> When using public return errors and calling the Withdebugger () method, it will automatically record log TraceId,
+> When using public return errors and calling the Withdebugger () method, it will automatically record log TraceID,
 > stack, SQL, HTTP, Redis, GRPC, and other call information. Debugging can be done based on debug and trace stack
 > information. The log file storage path is' storage/logs'.
 
