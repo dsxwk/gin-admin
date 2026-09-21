@@ -141,7 +141,7 @@ func TestHttpRequest(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
+	ctx = context.WithValue(ctx, ctxkey.TraceIDKey, "test-trace-id")
 
 	// 测试GET请求
 	resp := facade.Http().Send(ctx, "GET", ts.URL+"/ping")
@@ -168,7 +168,7 @@ func TestHttpTraceCollected(t *testing.T) {
 		store.Delete(traceID)
 	})
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, traceID)
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, traceID)
 	resp := facade.Http().Send(ctx, http.MethodGet, ts.URL+"/ping")
 	require.NoError(t, resp.ErrMsg)
 
@@ -193,7 +193,7 @@ func TestHttpWithoutTrace(t *testing.T) {
 		store.Delete(traceID)
 	})
 
-	ctx := context.WithValue(t.Context(), ctxkey.TraceIdKey, traceID)
+	ctx := context.WithValue(t.Context(), ctxkey.TraceIDKey, traceID)
 	resp := facade.Http().Send(h.WithoutTrace(ctx), http.MethodGet, ts.URL+"/ping")
 	require.NoError(t, resp.ErrMsg)
 
@@ -440,7 +440,7 @@ func TestHttpSendAsJsonJson(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "test-trace-id")
+	ctx = context.WithValue(ctx, ctxkey.TraceIDKey, "test-trace-id")
 
 	// 测试GET请求并解析JSON
 	resp, response := facade.Http().SendAsJson[errcode.SuccessResponse](
@@ -976,7 +976,7 @@ func TestHttpUploadFileWithContext(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	ctx = context.WithValue(ctx, ctxkey.TraceIdKey, "upload-trace-id")
+	ctx = context.WithValue(ctx, ctxkey.TraceIDKey, "upload-trace-id")
 
 	testContent := "Test file with context"
 	testFilePath := createTestFile(t, testContent)

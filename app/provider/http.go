@@ -7,10 +7,6 @@ import (
 	"gin/pkg/serviceprovider/http"
 )
 
-func init() {
-	serviceprovider.Register(&HttpProvider{})
-}
-
 // HttpProvider HTTP客户端服务提供者
 type HttpProvider struct{}
 
@@ -21,7 +17,7 @@ func (p *HttpProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *HttpProvider) Register(app *container.Container) {
-	app.Set(serviceprovider.ServiceHTTP, http.NewClient())
+	app.SetHTTP(http.NewClient())
 }
 
 // Boot 启动服务

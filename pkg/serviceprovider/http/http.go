@@ -489,7 +489,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 
 	traceId := "unknown"
 	if req.Context() != nil {
-		if id := req.Context().Value(ctxkey.TraceIdKey); id != nil {
+		if id := req.Context().Value(ctxkey.TraceIDKey); id != nil {
 			if s, ok := id.(string); ok && s != "" {
 				traceId = s
 			}
@@ -503,7 +503,7 @@ func (t *TracingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		}
 	}
 
-	eventbus.NewBus().Publish(debugger.TopicHTTP, debugger.HTTPEvent{
+	eventbus.Default().Publish(req.Context(), debugger.TopicHTTP, debugger.HTTPEvent{
 		TraceID:  traceId,
 		URL:      req.URL.String(),
 		Method:   req.Method,
