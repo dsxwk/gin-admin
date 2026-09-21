@@ -2,9 +2,9 @@ package queue
 
 import (
 	"fmt"
+	"gin/app/facade"
 	"gin/common/base"
 	"gin/pkg/cli"
-	"gin/pkg/serviceprovider/queue"
 	"sort"
 	"strings"
 
@@ -19,7 +19,7 @@ func (s *ProducerList) Description() string        { return "生产者列表" }
 func (s *ProducerList) Help() []base.CommandOption { return []base.CommandOption{} }
 
 func (s *ProducerList) Execute(values map[string]string) {
-	producers := queue.GetProducerRegistry().GetAll()
+	producers := facade.Queue().Producers()
 	if len(producers) == 0 {
 		color.Yellow("no registered producers")
 		return

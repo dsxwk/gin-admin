@@ -113,20 +113,3 @@ func (p *{{.Name}}{{if .IsDelay}}Delay{{end}}Producer) Close() error {
 	return p.RedisProducer.Close()
 	{{- end}}
 }
-
-func init() {
-	queue.GetProducerRegistry().RegisterFactory(func() queue.Producer {
-		{{- if eq .Type "kafka"}}
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Kafka.Enabled {
-			return nil
-		}
-		{{- else if eq .Type "rabbitmq"}}
-		cfg := facade.Config()
-		if cfg == nil || !cfg.Queue.Rabbitmq.Enabled {
-			return nil
-		}
-		{{- end}}
-		return New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer()
-	})
-}
