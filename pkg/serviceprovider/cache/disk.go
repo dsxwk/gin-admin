@@ -38,7 +38,7 @@ func NewDiskCache(conf *config.Config) *CacheProxy {
 	}
 	disk := &DiskCache{db: db}
 
-	diskCache = NewCacheProxy("disk", disk, eventbus.NewBus(), nil)
+	diskCache = NewCacheProxy("disk", disk, eventbus.Default(), nil)
 	return diskCache
 }
 

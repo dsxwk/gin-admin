@@ -2,15 +2,10 @@ package provider
 
 import (
 	"gin/common/flag"
-	"gin/config"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/cache"
 )
-
-func init() {
-	serviceprovider.Register(&CacheProvider{})
-}
 
 // CacheProvider 缓存服务提供者
 type CacheProvider struct{}
@@ -22,8 +17,7 @@ func (p *CacheProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *CacheProvider) Register(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
-	app.Set(serviceprovider.ServiceCache, cache.NewManager(cfg))
+	app.SetCache(cache.NewManager(app.Config()))
 }
 
 // Boot 启动服务

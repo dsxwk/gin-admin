@@ -25,7 +25,7 @@ func NewMemoryCache(conf *config.Config) *CacheProxy {
 	m := &MemoryCache{
 		cache: cache.New(conf.Cache.Memory.DefaultExpire, conf.Cache.Memory.CleanupInterval),
 	}
-	memoryCache = NewCacheProxy("memory", m, eventbus.NewBus(), nil)
+	memoryCache = NewCacheProxy("memory", m, eventbus.Default(), nil)
 	return memoryCache
 }
 

@@ -31,7 +31,7 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 
 	// 提取traceId
 	traceId := "unknown"
-	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+	if id := ctx.Value(ctxkey.TraceIDKey); id != nil {
 		if s, ok := id.(string); ok && s != "" {
 			traceId = s
 		}
@@ -39,7 +39,7 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 
 	// 发布事件
 	if h.bus != nil {
-		h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
+		h.bus.Publish(ctx, debugger.TopicCache, debugger.CacheEvent{
 			TraceID: traceId,
 			Driver:  "redis",
 			Name:    cmd.Name(),
@@ -65,7 +65,7 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 
 	// 提取traceId
 	traceId := "unknown"
-	if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+	if id := ctx.Value(ctxkey.TraceIDKey); id != nil {
 		if s, ok := id.(string); ok && s != "" {
 			traceId = s
 		}
@@ -73,7 +73,7 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 
 	for _, cmd := range cmds {
 		if h.bus != nil {
-			h.bus.Publish(debugger.TopicCache, debugger.CacheEvent{
+			h.bus.Publish(ctx, debugger.TopicCache, debugger.CacheEvent{
 				TraceID: traceId,
 				Driver:  "redis",
 				Name:    cmd.Name(),
@@ -106,7 +106,7 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 		return redisCache
 	}
 
-	bus := eventbus.NewBus()
+	bus := eventbus.Default()
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", conf.Cache.Redis.Address, conf.Cache.Redis.Port),
 		Password: conf.Cache.Redis.Password,
