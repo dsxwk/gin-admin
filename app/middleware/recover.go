@@ -17,7 +17,7 @@ type Recover struct {
 }
 
 type ErrData struct {
-	TraceId string   `json:"traceId"`
+	TraceID string   `json:"traceId"`
 	Error   any      `json:"error"`
 	IP      string   `json:"ip"`
 	Lang    string   `json:"lang"`
@@ -44,7 +44,7 @@ func (s Recover) Handle() gin.HandlerFunc {
 							WithMsg(fmt.Sprintf("%v", err)).
 							WithData(
 								&ErrData{
-									TraceId: getString(ctx, ctxkey.TraceIdKey),
+									TraceID: getString(ctx, ctxkey.TraceIDKey),
 									Error:   err,
 									IP:      getString(ctx, ctxkey.IpKey),
 									Lang:    getString(ctx, ctxkey.LangKey),

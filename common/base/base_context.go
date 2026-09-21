@@ -20,9 +20,9 @@ func (s *Context) Context() context.Context {
 	return s.context
 }
 
-// TraceId 获取traceId
-func (s *Context) TraceId() string {
-	return getString(s.Context(), ctxkey.TraceIdKey)
+// TraceID 获取traceId
+func (s *Context) TraceID() string {
+	return getString(s.Context(), ctxkey.TraceIDKey)
 }
 
 // GetLang 获取语言
