@@ -2,6 +2,7 @@ package tests
 
 import (
 	"gin/app/facade"
+	"gin/app/provider"
 	"gin/common/flag"
 	_ "gin/common/imports"
 	"gin/pkg/errcode"
@@ -12,7 +13,7 @@ import (
 
 func TestMain(m *testing.M) {
 	// 创建应用实例
-	app := serviceprovider.NewApp()
+	app := serviceprovider.NewApp(provider.Providers()...)
 
 	err := app.Boot()
 	if err != nil {
