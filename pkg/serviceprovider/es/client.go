@@ -168,8 +168,8 @@ func (c *Client) Delete(ctx context.Context, index, id string) error {
 	return err
 }
 
-// GetDocument 获取文档
-func (c *Client) GetDocument[T any](ctx context.Context, index, id string) (*DocumentResponse[T], error) {
+// Document 获取文档
+func (c *Client) Document[T any](ctx context.Context, index, id string) (*DocumentResponse[T], error) {
 	path := "/" + url.PathEscape(index) + "/_doc/" + url.PathEscape(id)
 	data, err := c.get(ctx, "detail", index, path)
 	if err != nil {
@@ -354,14 +354,14 @@ func publishTrace(ctx context.Context, action, index string, reqData []byte, sta
 
 	traceId := "unknown"
 	if ctx != nil {
-		if id := ctx.Value(ctxkey.TraceIdKey); id != nil {
+		if id := ctx.Value(ctxkey.TraceIDKey); id != nil {
 			if s, ok := id.(string); ok && s != "" {
 				traceId = s
 			}
 		}
 	}
 
-	eventbus.NewBus().Publish(debugger.TopicES, debugger.ESEvent{
+	eventbus.Default().Publish(ctx, debugger.TopicES, debugger.ESEvent{
 		TraceID:  traceId,
 		Action:   action,
 		Index:    index,
