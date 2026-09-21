@@ -2,15 +2,10 @@ package provider
 
 import (
 	"gin/common/flag"
-	"gin/config"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/logger"
 )
-
-func init() {
-	serviceprovider.Register(&LogProvider{})
-}
 
 // LogProvider 日志服务提供者
 type LogProvider struct{}
@@ -22,8 +17,7 @@ func (p *LogProvider) Name() string {
 
 // Register 注册日志服务到容器
 func (p *LogProvider) Register(app *container.Container) {
-	cfg := app.Get[*config.Config](serviceprovider.ServiceConfig)
-	app.Set(serviceprovider.ServiceLog, logger.NewLogger(cfg))
+	app.SetLog(logger.NewLogger(app.Config()))
 }
 
 // Boot 启动服务
