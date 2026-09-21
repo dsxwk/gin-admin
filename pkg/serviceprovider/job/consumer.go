@@ -13,38 +13,42 @@ type Consumer struct {
 	description string
 	connection  string
 	isDelay     bool
+	manager     *Manager
 	redis       *queue.RedisConsumer
 	kafka       *queue.KafkaConsumer
 	rabbitmq    *queue.RabbitmqConsumer
 }
 
 // NewRedisConsumer 创建Redis任务消费者
-func NewRedisConsumer(driver *queue.RedisConsumer) *Consumer {
+func NewRedisConsumer(manager *Manager, driver *queue.RedisConsumer) *Consumer {
 	return &Consumer{
 		name:        "job:redis",
 		description: "Redis任务消费者",
 		connection:  "redis",
 		isDelay:     true,
+		manager:     manager,
 		redis:       driver,
 	}
 }
 
 // NewKafkaConsumer 创建Kafka任务消费者
-func NewKafkaConsumer(driver *queue.KafkaConsumer) *Consumer {
+func NewKafkaConsumer(manager *Manager, driver *queue.KafkaConsumer) *Consumer {
 	return &Consumer{
 		name:        "job:kafka",
 		description: "Kafka任务消费者",
 		connection:  "kafka",
+		manager:     manager,
 		kafka:       driver,
 	}
 }
 
 // NewRabbitmqConsumer 创建RabbitMQ任务消费者
-func NewRabbitmqConsumer(driver *queue.RabbitmqConsumer) *Consumer {
+func NewRabbitmqConsumer(manager *Manager, driver *queue.RabbitmqConsumer) *Consumer {
 	return &Consumer{
 		name:        "job:rabbitmq",
 		description: "RabbitMQ任务消费者",
 		connection:  "rabbitmq",
+		manager:     manager,
 		rabbitmq:    driver,
 	}
 }
@@ -119,7 +123,7 @@ func (c *Consumer) Enabled(cfg *config.Config) bool {
 }
 
 // Status 消费者状态
-func (c *Consumer) Status() queue.ConsumerStatus {
+func (c *Consumer) Status() string {
 	switch {
 	case c.redis != nil:
 		return c.redis.Status()
@@ -148,5 +152,5 @@ func (c *Consumer) HandleContext(ctx context.Context, payload any) error {
 	if !ok {
 		return fmt.Errorf("job message type invalid: %T", payload)
 	}
-	return Execute(ctx, *message)
+	return Execute(ctx, c.manager.Job(message.JobName), *message)
 }
