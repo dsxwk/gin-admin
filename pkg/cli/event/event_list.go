@@ -10,7 +10,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 type EventList struct{}
@@ -42,50 +43,34 @@ func printEventTable(events []eventbus.EventInfo, showListeners bool) {
 		return events[i].Name < events[j].Name
 	})
 
-	nameWidth := max(20, runewidth.StringWidth("事件名称"))
-	descWidth := max(35, runewidth.StringWidth("描述"))
-	for _, event := range events {
-		nameWidth = max(nameWidth, runewidth.StringWidth(event.Name))
-		descWidth = max(descWidth, runewidth.StringWidth(event.Description))
+	writer := cli.NewTable()
+	writer.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, Colors: text.Colors{text.FgGreen}},
+		{Number: 2, Colors: text.Colors{text.FgWhite}},
+		{Number: 3, Colors: text.Colors{text.FgCyan}},
+	})
+	if showListeners {
+		writer.AppendHeader(table.Row{"事件名称", "描述", "监听器"})
+	} else {
+		writer.AppendHeader(table.Row{"事件名称", "描述"})
 	}
-
-	totalWidth := nameWidth + descWidth + 7
-
-	color.Yellow("┌" + strings.Repeat("─", totalWidth-2) + "┐")
-	color.Yellow(fmt.Sprintf(
-		"│ %s   %s %s",
-		color.HiWhiteString(padRight("事件名称", nameWidth)),
-		color.HiWhiteString(padRight("描述", descWidth)),
-		color.YellowString("│"),
-	))
-	color.Yellow("├" + strings.Repeat("─", totalWidth-2) + "┤")
 
 	listeners := 0
 	for _, event := range events {
-		color.Yellow(fmt.Sprintf(
-			"│ %s   %s %s",
-			color.GreenString(padRight(event.Name, nameWidth)),
-			color.WhiteString(padRight(event.Description, descWidth)),
-			color.YellowString("│"),
-		))
-
 		if !showListeners {
+			writer.AppendRow(table.Row{event.Name, event.Description})
 			continue
 		}
 
-		for index, listener := range event.Listeners {
-			prefix := "├─ "
-			if index == len(event.Listeners)-1 {
-				prefix = "└─ "
-			}
-			listeners++
-
-			row := strings.Repeat(" ", nameWidth+2) + prefix + listener
-			color.Yellow(fmt.Sprintf("│%-*s│", totalWidth-2, row))
-		}
+		listeners += len(event.Listeners)
+		writer.AppendRow(table.Row{
+			event.Name,
+			event.Description,
+			strings.Join(event.Listeners, "\n"),
+		})
 	}
 
-	color.Yellow("└" + strings.Repeat("─", totalWidth-2) + "┘")
+	fmt.Println(writer.Render())
 
 	if showListeners {
 		color.Cyan(fmt.Sprintf("总计 %d 个事件 %d 个监听\n", len(events), listeners))
@@ -93,16 +78,6 @@ func printEventTable(events []eventbus.EventInfo, showListeners bool) {
 	}
 
 	color.Cyan(fmt.Sprintf("总计 %d 个事件\n", len(events)))
-}
-
-// padRight 右侧填充空格,支持中文字符
-func padRight(s string, width int) string {
-	currentWidth := runewidth.StringWidth(s)
-	if currentWidth >= width {
-		return s
-	}
-	padding := width - currentWidth
-	return s + strings.Repeat(" ", padding)
 }
 
 func init() {

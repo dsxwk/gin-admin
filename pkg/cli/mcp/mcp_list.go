@@ -9,14 +9,9 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
-
-// toolRow MCP工具行数据
-type toolRow struct {
-	name      string
-	descLines []string
-}
 
 type McpList struct{}
 
@@ -43,80 +38,22 @@ func (s *McpList) Execute(values map[string]string) {
 		return tools[i].Name() < tools[j].Name()
 	})
 
-	maxNameLen := runewidth.StringWidth("工具名称")
-	maxDescLen := runewidth.StringWidth("描述")
+	writer := cli.NewTable()
+	writer.SetColumnConfigs([]table.ColumnConfig{
+		{Number: 1, Colors: text.Colors{text.FgGreen}},
+		{Number: 2, Colors: text.Colors{text.FgWhite}, WidthMax: 60},
+	})
+	writer.AppendHeader(table.Row{"工具名称", "描述"})
 
-	rows := make([]toolRow, 0, len(tools))
-	for _, t := range tools {
-		descLines := s.splitDesc(t.Description())
-		rows = append(rows, toolRow{name: t.Name(), descLines: descLines})
-
-		nameLen := runewidth.StringWidth(t.Name())
-		if nameLen > maxNameLen {
-			maxNameLen = nameLen
-		}
-
-		for _, line := range descLines {
-			lineLen := runewidth.StringWidth(line)
-			if lineLen > maxDescLen {
-				maxDescLen = lineLen
-			}
-		}
+	for _, tool := range tools {
+		writer.AppendRow(table.Row{
+			tool.Name(),
+			strings.TrimSpace(tool.Description()),
+		})
 	}
 
-	totalWidth := maxNameLen + maxDescLen + 6
-
-	color.Yellow("┌" + strings.Repeat("─", totalWidth-2) + "┐")
-
-	titleLine := fmt.Sprintf("│%s   %s "+color.YellowString("│"),
-		color.HiWhiteString(padRight("工具名称", maxNameLen)),
-		color.HiWhiteString(padRight("描述", maxDescLen)))
-	color.Yellow(titleLine)
-
-	color.Yellow("├" + strings.Repeat("─", totalWidth-2) + "┤")
-
-	for _, row := range rows {
-		for i, line := range row.descLines {
-			name := row.name
-			if i > 0 {
-				name = ""
-			}
-
-			contentLine := fmt.Sprintf("│%s   %s "+color.YellowString("│"),
-				color.GreenString(padRight(name, maxNameLen)),
-				color.WhiteString(padRight(line, maxDescLen)))
-			color.Yellow(contentLine)
-		}
-	}
-
-	color.Yellow("└" + strings.Repeat("─", totalWidth-2) + "┘")
-
-	color.Cyan(fmt.Sprintf("总计 %d 个MCP工具\n", len(tools)))
-}
-
-// splitDesc 将描述按换行拆分并去除首尾空白
-func (s *McpList) splitDesc(desc string) []string {
-	rawLines := strings.Split(desc, "\n")
-	lines := make([]string, 0, len(rawLines))
-	for _, line := range rawLines {
-		line = strings.TrimSpace(line)
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	if len(lines) == 0 {
-		lines = append(lines, "")
-	}
-	return lines
-}
-
-func padRight(s string, width int) string {
-	currentWidth := runewidth.StringWidth(s)
-	if currentWidth >= width {
-		return s
-	}
-	padding := width - currentWidth
-	return s + strings.Repeat(" ", padding)
+	fmt.Println(writer.Render())
+	color.Cyan("总计 %d 个MCP工具\n", len(tools))
 }
 
 func init() {

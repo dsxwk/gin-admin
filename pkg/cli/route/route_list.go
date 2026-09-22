@@ -3,7 +3,6 @@ package route
 import (
 	"fmt"
 	"gin/common/base"
-	"gin/pkg"
 	"gin/pkg/cli"
 	"gin/router"
 	"sort"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
+	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 type RouteList struct{}
@@ -48,7 +48,9 @@ func (s *RouteList) Execute(values map[string]string) {
 	})
 
 	// 打印路由列表
-	fmt.Println(pkg.Sprintf("%-8s %-35s %-40s", "Method", "Path", "Handler"))
+	writer := cli.NewTable()
+	writer.AppendHeader(table.Row{"Method", "Path", "Handler"})
+
 	for _, route := range routes {
 		// Method颜色: GET=绿色 POST=黄色 PUT=蓝色 DELETE=红色
 		var methodColor *color.Color
@@ -71,14 +73,14 @@ func (s *RouteList) Execute(values map[string]string) {
 		// Handler颜色: 白色(默认)
 		handlerColor := color.New(color.FgWhite)
 
-		str := pkg.Sprintf("%s %s %s",
-			methodColor.Sprintf("%-8s", route.Method),
-			pathColor.Sprintf("%-35s", route.Path),
-			handlerColor.Sprintf("%-40s", s.formatHandlerName(route.Handler)),
-		)
-		fmt.Println(str)
+		writer.AppendRow(table.Row{
+			methodColor.Sprint(route.Method),
+			pathColor.Sprint(route.Path),
+			handlerColor.Sprint(s.formatHandlerName(route.Handler)),
+		})
 	}
 
+	fmt.Println(writer.Render())
 	color.Cyan("总计 %d 条路由\n", len(routes))
 }
 
