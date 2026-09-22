@@ -240,7 +240,7 @@
 
 # Version History
 
-> - Latest Version [v3.3.0](version_history.md#v330)
+> - Latest Version [v3.3.1](version_history.md#v331)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions

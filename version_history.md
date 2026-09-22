@@ -1,5 +1,10 @@
 # Version History
 
+## v3.3.1
+> - Adjust command line table output style
+> - Add a progress bar loading feature to the database data filling command and permission synchronization command line
+> - Translation, configuration, task scheduling optimization, and renaming of some functional methods
+
 ## v3.3.0
 > - Refactor containers, facades, and providers to unify service resolution, lifecycle management, dependency ordering, and graceful shutdown
 > - Unify Queue and Job managers, as well as Kafka, RabbitMQ, and Redis drivers, and improve consumption, production, and status querying
