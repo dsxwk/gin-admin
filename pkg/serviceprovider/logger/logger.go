@@ -36,7 +36,7 @@ func NewLogger(conf *config.Config) *Logger {
 		setLogLevel(strings.ToLower(conf.Log.Level))
 
 		// 确保日志目录存在
-		logDir := filepath.Join(config.GetRootPath(), "storage", "logs")
+		logDir := filepath.Join(config.RootPath(), "storage", "logs")
 		if err := os.MkdirAll(logDir, 0755); err != nil {
 			flag.Errorf("创建日志目录失败: %v", err)
 			os.Exit(1)
