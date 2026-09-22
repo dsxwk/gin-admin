@@ -19,9 +19,9 @@ func (p *ConfigProvider) Register(app *container.Container) {
 	cfg := config.NewConfig()
 	app.SetConfig(cfg)
 
-	config.OnConfigUpdated = func(updated *config.Config) {
+	config.SetOnConfigUpdated(func(updated *config.Config) {
 		app.SetConfig(updated)
-	}
+	})
 }
 
 // Boot 启动服务(配置服务无需额外启动逻辑)
