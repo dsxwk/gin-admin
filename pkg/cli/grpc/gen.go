@@ -33,7 +33,7 @@ type GrpcGen struct {
 
 // Name 命令名称
 func (g *GrpcGen) Name() string {
-	return "grpc-gen"
+	return "grpc:gen"
 }
 
 // Description 命令描述

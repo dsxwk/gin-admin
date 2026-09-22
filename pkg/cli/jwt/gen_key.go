@@ -15,7 +15,7 @@ type Jwt struct {
 }
 
 func (s *Jwt) Name() string {
-	return "gen:jwt-key"
+	return "jwt-gen:key"
 }
 
 func (s *Jwt) Description() string {
