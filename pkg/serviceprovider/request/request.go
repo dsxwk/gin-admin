@@ -167,8 +167,8 @@ func (c Client) ValidateWithTranslates(data any, scene string, translates map[st
 	return nil
 }
 
-// GetValidator 获取验证器实例
-func (c Client) GetValidator(data any, scene string) *validate.Validation {
+// Validator 获取验证器实例
+func (c Client) Validator(data any, scene string) *validate.Validation {
 	return validate.Struct(data, scene)
 }
 
