@@ -12,7 +12,7 @@ import (
 // 使用示例:
 //
 //	msg := facade.Lang().Trans(ctx, "welcome", map[string]any{"name": "John"})
-//	localizer := facade.Lang().GetLocalizer("en")
+//	localizer := facade.Lang().Localizer("en")
 func Lang() *LangFacade {
 	return &LangFacade{
 		service: container.Default().Lang(),
@@ -32,20 +32,20 @@ func (l *LangFacade) Trans(ctx context.Context, messageID string, data map[strin
 	return l.service.Trans(ctx, messageID, data)
 }
 
-// GetLocalizer 获取指定语言的Localizer
-func (l *LangFacade) GetLocalizer(langCode string) *i18n.Localizer {
+// Localizer 获取指定语言的Localizer
+func (l *LangFacade) Localizer(langCode string) *i18n.Localizer {
 	if l.service == nil {
 		return nil
 	}
-	return l.service.GetLocalizer(langCode)
+	return l.service.Localizer(langCode)
 }
 
-// GetBundle 获取翻译包
-func (l *LangFacade) GetBundle() *i18n.Bundle {
+// Bundle 获取翻译包
+func (l *LangFacade) Bundle() *i18n.Bundle {
 	if l.service == nil {
 		return nil
 	}
-	return l.service.GetBundle()
+	return l.service.Bundle()
 }
 
 // IsLoaded 检查翻译是否已加载
