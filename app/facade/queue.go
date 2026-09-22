@@ -10,11 +10,6 @@ func Queue() *QueueFacade {
 	return &QueueFacade{manager: container.Default().Queue()}
 }
 
-// NewQueueFacade 创建队列门面
-func NewQueueFacade() *QueueFacade {
-	return Queue()
-}
-
 // QueueFacade 队列门面
 type QueueFacade struct {
 	manager *queue.Manager
