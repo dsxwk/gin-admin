@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gin/pkg/container"
-	jsjob "gin/pkg/serviceprovider/job"
+	"gin/pkg/serviceprovider/job"
 )
 
 // Job 任务门面实例
@@ -14,7 +14,7 @@ func Job() *JobFacade {
 
 // JobFacade 任务门面
 type JobFacade struct {
-	manager *jsjob.Manager
+	manager *job.Manager
 }
 
 func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) error {
@@ -24,12 +24,12 @@ func (j *JobFacade) Dispatch(ctx context.Context, jobName string, payload any) e
 	return j.manager.Dispatch(ctx, jobName, payload)
 }
 
-// Jobs 获取所有Job
-func (j *JobFacade) Jobs() []jsjob.Job {
+// List 获取所有Job
+func (j *JobFacade) List() []job.Job {
 	if j == nil || j.manager == nil {
 		return nil
 	}
-	return j.manager.Jobs()
+	return j.manager.List()
 }
 
 func (j *JobFacade) Count(ctx context.Context) (int64, error) {

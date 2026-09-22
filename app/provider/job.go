@@ -79,7 +79,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 
 	// 收集所有注册job使用的connection
 	connSet := make(map[string]bool)
-	for _, jb := range manager.Jobs() {
+	for _, jb := range manager.List() {
 		c := jb.Connection()
 		if c == "" {
 			c = "redis"

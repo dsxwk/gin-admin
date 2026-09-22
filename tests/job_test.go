@@ -61,12 +61,12 @@ func TestJobDispatchRabbitmq(t *testing.T) {
 
 // TestJobList 任务列表
 func TestJobList(t *testing.T) {
-	jobs := facade.Job().GetAllJobs()
+	jobs := facade.Job().List()
 	assert.NotEmpty(t, jobs, "任务列表不能为空")
 
 	t.Logf("已注册 %d 个Job", len(jobs))
 	for _, j := range jobs {
-		t.Logf("  - %s (连接: %s, 描述: %s)", j.Name, j.Connection, j.Description)
+		t.Logf("  - %s (连接: %s, 描述: %s)", j.Name(), j.Connection(), j.Description())
 	}
 }
 
