@@ -92,10 +92,10 @@ func (r RequestFacade) ValidateWithTranslates(data any, scene string, translates
 	return r.client.ValidateWithTranslates(data, scene, translates)
 }
 
-// GetValidator 获取验证器实例
-func (r RequestFacade) GetValidator(data any, scene string) *validate.Validation {
+// Validator 获取验证器实例
+func (r RequestFacade) Validator(data any, scene string) *validate.Validation {
 	if r.client == nil {
 		return nil
 	}
-	return r.client.GetValidator(data, scene)
+	return r.client.Validator(data, scene)
 }
