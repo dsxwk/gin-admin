@@ -154,7 +154,7 @@
     technologies. support multiple languages, simple to develop and easy to use, convenient for extension.
 > - The command line correctly creates CURD complete code that can generate runnable swagger documents in the order of
     model, request validation, service, controller, and routing.
-> - The directory structure of the `grpc service` uses `model`, `proto`, `request`, and `service` to support one-click command-line generation of model, request, proto, and service code, with `grpc-gen` automatically generating the gRPC code
+> - The directory structure of the `grpc service` uses `model`, `proto`, `request`, and `service` to support one-click command-line generation of model, request, proto, and service code, with `grpc:gen` automatically generating the gRPC code
 > - AI assistant support (openai、deepseek...)
 >   - Data query
 >     - **Operation log statistics**: Query PV, UV, request method distribution, status code statistics, etc. for
@@ -811,7 +811,7 @@ $ ./cli demo:command --args=arg1
 Generate protobuf message and gRPC service code from `grpc/proto/*.proto`:
 
 ```bash
-$ go run ./cmd/cli.go grpc-gen
+$ go run ./cmd/cli.go grpc:gen
 ```
 
 Options:
@@ -881,7 +881,7 @@ Options:
 - `--connection=mysql` Database connection
 - `--auth=true` Require authentication (default, use `--auth=false` to disable)
 
-The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc-gen`. The generated service implements `Name()`, `Register()`, and `AuthMethods()`, and is automatically appended to `grpc/service/services.go`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
+The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc:gen`. The generated service implements `Name()`, `Register()`, and `AuthMethods()`, and is automatically appended to `grpc/service/services.go`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
 
 ## Call From Go
 
