@@ -419,7 +419,15 @@ type userPermissionRow struct {
 
 // SyncAllUserPermissions 全量同步所有用户权限到Redis(仅同步role_permissions表中已有的权限)
 func (s *RoleService) SyncAllUserPermissions(ctx context.Context) error {
+	return s.SyncWithProgress(ctx, true, nil)
+}
+
+// SyncWithProgress 全量同步所有用户权限并回调进度
+func (s *RoleService) SyncWithProgress(ctx context.Context, consoleOutputSQL bool, onProgress func(current, total int)) error {
 	db := s.DB(ctx, &model.Roles{})
+	if consoleOutputSQL == false {
+		db = s.WithoutSQLLog(db)
+	}
 
 	// 查所有有角色的用户
 	var allUserIDs []int64
@@ -454,6 +462,11 @@ func (s *RoleService) SyncAllUserPermissions(ctx context.Context) error {
 	// Redis Pipeline 批量写入
 	redisCache := facade.Redis().WithContext(ctx)
 	pipe := redisCache.Pipeline()
+	total := len(userPerms)
+	current := 0
+	if onProgress != nil {
+		onProgress(0, total)
+	}
 	for userID, keys := range userPerms {
 		redisKey := fmt.Sprintf("permission:user:%d", userID)
 		pipe.Del(ctx, redisKey)
@@ -464,9 +477,16 @@ func (s *RoleService) SyncAllUserPermissions(ctx context.Context) error {
 			}
 			pipe.SAdd(ctx, redisKey, members...)
 		}
+		current++
+		if current < total && onProgress != nil {
+			onProgress(current, total)
+		}
 	}
 
 	_, err := pipe.Exec(ctx)
+	if err == nil && onProgress != nil {
+		onProgress(total, total)
+	}
 	return err
 }
 
