@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type BaseService struct {
@@ -54,6 +55,11 @@ func (s *BaseService) Search(db *gorm.DB, model any, conditions map[string]any) 
 		db = db.Where(whereSql, args...)
 	}
 	return db
+}
+
+// WithoutSQLLog 临时关闭sql输出
+func (s *BaseService) WithoutSQLLog(db *gorm.DB) *gorm.DB {
+	return db.Session(&gorm.Session{Logger: logger.Discard})
 }
 
 // Cache 获取缓存实例并绑定请求上下文
