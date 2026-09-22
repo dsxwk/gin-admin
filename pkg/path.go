@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 )
 
-// GetRootPath 获取项目根路径
-func GetRootPath() string {
+// RootPath 获取项目根路径
+func RootPath() string {
 	dir, _ := os.Getwd()
 
 	for {

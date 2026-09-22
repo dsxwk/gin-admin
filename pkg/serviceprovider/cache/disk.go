@@ -27,7 +27,7 @@ func NewDiskCache(conf *config.Config) *CacheProxy {
 	}
 	path := conf.Cache.Disk.Path
 	if path != "" && !filepath.IsAbs(path) {
-		if rootPath := config.GetRootPath(); rootPath != "" {
+		if rootPath := config.RootPath(); rootPath != "" {
 			path = filepath.Join(rootPath, path)
 		}
 	}

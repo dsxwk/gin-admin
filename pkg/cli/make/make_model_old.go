@@ -87,7 +87,7 @@ func init() {
 // generateFiles 生成模型文件
 func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel bool) {
 	var (
-		root    = pkg.GetRootPath()
+		root    = pkg.RootPath()
 		p       = filepath.Base(path)
 		outPath = filepath.Join(root + "/app/temp")
 	)

@@ -74,7 +74,7 @@ func (g *GrpcGen) Help() []base.CommandOption {
 
 // Execute 执行命令
 func (g *GrpcGen) Execute(values map[string]string) {
-	root := pkg.GetRootPath()
+	root := pkg.RootPath()
 	genType := values["type"]
 	if genType != "all" && genType != "pb" && genType != "grpc" {
 		flag.Errorf("参数 --type 只能是 all/pb/grpc")

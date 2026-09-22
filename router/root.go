@@ -36,7 +36,7 @@ func LoadRouters(router *gin.Engine) {
 	router.Use(corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware, operatorLogMiddleware)
 
 	// 静态文件
-	router.StaticFS("/public", http.Dir(pkg.GetRootPath()+"/public"))
+	router.StaticFS("/public", http.Dir(pkg.RootPath()+"/public"))
 
 	// Swagger 文档
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

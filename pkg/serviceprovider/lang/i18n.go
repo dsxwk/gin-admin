@@ -44,7 +44,7 @@ func (s *Service) Load(conf *config.Config) error {
 
 	baseDir := conf.I18n.Dir
 	if !filepath.IsAbs(baseDir) {
-		baseDir = filepath.Join(config.GetRootPath(), baseDir)
+		baseDir = filepath.Join(config.RootPath(), baseDir)
 	}
 	if _, err := os.Stat(baseDir); err != nil {
 		return fmt.Errorf("翻译目录不可用: %s: %w", baseDir, err)

@@ -20,18 +20,18 @@ import (
 )
 
 const (
-	// JobKafkaTopic 任务Kafka主题
-	JobKafkaTopic = "job"
-	// JobRabbitmqQueue 任务RabbitMQ队列
-	JobRabbitmqQueue = "job"
-	// JobRabbitmqExchange 任务RabbitMQ交换机
-	JobRabbitmqExchange = "job_exchange"
-	// JobRabbitmqRouting 任务RabbitMQ路由
-	JobRabbitmqRouting = "job"
-	// JobRabbitmqDelayExchange 任务延迟交换机
-	JobRabbitmqDelayExchange = "job_delay_exchange"
-	// JobRabbitmqDelayQueue 任务延迟队列
-	JobRabbitmqDelayQueue = "job_delay_queue"
+	// KafkaTopicJob 任务Kafka主题
+	KafkaTopicJob = "job"
+	// RabbitmqQueueJob 任务RabbitMQ队列
+	RabbitmqQueueJob = "job"
+	// RabbitmqExchangeJob 任务RabbitMQ交换机
+	RabbitmqExchangeJob = "job_exchange"
+	// RabbitmqRoutingJob 任务RabbitMQ路由
+	RabbitmqRoutingJob = "job"
+	// RabbitmqDelayExchangeJob 任务延迟交换机
+	RabbitmqDelayExchangeJob = "job_delay_exchange"
+	// RabbitmqDelayQueueJob 任务延迟队列
+	RabbitmqDelayQueueJob = "job_delay_queue"
 )
 
 // Manager 任务管理器
@@ -129,7 +129,7 @@ func (m *Manager) Dispatch(ctx context.Context, jobName string, payload any) err
 		dispatchErr = fmt.Errorf("job [%s] 不支持的连接: %s", jobName, connection)
 	}
 
-	if m != nil && m.bus != nil {
+	if m.bus != nil {
 		m.bus.Publish(ctx, debugger.TopicJob, debugger.JobEvent{
 			TraceID:    ctxkey.TraceID(ctx),
 			Name:       jobName,
@@ -214,8 +214,8 @@ func (m *Manager) dispatchRabbitmq(ctx context.Context, jobName string, payloadB
 	if delayMs > 0 {
 		return m.rabbitmqCh.PublishWithContext(
 			ctx,
-			JobRabbitmqDelayExchange,
-			JobRabbitmqRouting,
+			RabbitmqDelayExchangeJob,
+			RabbitmqRoutingJob,
 			false,
 			false,
 			amqp091.Publishing{
@@ -228,8 +228,8 @@ func (m *Manager) dispatchRabbitmq(ctx context.Context, jobName string, payloadB
 
 	return m.rabbitmqCh.PublishWithContext(
 		ctx,
-		JobRabbitmqExchange,
-		JobRabbitmqRouting,
+		RabbitmqExchangeJob,
+		RabbitmqRoutingJob,
 		false,
 		false,
 		amqp091.Publishing{
@@ -252,20 +252,20 @@ func (m *Manager) initConnections() {
 			if err != nil {
 				m.logError("Job RabbitMQ 连接失败: " + err.Error())
 			} else {
-				ch, err := conn.Channel()
-				if err != nil {
-					m.logError("Job RabbitMQ Channel 创建失败: " + err.Error())
+				ch, _err := conn.Channel()
+				if _err != nil {
+					m.logError("Job RabbitMQ Channel 创建失败: " + _err.Error())
 					_ = conn.Close()
 				} else {
-					_ = ch.ExchangeDeclare(JobRabbitmqExchange, "direct", true, false, false, false, nil)
-					_, _ = ch.QueueDeclare(JobRabbitmqQueue, true, false, false, false, nil)
-					_ = ch.QueueBind(JobRabbitmqQueue, JobRabbitmqRouting, JobRabbitmqExchange, false, nil)
-					_ = ch.ExchangeDeclare(JobRabbitmqDelayExchange, "direct", true, false, false, false, nil)
-					_, _ = ch.QueueDeclare(JobRabbitmqDelayQueue, true, false, false, false, amqp091.Table{
-						"x-dead-letter-exchange":    JobRabbitmqExchange,
-						"x-dead-letter-routing-key": JobRabbitmqRouting,
+					_ = ch.ExchangeDeclare(RabbitmqExchangeJob, "direct", true, false, false, false, nil)
+					_, _ = ch.QueueDeclare(RabbitmqQueueJob, true, false, false, false, nil)
+					_ = ch.QueueBind(RabbitmqQueueJob, RabbitmqRoutingJob, RabbitmqExchangeJob, false, nil)
+					_ = ch.ExchangeDeclare(RabbitmqDelayExchangeJob, "direct", true, false, false, false, nil)
+					_, _ = ch.QueueDeclare(RabbitmqDelayQueueJob, true, false, false, false, amqp091.Table{
+						"x-dead-letter-exchange":    RabbitmqExchangeJob,
+						"x-dead-letter-routing-key": RabbitmqRoutingJob,
 					})
-					_ = ch.QueueBind(JobRabbitmqDelayQueue, JobRabbitmqRouting, JobRabbitmqDelayExchange, false, nil)
+					_ = ch.QueueBind(RabbitmqDelayQueueJob, RabbitmqRoutingJob, RabbitmqDelayExchangeJob, false, nil)
 					m.rabbitmqConn = conn
 					m.rabbitmqCh = ch
 				}
@@ -275,7 +275,7 @@ func (m *Manager) initConnections() {
 		if cfg.Queue.Kafka.Enabled && len(cfg.Queue.Kafka.Brokers) > 0 {
 			m.kafkaWriter = &kafka.Writer{
 				Addr:     kafka.TCP(cfg.Queue.Kafka.Brokers...),
-				Topic:    JobKafkaTopic,
+				Topic:    KafkaTopicJob,
 				Balancer: &kafka.LeastBytes{},
 			}
 		}
@@ -297,33 +297,8 @@ func (m *Manager) logError(message string) {
 	}
 }
 
-// JobStats 任务统计
-type JobStats struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Connection  string `json:"connection"`
-}
-
-// GetAllJobs 获取所有任务
-func (m *Manager) GetAllJobs() []JobStats {
-	items := m.Jobs()
-	stats := make([]JobStats, 0, len(items))
-	for _, item := range items {
-		connection := item.Connection()
-		if connection == "" {
-			connection = "redis"
-		}
-		stats = append(stats, JobStats{
-			Name:        item.Name(),
-			Description: item.Description(),
-			Connection:  connection,
-		})
-	}
-	return stats
-}
-
-// Jobs 获取所有任务
-func (m *Manager) Jobs() []Job {
+// List 获取所有任务
+func (m *Manager) List() []Job {
 	if m == nil {
 		return nil
 	}

@@ -198,7 +198,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 	switch _make {
 	case "model-old":
 	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "grpc_request", "grpc_service", "grpc_proto":
-		templateFile = filepath.Join(pkg.GetRootPath(), "common", "template", _make+".tpl")
+		templateFile = filepath.Join(pkg.RootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")
 	}
@@ -209,8 +209,8 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 // GetQueueTemplates 获取队列模版文件
 func (b *BaseCommand) GetQueueTemplates() map[string]string {
 	return map[string]string{
-		"consumer": filepath.Join(pkg.GetRootPath(), "common", "template", "consumer.tpl"),
-		"producer": filepath.Join(pkg.GetRootPath(), "common", "template", "producer.tpl"),
+		"consumer": filepath.Join(pkg.RootPath(), "common", "template", "consumer.tpl"),
+		"producer": filepath.Join(pkg.RootPath(), "common", "template", "producer.tpl"),
 	}
 }
 

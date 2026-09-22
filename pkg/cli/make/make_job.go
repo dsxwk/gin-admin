@@ -89,7 +89,7 @@ func (m *MakeJob) Execute(values map[string]string) {
 		"Delay":       delay,
 	}
 
-	tplFile := filepath.Join(pkg.GetRootPath(), "common", "template", "job.tpl")
+	tplFile := filepath.Join(pkg.RootPath(), "common", "template", "job.tpl")
 	tpl, err := template.ParseFiles(tplFile)
 	if err != nil {
 		flag.Errorf("Error parsing job template: %s", err.Error())
