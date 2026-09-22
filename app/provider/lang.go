@@ -25,7 +25,10 @@ func (p *LangProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *LangProvider) Boot(app *container.Container) {
-	p.service.Load(app.Config(), app.Log())
+	if err := p.service.Load(app.Config()); err != nil {
+		flag.Errorf("翻译服务启动失败: %v", err)
+		return
+	}
 	flag.Infof("翻译服务启动成功")
 }
 
