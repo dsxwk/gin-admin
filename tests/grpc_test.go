@@ -34,7 +34,7 @@ func TestGrpcMethodAuth(t *testing.T) {
 	if err = srv.Start(); err != nil {
 		t.Fatalf("启动grpc鉴权服务端失败: %v", err)
 	}
-	defer srv.Stop()
+	defer func() { _ = srv.Stop() }()
 
 	c, err := client.NewClient(srv.Addr())
 	if err != nil {
@@ -71,7 +71,7 @@ func TestGrpcUserService(t *testing.T) {
 	if err = srv.Start(); err != nil {
 		t.Fatalf("启动grpc服务端失败: %v", err)
 	}
-	defer srv.Stop()
+	defer func() { _ = srv.Stop() }()
 
 	c, err := client.NewClient(srv.Addr())
 	if err != nil {
