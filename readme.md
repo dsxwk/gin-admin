@@ -1827,8 +1827,8 @@ func (s *UserController) Delete(c *gin.Context) {
 
 # Route
 
-> The `router/root.go` file defines global routing rules that can be modified by oneself, and in general, they only need
-> to be defaulted.
+> The `router/root.go` file defines global routing rules, and `router/registry.go` explicitly lists all route modules.
+> The `make:router` command automatically appends new routes to `router/registry.go`.
 
 ## Route Creation Help
 
@@ -1864,7 +1864,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -1872,12 +1871,8 @@ import (
 // UserRouter User Router
 type UserRouter struct{}
 
-func init() {
-	route.Register(&UserRouter{})
-}
-
-// RegisterRoutes Register Routes
-func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register Routes
+func (r *UserRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		user v1.UserController
 	)
@@ -1916,7 +1911,7 @@ POST     /api/v1/user                        gin/app/controller/v1.(*UserControl
 GET      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Detail
 PUT      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Update
 DELETE   /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Delete
-GET      /ping                               gin/router.LoadRouters
+GET      /ping                               gin/router.NewRouters
 GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
 HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
 GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
@@ -1973,8 +1968,8 @@ import (
 
 var rateLimitMiddleware middleware.RateLimit
 
-// LoadRouters Load Routers
-func LoadRouters(router *gin.Engine) {
+// NewRouters Load Routers
+func NewRouters(router *gin.Engine) {
 	// Global Rate Limit
 	group := router.Group("", rateLimitMiddleware.Handle())
 	r := group.Group("")
@@ -2841,6 +2836,79 @@ Job dispatch events are automatically recorded in the debugger:
     }
   ]
 }
+```
+
+# MCP
+
+> MCP uses HTTP JSON-RPC. The service address is controlled by `mcp.path`, and the default address is
+> `http://127.0.0.1:8080/mcp`. It does not use `/mcp/sse` or `/mcp/message`; every JSON-RPC request is sent with POST to
+> the configured address. If `mcp.path` is changed to `/debug/mcp`, the client address must also be changed to
+> `http://127.0.0.1:8080/debug/mcp`.
+
+## MCP Configuration
+
+```yaml
+mcp:
+  enabled: true # Enable the MCP service
+  path: /mcp # MCP service address
+  auth: # Authentication configuration
+    enabled: false # Enable authentication
+    token: "" # Bearer token
+```
+
+> When authentication is enabled, requests must include the `Authorization: Bearer <token>` or `token: <token>` header.
+
+## MCP Tools
+
+```bash
+$ go run ./cmd/cli.go mcp:list
+$ go run ./cmd/cli.go make:mcp --file=user_search --name=user_search --desc="Search users"
+```
+
+## MCP Calls
+
+Initialize:
+
+```bash
+curl -X POST "http://127.0.0.1:8080/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {}
+  }'
+```
+
+Get the tool list:
+
+```bash
+curl -X POST "http://127.0.0.1:8080/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list",
+    "params": {}
+  }'
+```
+
+Call a tool:
+
+```bash
+curl -X POST "http://127.0.0.1:8080/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "user_search",
+      "arguments": {
+        "keyword": "admin"
+      }
+    }
+  }'
 ```
 
 # Es

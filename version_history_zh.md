@@ -7,6 +7,7 @@
 > - 移除未使用的参数和方法以及忽略defer错误
 > - 队列以及监听注册优化
 > - Provider、Redis Hook、CLI、Service、Queue、gRPC、ORM及测试实现中未使用的参数统一改为_
+> - 优化路由模块使用显示注册
 
 ## v3.3.1
 > - 命令行表格输出样式调整

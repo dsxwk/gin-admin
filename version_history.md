@@ -7,6 +7,7 @@
 > - Remove unused parameters and methods, and ignore defer errors
 > - Queue and listener registration optimization
 > - Unused parameters in Provider, Redis Hook, CLI, Service, Queue, gRPC, ORM, and test implementations should be uniformly changed to _
+> - Optimize the routing module to use display registration
 
 ## v3.3.1
 > - Adjust command line table output style

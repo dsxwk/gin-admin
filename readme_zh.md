@@ -1817,7 +1817,8 @@ func (s *UserController) Delete(c *gin.Context) {
 
 # 路由
 
-> `router/root.go` 文件中定义了全局路由规则可自行修改, 一般情况只需要默认即可。
+> `router/root.go` 文件定义全局路由规则, `router/registry.go` 显式维护全部路由模块。
+> `make:router` 命令创建路由后会自动追加到 `router/registry.go`。
 
 ## 路由创建帮助
 
@@ -1853,7 +1854,6 @@ package router
 
 import (
   "gin/app/controller/v1"
-  "gin/pkg/route"
   
   "github.com/gin-gonic/gin"
 )
@@ -1861,12 +1861,8 @@ import (
 // UserRouter 用户路由
 type UserRouter struct{}
 
-func init() {
-  route.Register(&UserRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *UserRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *UserRouter) Register(routerGroup *gin.RouterGroup) {
   var (
     user v1.UserController
   )
@@ -1907,7 +1903,7 @@ POST     /api/v1/user                        gin/app/controller/v1.(*UserControl
 GET      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Detail
 PUT      /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Update
 DELETE   /api/v1/user/:id                    gin/app/controller/v1.(*UserController).Delete
-GET      /ping                               gin/router.LoadRouters
+GET      /ping                               gin/router.NewRouters
 GET      /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
 HEAD     /public/*filepath                   github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler
 GET      /swagger/*any                       github.com/swaggo/gin-swagger.CustomWrapHandler
@@ -1965,8 +1961,8 @@ import (
 
 var rateLimitMiddleware middleware.RateLimit
 
-// LoadRouters 加载路由
-func LoadRouters(router *gin.Engine) {
+// NewRouters 加载路由
+func NewRouters(router *gin.Engine) {
     // 全局限流
     group := router.Group("", rateLimitMiddleware.Handle())
 	r := group.Group("") 
@@ -2815,6 +2811,78 @@ Job 投递事件自动记录到调试器:
     }
   ]
 }
+```
+
+# MCP
+
+> MCP使用HTTP JSON-RPC,服务地址由 `mcp.path` 决定,默认地址为 `http://127.0.0.1:8080/mcp`。
+> 不使用 `/mcp/sse` 或 `/mcp/message`,所有JSON-RPC请求都POST到配置的地址。
+> 如果修改 `mcp.path`,例如改为 `/debug/mcp`,客户端地址也需要同步修改为 `http://127.0.0.1:8080/debug/mcp`。
+
+## MCP配置
+
+```yaml
+mcp:
+  enabled: true # 是否启用MCP服务
+  path: /mcp # MCP服务地址
+  auth: # 认证配置
+    enabled: false # 是否启用认证
+    token: "" # BearerToken
+```
+
+> 开启认证后,请求需要携带 `Authorization: Bearer <token>` 或 `token: <token>` 请求头。
+
+## MCP工具
+
+```bash
+$ go run ./cmd/cli.go mcp:list
+$ go run ./cmd/cli.go make:mcp --file=user_search --name=user_search --desc=搜索用户
+```
+
+## MCP调用
+
+初始化:
+
+```bash
+curl -X POST "http://127.0.0.1:8080/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {}
+  }'
+```
+
+获取工具列表:
+
+```bash
+curl -X POST "http://127.0.0.1:8080/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list",
+    "params": {}
+  }'
+```
+
+调用工具:
+
+```bash
+curl -X POST "http://127.0.0.1:8080/mcp" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "user_search",
+      "arguments": {
+        "keyword": "admin"
+      }
+    }
+  }'
 ```
 
 # Es
