@@ -131,7 +131,7 @@ type nullOperator struct {
 	not bool
 }
 
-func (o nullOperator) Build(column string, value any) (string, []any, error) {
+func (o nullOperator) Build(column string, _ any) (string, []any, error) {
 	if o.not {
 		return fmt.Sprintf("%s IS NOT NULL", column), nil, nil
 	}

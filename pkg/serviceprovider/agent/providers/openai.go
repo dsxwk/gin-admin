@@ -127,7 +127,7 @@ func (p *OpenAICompat) Chat(messages []agent.Message, tools []mcp.ToolDef) (*age
 }
 
 // StreamChat 流式对话
-func (p *OpenAICompat) StreamChat(messages []agent.Message, tools []mcp.ToolDef) (<-chan string, error) {
+func (p *OpenAICompat) StreamChat(_ []agent.Message, _ []mcp.ToolDef) (<-chan string, error) {
 	// TODO: SSE流式处理
 	ch := make(chan string)
 	close(ch)

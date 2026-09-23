@@ -21,7 +21,7 @@ func (p *CacheProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *CacheProvider) Boot(app *container.Container) {
+func (p *CacheProvider) Boot(_ *container.Container) {
 	flag.Infof("缓存服务启动成功")
 }
 

@@ -21,7 +21,7 @@ func (p *HttpProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *HttpProvider) Boot(app *container.Container) {
+func (p *HttpProvider) Boot(_ *container.Container) {
 	http.GetClient()
 	flag.Infof("HTTP客户端服务启动成功")
 }

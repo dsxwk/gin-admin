@@ -21,7 +21,7 @@ func (p *RequestProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *RequestProvider) Boot(app *container.Container) {
+func (p *RequestProvider) Boot(_ *container.Container) {
 	flag.Infof("请求验证服务启动成功")
 }
 

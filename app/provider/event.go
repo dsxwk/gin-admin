@@ -24,7 +24,7 @@ func (p *EventProvider) Register(app *container.Container) {
 }
 
 // Boot 启动事件服务
-func (p *EventProvider) Boot(app *container.Container) {
+func (p *EventProvider) Boot(_ *container.Container) {
 	flag.Infof("事件服务启动成功")
 }
 

@@ -26,7 +26,7 @@ func (p *RateLimitProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *RateLimitProvider) Boot(app *container.Container) {
+func (p *RateLimitProvider) Boot(_ *container.Container) {
 	flag.Infof("限流服务启动成功")
 }
 

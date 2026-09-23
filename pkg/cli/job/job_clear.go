@@ -24,7 +24,7 @@ func (s *JobClear) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *JobClear) Execute(values map[string]string) {
+func (s *JobClear) Execute(_ map[string]string) {
 	if err := facade.Job().Clear(context.Background()); err != nil {
 		flag.Errorf("清除Job失败: %v", err)
 		return

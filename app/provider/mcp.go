@@ -37,7 +37,7 @@ func (p *McpProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *McpProvider) Boot(app *container.Container) {
+func (p *McpProvider) Boot(_ *container.Container) {
 	// 路由在LoadRouters中注册
 }
 

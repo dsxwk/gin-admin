@@ -18,7 +18,7 @@ func (s *ProducerList) Name() string               { return "producer:list" }
 func (s *ProducerList) Description() string        { return "生产者列表" }
 func (s *ProducerList) Help() []base.CommandOption { return []base.CommandOption{} }
 
-func (s *ProducerList) Execute(values map[string]string) {
+func (s *ProducerList) Execute(_ map[string]string) {
 	producers := facade.Queue().Producers()
 	if len(producers) == 0 {
 		color.Yellow("no registered producers")

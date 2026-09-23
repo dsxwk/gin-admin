@@ -22,7 +22,7 @@ func (s *PermissionSync) Help() []base.CommandOption {
 	return nil
 }
 
-func (s *PermissionSync) Execute(values map[string]string) {
+func (s *PermissionSync) Execute(_ map[string]string) {
 	svc := service.RoleService{}
 	tracker, progressDone := cli.StartProgress("同步用户权限", 0)
 

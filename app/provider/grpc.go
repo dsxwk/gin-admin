@@ -22,7 +22,7 @@ func (p *GrpcProvider) Name() string {
 }
 
 // Register 注册服务到容器
-func (p *GrpcProvider) Register(app *container.Container) {
+func (p *GrpcProvider) Register(_ *container.Container) {
 }
 
 // Boot 启动服务

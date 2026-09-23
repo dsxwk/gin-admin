@@ -18,7 +18,7 @@ func (s *ConsumerList) Name() string               { return "consumer:list" }
 func (s *ConsumerList) Description() string        { return "消费者列表" }
 func (s *ConsumerList) Help() []base.CommandOption { return []base.CommandOption{} }
 
-func (s *ConsumerList) Execute(values map[string]string) {
+func (s *ConsumerList) Execute(_ map[string]string) {
 	consumers := facade.Queue().Consumers()
 	if len(consumers) == 0 {
 		color.Yellow("no registered consumers")

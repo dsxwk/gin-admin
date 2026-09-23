@@ -26,7 +26,7 @@ func (p *DebuggerProvider) Register(app *container.Container) {
 }
 
 // Boot 启动调试器
-func (p *DebuggerProvider) Boot(app *container.Container) {
+func (p *DebuggerProvider) Boot(_ *container.Container) {
 	p.instance.Start()
 	flag.Infof("调试器服务启动成功")
 }

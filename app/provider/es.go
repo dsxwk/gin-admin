@@ -34,7 +34,7 @@ func (p *EsProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *EsProvider) Boot(app *container.Container) {
+func (p *EsProvider) Boot(_ *container.Container) {
 	if p.client == nil {
 		return
 	}

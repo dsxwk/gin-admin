@@ -17,7 +17,7 @@ type RedisHook struct {
 	bus *eventbus.Bus
 }
 
-func (h *RedisHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
+func (h *RedisHook) BeforeProcess(ctx context.Context, _ redis.Cmder) (context.Context, error) {
 	// 在context中记录开始时间
 	return context.WithValue(ctx, "startTime", time.Now()), nil
 }
@@ -52,7 +52,7 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	return nil
 }
 
-func (h *RedisHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+func (h *RedisHook) BeforeProcessPipeline(ctx context.Context, _ []redis.Cmder) (context.Context, error) {
 	return context.WithValue(ctx, "startTime", time.Now()), nil
 }
 

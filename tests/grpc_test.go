@@ -246,7 +246,7 @@ func (authTestServer) AuthMethods() map[string]bool {
 }
 
 // Ping 测试方法
-func (authTestServer) Ping(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+func (authTestServer) Ping(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	if ctxkey.Value(ctx, ctxkey.UserIdKey) != int64(1) {
 		return nil, status.Error(codes.Unauthenticated, "用户ID缺失")
 	}
@@ -254,7 +254,7 @@ func (authTestServer) Ping(ctx context.Context, req *emptypb.Empty) (*emptypb.Em
 }
 
 // PingPublic 免鉴权测试方法
-func (authTestServer) PingPublic(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+func (authTestServer) PingPublic(_ context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	return &emptypb.Empty{}, nil
 }
 
@@ -286,7 +286,7 @@ func (fakeUserService) AuthMethods() map[string]bool {
 }
 
 // List 用户列表
-func (h fakeUserService) List(ctx context.Context, req *proto.UserListRequest) (*proto.UserListResponse, error) {
+func (fakeUserService) List(_ context.Context, req *proto.UserListRequest) (*proto.UserListResponse, error) {
 	return &proto.UserListResponse{
 		Total:    1,
 		Page:     req.Page,
@@ -303,7 +303,7 @@ func (h fakeUserService) List(ctx context.Context, req *proto.UserListRequest) (
 }
 
 // Detail 用户详情
-func (h fakeUserService) Detail(ctx context.Context, req *proto.UserRequest) (*proto.User, error) {
+func (fakeUserService) Detail(_ context.Context, req *proto.UserRequest) (*proto.User, error) {
 	dto := grpcrequest.UserRequest{Id: req.GetId()}
 	if err := dto.Validate(dto, "Detail"); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -351,7 +351,7 @@ func (h fakeUserService) Detail(ctx context.Context, req *proto.UserRequest) (*p
 }
 
 // Create 创建用户
-func (h fakeUserService) Create(ctx context.Context, req *proto.UserCreateRequest) (*proto.User, error) {
+func (fakeUserService) Create(_ context.Context, req *proto.UserCreateRequest) (*proto.User, error) {
 	return &proto.User{
 		Id:        2,
 		Username:  req.Username,
@@ -365,7 +365,7 @@ func (h fakeUserService) Create(ctx context.Context, req *proto.UserCreateReques
 }
 
 // Update 更新用户
-func (h fakeUserService) Update(ctx context.Context, req *proto.UserUpdateRequest) (*proto.User, error) {
+func (fakeUserService) Update(_ context.Context, req *proto.UserUpdateRequest) (*proto.User, error) {
 	data := req.GetData().AsMap()
 	return &proto.User{
 		Id:        req.Id,
@@ -380,11 +380,11 @@ func (h fakeUserService) Update(ctx context.Context, req *proto.UserUpdateReques
 }
 
 // Delete 删除用户
-func (h fakeUserService) Delete(ctx context.Context, req *proto.UserRequest) (*proto.EmptyResponse, error) {
+func (fakeUserService) Delete(_ context.Context, _ *proto.UserRequest) (*proto.EmptyResponse, error) {
 	return &proto.EmptyResponse{}, nil
 }
 
 // BatchDelete 批量删除用户
-func (h fakeUserService) BatchDelete(ctx context.Context, req *proto.UserBatchDeleteRequest) (*proto.EmptyResponse, error) {
+func (fakeUserService) BatchDelete(_ context.Context, _ *proto.UserBatchDeleteRequest) (*proto.EmptyResponse, error) {
 	return &proto.EmptyResponse{}, nil
 }

@@ -20,7 +20,7 @@ func (m *MakeDocs) Description() string {
 	return "生成Swagger文档"
 }
 
-func (m *MakeDocs) Execute(values map[string]string) {
+func (m *MakeDocs) Execute(_ map[string]string) {
 	flag.Infof("开始生成Swagger文档...")
 
 	// 排除远程调用服务目录,避免同名模型导致文档解析失败

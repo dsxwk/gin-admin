@@ -50,7 +50,7 @@ func (p *queueFacadeTestProducer) DelayMs() int64 {
 }
 
 // Publish 发送测试消息
-func (p *queueFacadeTestProducer) Publish(ctx context.Context, msg any) error {
+func (p *queueFacadeTestProducer) Publish(_ context.Context, _ any) error {
 	return nil
 }
 

@@ -25,7 +25,7 @@ func (p *ConfigProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务(配置服务无需额外启动逻辑)
-func (p *ConfigProvider) Boot(app *container.Container) {}
+func (p *ConfigProvider) Boot(_ *container.Container) {}
 
 // Dependencies 依赖服务
 func (p *ConfigProvider) Dependencies() []string {

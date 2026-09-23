@@ -121,7 +121,7 @@ func (e eventListTestEvent) Description() string {
 
 type eventListTestListener struct{}
 
-func (l eventListTestListener) Handle(event eventListTestEvent) {}
+func (l eventListTestListener) Handle(_ eventListTestEvent) {}
 
 type duplicateEventTestEvent struct{}
 
@@ -135,7 +135,7 @@ func (e duplicateEventTestEvent) Description() string {
 
 type duplicateEventTestListener struct{}
 
-func (l duplicateEventTestListener) Handle(event duplicateEventTestEvent) {}
+func (l duplicateEventTestListener) Handle(_ duplicateEventTestEvent) {}
 
 type emptyEventTestEvent struct{}
 
@@ -149,7 +149,7 @@ func (e emptyEventTestEvent) Description() string {
 
 type emptyEventTestListener struct{}
 
-func (l emptyEventTestListener) Handle(event emptyEventTestEvent) {}
+func (l emptyEventTestListener) Handle(_ emptyEventTestEvent) {}
 
 // 默认监听器注册测试
 func TestDefaultListenerRegistered(t *testing.T) {

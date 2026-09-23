@@ -21,7 +21,7 @@ func (p *LogProvider) Register(app *container.Container) {
 }
 
 // Boot 启动服务
-func (p *LogProvider) Boot(app *container.Container) {
+func (p *LogProvider) Boot(_ *container.Container) {
 	flag.Infof("日志服务启动成功")
 }
 

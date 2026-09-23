@@ -38,7 +38,7 @@ func unaryClientInterceptor(ctx context.Context, method string, req, reply any, 
 }
 
 // unaryServerInterceptor 服务端一元拦截器
-func unaryServerInterceptor(ctx context.Context, req any, info *grpclib.UnaryServerInfo, handler grpclib.UnaryHandler) (any, error) {
+func unaryServerInterceptor(ctx context.Context, req any, _ *grpclib.UnaryServerInfo, handler grpclib.UnaryHandler) (any, error) {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if values := md.Get("trace-id"); len(values) > 0 && values[0] != "" {
 			ctx = ctxkey.WithValue(ctx, ctxkey.TraceIDKey, values[0])

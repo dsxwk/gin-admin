@@ -206,7 +206,7 @@ func (n *nilProducer) IsDelay() bool { return false }
 func (n *nilProducer) DelayMs() int64 { return 0 }
 
 // Publish 发布消息
-func (n *nilProducer) Publish(ctx context.Context, msg any) error {
+func (n *nilProducer) Publish(_ context.Context, _ any) error {
 	return fmt.Errorf("queue producer [%s] not registered", n.name)
 }
 

@@ -20,7 +20,7 @@ func (s *EventListenerList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *EventListenerList) Execute(values map[string]string) {
+func (s *EventListenerList) Execute(_ map[string]string) {
 	printEventTable(facade.Event().List(), true)
 }
 

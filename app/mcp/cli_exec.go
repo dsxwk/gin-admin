@@ -40,7 +40,7 @@ func (t *CliExec) InputSchema() mcp.InputSchema {
 	}
 }
 
-func (t *CliExec) Call(ctx context.Context, args map[string]any) (any, error) {
+func (t *CliExec) Call(_ context.Context, args map[string]any) (any, error) {
 	cmdName, _ := args["command"].(string)
 	if cmdName == "" {
 		return map[string]any{"error": "请指定命令名称,如make:controller"}, nil

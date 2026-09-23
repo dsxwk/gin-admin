@@ -28,7 +28,7 @@ func (s *EventList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *EventList) Execute(values map[string]string) {
+func (s *EventList) Execute(_ map[string]string) {
 	printEventTable(facade.Event().List(), false)
 }
 

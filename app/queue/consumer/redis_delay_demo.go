@@ -62,6 +62,6 @@ func (c *RedisDelayDemoConsumer) Stop() error {
 	return c.RedisConsumer.Stop()
 }
 
-func (c *RedisDelayDemoConsumer) Enabled(cfg *config.Config) bool {
+func (c *RedisDelayDemoConsumer) Enabled(_ *config.Config) bool {
 	return true
 }

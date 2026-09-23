@@ -30,7 +30,7 @@ func (m *DemoCommand) Help() []base.CommandOption {
 	}
 }
 
-func (m *DemoCommand) Execute(values map[string]string) {
+func (m *DemoCommand) Execute(_ map[string]string) {
 	// todo
 }
 

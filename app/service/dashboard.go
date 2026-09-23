@@ -247,7 +247,7 @@ func (s *DashboardService) Statistics(ctx context.Context) (stat OperatorLogStat
 }
 
 // SystemResource 系统资源
-func (s *DashboardService) SystemResource(ctx context.Context) SystemResource {
+func (s *DashboardService) SystemResource(_ context.Context) SystemResource {
 	return SystemResourceInfo()
 }
 

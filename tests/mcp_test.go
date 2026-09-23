@@ -135,6 +135,6 @@ func (t *duplicateMcpTool) InputSchema() mcp.InputSchema {
 	return mcp.InputSchema{Type: "object"}
 }
 
-func (t *duplicateMcpTool) Call(ctx context.Context, args map[string]any) (any, error) {
+func (t *duplicateMcpTool) Call(_ context.Context, _ map[string]any) (any, error) {
 	return nil, nil
 }

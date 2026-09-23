@@ -27,7 +27,7 @@ func (s *McpList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *McpList) Execute(values map[string]string) {
+func (s *McpList) Execute(_ map[string]string) {
 	tools := facade.MCP().Tools()
 	if len(tools) == 0 {
 		color.Yellow("暂无注册的MCP工具")

@@ -60,7 +60,7 @@ func (s *LoginService) Login(ctx context.Context, username, password string) (er
 }
 
 // RefreshToken 刷新token
-func (s *LoginService) RefreshToken(ctx context.Context, token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
+func (s *LoginService) RefreshToken(_ context.Context, token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
 	var (
 		conf     = facade.Config()
 		loginErr errcode.LoginErrCode

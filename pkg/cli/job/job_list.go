@@ -26,7 +26,7 @@ func (s *JobList) Help() []base.CommandOption {
 	return []base.CommandOption{}
 }
 
-func (s *JobList) Execute(values map[string]string) {
+func (s *JobList) Execute(_ map[string]string) {
 	jobs := facade.Job().List()
 	if len(jobs) == 0 {
 		color.Yellow("暂无注册的Job")
