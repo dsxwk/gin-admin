@@ -128,12 +128,6 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 	return redisCache
 }
 
-// ResetRedisCache 重置Redis缓存连接
-func ResetRedisCache(conf *config.Config) *CacheProxy {
-	redisCache = nil
-	return NewRedisCache(conf)
-}
-
 func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {
 	return &RedisCache{
 		client:  r.client,

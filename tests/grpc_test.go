@@ -40,7 +40,7 @@ func TestGrpcMethodAuth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("创建grpc鉴权客户端失败: %v", err)
 	}
-	defer c.Close()
+	defer func() { _ = c.Close() }()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -77,7 +77,7 @@ func TestGrpcUserService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("创建grpc客户端失败: %v", err)
 	}
-	defer c.Close()
+	defer func() { _ = c.Close() }()
 
 	container.Default().SetGRPC(c)
 

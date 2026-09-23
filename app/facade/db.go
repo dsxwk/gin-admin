@@ -20,13 +20,3 @@ func DB(conn ...string) *gorm.DB {
 
 	return manager.Connection(name)
 }
-
-// ResetDB 重置数据库连接,关闭旧连接并重建
-func ResetDB(db *gorm.DB) *gorm.DB {
-	manager := container.Default().DB()
-	if manager == nil {
-		return nil
-	}
-
-	return manager.Reset("")
-}

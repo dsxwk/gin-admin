@@ -167,7 +167,7 @@ func (m *MakeEs) generateEs(db *gorm.DB, table, outDir string, exclude map[strin
 	if f == nil {
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var buf bytes.Buffer
 	if err = tpl.Execute(&buf, data); err != nil {

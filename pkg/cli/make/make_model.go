@@ -170,7 +170,7 @@ func GetColumnInfo(db *gorm.DB, tableName string) ([]Column, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var col Column

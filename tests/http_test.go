@@ -679,7 +679,7 @@ func TestHttpRequestInvalidURL(t *testing.T) {
 func createTestFile(t *testing.T, content string) string {
 	tmpFile, err := os.CreateTemp("", "test-*.txt")
 	require.NoError(t, err)
-	defer tmpFile.Close()
+	defer func() { _ = tmpFile.Close() }()
 
 	_, err = tmpFile.WriteString(content)
 	require.NoError(t, err)
@@ -697,7 +697,7 @@ func TestHttpUploadFile(t *testing.T) {
 	// 创建测试文件
 	testContent := "Hello, this is a test file"
 	testFilePath := createTestFile(t, testContent)
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	type UploadResponse struct {
 		Code int `json:"code"`
@@ -779,11 +779,11 @@ func TestHttpUploadMultipleFiles(t *testing.T) {
 	// 创建多个测试文件
 	file1Content := "Content of file 1"
 	file1Path := createTestFile(t, file1Content)
-	defer os.Remove(file1Path)
+	defer func() { _ = os.Remove(file1Path) }()
 
 	file2Content := "Content of file 2"
 	file2Path := createTestFile(t, file2Content)
-	defer os.Remove(file2Path)
+	defer func() { _ = os.Remove(file2Path) }()
 
 	file3Data := []byte("Content of file 3")
 
@@ -830,7 +830,7 @@ func TestHttpUploadFileWithCustomFieldName(t *testing.T) {
 
 	testContent := "Test file with custom field name"
 	testFilePath := createTestFile(t, testContent)
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	type UploadResponse struct {
 		Code int `json:"code"`
@@ -865,7 +865,7 @@ func TestHttpUploadFileWithRequestMethod(t *testing.T) {
 
 	testContent := "Test file using Request method"
 	testFilePath := createTestFile(t, testContent)
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	resp := facade.Http().
 		WithFiles(map[string]h.File{
@@ -910,7 +910,7 @@ func TestHttpUploadFileWithTimeout(t *testing.T) {
 
 	testContent := "Test timeout file"
 	testFilePath := createTestFile(t, testContent)
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	response := facade.Http().
 		WithFiles(map[string]h.File{
@@ -939,7 +939,7 @@ func TestHttpUploadFileLargeFile(t *testing.T) {
 	}
 
 	testFilePath := createTestFile(t, string(largeContent))
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	type UploadResponse struct {
 		Code int `json:"code"`
@@ -980,7 +980,7 @@ func TestHttpUploadFileWithContext(t *testing.T) {
 
 	testContent := "Test file with context"
 	testFilePath := createTestFile(t, testContent)
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	type UploadResponse struct {
 		Code int    `json:"code"`
@@ -1010,7 +1010,7 @@ func TestHttpUploadFileAndFormData(t *testing.T) {
 
 	testContent := "Test file with form data"
 	testFilePath := createTestFile(t, testContent)
-	defer os.Remove(testFilePath)
+	defer func() { _ = os.Remove(testFilePath) }()
 
 	type UploadResponse struct {
 		Code int `json:"code"`

@@ -298,7 +298,7 @@ func (c *Client) Send(ctx context.Context, method, uri string) Response {
 	if err != nil {
 		return Response{ErrMsg: fmt.Errorf("请求失败: %w", err)}
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -409,7 +409,7 @@ func (c *Client) doFileUpload(ctx context.Context, uri string, requestTimeout ti
 	if err != nil {
 		return Response{ErrMsg: fmt.Errorf("请求失败: %w", err)}
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {

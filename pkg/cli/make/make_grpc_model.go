@@ -8,7 +8,6 @@ import (
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"text/template"
 
@@ -92,7 +91,6 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 	columns = filterSoftDeleteColumns(columns)
 
 	tableComment, _ := getTableComment(db, table)
-	imports := make(map[string]string)
 	structName := lo.PascalCase(table)
 	tableConst := "TableName" + structName
 	file := filepath.Join(outDir, table+".go")
@@ -101,7 +99,7 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 	maxTypeLen := 0
 	for _, c := range columns {
 		fieldName := grpcModelFieldName(c.Name)
-		fieldType := grpcGoType(c, imports)
+		fieldType := grpcGoType(c)
 		if len(fieldName) > maxNameLen {
 			maxNameLen = len(fieldName)
 		}
@@ -113,7 +111,7 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 	var fieldLines []string
 	for _, c := range columns {
 		fieldName := grpcModelFieldName(c.Name)
-		fieldType := grpcGoType(c, imports)
+		fieldType := grpcGoType(c)
 		jsonName := lo.CamelCase(fieldName)
 		gormTag := buildGormTag(c)
 		tag := "`" + gormTag + " json:\"" + jsonName + "\" form:\"" + jsonName + "\"`"
@@ -145,7 +143,7 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 		Connection    string
 		Fields        []string
 	}{
-		Imports:       renderGrpcImports(imports),
+		Imports:       "",
 		Struct:        structName,
 		StructComment: tableComment,
 		Table:         table,
@@ -167,7 +165,7 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 }
 
 // grpcGoType 数据库类型转grpc模型Go类型
-func grpcGoType(c Column, imports map[string]string) string {
+func grpcGoType(c Column) string {
 	t := strings.ToLower(c.DataType)
 
 	switch {
@@ -201,30 +199,6 @@ func grpcGoType(c Column, imports map[string]string) string {
 	}
 
 	return "string"
-}
-
-// renderGrpcImports 渲染import块
-func renderGrpcImports(imports map[string]string) string {
-	if len(imports) == 0 {
-		return ""
-	}
-
-	keys := make([]string, 0, len(imports))
-	for pkg := range imports {
-		keys = append(keys, pkg)
-	}
-	sort.Strings(keys)
-
-	lines := []string{"import ("}
-	for _, pkg := range keys {
-		if alias := imports[pkg]; alias != "" {
-			lines = append(lines, fmt.Sprintf("\t%s %q", alias, pkg))
-		} else {
-			lines = append(lines, fmt.Sprintf("\t%q", pkg))
-		}
-	}
-	lines = append(lines, ")")
-	return strings.Join(lines, "\n")
 }
 
 // grpcModelFieldName 数据库字段名转Go字段名
