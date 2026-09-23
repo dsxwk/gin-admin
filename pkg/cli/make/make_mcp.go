@@ -109,7 +109,7 @@ func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {
 		os.Exit(1)
 	}
 
-	toolsFile := filepath.Join("app", "mcp", "tools.go")
+	toolsFile := filepath.Join("app", "mcp", "registry.go")
 	qualifier := ""
 	mcpDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if mcpDir != "app/mcp" {

@@ -42,7 +42,7 @@ func (p *GrpcProvider) Boot(app *container.Container) {
 		cfg.Grpc.Host,
 		cfg.Grpc.Port,
 		cfg.Jwt.Key,
-		grpcservice.Services()...,
+		grpcservice.All()...,
 	)
 	if err != nil {
 		_ = client.Close()

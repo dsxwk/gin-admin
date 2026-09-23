@@ -171,7 +171,7 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, aut
 		os.Exit(1)
 	}
 
-	servicesFile := filepath.Join("grpc", "service", "services.go")
+	servicesFile := filepath.Join("grpc", "service", "registry.go")
 	qualifier := ""
 	if filepath.ToSlash(filepath.Clean(outDir)) != "grpc/service" {
 		alias, importErr := addRegistryImport(servicesFile, registryImportPath(file))

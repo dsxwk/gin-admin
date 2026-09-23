@@ -36,7 +36,7 @@ func (p *JobProvider) Register(app *container.Container) {
 		bus = registry.Bus()
 	}
 
-	jobs := appjob.Jobs()
+	jobs := appjob.All()
 	manager, err := job.NewManager(
 		app.Config,
 		app.Log(),

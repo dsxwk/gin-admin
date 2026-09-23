@@ -4,8 +4,8 @@ import (
 	"gin/pkg/serviceprovider"
 )
 
-// Providers 获取服务提供者列表
-func Providers() []serviceprovider.ServiceProvider {
+// All 服务提供者列表
+func All() []serviceprovider.ServiceProvider {
 	return []serviceprovider.ServiceProvider{
 		&ConfigProvider{},
 		&LogProvider{},

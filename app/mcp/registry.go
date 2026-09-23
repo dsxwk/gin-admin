@@ -2,8 +2,8 @@ package mcp
 
 import servicemcp "gin/pkg/serviceprovider/mcp"
 
-// Tools 获取MCP工具列表
-func Tools() []servicemcp.Tool {
+// All MCP工具列表
+func All() []servicemcp.Tool {
 	return []servicemcp.Tool{
 		&CliExec{},
 		&DepartmentQuery{},

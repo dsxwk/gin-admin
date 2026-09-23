@@ -88,7 +88,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 		os.Exit(1)
 	}
 
-	listenersFile := filepath.Join("app", "listener", "listeners.go")
+	listenersFile := filepath.Join("app", "listener", "registry.go")
 	qualifier := ""
 	listenerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if listenerDir != "app/listener" {

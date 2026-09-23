@@ -26,7 +26,7 @@ func (p *McpProvider) Register(app *container.Container) {
 	handler, err := servicemcp.NewHandler(servicemcp.ServerInfo{
 		Name:    cfg.App.Name,
 		Version: cfg.App.CliVersion,
-	}, cfg, appmcp.Tools())
+	}, cfg, appmcp.All())
 	if err != nil {
 		flag.Errorf("MCP服务注册失败: %v", err)
 		return

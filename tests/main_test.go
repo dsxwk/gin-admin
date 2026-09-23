@@ -13,7 +13,7 @@ import (
 
 func TestMain(m *testing.M) {
 	// 创建应用实例
-	app := serviceprovider.NewApp(provider.Providers()...)
+	app := serviceprovider.NewApp(provider.All()...)
 
 	err := app.Boot()
 	if err != nil {

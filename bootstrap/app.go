@@ -35,7 +35,7 @@ type App struct {
 // Init 初始化应用
 func Init() (*serviceprovider.Application, error) {
 	// 启动应用(加载所有providers)
-	app := serviceprovider.NewApp(provider.Providers()...)
+	app := serviceprovider.NewApp(provider.All()...)
 	if err := app.Boot(); err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func InitCLI() error {
 	flag.SetSilent(true)
 	defer flag.SetSilent(false)
 
-	app := serviceprovider.NewApp(provider.Providers()...)
+	app := serviceprovider.NewApp(provider.All()...)
 	if err := app.RegisterProviders(); err != nil {
 		return err
 	}

@@ -5,8 +5,8 @@ import (
 	"gin/pkg/serviceprovider/eventbus"
 )
 
-// Listeners 获取监听器列表
-func Listeners() []eventbus.ListenerRegistration {
+// All 监听器列表
+func All() []eventbus.ListenerRegistration {
 	return []eventbus.ListenerRegistration{
 		eventbus.Bind(&UserLoginListener{}, event.UserLoginEvent{}),
 		eventbus.Bind(&TestListener{}, event.UserLoginEvent{}),

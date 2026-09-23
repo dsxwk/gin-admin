@@ -131,7 +131,7 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 		os.Exit(1)
 	}
 
-	providersFile := filepath.Join("app", "provider", "providers.go")
+	providersFile := filepath.Join("app", "provider", "registry.go")
 	qualifier := ""
 	providerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if providerDir != "app/provider" {
