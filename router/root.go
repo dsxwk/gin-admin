@@ -1,10 +1,8 @@
 package router
 
 import (
-	"context"
 	"gin/app/facade"
 	"gin/app/middleware"
-	"gin/app/service"
 	_ "gin/docs"
 	"gin/pkg"
 	"gin/pkg/errcode"
@@ -16,8 +14,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// LoadRouters 加载路由
-func LoadRouters(router *gin.Engine) {
+// NewRouters 加载路由
+func NewRouters(router *gin.Engine) {
 	cfg := facade.Config()
 	if cfg == nil {
 		return
@@ -42,36 +40,15 @@ func LoadRouters(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 路由分组
-	public := router.Group("")                                    // 无需权限
-	auth := router.Group("", jwtMiddleware, permissionMiddleware) // 需要权限
+	routeGroup := router.Group("")
+	authMiddleware := []gin.HandlerFunc{jwtMiddleware, permissionMiddleware}
 
 	// 全局限流:rateLimitMiddleware.Handle() 用户限流:rateLimitMiddleware.UserRateLimit(1, 1) ip限流:rateLimitMiddleware.IpRateLimit(1, 1)
 	// 健康检查
-	public.GET("/ping", rateLimitMiddleware.IpRateLimit(1, 1), func(c *gin.Context) {
+	routeGroup.GET("/ping", rateLimitMiddleware.IpRateLimit(1, 1), func(c *gin.Context) {
 		facade.Response().Success(c, errcode.NewError(0, "pong"))
 	})
 
-	// 自动注册
-	route.Mount(public, auth)
-
-	// MCP服务路由(MCP自带认证,使用public分组)
-	if cfg.Mcp.Enabled {
-		mcpHandler := facade.MCP()
-		if mcpHandler != nil {
-			mcpPath := cfg.Mcp.Path
-			if mcpPath == "" {
-				mcpPath = "/mcp"
-			}
-			router.POST(mcpPath, gin.WrapH(mcpHandler))
-		}
-	}
-}
-
-// SyncPermissionRoutes 同步路由权限到数据库(仅服务器启动时调用)
-func SyncPermissionRoutes() {
-	permissionKeys := route.PermissionKeys()
-	if len(permissionKeys) > 0 {
-		svc := service.PermissionService{}
-		_ = svc.SyncRoutePermissions(context.Background(), permissionKeys)
-	}
+	// 业务路由
+	route.Mount(routeGroup, authMiddleware, All()...)
 }

@@ -99,13 +99,22 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 		os.Exit(1)
 	}
 
+	registryFile := filepath.Join("router", "registry.go")
+	qualifier := ""
 	routerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if routerDir != "router" {
-		importFile := filepath.Join("common", "imports", "import.go")
-		if err = addBlankImport(importFile, registryImportPath(file)); err != nil {
-			flag.Errorf("自动导入路由失败: %s", err.Error())
+		alias, importErr := addRegistryImport(registryFile, registryImportPath(file))
+		if importErr != nil {
+			flag.Errorf("自动添加路由导入失败: %s", importErr.Error())
 			os.Exit(1)
 		}
+		qualifier = alias + "."
+	}
+
+	item := "&" + qualifier + data.Name + "Router{}"
+	if err = addRegistryItem(registryFile, "return []route.Router{", item); err != nil {
+		flag.Errorf("自动注册路由失败: %s", err.Error())
+		os.Exit(1)
 	}
 
 	flag.Successf("路由文件: " + file + " 生成成功!")

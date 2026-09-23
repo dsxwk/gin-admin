@@ -33,7 +33,7 @@ func (s *RouteList) Execute(_ map[string]string) {
 	engine := gin.New()
 
 	// 加载项目路由
-	router.LoadRouters(engine)
+	router.NewRouters(engine)
 
 	// 获取所有路由
 	routes := engine.Routes()

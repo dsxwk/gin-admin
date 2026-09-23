@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // DictRouter Dict
 type DictRouter struct{}
 
-func init() {
-	route.Register(&DictRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *DictRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *DictRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		dict v1.DictController
 	)

@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // OperatorLogRouter 操作日志
 type OperatorLogRouter struct{}
 
-func init() {
-	route.Register(&OperatorLogRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *OperatorLogRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *OperatorLogRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		operatorLog v1.OperatorLogController
 	)

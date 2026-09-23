@@ -14,7 +14,7 @@ import (
 
 func TestHealth(t *testing.T) {
 	r := gin.Default()
-	router.LoadRouters(r)
+	router.NewRouters(r)
 
 	req := httptest.NewRequest("GET", "/ping", nil)
 	w := httptest.NewRecorder()

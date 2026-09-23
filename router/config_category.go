@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // ConfigCategoryRouter ConfigCategory
 type ConfigCategoryRouter struct{}
 
-func init() {
-	route.Register(&ConfigCategoryRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *ConfigCategoryRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *ConfigCategoryRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		configCategory v1.ConfigCategoryController
 	)

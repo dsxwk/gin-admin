@@ -3,20 +3,15 @@ package router
 import (
 	v1 "gin/app/controller/v1"
 	"gin/app/middleware"
-	"gin/pkg/route"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func init() {
-	route.Register(&AgentRouter{})
-}
-
 // AgentRouter Agent路由
 type AgentRouter struct{}
 
-func (r *AgentRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+func (r *AgentRouter) Register(routerGroup *gin.RouterGroup) {
 	var agent v1.AgentController
 	agentTimeout := middleware.Timeout{}.Handle(3 * time.Minute)
 

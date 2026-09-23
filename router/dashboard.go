@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // DashboardRouter 仪表盘
 type DashboardRouter struct{}
 
-func init() {
-	route.Register(&DashboardRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *DashboardRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *DashboardRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		dashboard v1.DashboardController
 	)

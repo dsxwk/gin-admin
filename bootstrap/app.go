@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/provider"
+	"gin/app/service"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg"
 	"gin/pkg/errcode"
+	"gin/pkg/route"
 	"gin/pkg/serviceprovider"
 	"gin/router"
 	"net"
@@ -75,12 +77,25 @@ func setupEngine() *gin.Engine {
 	r.MaxMultipartMemory = 90 << 20
 
 	// 加载路由
-	router.LoadRouters(r)
+	router.NewRouters(r)
 
 	// 同步路由权限到数据库
-	router.SyncPermissionRoutes()
+	syncRoutePermissions()
 
 	return r
+}
+
+// syncRoutePermissions 同步路由权限到数据库
+func syncRoutePermissions() {
+	permissionKeys := route.PermissionKeys(router.All()...)
+	if len(permissionKeys) == 0 {
+		return
+	}
+
+	svc := service.PermissionService{}
+	if err := svc.SyncRoutePermissions(context.Background(), permissionKeys); err != nil {
+		flag.Warningf("同步路由权限失败: %s", err.Error())
+	}
 }
 
 func (a *App) Run() {

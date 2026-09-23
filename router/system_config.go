@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // SystemConfigRouter SystemConfig
 type SystemConfigRouter struct{}
 
-func init() {
-	route.Register(&SystemConfigRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *SystemConfigRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *SystemConfigRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		systemConfig v1.SystemConfigController
 	)

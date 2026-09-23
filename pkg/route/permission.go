@@ -7,7 +7,7 @@ import (
 )
 
 // PermissionKeys 提取需要鉴权的路由权限Key
-func PermissionKeys() []string {
+func PermissionKeys(routers ...Router) []string {
 	// 临时禁用Gin调试输出避免重复打印路由
 	orig := gin.DefaultWriter
 	gin.DefaultWriter = io.Discard
@@ -17,10 +17,12 @@ func PermissionKeys() []string {
 
 	engine := gin.New()
 	group := engine.Group("")
-	for _, r := range snapshot() {
-		if r.IsAuth() {
-			r.RegisterRoutes(group)
+	for _, r := range routers {
+		if r == nil || !r.IsAuth() {
+			continue
 		}
+
+		r.Register(group)
 	}
 
 	return extractPermissionKeys(engine)

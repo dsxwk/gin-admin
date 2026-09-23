@@ -2,19 +2,14 @@ package {{.Package}}
 
 import (
     "gin/app/controller/v1"
-    "gin/pkg/route"
 	"github.com/gin-gonic/gin"
 )
 
 // {{.Name}}Router {{.Description}}
 type {{.Name}}Router struct {}
 
-func init() {
-	route.Register(&{{.Name}}Router{})
-}
-
-// RegisterRoutes 注册路由
-func (r *{{.Name}}Router) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *{{.Name}}Router) Register(routerGroup *gin.RouterGroup) {
 	var (
    	    {{.NameLower}} v1.{{.Name}}Controller
     )

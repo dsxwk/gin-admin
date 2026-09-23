@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // DepartmentRouter Department
 type DepartmentRouter struct{}
 
-func init() {
-	route.Register(&DepartmentRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *DepartmentRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *DepartmentRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		department v1.DepartmentController
 	)

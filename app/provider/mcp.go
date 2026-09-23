@@ -38,7 +38,7 @@ func (p *McpProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *McpProvider) Boot(_ *container.Container) {
-	// 路由在LoadRouters中注册
+	// 路由在router/mcp.go中注册
 }
 
 // Dependencies 依赖配置服务

@@ -2,7 +2,6 @@ package router
 
 import (
 	"gin/app/controller/v1"
-	"gin/pkg/route"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,12 +9,8 @@ import (
 // PermissionRouter Permission
 type PermissionRouter struct{}
 
-func init() {
-	route.Register(&PermissionRouter{})
-}
-
-// RegisterRoutes 注册路由
-func (r *PermissionRouter) RegisterRoutes(routerGroup *gin.RouterGroup) {
+// Register 注册路由
+func (r *PermissionRouter) Register(routerGroup *gin.RouterGroup) {
 	var (
 		permission v1.PermissionController
 	)
