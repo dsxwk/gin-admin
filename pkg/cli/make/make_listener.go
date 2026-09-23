@@ -101,12 +101,12 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 	}
 
 	item := fmt.Sprintf(
-		"listenerRegister(&%s%sListener{}, event.%s{})",
+		"eventbus.Bind(&%s%sListener{}, event.%s{})",
 		qualifier,
 		data.Name,
 		eventName,
 	)
-	if err = addRegistryItem(listenersFile, "return []listenerEntry{", item); err != nil {
+	if err = addRegistryItem(listenersFile, "return []eventbus.ListenerRegistration{", item); err != nil {
 		flag.Errorf("自动注册监听器失败: %s", err.Error())
 		return
 	}

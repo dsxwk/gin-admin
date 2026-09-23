@@ -17,11 +17,31 @@ type EventInfo struct {
 	Listeners   []string `json:"listeners"`
 }
 
+// ListenerRegistration 监听器注册项
+type ListenerRegistration func(*Registry)
+
 // Registry 业务事件注册表
 type Registry struct {
 	mu    sync.RWMutex
 	bus   *Bus
 	infos map[string]*EventInfo
+}
+
+// Bind 绑定监听器与事件
+func Bind[T Event](listener Listener[T], event T) ListenerRegistration {
+	return func(registry *Registry) {
+		registry.Register(listener, event)
+	}
+}
+
+// Register 批量注册监听器
+func Register(registry *Registry, registrations []ListenerRegistration) {
+	for _, registration := range registrations {
+		if registration == nil {
+			continue
+		}
+		registration(registry)
+	}
 }
 
 // NewRegistry 创建业务事件注册表

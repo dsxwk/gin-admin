@@ -20,7 +20,7 @@ func (p *EventProvider) Name() string {
 func (p *EventProvider) Register(app *container.Container) {
 	registry := eventbus.NewRegistry(eventbus.Default())
 	app.SetEvent(registry)
-	applistener.Register(registry)
+	eventbus.Register(registry, applistener.Listeners())
 }
 
 // Boot 启动事件服务

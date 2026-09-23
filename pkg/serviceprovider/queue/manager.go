@@ -17,8 +17,8 @@ type Manager struct {
 // NewManager 创建队列管理器
 func NewManager(
 	config func() *config.Config,
-	consumerFactories []func() Consumer,
-	producerFactories []func() Producer,
+	consumerFactories []ConsumerFactory,
+	producerFactories []ProducerFactory,
 ) (*Manager, error) {
 	manager := &Manager{
 		config:    config,
@@ -26,11 +26,16 @@ func NewManager(
 		producers: NewRegistry[Producer](),
 	}
 
+	cfg := manager.Config()
 	for _, factory := range consumerFactories {
-		manager.consumers.Factory(factory)
+		manager.consumers.Factory(func() Consumer {
+			return factory.Create(cfg)
+		})
 	}
 	for _, factory := range producerFactories {
-		manager.producers.Factory(factory)
+		manager.producers.Factory(func() Producer {
+			return factory.Create(cfg)
+		})
 	}
 
 	if err := manager.consumers.RegisterFactories(); err != nil {
