@@ -240,7 +240,7 @@
 
 # Version History
 
-> - Latest Version [v3.3.1](version_history.md#v331)
+> - Latest Version [v3.3.2](version_history.md#v332)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -881,7 +881,7 @@ Options:
 - `--connection=mysql` Database connection
 - `--auth=true` Require authentication (default, use `--auth=false` to disable)
 
-The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc:gen`. The generated service implements `Name()`, `Register()`, and `AuthMethods()`, and is automatically appended to `grpc/service/services.go`. The `Update` request receives fields through `google.protobuf.Struct data`, optionally converts them to a request struct for custom validation, and only updates explicitly provided fields, matching the controller map update flow.
+The service layer uses the requests under `grpc/request` and the models under `grpc/model`. Define the matching `UserService` in `grpc/proto/user.proto` and run `grpc:gen`. The generated service implements `Name()`, `Register()`, and `AuthMethods()`, and is automatically appended to `grpc/service/registry.go`.
 
 ## Call From Go
 
@@ -2367,10 +2367,10 @@ The event system is split into two layers:
 
 The debugger is a consumer of the bus. It collects debug events and business events without becoming a dependency of
 `eventbus`.
-Business listeners are registered through `app/listener/listeners.go`, and `EventProvider` runs
+Business listeners are registered through `app/listener/registry.go`, and `EventProvider` runs
 `listener.Register(registry)` during startup.
 
-`make:listener` automatically appends the generated listener to `app/listener/listeners.go`:
+`make:listener` automatically appends the generated listener to `app/listener/registry.go`:
 
 ```go
 listenerRegister(&UserLoginListener{}, event.UserLoginEvent{})
@@ -2702,7 +2702,7 @@ Total 6 producers
 ### Job Creation
 
 > Create models, controllers, etc. using the command line, refer to the previous documentation for details. Generated
-> Jobs are automatically appended to the registration list in `app/job/jobs.go`.
+> Jobs are automatically appended to the registration list in `app/job/registry.go`.
 
 | Argument       | Short | Required | Default                   | Description                                  |
 |----------------|-------|----------|---------------------------|----------------------------------------------|
@@ -2745,7 +2745,7 @@ func (j *SendEmailJob) Handle(payload any) error {
 }
 ```
 
-`make:job` automatically appends the generated Job to `app/job/jobs.go`:
+`make:job` automatically appends the generated Job to `app/job/registry.go`:
 
 ```go
 return []servicejob.Job{

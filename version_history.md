@@ -1,5 +1,13 @@
 # Version History
 
+## v3.3.2
+> - Optimize and repair the model's soft deletion
+> - Soft-delete query compatibility is determined by identifying whether soft-delete is implemented at the underlying level to decide the query conditions
+> - Whether the newly added configuration command line generates a soft-delete field controls whether a soft-delete field is generated
+> - Remove unused parameters and methods, and ignore defer errors
+> - Queue and listener registration optimization
+> - Unused parameters in Provider, Redis Hook, CLI, Service, Queue, gRPC, ORM, and test implementations should be uniformly changed to _
+
 ## v3.3.1
 > - Adjust command line table output style
 > - Add a progress bar loading feature to the database data filling command and permission synchronization command line

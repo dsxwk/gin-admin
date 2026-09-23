@@ -229,7 +229,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.3.1](version_history_zh.md#v331)
+> - 最新版本 [v3.3.2](version_history_zh.md#v332)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -864,7 +864,7 @@ $ go run ./cmd/cli.go grpc-make:service --table=user
 - `--connection=mysql` 数据库连接
 - `--auth=true` 是否需要鉴权 (默认, `--auth=false` 关闭)
 
-grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。生成的服务会实现`Name()`、`Register()`和`AuthMethods()`方法,并自动追加到`grpc/service/services.go`服务列表。更新请求使用`google.protobuf.Struct`接收`data`,按需转成请求结构体做自定义校验,更新时只处理显式传入的字段,和controller的map更新方式一致。
+grpc服务层使用`grpc/request`请求和`grpc/model`模型,需在`grpc/proto/user.proto`中定义对应的`UserService`服务。生成的服务会实现`Name()`、`Register()`和`AuthMethods()`方法,并自动追加到`grpc/service/registry.go`服务列表。
 
 ## grpc内部调用
 
@@ -2355,9 +2355,9 @@ func (l *UserLoginListener) Handle(e event.UserLoginEvent) {
 - `eventbus.Registry`: 负责业务事件注册、监听器分发以及 `PublishedEvent` 发布.
 
 调试器作为总线消费者收集调试事件和业务事件, `eventbus` 不再反向依赖 `debugger`.
-业务监听器由 `app/listener/listeners.go` 统一注册, `EventProvider` 启动时执行 `listener.Register(registry)`。
+业务监听器由 `app/listener/registry.go` 统一注册, `EventProvider` 启动时执行 `listener.All()`。
 
-`make:listener` 会自动将生成的监听器追加到 `app/listener/listeners.go`:
+`make:listener` 会自动将生成的监听器追加到 `app/listener/registry.go`:
 
 ```go
 listenerRegister(&UserLoginListener{}, event.UserLoginEvent{})
@@ -2684,7 +2684,7 @@ $ go run ./cmd/cli.go producer:list
 
 ### Job创建
 
-> 同模型、控制器等使用命令行创建,具体参考之前文档。生成的 Job 会自动追加到 `app/job/jobs.go` 注册列表。
+> 同模型、控制器等使用命令行创建,具体参考之前文档。生成的 Job 会自动追加到 `app/job/registry.go` 注册列表。
 
 ### Job结构
 
@@ -2719,7 +2719,7 @@ func (j *SendEmailJob) Handle(payload any) error {
 }
 ```
 
-`make:job` 会自动将生成的 Job 追加到 `app/job/jobs.go`:
+`make:job` 会自动将生成的 Job 追加到 `app/job/registry.go`:
 
 ```go
 return []servicejob.Job{
