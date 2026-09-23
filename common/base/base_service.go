@@ -15,22 +15,14 @@ import (
 type BaseService struct {
 }
 
-type Model interface {
-	TableName() string
-}
-
-// HasConnection 检查是否有连接方法的接口
-type HasConnection interface {
-	Connection() string
-}
+// Model 数据库模型接口
+type Model = orm.Model
 
 // getDB 获取数据库连接(带连接名判断)
 func (s *BaseService) getDB(ctx context.Context, model Model) *gorm.DB {
-	if connModel, ok := model.(HasConnection); ok {
-		conn := connModel.Connection()
-		if conn != "" {
-			return facade.DB(conn).WithContext(ctx)
-		}
+	conn := model.Connection()
+	if conn != "" {
+		return facade.DB(conn).WithContext(ctx)
 	}
 	return facade.DB().WithContext(ctx)
 }

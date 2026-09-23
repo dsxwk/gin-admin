@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/app/facade"
+	appmodel "gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
@@ -120,7 +121,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 		},
 		"datetime": func(detailType gorm.ColumnType) (dataType string) {
 			// deleted_at字段特殊处理
-			if detailType.Name() == "deleted_at" {
+			if detailType.Name() == appmodel.DeletedField {
 				if p != "model" {
 					return "*model.DeletedAt"
 				} else {
@@ -153,6 +154,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 	for _, table := range tables {
 		flag.Infof("→ 正在生成表: %s", table)
 		fileName := filepath.Join(path, table+".gen.go")
+		structName := lo.PascalCase(table)
 		f := m.CheckDirAndFile(fileName)
 		if f == nil {
 			continue
@@ -166,15 +168,8 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 			continue
 		}
 		text := string(content)
-
-		re := regexp.MustCompile("(`[^`]*json:\"deletedAt\"[^`]*`)")
-
-		text = re.ReplaceAllStringFunc(text, func(match string) string {
-			if strings.Contains(match, "swaggerignore") {
-				return match
-			}
-			return strings.TrimSuffix(match, "`") + " swaggerignore:\"true\"`"
-		})
+		text = removeSoftDeleteField(text)
+		text = addSoftDeleteSwaggerIgnore(text)
 
 		if err = os.WriteFile(fileName, []byte(text), 0644); err != nil {
 			flag.Errorf("为文件 %s 添加 swaggerignore 失败", fileName)
@@ -183,7 +178,6 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 
 		// 为每个生成的模型文件追加Connection方法
 		if conn != "" {
-			structName := lo.PascalCase(table)
 			err = appendConnection(path, table, structName, conn)
 			if err != nil {
 				flag.Errorf("为模型 %s 追加 Connection 方法失败: %s", table, err.Error())
@@ -198,6 +192,17 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 
 // appendConnection 为模型文件追加Connection方法
 func appendConnection(path, table, structName, conn string) error {
+	function := fmt.Sprintf(`
+// Connection 数据库连接名称
+func (*%s) Connection() string {
+    return "%s"
+}`, structName, conn)
+
+	return appendModelMethod(path, table, structName, "Connection", function)
+}
+
+// appendModelMethod 在TableName方法后追加模型方法
+func appendModelMethod(path, table, structName, methodName, function string) error {
 	filePath := filepath.Join(path, table+".gen.go")
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -205,28 +210,23 @@ func appendConnection(path, table, structName, conn string) error {
 	}
 
 	text := string(content)
-	// 检查是否已经存在Connection方法
-	if strings.Contains(text, "func (*"+structName+") Connection() string") {
-		flag.Infof("模型 %s 已存在 Connection 方法,跳过添加", structName)
+	// 检查方法是否已经存在
+	if strings.Contains(text, "func (*"+structName+") "+methodName+"()") {
+		flag.Infof("模型 %s 已存在 %s 方法,跳过添加", structName, methodName)
 		return nil
 	}
-
-	// 在TableName方法后面追加Connection方法
-	function := fmt.Sprintf(`
-// Connection 数据库连接名称
-func (*%s) Connection() string {
-    return "%s"
-}`, structName, conn)
 
 	// 查找TableName方法结束的位置
 	tableNamePattern := regexp.MustCompile(`func \(\*` + structName + `\) TableName\(\) string \{[\s\S]*?\n\}`)
 
-	if tableNamePattern.MatchString(text) {
-		// 在TableName方法后面插入
-		text = tableNamePattern.ReplaceAllStringFunc(text, func(match string) string {
-			return match + "\n" + function
-		})
+	if !tableNamePattern.MatchString(text) {
+		return fmt.Errorf("未找到 %s 的 TableName 方法", structName)
 	}
+
+	// 在TableName方法后面插入
+	text = tableNamePattern.ReplaceAllStringFunc(text, func(match string) string {
+		return match + "\n" + function
+	})
 
 	return os.WriteFile(filePath, []byte(text), 0644)
 }

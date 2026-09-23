@@ -12,7 +12,7 @@ app:
 # 数据库
 databases:
   driver: mysql # 默认数据库
-  disable-soft-delete: true # 是否禁用软删除
+  cli-soft-delete: false # 命令行是否生成软删除字段
   # 慢查询的时间,超过这个时间会记录到日志中
   slow-query-duration: 3s # 3秒(time.Duration)
     # 连接池

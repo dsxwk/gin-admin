@@ -18,7 +18,6 @@ type Dict struct {
 	Children  []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`
 	CreatedAt *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`
 	UpdatedAt *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt" form:"updatedAt"`
-	DeletedAt *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" form:"deletedAt" swaggerignore:"true"`
 }
 
 func (*Dict) TableName() string {

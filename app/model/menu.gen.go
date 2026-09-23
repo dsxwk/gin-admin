@@ -24,12 +24,16 @@ type Menu struct {
 	Children   []pkg.TreeNode `gorm:"-;comment:子节点" json:"children"`                                                                // 子节点
 	CreatedAt  *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                                // 创建时间
 	UpdatedAt  *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                                // 更新时间
-	DeletedAt  *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`           // 删除时间
 }
 
 // TableName Menu's table name
 func (*Menu) TableName() string {
 	return TableNameMenu
+}
+
+// Connection 数据库连接名称
+func (*Menu) Connection() string {
+	return "mysql"
 }
 
 // 实现TreeNode接口

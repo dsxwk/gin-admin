@@ -89,11 +89,13 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 		flag.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
+	columns = filterSoftDeleteColumns(columns)
 
 	tableComment, _ := getTableComment(db, table)
 	imports := make(map[string]string)
 	structName := lo.PascalCase(table)
 	tableConst := "TableName" + structName
+	file := filepath.Join(outDir, table+".go")
 
 	maxNameLen := 0
 	maxTypeLen := 0
@@ -115,7 +117,7 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 		jsonName := lo.CamelCase(fieldName)
 		gormTag := buildGormTag(c)
 		tag := "`" + gormTag + " json:\"" + jsonName + "\" form:\"" + jsonName + "\"`"
-		if jsonName == "deletedAt" || c.Name == "deleted_at" {
+		if isSoftDeleteField(c.Name) {
 			tag = strings.TrimSuffix(tag, "`") + " swaggerignore:\"true\"`"
 		}
 		line := fmt.Sprintf("%s%s%s%s%s",
@@ -152,7 +154,6 @@ func (m *MakeGrpcModel) generateModel(db *gorm.DB, table, outDir string) {
 		Fields:        fieldLines,
 	}
 
-	file := filepath.Join(outDir, table+".go")
 	f := m.CheckDirAndFile(file)
 	if f == nil {
 		return
@@ -189,7 +190,7 @@ func grpcGoType(c Column, imports map[string]string) string {
 	case strings.Contains(t, "timestamp"),
 		strings.Contains(t, "datetime"),
 		t == "date":
-		if c.Name == "deleted_at" {
+		if isSoftDeleteField(c.Name) {
 			return "*DeletedAt"
 		}
 		return "*DateTime"

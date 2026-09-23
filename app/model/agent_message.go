@@ -15,7 +15,6 @@ type AgentMessage struct {
 	CostMs     float64    `gorm:"column:cost_ms;not null;default:0.00;type:decimal(10,2) unsigned;comment:本轮对话耗时(毫秒),包含API调用+工具执行的总时间" json:"costMs" form:"costMs"`
 	CreatedAt  *DateTime  `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`
 	UpdatedAt  *DateTime  `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt" form:"updatedAt"`
-	DeletedAt  *DeletedAt `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" form:"deletedAt" swaggerignore:"true"`
 }
 
 func (*AgentMessage) TableName() string {

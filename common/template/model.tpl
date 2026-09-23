@@ -17,7 +17,7 @@ func (*{{ .Struct }}) TableName() string {
 {{- if .Connection}}
 
 // Connection 数据库连接名称
-func (m *{{ .Struct }}) Connection() string {
+func (*{{ .Struct }}) Connection() string {
     return "{{ .Connection }}"
 }
 {{- end}}

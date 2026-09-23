@@ -21,7 +21,6 @@ type MenuMeta struct {
 	AuthBtnList []*MenuActions `gorm:"foreignKey:menu_id;references:menu_id;comment:按钮权限列表" json:"authBtnList"`
 	CreatedAt   *DateTime      `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`
 	UpdatedAt   *DateTime      `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`
-	DeletedAt   *DeletedAt     `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"`
 }
 
 func (*MenuMeta) TableName() string {

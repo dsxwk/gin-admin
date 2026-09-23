@@ -13,7 +13,6 @@ type Roles struct {
 	RolePermissions []*RolePermissions `gorm:"foreignKey:role_id;references:id;comment:角色用户" json:"rolePermissions"`
 	CreatedAt       *DateTime          `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt" form:"createdAt"`
 	UpdatedAt       *DateTime          `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt" form:"updatedAt"`
-	DeletedAt       *DeletedAt         `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" form:"deletedAt" swaggerignore:"true"`
 }
 
 func (*Roles) TableName() string {

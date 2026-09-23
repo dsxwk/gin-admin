@@ -21,12 +21,16 @@ type User struct {
 	UserRoles []*UserRoles       `gorm:"foreignKey:user_id;references:id;comment:用户角色" json:"userRoles"`                               // 用户角色
 	MainDept  *UserDepartments   `gorm:"foreignKey:user_id;references:id;comment:主部门" json:"mainDept"`
 	UserDepts []*UserDepartments `gorm:"foreignKey:user_id;references:id;comment:用户部门" json:"userDepts"`
-	CreatedAt *DateTime          `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"`                      // 创建时间
-	UpdatedAt *DateTime          `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"`                      // 更新时间
-	DeletedAt *DeletedAt         `gorm:"column:deleted_at;type:datetime;comment:删除时间" json:"deletedAt" swaggerignore:"true"` // 删除时间
+	CreatedAt *DateTime          `gorm:"column:created_at;type:datetime;comment:创建时间" json:"createdAt"` // 创建时间
+	UpdatedAt *DateTime          `gorm:"column:updated_at;type:datetime;comment:更新时间" json:"updatedAt"` // 更新时间
 }
 
 // TableName User's table name
 func (*User) TableName() string {
 	return TableNameUser
+}
+
+// Connection 数据库连接名称
+func (*User) Connection() string {
+	return "mysql"
 }

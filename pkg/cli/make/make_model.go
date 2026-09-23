@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gin/app/facade"
+	appmodel "gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg/cli"
@@ -217,6 +218,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		flag.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
+	columns = filterSoftDeleteColumns(columns)
 
 	// 获取表注释
 	tableComment, _ := getTableComment(db, table)
@@ -269,8 +271,8 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		gormTag := buildGormTag(c)
 		tag := fmt.Sprintf("`%s json:\"%s\" form:\"%s\"`", gormTag, jsonName, jsonName)
 
-		// deleted_at 自动忽略 swagger
-		if jsonName == "deletedAt" || c.Name == "deleted_at" {
+		// 软删除字段自动忽略swagger
+		if isSoftDeleteField(c.Name) {
 			tag = strings.TrimSuffix(tag, "`") + " swaggerignore:\"true\"`"
 		}
 
@@ -295,6 +297,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		os.Exit(1)
 	}
 
+	file := filepath.Join(outDir, table+".go")
 	data := struct {
 		Imports       string
 		Struct        string
@@ -313,7 +316,6 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 		Fields:        fieldLines,
 	}
 
-	file := filepath.Join(outDir, table+".go")
 	f := m.CheckDirAndFile(file)
 	if f == nil {
 		return
@@ -325,6 +327,71 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	}
 
 	flag.Successf("模型文件: " + file + " 生成成功!")
+}
+
+// cliSoftDeleteEnabled 获取命令行软删除配置
+func cliSoftDeleteEnabled() bool {
+	cfg := facade.Config()
+	return cfg != nil && cfg.Databases.CLISoftDelete
+}
+
+// isSoftDeleteField 判断是否为软删除字段
+func isSoftDeleteField(name string) bool {
+	return name == appmodel.DeletedField
+}
+
+// filterSoftDeleteColumns 过滤软删除字段
+func filterSoftDeleteColumns(columns []Column) []Column {
+	if cliSoftDeleteEnabled() {
+		return columns
+	}
+
+	result := make([]Column, 0, len(columns))
+	for _, column := range columns {
+		if isSoftDeleteField(column.Name) {
+			continue
+		}
+		result = append(result, column)
+	}
+	return result
+}
+
+// removeSoftDeleteField 移除软删除字段
+func removeSoftDeleteField(content string) string {
+	if cliSoftDeleteEnabled() {
+		return content
+	}
+
+	var lines []string
+	for _, line := range strings.SplitAfter(content, "\n") {
+		if strings.Contains(line, "column:"+appmodel.DeletedField) {
+			continue
+		}
+		lines = append(lines, line)
+	}
+	return strings.Join(lines, "")
+}
+
+// addSoftDeleteSwaggerIgnore 添加软删除字段swagger忽略
+func addSoftDeleteSwaggerIgnore(content string) string {
+	if !cliSoftDeleteEnabled() {
+		return content
+	}
+
+	lines := strings.SplitAfter(content, "\n")
+	for i, line := range lines {
+		if !strings.Contains(line, "column:"+appmodel.DeletedField) ||
+			strings.Contains(line, "swaggerignore") {
+			continue
+		}
+
+		end := strings.LastIndex(line, "`")
+		if end < 0 {
+			continue
+		}
+		lines[i] = line[:end] + ` swaggerignore:"true"` + line[end:]
+	}
+	return strings.Join(lines, "")
 }
 
 // getTableComment 获取表注释
@@ -381,7 +448,7 @@ func goType(c Column, im *Import, pkgName string) string {
 	case strings.Contains(t, "timestamp"),
 		strings.Contains(t, "datetime"),
 		t == "date":
-		if c.Name == "deleted_at" {
+		if isSoftDeleteField(c.Name) {
 			if pkgName != "model" {
 				im.Add("gin/app/model")
 				return "*model.DeletedAt"
