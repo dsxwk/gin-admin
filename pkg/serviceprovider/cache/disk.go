@@ -50,7 +50,7 @@ func (d *DiskCache) WithContext(ctx context.Context) *DiskCache {
 }
 
 func (d *DiskCache) Set(key string, value any, expire time.Duration) error {
-	data, err := encodeCacheValue(value)
+	data, err := encodeValue(value)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (d *DiskCache) Get(key string) (any, bool) {
 	}
 
 	// 缓存只存储JSON,解析失败按未命中处理
-	value, err := decodeCacheValue(data)
+	value, err := decodeValue(data)
 	if err != nil {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (d *DiskCache) Expire(key string) (any, time.Time, bool, error) {
 		return nil, time.Time{}, false, errors.New("cache key not found")
 	}
 
-	value, err := decodeCacheValue(data)
+	value, err := decodeValue(data)
 	if err != nil {
 		return nil, time.Time{}, false, err
 	}

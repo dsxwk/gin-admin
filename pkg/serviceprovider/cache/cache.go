@@ -153,7 +153,7 @@ func GetAs[T any](p *CacheProxy, key string) (T, bool) {
 		return result, true
 	}
 
-	data, err := encodeCacheValue(value)
+	data, err := encodeValue(value)
 	if err != nil {
 		return zero, false
 	}

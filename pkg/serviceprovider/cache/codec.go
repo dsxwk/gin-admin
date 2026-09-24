@@ -11,8 +11,8 @@ import (
 	"github.com/goccy/go-json"
 )
 
-// encodeCacheValue 编码缓存值为JSON
-func encodeCacheValue(value any) ([]byte, error) {
+// encodeValue 编码缓存值为JSON
+func encodeValue(value any) ([]byte, error) {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return nil, fmt.Errorf("缓存值JSON编码失败: %w", err)
@@ -21,8 +21,8 @@ func encodeCacheValue(value any) ([]byte, error) {
 	return data, nil
 }
 
-// decodeCacheValue 解析缓存JSON值
-func decodeCacheValue(value []byte) (any, error) {
+// decodeValue 解析缓存JSON值
+func decodeValue(value []byte) (any, error) {
 	decoder := json.NewDecoder(bytes.NewReader(value))
 	decoder.UseNumber()
 
@@ -36,11 +36,11 @@ func decodeCacheValue(value []byte) (any, error) {
 		return nil, errors.New("缓存值包含多余内容")
 	}
 
-	return normalizeCacheValue(result), nil
+	return normalizeValue(result), nil
 }
 
-// normalizeCacheValue 标准化JSON数字类型
-func normalizeCacheValue(value any) any {
+// normalizeValue 标准化JSON数字类型
+func normalizeValue(value any) any {
 	switch item := value.(type) {
 	case json.Number:
 		text := item.String()
@@ -66,13 +66,13 @@ func normalizeCacheValue(value any) any {
 		return text
 	case map[string]any:
 		for key, value := range item {
-			item[key] = normalizeCacheValue(value)
+			item[key] = normalizeValue(value)
 		}
 
 		return item
 	case []any:
 		for index, value := range item {
-			item[index] = normalizeCacheValue(value)
+			item[index] = normalizeValue(value)
 		}
 
 		return item

@@ -161,7 +161,7 @@ func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {
 }
 
 func (r *RedisCache) Set(key string, value any, expire time.Duration) error {
-	data, err := encodeCacheValue(value)
+	data, err := encodeValue(value)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (r *RedisCache) Get(key string) (any, bool) {
 	}
 
 	// 缓存只存储JSON,解析失败按未命中处理
-	result, err := decodeCacheValue([]byte(val))
+	result, err := decodeValue([]byte(val))
 	if err != nil {
 		return nil, false
 	}
