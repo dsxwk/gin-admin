@@ -42,8 +42,6 @@ func TestCacheSetGet(t *testing.T) {
 			switch v := val.(type) {
 			case string:
 				require.Equal(t, "123", v)
-			case []byte:
-				require.Equal(t, []byte("123"), v) // 或 string(v) == "123"
 			case int:
 				require.Equal(t, 123, v)
 			case int64:
@@ -244,8 +242,6 @@ func TestCacheStoreMethods(t *testing.T) {
 			switch v := val.(type) {
 			case string:
 				require.Equal(t, value, v)
-			case []byte:
-				require.Equal(t, value, string(v))
 			default:
 				require.Equal(t, value, v)
 			}
@@ -268,7 +264,7 @@ func TestCacheDiskDriver(t *testing.T) {
 
 	val, ok := diskCache.Get(key)
 	require.True(t, ok)
-	require.Equal(t, []byte(value), val)
+	require.Equal(t, value, val)
 
 	_, err = facade.Redis().Client().Get(ctx, key).Result()
 	require.ErrorIs(t, err, redis.Nil)

@@ -10,6 +10,8 @@ import (
 	"gin/pkg/serviceprovider/logger"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
 )
 
 // Cache 缓存接口
@@ -119,6 +121,63 @@ func (p *CacheProxy) Expire(key string) (any, time.Time, bool, error) {
 	val, exp, ok, err := p.c.Expire(key)
 	p.publish("Expire", key, val, time.Since(start))
 	return val, exp, ok, err
+}
+
+// Lock 获取带看门狗的Redis分布式锁
+func (p *CacheProxy) Lock(ctx context.Context, key string, ttl time.Duration) (*LockResult, error) {
+	if p == nil {
+		return nil, ErrLockUnsupported
+	}
+
+	redisCache, ok := p.c.(*RedisCache)
+	if !ok {
+		return nil, ErrLockUnsupported
+	}
+
+	return redisCache.Lock(ctx, key, ttl)
+}
+
+// GetAs 获取缓存并转换为指定类型
+func GetAs[T any](p *CacheProxy, key string) (T, bool) {
+	var zero T
+	if p == nil {
+		return zero, false
+	}
+
+	value, ok := p.Get(key)
+	if !ok {
+		return zero, false
+	}
+
+	if result, ok := value.(T); ok {
+		return result, true
+	}
+
+	data, err := encodeCacheValue(value)
+	if err != nil {
+		return zero, false
+	}
+
+	var result T
+	if err = json.Unmarshal(data, &result); err != nil {
+		return zero, false
+	}
+
+	return result, true
+}
+
+// Close 关闭底层缓存驱动
+func (p *CacheProxy) Close() error {
+	if p == nil || p.c == nil {
+		return nil
+	}
+
+	closer, ok := p.c.(interface{ Close() error })
+	if !ok {
+		return nil
+	}
+
+	return closer.Close()
 }
 
 func (p *CacheProxy) publish(method, key string, val any, cost time.Duration) {

@@ -2,9 +2,12 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	"gin/app/queue/consumer"
 	"gin/common/ctxkey"
+	"gin/pkg/serviceprovider/cache"
+	"sync"
 	"testing"
 	"time"
 
@@ -87,7 +90,6 @@ func TestRedisQueueStatus(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Logf("消费者: %s, 状态: %s, 启用: %v", name, status, enabled)
 			assert.NotEmpty(t, name, "消费者名称不能为空")
-
 		})
 	}
 }
@@ -147,21 +149,140 @@ func TestRedisCacheLock(t *testing.T) {
 
 	redisCache := facade.Redis().WithContext(ctx)
 	key := "test:cache:lock"
-	value := "lock-owner"
-	defer func() { _ = redisCache.UnLock(key, value) }()
 
-	err := redisCache.Lock(key, value, 2*time.Second)
+	lock, err := redisCache.Lock(ctx, key, 2*time.Second)
+	require.NoError(t, err, "获取锁失败")
+	defer func() { _ = lock.Release() }()
+
+	_, err = redisCache.Lock(ctx, key, 2*time.Second)
+	require.ErrorIs(t, err, cache.ErrLockExists)
+
+	require.NoError(t, lock.Release(), "释放锁失败")
+
+	next, err := redisCache.Lock(ctx, key, 2*time.Second)
+	require.NoError(t, err, "释放后重新获取锁失败")
+	require.NoError(t, next.Release())
+}
+
+// TestRedisCacheLockWithWatchdog Redis锁自动续期测试
+func TestRedisCacheLockWithWatchdog(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	redisCache := facade.Cache("redis").WithContext(ctx)
+	key := "test:cache:lock-watchdog"
+	defer func() { _ = redisCache.Delete(key) }()
+
+	lock, err := redisCache.Lock(ctx, key, 100*time.Millisecond)
 	require.NoError(t, err, "获取锁失败")
 
-	err = redisCache.Lock(key, value, 2*time.Second)
-	require.Error(t, err, "重复获取同一锁应该失败")
-	assert.Contains(t, err.Error(), "lock already exists")
+	time.Sleep(250 * time.Millisecond)
 
-	err = redisCache.UnLock(key, value)
-	require.NoError(t, err, "释放锁失败")
+	_, err = redisCache.Lock(ctx, key, 100*time.Millisecond)
+	require.ErrorIs(t, err, cache.ErrLockExists, "看门狗未保持锁")
+	require.NoError(t, lock.Release(), "释放锁失败")
 
-	err = redisCache.Lock(key, value, 2*time.Second)
+	next, err := redisCache.Lock(ctx, key, 100*time.Millisecond)
 	require.NoError(t, err, "释放后重新获取锁失败")
+	require.NoError(t, next.Release())
+}
+
+// TestRedisCacheLockLost Redis锁丢失测试
+func TestRedisCacheLockLost(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	redisCache := facade.Cache("redis").WithContext(ctx)
+	key := "test:cache:lock-lost"
+
+	lock, err := redisCache.Lock(ctx, key, time.Second)
+	require.NoError(t, err, "获取锁失败")
+	require.NoError(t, redisCache.Delete(key))
+
+	require.ErrorIs(t, lock.Release(), cache.ErrLockNotOwned)
+}
+
+// TestRedisCacheSerializationSymmetric Redis序列化对称性测试
+func TestRedisCacheSerializationSymmetric(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	redisCache := facade.Cache("redis").WithContext(ctx)
+	testCases := []struct {
+		name  string
+		key   string
+		value any
+		check func(t *testing.T, value any)
+	}{
+		{"numeric-string", "test:serialize:string", "12345", func(t *testing.T, value any) {
+			assert.Equal(t, "12345", value)
+		}},
+		{"integer", "test:serialize:int", 12345, func(t *testing.T, value any) {
+			assert.Equal(t, int64(12345), value)
+		}},
+		{"map", "test:serialize:map", map[string]any{"count": 100}, func(t *testing.T, value any) {
+			result, ok := value.(map[string]any)
+			require.True(t, ok)
+			assert.Equal(t, int64(100), result["count"])
+		}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.NoError(t, redisCache.Set(tc.key, tc.value, 10*time.Second))
+			defer func() { _ = redisCache.Delete(tc.key) }()
+
+			value, ok := redisCache.Get(tc.key)
+			require.True(t, ok)
+			tc.check(t, value)
+		})
+	}
+}
+
+// TestRedisCacheSubscribeConcurrent Redis并发订阅测试
+func TestRedisCacheSubscribeConcurrent(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	redisCache := facade.Redis().WithContext(ctx)
+	const count = 16
+
+	var waitGroup sync.WaitGroup
+	errs := make(chan error, count)
+	waitGroup.Add(count)
+
+	for index := range count {
+		go func(index int) {
+			defer waitGroup.Done()
+
+			channel := fmt.Sprintf("test:cache:subscribe:%d", index)
+			received := make(chan struct{})
+			if err := redisCache.Subscribe(channel, func(_ string, _ string) {
+				close(received)
+			}); err != nil {
+				errs <- err
+				return
+			}
+			defer func() { _ = redisCache.Unsubscribe(channel) }()
+
+			if err := redisCache.Publish(channel, "payload"); err != nil {
+				errs <- err
+				return
+			}
+
+			select {
+			case <-received:
+			case <-time.After(2 * time.Second):
+				errs <- fmt.Errorf("channel %s receive timeout", channel)
+			}
+		}(index)
+	}
+
+	waitGroup.Wait()
+	close(errs)
+	for err := range errs {
+		require.NoError(t, err)
+	}
 }
 
 // TestRedisCacheSetOps Redis集合操作

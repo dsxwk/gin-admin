@@ -58,3 +58,27 @@ func (m *Manager) Redis() *RedisCache {
 	redisCache, _ := instance.c.(*RedisCache)
 	return redisCache
 }
+
+// Close 关闭全部缓存实例
+func (m *Manager) Close() error {
+	if m == nil {
+		return nil
+	}
+
+	m.mu.Lock()
+	instances := make([]*CacheProxy, 0, len(m.caches))
+	for _, instance := range m.caches {
+		instances = append(instances, instance)
+	}
+	m.caches = make(map[string]*CacheProxy)
+	m.mu.Unlock()
+
+	var firstErr error
+	for _, instance := range instances {
+		if err := instance.Close(); err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+
+	return firstErr
+}

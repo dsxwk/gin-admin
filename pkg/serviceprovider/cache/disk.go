@@ -50,34 +50,33 @@ func (d *DiskCache) WithContext(ctx context.Context) *DiskCache {
 }
 
 func (d *DiskCache) Set(key string, value any, expire time.Duration) error {
-	valBytes, ok := value.([]byte)
-	if !ok {
-		valBytes = []byte(fmt.Sprintf("%v", value))
+	data, err := encodeCacheValue(value)
+	if err != nil {
+		return err
 	}
-	err := d.db.Update(func(txn *badger.Txn) error {
-		e := badger.NewEntry([]byte(key), valBytes)
+
+	return d.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(key), data)
 		if expire > 0 {
 			e = e.WithTTL(expire)
 		}
 		return txn.SetEntry(e)
 	})
-	return err
 }
 
 func (d *DiskCache) Get(key string) (any, bool) {
-	var val []byte
-	err := d.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil {
-			return err
-		}
-		val, err = item.ValueCopy(nil)
-		return err
-	})
+	data, _, ok := d.load(key)
+	if !ok {
+		return nil, false
+	}
+
+	// 缓存只存储JSON,解析失败按未命中处理
+	value, err := decodeCacheValue(data)
 	if err != nil {
 		return nil, false
 	}
-	return val, true
+
+	return value, true
 }
 
 func (d *DiskCache) Delete(key string) error {
@@ -87,9 +86,24 @@ func (d *DiskCache) Delete(key string) error {
 }
 
 func (d *DiskCache) Expire(key string) (any, time.Time, bool, error) {
+	data, expireTime, ok := d.load(key)
+	if !ok {
+		return nil, time.Time{}, false, errors.New("cache key not found")
+	}
+
+	value, err := decodeCacheValue(data)
+	if err != nil {
+		return nil, time.Time{}, false, err
+	}
+
+	return value, expireTime, true, nil
+}
+
+// load 读取缓存原始数据和过期时间
+func (d *DiskCache) load(key string) ([]byte, time.Time, bool) {
 	var (
-		val        []byte
-		expireTime time.Time
+		data   []byte
+		expire time.Time
 	)
 
 	// Badger 不直接支持获取剩余ttl,只能判断是否存在
@@ -98,18 +112,27 @@ func (d *DiskCache) Expire(key string) (any, time.Time, bool, error) {
 		if err != nil {
 			return err
 		}
-		val, err = item.ValueCopy(nil)
+		data, err = item.ValueCopy(nil)
 		if err != nil {
 			return err
 		}
-		ttl := item.ExpiresAt()
-		if ttl > 0 {
-			expireTime = time.Unix(int64(ttl), 0)
+		if ttl := item.ExpiresAt(); ttl > 0 {
+			expire = time.Unix(int64(ttl), 0)
 		}
 		return nil
 	})
 	if err != nil {
-		return nil, time.Time{}, false, errors.New("cache key not found")
+		return nil, time.Time{}, false
 	}
-	return val, expireTime, true, nil
+
+	return data, expire, true
+}
+
+// Close 关闭磁盘缓存
+func (d *DiskCache) Close() error {
+	if d == nil || d.db == nil {
+		return nil
+	}
+
+	return d.db.Close()
 }

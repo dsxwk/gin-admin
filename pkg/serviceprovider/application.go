@@ -99,7 +99,8 @@ func (app *Application) Stop() error {
 	}
 
 	var errs []error
-	for _, runner := range app.runners {
+	for index := len(app.runners) - 1; index >= 0; index-- {
+		runner := app.runners[index]
 		if err := runner.Stop(); err != nil {
 			errs = append(errs, fmt.Errorf("%s: %w", runner.Name(), err))
 		}

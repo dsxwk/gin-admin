@@ -7,11 +7,16 @@ import (
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
+	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/goccy/go-json"
 )
+
+type redisHookContextKey int
+
+const redisStartTimeKey redisHookContextKey = iota
 
 type RedisHook struct {
 	bus *eventbus.Bus
@@ -19,11 +24,11 @@ type RedisHook struct {
 
 func (h *RedisHook) BeforeProcess(ctx context.Context, _ redis.Cmder) (context.Context, error) {
 	// 在context中记录开始时间
-	return context.WithValue(ctx, "startTime", time.Now()), nil
+	return context.WithValue(ctx, redisStartTimeKey, time.Now()), nil
 }
 
 func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
-	start, ok := ctx.Value("startTime").(time.Time)
+	start, ok := ctx.Value(redisStartTimeKey).(time.Time)
 	if !ok {
 		start = time.Now()
 	}
@@ -53,11 +58,11 @@ func (h *RedisHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 }
 
 func (h *RedisHook) BeforeProcessPipeline(ctx context.Context, _ []redis.Cmder) (context.Context, error) {
-	return context.WithValue(ctx, "startTime", time.Now()), nil
+	return context.WithValue(ctx, redisStartTimeKey, time.Now()), nil
 }
 
 func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
-	start, ok := ctx.Value("startTime").(time.Time)
+	start, ok := ctx.Value(redisStartTimeKey).(time.Time)
 	if !ok {
 		start = time.Now()
 	}
@@ -87,21 +92,34 @@ func (h *RedisHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder
 	return nil
 }
 
+// redisState Redis共享状态
+type redisState struct {
+	mu        sync.RWMutex
+	pubsubs   map[string]*redis.PubSub
+	locks     map[string]*LockResult
+	closed    bool
+	closeOnce sync.Once
+	closeErr  error
+}
+
 // RedisCache Redis缓存
 type RedisCache struct {
-	client       *redis.Client
-	pubsubs      map[string]*redis.PubSub
-	ctx          context.Context
-	bus          *eventbus.Bus
-	conf         *config.Config
-	lastPingFail time.Time
+	client *redis.Client
+	ctx    context.Context
+	bus    *eventbus.Bus
+	conf   *config.Config
+	state  *redisState
 }
 
 var (
-	redisCache *CacheProxy
+	redisCache   *CacheProxy
+	redisCacheMu sync.Mutex
 )
 
 func NewRedisCache(conf *config.Config) *CacheProxy {
+	redisCacheMu.Lock()
+	defer redisCacheMu.Unlock()
+
 	if redisCache != nil {
 		return redisCache
 	}
@@ -117,11 +135,14 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 	client.AddHook(&RedisHook{bus: bus})
 
 	r := &RedisCache{
-		client:  client,
-		ctx:     context.Background(),
-		pubsubs: make(map[string]*redis.PubSub),
-		bus:     bus,
-		conf:    conf,
+		client: client,
+		ctx:    context.Background(),
+		bus:    bus,
+		conf:   conf,
+		state: &redisState{
+			pubsubs: make(map[string]*redis.PubSub),
+			locks:   make(map[string]*LockResult),
+		},
 	}
 
 	redisCache = NewCacheProxy("redis", r, bus, conf)
@@ -129,40 +150,25 @@ func NewRedisCache(conf *config.Config) *CacheProxy {
 }
 
 func (r *RedisCache) WithContext(ctx context.Context) *RedisCache {
-	return &RedisCache{
-		client:  r.client,
-		pubsubs: r.pubsubs,
-		ctx:     ctx,
+	if r == nil {
+		return nil
 	}
+
+	cp := *r
+	cp.ctx = ctx
+
+	return &cp
 }
 
 func (r *RedisCache) Set(key string, value any, expire time.Duration) error {
-	var valStr string
-
-	// 根据类型处理值
-	switch v := value.(type) {
-	case string:
-		valStr = v
-	case []byte:
-		valStr = string(v)
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		valStr = fmt.Sprintf("%v", v)
-	case float32, float64:
-		valStr = fmt.Sprintf("%v", v)
-	case bool:
-		valStr = fmt.Sprintf("%v", v)
-	default:
-		// map,slice,struct等复杂类型需要JSON序列化
-		b, err := json.Marshal(v)
-		if err != nil {
-			return fmt.Errorf("failed to marshal value: %v", err)
-		}
-		valStr = string(b)
+	data, err := encodeCacheValue(value)
+	if err != nil {
+		return err
 	}
 
-	err := r.client.Set(r.ctx, key, valStr, expire).Err()
+	err = r.client.Set(r.ctx, key, data, expire).Err()
 	if err != nil {
-		return fmt.Errorf("error setting Redis cache: %v", err)
+		return fmt.Errorf("error setting Redis cache: %w", err)
 	}
 
 	return nil
@@ -174,15 +180,13 @@ func (r *RedisCache) Get(key string) (any, bool) {
 		return nil, false
 	}
 
-	// 尝试解析JSON
-	var result any
-	if err = json.Unmarshal([]byte(val), &result); err == nil {
-		// 如果是JSON对象或数组,返回解析后的结果
-		return result, true
+	// 缓存只存储JSON,解析失败按未命中处理
+	result, err := decodeCacheValue([]byte(val))
+	if err != nil {
+		return nil, false
 	}
 
-	// 否则返回原始字符串
-	return val, true
+	return result, true
 }
 
 func (r *RedisCache) Delete(key string) error {
@@ -194,7 +198,7 @@ func (r *RedisCache) Delete(key string) error {
 	return nil
 }
 
-// Exists ??key????
+// Exists 判断key是否存在
 func (r *RedisCache) Exists(key string) (int64, error) {
 	result, err := r.client.Exists(r.ctx, key).Result()
 	if err != nil {
@@ -204,7 +208,12 @@ func (r *RedisCache) Exists(key string) (int64, error) {
 }
 
 func (r *RedisCache) SAdd(key string, members ...any) error {
-	err := r.client.SAdd(r.ctx, key, members...).Err()
+	values, err := encodeRedisSetMembers(members)
+	if err != nil {
+		return err
+	}
+
+	err = r.client.SAdd(r.ctx, key, values...).Err()
 	if err != nil {
 		return fmt.Errorf("error SAdd Redis set: %v", err)
 	}
@@ -212,65 +221,73 @@ func (r *RedisCache) SAdd(key string, members ...any) error {
 }
 
 func (r *RedisCache) SIsMember(key string, member any) (bool, error) {
-	result, err := r.client.SIsMember(r.ctx, key, member).Result()
+	value, err := encodeRedisSetMember(member)
+	if err != nil {
+		return false, err
+	}
+
+	result, err := r.client.SIsMember(r.ctx, key, value).Result()
 	if err != nil {
 		return false, fmt.Errorf("error SIsMember Redis set: %v", err)
 	}
 	return result, nil
 }
 
+// encodeRedisSetMembers 编码Redis集合成员
+func encodeRedisSetMembers(members []any) ([]any, error) {
+	values := make([]any, len(members))
+	for index, member := range members {
+		value, err := encodeRedisSetMember(member)
+		if err != nil {
+			return nil, err
+		}
+		values[index] = value
+	}
+
+	return values, nil
+}
+
+// encodeRedisSetMember 编码Redis集合成员
+func encodeRedisSetMember(member any) (any, error) {
+	switch member.(type) {
+	case string, []byte:
+		return member, nil
+	default:
+		value, err := json.Marshal(member)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal set member: %w", err)
+		}
+
+		return string(value), nil
+	}
+}
+
+// GetWithTTL 获取缓存值和过期时间
+func (r *RedisCache) GetWithTTL(key string) (any, time.Time, bool, error) {
+	ttl, err := r.client.PTTL(r.ctx, key).Result()
+	if err != nil {
+		return nil, time.Time{}, false, fmt.Errorf("error getting TTL for key %v: %w", key, err)
+	}
+
+	if ttl == -2*time.Nanosecond {
+		return nil, time.Time{}, false, nil
+	}
+
+	value, ok := r.Get(key)
+	if !ok {
+		return nil, time.Time{}, false, nil
+	}
+
+	if ttl == -1*time.Nanosecond {
+		return value, time.Time{}, true, nil
+	}
+
+	return value, time.Now().Add(ttl), true, nil
+}
+
+// Expire 获取缓存值和过期时间
 func (r *RedisCache) Expire(key string) (any, time.Time, bool, error) {
-	// Redis不支持使用相同的API获取到期时间,因此必须使用TTL
-	ttl, err := r.client.TTL(r.ctx, key).Result()
-	if err != nil {
-		return nil, time.Time{}, false, fmt.Errorf("error getting TTL for key %v: %v", key, err)
-	}
-
-	val, err := r.client.Get(r.ctx, key).Result()
-	if err != nil {
-		return nil, time.Time{}, false, fmt.Errorf("error getting value for key %v: %v", key, err)
-	}
-
-	expireTime := time.Now().Add(ttl)
-
-	return val, expireTime, true, nil
-}
-
-// Lock 获取锁
-func (r *RedisCache) Lock(key string, value string, expire time.Duration) error {
-	// 使用SETNX命令尝试设置锁
-	result, err := r.client.SetNX(r.ctx, key, value, expire).Result()
-	if err != nil {
-		return fmt.Errorf("failed to acquire lock: %v", err)
-	}
-
-	if !result {
-		// 如果返回 false,表示锁已存在
-		return fmt.Errorf("lock already exists")
-	}
-
-	return nil
-}
-
-// UnLock 释放锁
-func (r *RedisCache) UnLock(key string, value string) error {
-	script := `
-	if redis.call("get", KEYS[1]) == ARGV[1] then
-		return redis.call("del", KEYS[1])
-	else
-		return 0
-	end`
-	// 使用EVAL命令执行Lua脚本
-	status, err := r.client.Eval(r.ctx, script, []string{key}, value).Int()
-	if err != nil {
-		return fmt.Errorf("failed to unlock: %v", err)
-	}
-
-	if status == 0 {
-		return fmt.Errorf("unlock failed: lock not owned or already released")
-	}
-
-	return nil
+	return r.GetWithTTL(key)
 }
 
 // Publish 发布
@@ -309,8 +326,19 @@ func (r *RedisCache) Subscribe(channel string, handler func(channel string, payl
 		return fmt.Errorf("failed to subscribe to channel %s: %v", channel, err)
 	}
 
-	// 保存pubsub对象
-	r.pubsubs[channel] = pubsub
+	r.state.mu.Lock()
+	if r.state.closed {
+		r.state.mu.Unlock()
+		_ = pubsub.Close()
+		return ErrCacheClosed
+	}
+	if _, exists := r.state.pubsubs[channel]; exists {
+		r.state.mu.Unlock()
+		_ = pubsub.Close()
+		return fmt.Errorf("channel %s already subscribed", channel)
+	}
+	r.state.pubsubs[channel] = pubsub
+	r.state.mu.Unlock()
 
 	// 消息处理协程
 	go func() {
@@ -323,7 +351,7 @@ func (r *RedisCache) Subscribe(channel string, handler func(channel string, payl
 	return nil
 }
 
-// Pipeline 返回一个 Redis Pipeline，用于批量执行命令
+// Pipeline 返回Redis Pipeline,仅Redis驱动可用
 func (r *RedisCache) Pipeline() redis.Pipeliner {
 	return r.client.Pipeline()
 }
@@ -340,10 +368,14 @@ func (r *RedisCache) Client() *redis.Client {
 
 // Unsubscribe 取消订阅
 func (r *RedisCache) Unsubscribe(channel string) error {
-	pubsub, ok := r.pubsubs[channel]
+	r.state.mu.Lock()
+	pubsub, ok := r.state.pubsubs[channel]
 	if !ok {
+		r.state.mu.Unlock()
 		return fmt.Errorf("channel %s not found in subscriptions", channel)
 	}
+	delete(r.state.pubsubs, channel)
+	r.state.mu.Unlock()
 
 	err := pubsub.Unsubscribe(r.ctx, channel)
 	if err != nil {
@@ -356,6 +388,33 @@ func (r *RedisCache) Unsubscribe(channel string) error {
 		return fmt.Errorf("failed to close pubsub for channel %s: %v", channel, err)
 	}
 
-	delete(r.pubsubs, channel)
 	return nil
+}
+
+// Close 关闭Redis客户端
+func (r *RedisCache) Close() error {
+	if r == nil || r.state == nil || r.client == nil {
+		return nil
+	}
+
+	r.state.closeOnce.Do(func() {
+		r.state.mu.Lock()
+		r.state.closed = true
+		pubsubs := r.state.pubsubs
+		locks := r.state.locks
+		r.state.pubsubs = make(map[string]*redis.PubSub)
+		r.state.locks = make(map[string]*LockResult)
+		r.state.mu.Unlock()
+
+		for _, lock := range locks {
+			_ = lock.Release()
+		}
+		for _, pubsub := range pubsubs {
+			_ = pubsub.Close()
+		}
+
+		r.state.closeErr = r.client.Close()
+	})
+
+	return r.state.closeErr
 }
