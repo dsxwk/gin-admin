@@ -9,6 +9,9 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// closeWait 关闭清理协程的最长等待时间
+const closeWait = 3 * time.Second
+
 // limiterItem key对应的令牌桶
 type limiterItem struct {
 	limiter  *rate.Limiter // 令牌桶
@@ -49,7 +52,18 @@ func (s *keyedStore) close() {
 			close(s.stop)
 		}
 	})
-	s.wg.Wait()
+
+	done := make(chan struct{})
+	go func() {
+		s.wg.Wait()
+		close(done)
+	}()
+
+	// 清理协程必须保持非阻塞,超时兜底避免拖住优雅退出
+	select {
+	case <-done:
+	case <-time.After(closeWait):
+	}
 }
 
 // get 获取key对应的令牌桶
@@ -73,7 +87,6 @@ func (s *keyedStore) get(key string, r rate.Limit, burst int) *rate.Limiter {
 		if s.items.CompareAndSwap(key, current, replacement) {
 			return replacement.limiter
 		}
-		candidate = newLimiterItem(r, burst, now)
 	}
 }
 
@@ -84,7 +97,21 @@ func (s *keyedStore) allow(key string, r rate.Limit, burst int) bool {
 
 // wait key级平滑限流
 func (s *keyedStore) wait(ctx context.Context, key string, r rate.Limit, burst int) error {
-	return s.get(key, r, burst).Wait(ctx)
+	err := s.get(key, r, burst).Wait(ctx)
+	// 等待期间可能被清理,结束后刷新最后访问时间
+	s.touch(key)
+
+	return err
+}
+
+// touch 刷新key最后访问时间
+func (s *keyedStore) touch(key string) {
+	actual, ok := s.items.Load(key)
+	if !ok {
+		return
+	}
+
+	actual.(*limiterItem).lastSeen.Store(time.Now().Unix())
 }
 
 // clean 定时清理空闲key
@@ -93,7 +120,8 @@ func (s *keyedStore) clean() {
 
 	interval := time.Minute
 	if s.ttl < interval {
-		interval = s.ttl
+		// 清理周期取TTL的一半,避免空闲key最长存活接近2倍TTL
+		interval = s.ttl / 2
 	}
 	if interval < time.Millisecond {
 		interval = time.Millisecond

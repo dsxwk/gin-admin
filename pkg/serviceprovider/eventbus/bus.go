@@ -5,13 +5,20 @@ import (
 	"log"
 	"runtime"
 	"sync"
+	"sync/atomic"
+	"time"
 )
 
-const defaultQueueSize = 1024
+const (
+	defaultQueueSize = 1024
+	// defaultEnqueueWait 队列满时等待空闲槽位的最长时间
+	defaultEnqueueWait = 100 * time.Millisecond
+)
 
 type config struct {
 	workers      int
 	queueSize    int
+	enqueueWait  time.Duration
 	panicHandler PanicHandler
 }
 
@@ -39,6 +46,17 @@ func WithQueueSize(size int) Option {
 		if size > 0 {
 			cfg.queueSize = size
 		}
+	}
+}
+
+// WithEnqueueWait 设置队列满时等待空闲槽位的最长时间,0为立即丢弃
+func WithEnqueueWait(wait time.Duration) Option {
+	return func(cfg *config) {
+		if wait < 0 {
+			wait = 0
+		}
+
+		cfg.enqueueWait = wait
 	}
 }
 
@@ -87,11 +105,22 @@ type Bus struct {
 	nextID       uint64
 	panicHandler PanicHandler
 
-	queue     chan job
-	done      chan struct{}
-	stopped   chan struct{}
-	closeOnce sync.Once
-	wg        sync.WaitGroup
+	queue       chan job
+	enqueueWait time.Duration
+	dropped     atomic.Uint64
+	mismatched  atomic.Uint64
+	done        chan struct{}
+	stopped     chan struct{}
+	closeOnce   sync.Once
+	wg          sync.WaitGroup
+}
+
+// Stats 事件总线运行统计
+type Stats struct {
+	Queue      int    // 当前队列长度
+	Capacity   int    // 队列容量
+	Dropped    uint64 // 队列满丢弃的事件数
+	Mismatched uint64 // 事件类型不匹配次数
 }
 
 var (
@@ -111,8 +140,9 @@ func Default() *Bus {
 // NewBus 创建事件总线
 func NewBus(options ...Option) *Bus {
 	cfg := config{
-		workers:   max(runtime.GOMAXPROCS(0), 1),
-		queueSize: defaultQueueSize,
+		workers:     max(runtime.GOMAXPROCS(0), 1),
+		queueSize:   defaultQueueSize,
+		enqueueWait: defaultEnqueueWait,
 		panicHandler: func(topic string, event any, recovered any) {
 			log.Printf("eventbus handler panic: topic=%s event=%T panic=%v", topic, event, recovered)
 		},
@@ -128,13 +158,14 @@ func NewBus(options ...Option) *Bus {
 		subscribers:  make(map[string][]*subscriber),
 		panicHandler: cfg.panicHandler,
 		queue:        make(chan job, cfg.queueSize),
+		enqueueWait:  cfg.enqueueWait,
 		done:         make(chan struct{}),
 		stopped:      make(chan struct{}),
 	}
 
-	bus.wg.Add(cfg.workers)
 	for index := 0; index < cfg.workers; index++ {
-		go bus.worker()
+		// WaitGroup.Go 内部负责Done,worker内不要再调用wg.Done
+		bus.wg.Go(bus.worker)
 	}
 
 	return bus
@@ -162,6 +193,7 @@ func (b *Bus) subscribe[T any](topic string, handler Handler[T], async bool) *Su
 		handle: func(ctx context.Context, data any) {
 			event, ok := data.(T)
 			if !ok {
+				b.reportMismatch(topic, data)
 				return
 			}
 
@@ -220,15 +252,14 @@ func (b *Bus) Publish(ctx context.Context, topic string, event any) {
 	}
 
 	for _, item := range b.subscribersFor(topic) {
-		if ctx.Err() != nil {
-			return
+		// 异步订阅与发布方context解耦,只受队列容量限制
+		if item.async {
+			b.enqueue(ctx, item, event)
+			continue
 		}
 
-		if item.async {
-			if !b.enqueue(ctx, item, event) {
-				return
-			}
-			continue
+		if ctx.Err() != nil {
+			return
 		}
 
 		b.handle(ctx, item, event)
@@ -243,16 +274,32 @@ func (b *Bus) enqueue(ctx context.Context, item *subscriber, event any) bool {
 	default:
 	}
 
-	select {
-	case b.queue <- job{
-		ctx:        ctx,
+	// 异步任务剥离取消信号但保留value,request结束后仍能执行
+	task := job{
+		ctx:        context.WithoutCancel(ctx),
 		subscriber: item,
 		event:      event,
-	}:
+	}
+
+	select {
+	case b.queue <- task:
+		return true
+	default:
+	}
+
+	// 队列已满,短暂等待空闲槽位,超时丢弃避免拖垮发布方
+	timer := time.NewTimer(b.enqueueWait)
+	defer timer.Stop()
+
+	select {
+	case b.queue <- task:
 		return true
 	case <-ctx.Done():
 		return false
 	case <-b.done:
+		return false
+	case <-timer.C:
+		b.reportDrop(item.topic, event)
 		return false
 	}
 }
@@ -267,8 +314,6 @@ func (b *Bus) subscribersFor(topic string) []*subscriber {
 
 // worker 消费异步任务
 func (b *Bus) worker() {
-	defer b.wg.Done()
-
 	for {
 		select {
 		case item := <-b.queue:
@@ -323,6 +368,26 @@ func (b *Bus) reportPanic(topic string, event any, recovered any) {
 	b.panicHandler(topic, event, recovered)
 }
 
+// reportDrop 上报队列满丢弃事件
+func (b *Bus) reportDrop(topic string, event any) {
+	if b == nil {
+		return
+	}
+
+	b.dropped.Add(1)
+	log.Printf("eventbus queue full, event dropped: topic=%s event=%T", topic, event)
+}
+
+// reportMismatch 上报事件类型不匹配
+func (b *Bus) reportMismatch(topic string, event any) {
+	if b == nil {
+		return
+	}
+
+	b.mismatched.Add(1)
+	log.Printf("eventbus event type mismatch: topic=%s event=%T", topic, event)
+}
+
 // Count 获取指定主题的订阅数量
 func (b *Bus) Count(topic string) int {
 	if b == nil {
@@ -333,6 +398,20 @@ func (b *Bus) Count(topic string) int {
 	defer b.mu.RUnlock()
 
 	return len(b.subscribers[topic])
+}
+
+// Stats 获取事件总线运行统计
+func (b *Bus) Stats() Stats {
+	if b == nil {
+		return Stats{}
+	}
+
+	return Stats{
+		Queue:      len(b.queue),
+		Capacity:   cap(b.queue),
+		Dropped:    b.dropped.Load(),
+		Mismatched: b.mismatched.Load(),
+	}
 }
 
 // Close 关闭事件总线并等待异步任务完成

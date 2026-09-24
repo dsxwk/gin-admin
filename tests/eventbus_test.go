@@ -109,6 +109,107 @@ func TestBusPublishWithCanceledContext(t *testing.T) {
 	}
 }
 
+// 异步事件不受发布方context取消影响
+func TestBusAsyncSurvivesContextCancel(t *testing.T) {
+	bus := eventbus.NewBus(
+		eventbus.WithWorkers(1),
+		eventbus.WithQueueSize(8),
+	)
+	t.Cleanup(func() { _ = bus.Close(context.Background()) })
+
+	traceID := "test-bus-async-cancel"
+	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), ctxkey.TraceIDKey, traceID))
+
+	done := make(chan struct{})
+	topic := "test:bus:async-cancel"
+	subscription := bus.SubscribeAsync(topic, func(handlerCtx context.Context, _ int) {
+		if handlerCtx.Err() != nil {
+			t.Error("expected handler context not canceled")
+		}
+		if value, _ := handlerCtx.Value(ctxkey.TraceIDKey).(string); value != traceID {
+			t.Errorf("expected traceID %s, got %s", traceID, value)
+		}
+		close(done)
+	})
+	defer subscription.Unsubscribe()
+
+	bus.Publish(ctx, topic, 1)
+	cancel()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("expected async handler run after context canceled")
+	}
+}
+
+// 队列满丢弃事件且不阻塞发布方
+func TestBusQueueFullDrops(t *testing.T) {
+	bus := eventbus.NewBus(
+		eventbus.WithWorkers(1),
+		eventbus.WithQueueSize(1),
+		eventbus.WithEnqueueWait(10*time.Millisecond),
+	)
+	t.Cleanup(func() { _ = bus.Close(context.Background()) })
+
+	started := make(chan struct{}, 8)
+	release := make(chan struct{})
+	topic := "test:bus:queue-full"
+	subscription := bus.SubscribeAsync(topic, func(_ context.Context, _ int) {
+		started <- struct{}{}
+		<-release
+	})
+	defer subscription.Unsubscribe()
+
+	bus.Publish(context.Background(), topic, 1)
+
+	select {
+	case <-started:
+	case <-time.After(time.Second):
+		t.Fatal("expected handler started")
+	}
+
+	// worker 被占用,队列已被第二个事件填满
+	bus.Publish(context.Background(), topic, 2)
+
+	begin := time.Now()
+	bus.Publish(context.Background(), topic, 3)
+	if elapsed := time.Since(begin); elapsed > time.Second {
+		t.Fatalf("expected publish not blocked, elapsed %s", elapsed)
+	}
+
+	if dropped := bus.Stats().Dropped; dropped != 1 {
+		t.Fatalf("expected 1 dropped event, got %d", dropped)
+	}
+
+	close(release)
+}
+
+// 事件类型不匹配计数
+func TestBusTypeMismatchCounted(t *testing.T) {
+	bus := eventbus.NewBus(
+		eventbus.WithWorkers(1),
+		eventbus.WithQueueSize(4),
+	)
+	t.Cleanup(func() { _ = bus.Close(context.Background()) })
+
+	topic := "test:bus:mismatch"
+	subscription := bus.SubscribeAsync(topic, func(_ context.Context, _ int) {})
+	defer subscription.Unsubscribe()
+
+	bus.Publish(context.Background(), topic, "not-int")
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		if bus.Stats().Mismatched == 1 {
+			return
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+
+	t.Fatalf("expected 1 mismatched event, got %d", bus.Stats().Mismatched)
+}
+
 type eventListTestEvent struct{}
 
 func (e eventListTestEvent) Name() string {
