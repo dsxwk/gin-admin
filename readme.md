@@ -2023,6 +2023,7 @@ func NewRouters(router *gin.Engine) {
 > `Memory cache`, `Redis cache`, and `Disk cache`. It can use global cache or any cache separately. The global cache only
 > integrates the common methods of `Set`, `Get`, `Delete`, and `Expire` by default. If you need to use more, you can use
 > them separately, or you can integrate them yourself.
+> Cache values are stored as JSON. The `Redis cache` and `Disk cache` drivers read and write JSON only.
 
 ## Global Cache
 
@@ -2137,6 +2138,39 @@ func (s *TestController) Test() {
 	// ... Other
 }
 ```
+
+## Redis Distributed Lock
+
+> `facade.Cache("redis").Lock` generates a unique token internally, starts a watchdog, and renews the lock until
+> `Release`. Use `errors.Is` with the cache sentinel errors.
+
+```go
+package service
+
+import (
+    "context"
+    "errors"
+    "gin/app/facade"
+    "gin/pkg/serviceprovider/cache"
+    "time"
+)
+
+func SettleCoupon(ctx context.Context) error {
+    lock, err := facade.Cache("redis").Lock(ctx, "coupon:settle", 30*time.Second)
+    if errors.Is(err, cache.ErrLockExists) {
+        return nil
+    }
+    if err != nil {
+        return err
+    }
+    defer func() { _ = lock.Release() }()
+
+    // Execute the critical section here.
+    return nil
+}
+```
+
+The lock is still a first line of defense. Settlement, payment, and other critical operations must also be idempotent.
 
 ## Memory Cache
 
@@ -2781,7 +2815,7 @@ Registered Jobs, Job statistics, and pending Redis Jobs can be queried through t
 
 ```go
 jobs := facade.Job().Jobs()
-stats := facade.Job().GetAllJobs()
+stats := facade.Job().List()
 count, err := facade.Job().Count(ctx)
 ```
 

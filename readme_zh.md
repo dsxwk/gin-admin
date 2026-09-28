@@ -2014,6 +2014,7 @@ func NewRouters(router *gin.Engine) {
 
 > 默认使用 `memory` 作为缓存驱动, 支持自定义扩展。默认支持`内存缓存`、`Redis缓存`、`磁盘缓存`三种模式,
 > 可使用全局缓存也可单独使用任意缓存。全局缓存默认只集成了`Set`、`Get`、`Delete`、`Expire`公共方法如需使用更多可以单独使用,你也可以自己集成。
+> 缓存值统一按JSON存储,`Redis`与`磁盘缓存`读写都是JSON。
 
 ## 全局缓存
 
@@ -2127,6 +2128,39 @@ func (s *TestController) Test() {
 	// ... 其他
 }
 ```
+
+## Redis分布式锁
+
+> `facade.Cache("redis").Lock` 会在缓存层内部生成唯一token, 启动看门狗自动续期, 并在 `Release` 时原子释放。
+> 推荐使用 `errors.Is` 判断哨兵错误, 并通过 `LockResult.Release` 释放锁。
+
+```go
+package service
+
+import (
+    "context"
+    "errors"
+    "gin/app/facade"
+    "gin/pkg/serviceprovider/cache"
+    "time"
+)
+
+func SettleCoupon(ctx context.Context) error {
+    lock, err := facade.Cache("redis").Lock(ctx, "coupon:settle", 30*time.Second)
+    if errors.Is(err, cache.ErrLockExists) {
+        return nil
+    }
+    if err != nil {
+        return err
+    }
+    defer func() { _ = lock.Release() }()
+
+    // 执行临界区业务
+    return nil
+}
+```
+
+分布式锁只是第一道防线, 结算、扣款等临界区业务仍然需要保证幂等。
 
 ## 内存缓存
 
@@ -2756,7 +2790,7 @@ func (s *TestController) Test(c *gin.Context) {
 
 ```go
 jobs := facade.Job().Jobs()
-stats := facade.Job().GetAllJobs()
+stats := facade.Job().List()
 count, err := facade.Job().Count(ctx)
 ```
 
