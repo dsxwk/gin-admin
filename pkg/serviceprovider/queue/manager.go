@@ -106,7 +106,7 @@ func (m *Manager) Producers() []Producer {
 	if m == nil {
 		return nil
 	}
-	return m.producers.GetAll()
+	return m.producers.All()
 }
 
 // Consumers 获取所有消费者
@@ -114,7 +114,7 @@ func (m *Manager) Consumers() []Consumer {
 	if m == nil {
 		return nil
 	}
-	return m.consumers.GetAll()
+	return m.consumers.All()
 }
 
 // ConsumerNames 获取所有消费者名称
@@ -122,7 +122,7 @@ func (m *Manager) ConsumerNames() []string {
 	if m == nil {
 		return nil
 	}
-	return m.consumers.GetNames()
+	return m.consumers.Names()
 }
 
 // RunningConsumers 获取运行中的消费者

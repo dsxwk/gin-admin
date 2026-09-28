@@ -127,7 +127,7 @@ func (r *Registry[T]) Get(name string) (T, bool) {
 	return item, exists
 }
 
-func (r *Registry[T]) GetAll() []T {
+func (r *Registry[T]) All() []T {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	items := make([]T, 0, len(r.items))
@@ -137,7 +137,7 @@ func (r *Registry[T]) GetAll() []T {
 	return items
 }
 
-func (r *Registry[T]) GetNames() []string {
+func (r *Registry[T]) Names() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	names := make([]string, 0, len(r.items))
