@@ -69,32 +69,32 @@ func TestUserEnum(t *testing.T) {
 		// 测试Get方法
 		list := status.Get()
 		assert.Len(t, list, 2)
-		assert.Equal(t, []base.Item[string]{
-			{"enable", "启用"},
-			{"disable", "停用"},
+		assert.Equal(t, []base.Item[int64]{
+			{1, "启用"},
+			{2, "停用"},
 		}, list)
 
 		// 测试Desc方法
-		assert.Equal(t, "启用", status.Desc("enable"))
-		assert.Equal(t, "停用", status.Desc("disable"))
-		assert.Equal(t, "", status.Desc("unknown"))
+		assert.Equal(t, "启用", status.Desc(1))
+		assert.Equal(t, "停用", status.Desc(2))
+		assert.Equal(t, "", status.Desc(0))
 
 		// 测试Value方法
-		assert.Equal(t, "enable", status.Value("启用"))
-		assert.Equal(t, "disable", status.Value("停用"))
-		assert.Equal(t, "", status.Value("未知"))
+		assert.Equal(t, int64(1), status.Value("启用"))
+		assert.Equal(t, int64(2), status.Value("停用"))
+		assert.Equal(t, int64(0), status.Value("未知"))
 
 		// 测试Map方法
 		m := status.Map()
-		assert.Equal(t, map[string]string{
-			"enable":  "启用",
-			"disable": "停用",
+		assert.Equal(t, map[int64]string{
+			1: "启用",
+			2: "停用",
 		}, m)
 
 		// 测试ContainsValue
-		assert.True(t, status.ContainsValue("enable"))
-		assert.True(t, status.ContainsValue("disable"))
-		assert.False(t, status.ContainsValue("unknown"))
+		assert.True(t, status.ContainsValue(1))
+		assert.True(t, status.ContainsValue(2))
+		assert.False(t, status.ContainsValue(0))
 
 		// 测试ContainsDesc
 		assert.True(t, status.ContainsDesc("启用"))
@@ -112,8 +112,8 @@ func TestUserEnum(t *testing.T) {
 		assert.Equal(t, 2, enum.UserGenderFemale)
 
 		// 测试状态常量
-		assert.Equal(t, "enable", enum.UserStatusEnabled)
-		assert.Equal(t, "disable", enum.UserStatusDisabled)
+		assert.Equal(t, int64(1), enum.UserStatusEnabled)
+		assert.Equal(t, int64(2), enum.UserStatusDisabled)
 	})
 }
 
@@ -182,7 +182,7 @@ func BenchmarkEnum(b *testing.B) {
 
 	b.Run("Desc", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			_ = status.Desc("enable")
+			_ = status.Desc(1)
 		}
 	})
 
@@ -208,15 +208,15 @@ func ExampleUserEnum() {
 	fmt.Printf("状态列表: %+v\n", statusList)
 
 	// 获取状态描述
-	desc := userEnum.Status().Desc("enable")
-	fmt.Printf("enable的描述: %s\n", desc) // 去掉空格
+	desc := userEnum.Status().Desc(1)
+	fmt.Printf("1的描述: %s\n", desc) // 去掉空格
 
 	// 获取状态值
 	value := userEnum.Status().Value("启用")
 	fmt.Printf("启用的值: %s\n", value) // 去掉空格
 
 	// Output:
-	// 状态列表: [{Value:enable Desc:启用} {Value:disable Desc:停用}]
-	// enable的描述: 启用
-	// 启用的值: enable
+	// 状态列表: [{Value:1 Desc:启用} {Value:2 Desc:停用}]
+	// 1的描述: 启用
+	// 启用的值: 1
 }

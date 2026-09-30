@@ -168,6 +168,8 @@ func (b *BaseCommand) GetMakeFile(file string, _make string) string {
 	switch _make {
 	case "router":
 		file = filepath.Join("router", file)
+	case "ws":
+		file = filepath.Join("websocket", file)
 	default:
 		file = filepath.Join("app", _make, file)
 	}
@@ -197,7 +199,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 
 	switch _make {
 	case "model-old":
-	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "grpc_request", "grpc_service", "grpc_proto":
+	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "ws", "grpc_request", "grpc_service", "grpc_proto":
 		templateFile = filepath.Join(pkg.RootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")
