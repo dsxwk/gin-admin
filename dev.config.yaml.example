@@ -149,6 +149,23 @@ mcp:
     enabled: false # 是否启用认证
     token: "" # 认证token
 
+# WebSocket服务配置
+ws:
+  enabled: true # 是否启用WebSocket服务
+  path: /ws # WebSocket升级地址
+  shards: 64 # 连接分片数量
+  max-connections: 100000 # 最大连接数
+  write-queue-size: 32 # 单连接发送队列长度
+  read-buffer-size: 2048 # 读缓冲区大小
+  write-buffer-size: 2048 # 写缓冲区大小
+  read-limit: 1048576 # 单条消息最大字节数
+  write-wait: 10s # 写入超时
+  pong-wait: 60s # Pong等待时间
+  ping-interval: 25s # Ping发送间隔
+  close-wait: 5s # 关闭等待时间
+  allowed-origins: ["http://127.0.0.1:3000"] # 允许的Origin,空为同源
+  compression: false # 是否启用压缩
+
 # AI Agent
 agent:
   enabled: true # 是否启用Agent

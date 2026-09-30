@@ -22,5 +22,6 @@ func All() []route.Router {
 		&SystemConfigRouter{},
 		&UserRouter{},
 		&McpRouter{},
+		&WsRouter{},
 	}
 }

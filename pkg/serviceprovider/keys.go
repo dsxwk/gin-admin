@@ -27,6 +27,8 @@ const (
 	ServiceLang = "lang"
 	// ServiceMCP MCP服务
 	ServiceMCP = "mcp"
+	// ServiceWS WebSocket服务
+	ServiceWS = "ws"
 	// ServiceRequest 请求服务
 	ServiceRequest = "request"
 	// ServiceRateLimit 限流服务

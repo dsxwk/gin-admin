@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gin/app/errcode"
 	"gin/common/base"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -55,6 +56,12 @@ func (w *timeoutWriter) WriteString(s string) (int, error) {
 // Handle 超时中间件
 func (s Timeout) Handle(timeout time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// WebSocket升级后连接长期存在,不能受HTTP超时控制
+		if strings.EqualFold(c.GetHeader("Upgrade"), "websocket") {
+			c.Next()
+			return
+		}
+
 		// 如果标记了跳过,直接放行
 		if _, ok := c.Get(SkipTimeoutKey); ok {
 			c.Next()

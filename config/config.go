@@ -25,6 +25,7 @@ type Config struct {
 	Queue          Queue          `mapstructure:"queue" yaml:"queue"`
 	OperatorRecord OperatorRecord `mapstructure:"operator-record" yaml:"operator-record"`
 	Mcp            Mcp            `mapstructure:"mcp" yaml:"mcp"`
+	Ws             Ws             `mapstructure:"ws" yaml:"ws"`
 	Agent          Agent          `mapstructure:"agent" yaml:"agent"`
 	Grpc           Grpc           `mapstructure:"grpc" yaml:"grpc"`
 	Es             Es             `mapstructure:"es" yaml:"es"`

@@ -21,6 +21,7 @@ func All() []serviceprovider.ServiceProvider {
 		&JobProvider{},
 		&LangProvider{},
 		&McpProvider{},
+		&WsProvider{},
 		&RateLimitProvider{},
 	}
 }

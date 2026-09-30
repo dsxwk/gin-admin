@@ -15,6 +15,7 @@ require (
 	github.com/godoes/gorm-oracle v1.6.20
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gookit/validate v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/jedib0t/go-pretty/v6 v6.8.3
 	github.com/mattn/go-runewidth v0.0.30
 	github.com/mojocn/base64Captcha v1.3.8

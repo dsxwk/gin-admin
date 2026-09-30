@@ -16,6 +16,7 @@ import (
 	"gin/pkg/serviceprovider/queue"
 	"gin/pkg/serviceprovider/ratelimit"
 	"gin/pkg/serviceprovider/request"
+	"gin/pkg/serviceprovider/ws"
 	"sync/atomic"
 )
 
@@ -41,6 +42,7 @@ type Container struct {
 	job       atomic.Pointer[job.Manager]
 	lang      atomic.Pointer[lang.Service]
 	mcp       atomic.Pointer[mcp.Handler]
+	ws        atomic.Pointer[ws.Manager]
 	request   atomic.Pointer[request.Client]
 	rateLimit atomic.Pointer[ratelimit.Manager]
 }
@@ -187,6 +189,16 @@ func (c *Container) SetMCP(value *mcp.Handler) {
 // MCP 获取MCP服务
 func (c *Container) MCP() *mcp.Handler {
 	return c.mcp.Load()
+}
+
+// SetWS 设置WebSocket服务
+func (c *Container) SetWS(value *ws.Manager) {
+	c.ws.Store(value)
+}
+
+// WS 获取WebSocket服务
+func (c *Container) WS() *ws.Manager {
+	return c.ws.Load()
 }
 
 // SetRequest 设置请求服务
