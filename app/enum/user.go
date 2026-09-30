@@ -11,8 +11,8 @@ const (
 )
 
 const (
-	UserStatusEnabled  = "enable"  // 启用
-	UserStatusDisabled = "disable" // 停用
+	UserStatusEnabled  int64 = 1 // 启用
+	UserStatusDisabled int64 = 2 // 停用
 )
 
 // UserEnum 用户枚举
@@ -28,9 +28,9 @@ func (s *UserEnum) Gender() *base.Enum[int] {
 }
 
 // Status 状态
-func (s *UserEnum) Status() *base.Enum[string] {
+func (s *UserEnum) Status() *base.Enum[int64] {
 	return base.NewEnum(
-		base.Item[string]{Value: UserStatusEnabled, Desc: "启用"},
-		base.Item[string]{Value: UserStatusDisabled, Desc: "停用"},
+		base.Item[int64]{Value: UserStatusEnabled, Desc: "启用"},
+		base.Item[int64]{Value: UserStatusDisabled, Desc: "停用"},
 	)
 }
