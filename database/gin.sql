@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 10/09/2026 15:07:14
+ Date: 30/09/2026 13:34:27
 */
 
 SET NAMES utf8mb4;
@@ -72,7 +72,7 @@ INSERT INTO `agent_message` VALUES (34, 6, 'user', '你能查询天气吗', '', 
 INSERT INTO `agent_message` VALUES (35, 6, 'assistant', '抱歉,我当前只能处理以下范围:查询操作日志统计、查询系统配置项、根据姓名或用户名搜索系统用户、执行CLI命令、查询部门列表或指定上级的子部门、根据字典类型查询字典项', '', '', NULL, 0, 2064.00, '2026-08-13 11:07:53', '2026-08-13 11:07:53', NULL);
 INSERT INTO `agent_message` VALUES (39, 8, 'user', '给test角色新增ai助手权限', '', '', NULL, 0, 0.00, '2026-08-13 14:06:43', '2026-08-13 14:06:43', NULL);
 INSERT INTO `agent_message` VALUES (40, 8, 'assistant', '', 'execute_cli', 'call_00_jlWKIiR7BCMuBiJ5N2YC3616', '{\"command\": \"route:list\"}', 0, 3208.00, '2026-08-13 14:06:46', '2026-08-13 14:06:46', NULL);
-INSERT INTO `agent_message` VALUES (41, 8, 'tool', '{\"args\":{},\"command\":\"route:list\",\"message\":\"命令 route:list 执行完成\",\"output\":\"Method   Path                                Handler                                 \\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/agent/ask                  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).Ask\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/agent/history              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).History\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/agent/sessions             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).Sessions\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/article                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/article                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).List\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Update\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/captcha                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).CheckCaptcha\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/captcha                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).GetCaptcha\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/config-category            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/config-category            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).List\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/cards            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).Cards\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/statistics       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).Statistics\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/system-resource  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).SystemResource\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/department                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/department                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).List\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dict                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/dict                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Create\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Detail\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/import-records             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ImportRecordsController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/import-records/:id         \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ImportRecordsController).Delete\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/login                      \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).Login\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/menu                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/menu                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Create\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/operator-log               \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/operator-log/:id           \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/operator-log/:id           \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).Detail\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/operator-log/batch-delete  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).BatchDelete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/permission                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*PermissionController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/refresh-token              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).RefreshToken\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/role                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role/:id/menu              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).RoleMenu\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Create\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).UpdateConfig\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Detail\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/test                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).Test\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/user                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/user/:id/password          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Password\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user/batch-delete          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).BatchDelete\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user/import                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Import\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/ping                              \\u001b[0m \\u001b[37mgin/router.NewRouters                  \\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/public/*filepath                  \\u001b[0m \\u001b[37mgithub.com/gin-gonic/gin.(*RouterGroup).createStaticHandler\\u001b[0m\\n\\u001b[37mHEAD    \\u001b[0m \\u001b[36m/public/*filepath                  \\u001b[0m \\u001b[37mgithub.com/gin-gonic/gin.(*RouterGroup).createStaticHandler\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/swagger/*any                      \\u001b[0m \\u001b[37mgithub.com/swaggo/gin-swagger.CustomWrapHandler\\u001b[0m\\n\"}', 'execute_cli', 'call_00_jlWKIiR7BCMuBiJ5N2YC3616', NULL, 0, 0.00, '2026-08-13 14:06:46', '2026-08-13 14:06:46', NULL);
+INSERT INTO `agent_message` VALUES (41, 8, 'tool', '{\"args\":{},\"command\":\"route:list\",\"message\":\"命令 route:list 执行完成\",\"output\":\"Method   Path                                Handler                                 \\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/agent/ask                  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).Ask\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/agent/history              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).History\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/agent/sessions             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*AgentController).Sessions\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/article                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/article                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).List\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/article/:id                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ArticleController).Update\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/captcha                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).CheckCaptcha\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/captcha                    \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).GetCaptcha\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/config-category            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/config-category            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).List\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/config-category/:id        \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ConfigCategoryController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/cards            \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).Cards\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/statistics       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).Statistics\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dashboard/system-resource  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DashboardController).SystemResource\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/department                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/department                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).List\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Detail\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/department/:id             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DepartmentController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dict                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/dict                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Create\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/dict/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*DictController).Detail\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/import-records             \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ImportRecordsController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/import-records/:id         \\u001b[0m \\u001b[37mgin/app/controller/v1.(*ImportRecordsController).Delete\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/login                      \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).Login\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/menu                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/menu                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Create\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/menu/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/operator-log               \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/operator-log/:id           \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/operator-log/:id           \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).Detail\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/operator-log/batch-delete  \\u001b[0m \\u001b[37mgin/app/controller/v1.(*OperatorLogController).BatchDelete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/permission                 \\u001b[0m \\u001b[37mgin/app/controller/v1.(*PermissionController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/refresh-token              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).RefreshToken\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/role                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/role/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*RoleController).Delete\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/role/:id/menu              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*MenuController).RoleMenu\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Create\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).UpdateConfig\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/system-config              \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).List\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Update\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/system-config/:id          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*SystemConfigController).Detail\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/test                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*LoginController).Test\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/user                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).List\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user                       \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Create\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Detail\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Update\\u001b[0m\\n\\u001b[31mDELETE  \\u001b[0m \\u001b[36m/api/v1/user/:id                   \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Delete\\u001b[0m\\n\\u001b[34mPUT     \\u001b[0m \\u001b[36m/api/v1/user/:id/password          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Password\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user/batch-delete          \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).BatchDelete\\u001b[0m\\n\\u001b[33mPOST    \\u001b[0m \\u001b[36m/api/v1/user/import                \\u001b[0m \\u001b[37mgin/app/controller/v1.(*UserController).Import\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/ping                              \\u001b[0m \\u001b[37mgin/router.LoadRouters                  \\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/public/*filepath                  \\u001b[0m \\u001b[37mgithub.com/gin-gonic/gin.(*RouterGroup).createStaticHandler\\u001b[0m\\n\\u001b[37mHEAD    \\u001b[0m \\u001b[36m/public/*filepath                  \\u001b[0m \\u001b[37mgithub.com/gin-gonic/gin.(*RouterGroup).createStaticHandler\\u001b[0m\\n\\u001b[32mGET     \\u001b[0m \\u001b[36m/swagger/*any                      \\u001b[0m \\u001b[37mgithub.com/swaggo/gin-swagger.CustomWrapHandler\\u001b[0m\\n\"}', 'execute_cli', 'call_00_jlWKIiR7BCMuBiJ5N2YC3616', NULL, 0, 0.00, '2026-08-13 14:06:46', '2026-08-13 14:06:46', NULL);
 INSERT INTO `agent_message` VALUES (42, 8, 'assistant', '我已找到与\"AI助手\"相关的路由（AgentController 相关）。现在为 test 角色授予 AI 助手相关权限。', 'set_role_permissions', 'call_00_15ooOP4khTaevZYBSken9981', '{\"role\": \"test\", \"permissions\": [\"POST:/api/v1/agent/ask\", \"GET:/api/v1/agent/history\", \"GET:/api/v1/agent/sessions\"]}', 0, 3684.00, '2026-08-13 14:06:50', '2026-08-13 14:06:50', NULL);
 INSERT INTO `agent_message` VALUES (43, 8, 'tool', '{\"granted\":3,\"message\":\"权限设置完成\",\"permissions\":[\"POST:/api/v1/agent/ask\",\"GET:/api/v1/agent/history\",\"GET:/api/v1/agent/sessions\"],\"role\":\"test\"}', 'set_role_permissions', 'call_00_15ooOP4khTaevZYBSken9981', NULL, 0, 0.00, '2026-08-13 14:06:50', '2026-08-13 14:06:50', NULL);
 INSERT INTO `agent_message` VALUES (44, 8, 'assistant', '已为 **test** 角色成功授予 AI 助手相关权限，共 3 项：\n\n| 方法 | 路径 | 说明 |\n|------|------|------|\n| POST | /api/v1/agent/ask | AI 助手问答 |\n| GET | /api/v1/agent/history | AI 助手历史记录 |\n| GET | /api/v1/agent/sessions | AI 助手会话列表 |', '', '', NULL, 0, 1794.00, '2026-08-13 14:06:52', '2026-08-13 14:06:52', NULL);
@@ -123,7 +123,7 @@ CREATE TABLE `article`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of article
@@ -187,7 +187,7 @@ CREATE TABLE `department`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE,
   INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of department
@@ -288,12 +288,12 @@ CREATE TABLE `menu`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 72 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 73 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
-INSERT INTO `menu` VALUES (1, 0, 1, 'home', 1, 1, '2025-05-23 15:37:03', '2026-08-04 17:15:38', NULL);
+INSERT INTO `menu` VALUES (1, 0, 1, 'home', 1, 0, '2025-05-23 15:37:03', '2026-09-30 09:04:35', NULL);
 INSERT INTO `menu` VALUES (2, 0, 1, 'system', 1, 2, '2025-05-23 15:39:37', '2025-05-27 16:49:52', NULL);
 INSERT INTO `menu` VALUES (3, 2, 1, 'systemMenu', 1, 3, '2025-05-23 15:41:38', '2025-06-11 17:17:14', NULL);
 INSERT INTO `menu` VALUES (4, 2, 1, 'systemUser', 1, 4, '2025-05-23 23:26:38', '2025-06-11 17:17:29', NULL);
@@ -342,7 +342,10 @@ INSERT INTO `menu` VALUES (68, 67, 2, 'sys.dept.add', 1, 0, '2026-08-06 15:55:23
 INSERT INTO `menu` VALUES (69, 67, 2, 'sys.dept.edit', 1, 0, '2026-08-06 15:58:32', '2026-08-06 16:01:58', NULL);
 INSERT INTO `menu` VALUES (70, 67, 2, 'sys.dept.addChildren', 1, 0, '2026-08-06 16:03:34', '2026-08-06 16:03:34', NULL);
 INSERT INTO `menu` VALUES (71, 67, 2, 'sys.dept.del', 1, 0, '2026-08-06 16:04:07', '2026-08-06 16:04:07', NULL);
-INSERT INTO `menu` VALUES (72, 0, 1, 'agent', 1, 0, '2026-08-13 10:38:41', '2026-08-13 10:38:41', NULL);
+INSERT INTO `menu` VALUES (72, 0, 1, 'agent', 1, 1, '2026-08-13 10:38:41', '2026-09-30 09:04:24', NULL);
+INSERT INTO `menu` VALUES (73, 0, 1, 'notification', 1, 1, '2026-09-30 09:25:41', '2026-09-30 09:25:58', NULL);
+INSERT INTO `menu` VALUES (74, 73, 2, 'notification.send', 1, 0, '2026-09-30 10:44:21', '2026-09-30 10:49:06', NULL);
+INSERT INTO `menu` VALUES (75, 73, 2, 'notification.revoke', 1, 0, '2026-09-30 10:46:10', '2026-09-30 10:48:42', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -365,7 +368,7 @@ CREATE TABLE `menu_actions`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_actions
@@ -406,6 +409,8 @@ INSERT INTO `menu_actions` VALUES (48, 68, 1, 'btn', 'primary', 'default', 2, '�
 INSERT INTO `menu_actions` VALUES (50, 69, 2, 'btn', 'primary', 'small', 2, '编辑', '', 'sys.dept.edit', 2, '2026-08-06 16:01:58', '2026-08-06 16:01:58', NULL);
 INSERT INTO `menu_actions` VALUES (51, 70, 2, 'btn', 'primary', 'small', 2, '新增子集', '', 'sys.dept.addChildren', 2, '2026-08-06 16:03:34', '2026-08-06 16:03:34', NULL);
 INSERT INTO `menu_actions` VALUES (52, 71, 2, 'btn', 'danger', 'small', 2, '删除', '', 'sys.dept.del', 2, '2026-08-06 16:04:07', '2026-08-06 16:04:07', NULL);
+INSERT INTO `menu_actions` VALUES (56, 75, 2, 'btn', 'warning', 'small', 1, '撤回', '', 'notification.revoke', 2, '2026-09-30 10:48:42', '2026-09-30 10:48:42', NULL);
+INSERT INTO `menu_actions` VALUES (57, 74, 1, 'btn', 'primary', 'default', 2, '发送通知', '', 'notification.send', 2, '2026-09-30 10:49:06', '2026-09-30 10:49:06', NULL);
 
 -- ----------------------------
 -- Table structure for menu_meta
@@ -430,7 +435,7 @@ CREATE TABLE `menu_meta`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 32 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_meta
@@ -446,9 +451,10 @@ INSERT INTO `menu_meta` VALUES (9, 21, '配置列表', '', 'iconfont icon-quanju
 INSERT INTO `menu_meta` VALUES (10, 22, '系统配置', '', 'iconfont icon--chaifenhang', '/system/config/setting', '', 'system/config/setting', 2, 1, 2, '', 2, '2026-07-08 15:54:52', '2026-07-15 16:08:00', NULL);
 INSERT INTO `menu_meta` VALUES (11, 23, '配置分类', '', 'iconfont icon--chaifenlie', '/system/config-category/index', '', 'system/config/category/index', 2, 1, 2, '', 2, '2026-07-09 10:56:40', '2026-07-09 10:56:40', NULL);
 INSERT INTO `menu_meta` VALUES (24, 63, '操作日志', '', 'ele-AlarmClock', '/operator-log', '', 'operator_log/index', 2, 1, 2, '', 2, '2026-07-27 14:22:13', '2026-07-27 14:22:13', NULL);
-INSERT INTO `menu_meta` VALUES (27, 1, '首页', 'message.router.home', 'iconfont icon-shouye', '/home', '', 'home/index', 2, 1, 1, '', 2, '2026-08-04 17:15:38', '2026-08-04 17:15:38', NULL);
 INSERT INTO `menu_meta` VALUES (28, 67, '部门管理', '', 'ele-Avatar', '/system/department', '', 'system/department/index', 2, 1, 2, '', 2, '2026-08-06 15:45:45', '2026-08-06 15:45:45', NULL);
-INSERT INTO `menu_meta` VALUES (29, 72, 'AI助手', '', 'fa fa-window-restore', '/assistant', '', 'agent/index', 2, 1, 2, '', 2, '2026-08-13 10:38:41', '2026-08-13 10:38:41', NULL);
+INSERT INTO `menu_meta` VALUES (30, 72, 'AI助手', '', 'fa fa-window-restore', '/assistant', '', 'agent/index', 2, 1, 2, '', 2, '2026-09-30 09:04:24', '2026-09-30 09:04:24', NULL);
+INSERT INTO `menu_meta` VALUES (31, 1, '首页', 'message.router.home', 'iconfont icon-shouye', '/home', '', 'home/index', 2, 1, 1, '', 2, '2026-09-30 09:04:35', '2026-09-30 09:04:35', NULL);
+INSERT INTO `menu_meta` VALUES (33, 73, '通知管理', 'message.router.systemNotification', 'iconfont icon-tongzhi1', '/notification', '', 'notification/index', 2, 1, 2, '', 2, '2026-09-30 09:25:58', '2026-09-30 09:25:58', NULL);
 
 -- ----------------------------
 -- Table structure for migrations
@@ -466,6 +472,29 @@ CREATE TABLE `migrations`  (
 -- Records of migrations
 -- ----------------------------
 INSERT INTO `migrations` VALUES (1, '20251212_create_user_table', '2025-12-12 17:04:27.313');
+
+-- ----------------------------
+-- Table structure for notification_users
+-- ----------------------------
+DROP TABLE IF EXISTS `notification_users`;
+CREATE TABLE `notification_users`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `notification_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '系统通知id',
+  `to_user_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '接收用户id',
+  `is_read` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否已读 1=是 2=否',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_to_user_id`(`to_user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统通知用户表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of notification_users
+-- ----------------------------
+INSERT INTO `notification_users` VALUES (1, 1, 10, 1, '2026-09-30 10:02:47', '2026-09-30 10:03:08', NULL);
+INSERT INTO `notification_users` VALUES (2, 2, 1, 1, '2026-09-30 10:51:55', '2026-09-30 10:52:11', NULL);
+INSERT INTO `notification_users` VALUES (3, 3, 1, 1, '2026-09-30 10:52:41', '2026-09-30 10:52:56', NULL);
 
 -- ----------------------------
 -- Table structure for operator_log
@@ -490,7 +519,7 @@ CREATE TABLE `operator_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_trace_id`(`trace_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 55 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operator_log
@@ -647,7 +676,7 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 917 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 921 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
@@ -656,9 +685,6 @@ INSERT INTO `role_menus` VALUES (303, 2, 24, 'test', '2026-07-20 14:19:04', '202
 INSERT INTO `role_menus` VALUES (304, 2, 27, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `role_menus` VALUES (305, 2, 2, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `role_menus` VALUES (306, 2, 3, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
-INSERT INTO `role_menus` VALUES (666, 2, 1, 'test', '2026-08-04 17:15:38', '2026-08-04 17:15:38', NULL);
-INSERT INTO `role_menus` VALUES (868, 1, 72, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
-INSERT INTO `role_menus` VALUES (869, 1, 1, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 INSERT INTO `role_menus` VALUES (870, 1, 2, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 INSERT INTO `role_menus` VALUES (871, 1, 67, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 INSERT INTO `role_menus` VALUES (872, 1, 68, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
@@ -707,6 +733,15 @@ INSERT INTO `role_menus` VALUES (914, 1, 63, 'admin', '2026-09-02 14:42:26', '20
 INSERT INTO `role_menus` VALUES (915, 1, 66, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 INSERT INTO `role_menus` VALUES (916, 1, 64, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
 INSERT INTO `role_menus` VALUES (917, 1, 65, 'admin', '2026-09-02 14:42:26', '2026-09-02 14:42:26', NULL);
+INSERT INTO `role_menus` VALUES (918, 1, 72, 'admin', '2026-09-30 09:04:24', '2026-09-30 09:04:24', NULL);
+INSERT INTO `role_menus` VALUES (919, 2, 1, 'test', '2026-09-30 09:04:35', '2026-09-30 09:04:35', NULL);
+INSERT INTO `role_menus` VALUES (920, 1, 1, 'admin', '2026-09-30 09:04:35', '2026-09-30 09:04:35', NULL);
+INSERT INTO `role_menus` VALUES (923, 2, 73, 'test', '2026-09-30 09:25:58', '2026-09-30 09:25:58', NULL);
+INSERT INTO `role_menus` VALUES (924, 1, 73, 'admin', '2026-09-30 09:25:58', '2026-09-30 09:25:58', NULL);
+INSERT INTO `role_menus` VALUES (931, 2, 75, 'test', '2026-09-30 10:48:42', '2026-09-30 10:48:42', NULL);
+INSERT INTO `role_menus` VALUES (932, 1, 75, 'admin', '2026-09-30 10:48:42', '2026-09-30 10:48:42', NULL);
+INSERT INTO `role_menus` VALUES (933, 2, 74, 'test', '2026-09-30 10:49:06', '2026-09-30 10:49:06', NULL);
+INSERT INTO `role_menus` VALUES (934, 1, 74, 'admin', '2026-09-30 10:49:06', '2026-09-30 10:49:06', NULL);
 
 -- ----------------------------
 -- Table structure for role_permissions
@@ -825,7 +860,7 @@ CREATE TABLE `system_config`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `unq_key`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of system_config
@@ -846,6 +881,32 @@ INSERT INTO `system_config` VALUES (13, 'checkbox', '复选框', 'HTML,CSS', 'AJ
 INSERT INTO `system_config` VALUES (14, 'textarea', '文本域', '文本域', '0', 5, 1, '2026-07-15 16:03:49', '2026-07-15 16:03:49', NULL);
 INSERT INTO `system_config` VALUES (15, 'default_head_img', '默认头像', '', '', 6, 1, '2026-07-15 16:03:49', '2026-07-15 16:03:49', NULL);
 INSERT INTO `system_config` VALUES (16, 'seo_description', '描述', '11', '', 5, 3, '2026-07-15 16:03:49', '2026-07-15 16:03:49', NULL);
+
+-- ----------------------------
+-- Table structure for system_notification
+-- ----------------------------
+DROP TABLE IF EXISTS `system_notification`;
+CREATE TABLE `system_notification`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `from_user_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '发送用户id',
+  `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '通知类型 1=用户 2=部门',
+  `is_to_all` tinyint(3) UNSIGNED NOT NULL DEFAULT 2 COMMENT '是否推送所有 1=是 2=否',
+  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '标题',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '内容',
+  `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '状态 1=正常 2=撤回',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_from_user_id`(`from_user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统通知表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of system_notification
+-- ----------------------------
+INSERT INTO `system_notification` VALUES (1, 1, 1, 2, '测试', '测试123123', 1, '2026-09-30 10:02:47', '2026-09-30 10:02:47', NULL);
+INSERT INTO `system_notification` VALUES (2, 10, 1, 2, '测试222', '测试222', 1, '2026-09-30 10:51:55', '2026-09-30 10:51:55', NULL);
+INSERT INTO `system_notification` VALUES (3, 10, 1, 2, '测试333', '测试333', 1, '2026-09-30 10:52:41', '2026-09-30 10:52:41', NULL);
 
 -- ----------------------------
 -- Table structure for user
@@ -910,7 +971,7 @@ CREATE TABLE `user_departments`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_dept_id`(`department_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户部门表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_departments
