@@ -1,5 +1,14 @@
 # Version History
 
+## v3.3.3
+> - Queue method renaming
+> - Add system notification model requests and services
+> - Add system notification using websocket
+> - Add websocket command line creation
+> - Enumeration and adjustment of users and departments
+> - Optimization of JWT middleware
+> - Update the readme document and version history
+
 ## v3.3.2
 > - Optimize and repair the model's soft deletion
 > - Soft-delete query compatibility is determined by identifying whether soft-delete is implemented at the underlying level to decide the query conditions
