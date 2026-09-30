@@ -105,6 +105,15 @@
     - [Job Clear](#Job-Clear)
 - [Es](#Es)
     - [Es Creation](#Es-Creation)
+- [WebSocket](#WebSocket)
+    - [WebSocket Creation](#WebSocket-Creation)
+    - [WebSocket Configuration](#WebSocket-Configuration)
+    - [WebSocket Directory Structure](#WebSocket-Directory-Structure)
+    - [Message Protocol](#Message-Protocol)
+    - [Message Handler](#Message-Handler)
+    - [Sending Messages](#Sending-Messages)
+    - [Frontend Test](#Frontend-Test)
+    - [Backend Debugging](#Backend-Debugging)
 - [Publish Event](#Publish-Event)
     - [Event Test](#Event-Test)
 - [Event List](#Event-List)
@@ -173,6 +182,7 @@
 >       - Request creation (`make:request`)
 >       - Middleware creation (`make:middleware`)
 >       - Router creation (`make:router`)
+>       - WebSocket message handler creation (`make:ws`)
 >       - Errcode creation (`make:errcode`)
 >       - Generate Swagger document (`make:docs`)
 >   - **Permission Management**:
@@ -384,10 +394,15 @@ $ ./cli demo:command --args=11
 │   │   ├── orm                 # Orm Tool
 │   │   ├── queue               # Queue
 │   │   ├── ratelimit           # Rate Limit
-│   │   └── request             # Request
+│   │   ├── request             # Request
+│   │   └── ws                  # WebSocket
 │   └── time                    # Time Processing
 ├── public                      # Static Resources
+│   └── ws-test.html            # WebSocket Test Page
 ├── router                      # Router
+├── websocket                   # WebSocket Business Layer
+│   ├── message.go              # Message Handler
+│   └── registry.go             # Message Handler Registry
 ├── storage                     # Storage
 │   ├── cache                   # Disk Cache
 │   ├── logs                    # Logs
@@ -524,6 +539,7 @@ make:
   make:router      Router Creation
   make:seed        Generate database seeder template
   make:service     Service Creation
+  make:ws          WebSocket Message Handler Creation
 producer:
   producer:list    Producer List
 route:
@@ -636,6 +652,10 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "Service Creation",
       "name": "make:service"
+    },
+    {
+      "description": "WebSocket Message Handler Creation",
+      "name": "make:ws"
     },
     {
       "description": "Producer List",
@@ -2961,6 +2981,317 @@ command options:
 - `--path=grpc/model`        Output directory (default)
 - `--connection=mysql`       Database connection
 - `--exclude=password,token` Exclude field
+
+# WebSocket
+
+The WebSocket service is divided by responsibility:
+
+- `pkg/serviceprovider/ws`: framework capabilities such as connection management, clients, messages, and handler interfaces
+- `websocket`: business message handlers and handler registration
+- `app/provider/ws.go`: lifecycle registration and shutdown
+- `app/facade/ws.go`: application access entry
+- `router/ws.go`: WebSocket upgrade route
+
+## WebSocket Creation
+
+Use `make:ws` to create a handler matched by message type:
+
+```bash
+$ go run ./cmd/cli.go make:ws --file=notice --type=notice --desc=Notice message
+```
+
+Command options:
+
+- `--file=notice` File path, generated as `websocket/notice.go`
+- `--type=notice` Message type, defaults to the snake case file name
+- `--desc=Notice message` Handler description
+
+Generated content:
+
+- File: `websocket/notice.go`
+- Handler: `NoticeHandler`
+- Message type constant: `NoticeMessageType`
+- Automatically appended to `All()` in `websocket/registry.go`
+
+The generated handler implements `Match()` and `Handle()`. When `{"type":"notice"}` is received, only the matched handler runs and the generic fallback handler is skipped.
+
+## WebSocket Configuration
+
+WebSocket settings are defined under the `ws` node:
+
+```yaml
+# WebSocket Service Configuration
+ws:
+  enabled: false # Whether to enable the WebSocket service
+  path: /ws # WebSocket upgrade path
+  shards: 64 # Number of connection shards
+  max-connections: 100000 # Maximum connections
+  write-queue-size: 32 # Per-client send queue size
+  read-buffer-size: 2048 # Read buffer size
+  write-buffer-size: 2048 # Write buffer size
+  read-limit: 1048576 # Maximum bytes per message
+  write-wait: 10s # Write timeout
+  pong-wait: 60s # Pong timeout
+  ping-interval: 25s # Ping interval
+  close-wait: 5s # Shutdown wait time
+  allowed-origins: [] # Allowed origins, empty means same origin
+  compression: false # Whether to enable compression
+```
+
+Configuration options:
+
+- `enabled`: Whether to enable the WebSocket service
+- `path`: WebSocket handshake path, defaults to `/ws`
+- `shards`: Number of connection shards, used to reduce lock contention with many connections
+- `max-connections`: Maximum number of connections
+- `write-queue-size`: Send queue size for each client. A slow client is closed when its queue is full
+- `read-limit`: Maximum bytes for one message
+- `write-wait`: Write timeout
+- `pong-wait`: Time to wait for a Pong message
+- `ping-interval`: Server Ping interval. It must be less than `pong-wait`
+- `close-wait`: Time to wait for connections during shutdown
+- `allowed-origins`: Allowed cross-origin values. An empty list allows only the same origin. `*` allows all origins
+- `compression`: Whether to enable WebSocket compression
+
+The development test page is:
+
+```text
+http://127.0.0.1:8080/public/ws-test.html
+```
+
+The WebSocket endpoint is:
+
+```text
+ws://127.0.0.1:8080/ws
+```
+
+## WebSocket Directory Structure
+
+```text
+websocket/
+├── message.go              # Business message handlers
+└── registry.go             # Message handler registration
+
+pkg/serviceprovider/ws/
+├── manager.go              # WebSocket connection manager
+├── client.go               # Client connection and read/write pumps
+├── handler.go              # Connection and Handler interfaces
+├── message.go              # WebSocket message definition
+├── options.go              # Runtime options and defaults
+└── errors.go               # WebSocket errors
+
+app/provider/ws.go          # WebSocket service provider
+app/facade/ws.go            # WebSocket facade
+router/ws.go                # WebSocket route
+public/ws-test.html         # Frontend test page
+```
+
+`gin/websocket` is the business layer and handles concrete messages. `gin/pkg/serviceprovider/ws` is the framework layer and only handles connections, reads, writes, dispatch, broadcast, and lifecycle management. Business code should not operate the underlying connection directly, and should use the `Connection` interface.
+
+## Message Protocol
+
+The message type in `pkg/serviceprovider/ws` only describes the WebSocket transport layer:
+
+```go
+type Message struct {
+    Type MessageType
+    Data []byte
+}
+```
+
+The business layer uses JSON messages by default:
+
+```json
+{
+  "type": "message-type",
+  "data": {}
+}
+```
+
+Example messages:
+
+| Type | Request | Response | Description |
+| --- | --- | --- | --- |
+| `bind` | `{"type":"bind","data":{"userId":1001}}` | `{"type":"bound","data":{"clientId":"1","userId":1001}}` | Bind a user ID |
+| `ping` | `{"type":"ping"}` | `{"type":"pong"}` | Heartbeat check |
+| `chat` | `{"type":"chat","data":"hello"}` | `{"type":"chat","data":"hello"}` | Echo chat content |
+| Unknown | `{"type":"unknown"}` | `{"type":"error","data":{"message":"不支持的消息类型: unknown"}}` | Return an error message |
+
+Clients and the server can also send binary messages with `ws.MessageBinary`. The current example business handler only parses JSON text messages.
+
+## Message Handler
+
+A business message handler must implement the `ws.Handler` interface:
+
+```go
+type Connection interface {
+    ID() string
+    UserID() int64
+    BindUser(userID int64)
+    Send(message Message) error
+    Close()
+}
+
+type Handler interface {
+    Handle(ctx context.Context, connection Connection, message Message) error
+}
+
+type HandlerMatcher interface {
+    Match(message Message) bool
+}
+```
+
+Handlers that implement `HandlerMatcher` are checked first. When any matching handler is found, only matching handlers run and generic `Handler` implementations are skipped. Handlers generated by `make:ws` implement this interface automatically.
+
+Add a handler:
+
+```go
+package websocket
+
+import (
+    "context"
+    "fmt"
+
+    "gin/pkg/serviceprovider/ws"
+)
+
+type NoticeHandler struct{}
+
+func (h *NoticeHandler) Handle(_ context.Context, client ws.Connection, message ws.Message) error {
+    fmt.Println(client.ID(), client.UserID(), string(message.Data))
+    return nil
+}
+```
+
+Register it in `websocket/registry.go`:
+
+```go
+package websocket
+
+import "gin/pkg/serviceprovider/ws"
+
+// All WebSocket message handlers
+func All() []ws.Handler {
+    return []ws.Handler{
+        &MessageHandler{},
+        &NoticeHandler{},
+    }
+}
+```
+
+`WsProvider` automatically passes handlers returned by `websocket.All()`:
+
+```go
+import (
+    "gin/pkg/serviceprovider/ws"
+    "gin/websocket"
+)
+
+manager := ws.NewManager(options, websocket.All()...)
+```
+
+Multiple handlers run in registration order. If a handler returns an error, the current connection receives the error text.
+
+## Sending Messages
+
+Inside a message handler, use `Connection` to send a message to the current connection:
+
+```go
+client.Send(ws.Message{
+    Type: ws.MessageText,
+    Data: []byte(`{"type":"notice","data":"You have a new message"}`),
+})
+```
+
+In business code, use the facade to send messages to one client, all connections for a user, or all connections:
+
+```go
+message := ws.Message{
+    Type: ws.MessageText,
+    Data: []byte(`{"type":"notice","data":"You have a new message"}`),
+}
+
+// Send to one client
+err := facade.WS().Send(clientID, message)
+
+// Send to all connections of a user and return the number of successful sends
+count := facade.WS().SendToUser(userID, message)
+
+// Broadcast to all connections and return the number of successful sends
+count = facade.WS().Broadcast(message)
+```
+
+Connection statistics:
+
+```go
+facade.WS().Count()
+facade.WS().Stats()
+```
+
+## Frontend Test
+
+Start the service and open the test page:
+
+```text
+http://127.0.0.1:8080/public/ws-test.html
+```
+
+The test page connects to:
+
+```text
+ws://127.0.0.1:8080/ws
+```
+
+Basic frontend example:
+
+```javascript
+const socket = new WebSocket("ws://127.0.0.1:8080/ws")
+
+socket.onopen = function () {
+    socket.send(JSON.stringify({
+        type: "bind",
+        data: { userId: 1001 }
+    }))
+}
+
+socket.onmessage = function (event) {
+    console.log(JSON.parse(event.data))
+}
+```
+
+When using the test page, inspect the global connection in the browser console:
+
+```javascript
+window.wsTestSocket.readyState
+```
+
+You can also send a message from the console:
+
+```javascript
+window.wsTestSocket.send(JSON.stringify({
+    type: "ping"
+}))
+```
+> For specific usage, please refer to the front-end project notification management
+
+## Backend Debugging
+
+Use the following paths when debugging WebSocket behavior:
+
+1. WebSocket message entry: `readPump` in `pkg/serviceprovider/ws/client.go`
+2. WebSocket dispatch: `dispatch` in `pkg/serviceprovider/ws/manager.go`
+3. Business message handling: `Handle` in `websocket/message.go`
+4. WebSocket route: `router/ws.go`
+5. WebSocket service provider: `app/provider/ws.go`
+
+Browser debugging notes:
+
+- Switch the browser `Network` panel to the `WS` filter. The WebSocket handshake is not shown under `Fetch/XHR`
+- The `[ws] send`, `[ws] receive`, and `[ws] error` console logs come from `public/ws-test.html`
+- Server logs come from `facade.Log()` calls in `websocket/message.go`
+- After a connection closes, `facade.WS().Client(clientID)` returns `nil`
+
+`WsRouter.IsAuth()` currently returns `false`, so the example route does not pass through JWT and permission middleware. Production deployments should use an authenticated route, or validate connection parameters and user identity before allowing a user binding.
 
 # Publish Event
 

@@ -105,6 +105,15 @@
     - [Job清除](#Job清除)
 - [Es](#Es)
     - [Es创建](#Es创建)
+- [WebSocket](#WebSocket)
+    - [WebSocket创建](#WebSocket创建)
+    - [WebSocket配置](#WebSocket配置)
+    - [WebSocket目录结构](#WebSocket目录结构)
+    - [消息协议](#消息协议)
+    - [消息处理器](#消息处理器)
+    - [发送消息](#发送消息)
+    - [前端测试](#前端测试)
+    - [后台调试](#后台调试)
 - [发布事件](#发布事件)
     - [测试事件](#测试事件)
 - [事件列表](#事件列表)
@@ -168,6 +177,7 @@
 >       - 创建验证器 (`make:request`)
 >       - 创建中间件 (`make:middleware`)
 >       - 创建路由 (`make:router`)
+>       - 创建WebSocket消息处理器 (`make:ws`)
 >       - 创建错误码 (`make:errcode`)
 >       - 生成 Swagger 文档 (`make:docs`)
 >   - **权限管理**:
@@ -370,10 +380,15 @@ $ ./cli demo:command --args=11
 │   │   ├── orm               # orm工具
 │   │   ├── queue             # 队列
 │   │   ├── ratelimit         # 限流
-│   │   └── request           # 请求
+│   │   ├── request           # 请求
+│   │   └── ws                # WebSocket
 │   └── time                  # 时间处理
 ├── public                    # 静态资源目录
+│   └── ws-test.html          # WebSocket测试页面
 ├── router                    # 路由
+├── websocket                 # WebSocket业务层
+│   ├── message.go            # 消息处理器
+│   └── registry.go           # 消息处理器注册
 ├── storage                   # 存储
 │   ├── cache                 # 磁盘缓存
 │   ├── logs                  # 日志
@@ -509,6 +524,7 @@ make:
   make:router      路由创建
   make:seed        生成数据库seeder模板
   make:service     服务创建
+  make:ws         创建WebSocket消息处理器
 producer:
   producer:list    生产者列表
 route:
@@ -621,6 +637,10 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "服务创建",
       "name": "make:service"
+    },
+    {
+      "description": "创建ws消息处理器",
+      "name": "make:ws"
     },
     {
       "description": "生产者列表",
@@ -2935,6 +2955,317 @@ $ go run ./cmd/cli.go make:es --table=user
 - `--path=grpc/model`        输出目录(默认)
 - `--connection=mysql`       数据库连接
 - `--exclude=password,token` 排除字段
+
+# WebSocket
+
+WebSocket服务按职责分层:
+
+- `pkg/serviceprovider/ws`: 连接管理、客户端、消息、处理器接口等框架能力
+- `websocket`: 业务消息处理器和处理器注册
+- `app/provider/ws.go`: 生命周期注册和关闭
+- `app/facade/ws.go`: 业务侧访问入口
+- `router/ws.go`: WebSocket升级路由
+
+## WebSocket创建
+
+使用`make:ws`创建按消息类型匹配的处理器:
+
+```bash
+$ go run ./cmd/cli.go make:ws --file=notice --type=notice --desc=通知消息
+```
+
+命令选项:
+
+- `--file=notice` 文件路径,生成到`websocket/notice.go`
+- `--type=notice` 消息类型,默认取文件名的蛇形命名
+- `--desc=通知消息` 处理器描述
+
+生成内容:
+
+- 文件: `websocket/notice.go`
+- 处理器: `NoticeHandler`
+- 消息类型常量: `NoticeMessageType`
+- 自动追加到`websocket/registry.go`中的`All()`列表
+
+生成的处理器实现`Match()`和`Handle()`。收到`{"type":"notice"}`时只执行匹配的处理器,不会继续进入普通兜底处理器。
+
+## WebSocket配置
+
+WebSocket配置位于配置文件中的`ws`节点:
+
+```yaml
+# WebSocket服务配置
+ws:
+  enabled: false # 是否启用WebSocket服务
+  path: /ws # WebSocket升级地址
+  shards: 64 # 连接分片数量
+  max-connections: 100000 # 最大连接数
+  write-queue-size: 32 # 单连接发送队列长度
+  read-buffer-size: 2048 # 读缓冲区大小
+  write-buffer-size: 2048 # 写缓冲区大小
+  read-limit: 1048576 # 单条消息最大字节数
+  write-wait: 10s # 写入超时
+  pong-wait: 60s # Pong等待时间
+  ping-interval: 25s # Ping发送间隔
+  close-wait: 5s # 关闭等待时间
+  allowed-origins: [] # 允许的Origin,空为同源
+  compression: false # 是否启用压缩
+```
+
+配置说明:
+
+- `enabled`: 是否启用WebSocket服务
+- `path`: WebSocket握手路径,默认`/ws`
+- `shards`: 连接分片数量,用于降低多连接场景下的锁竞争
+- `max-connections`: 最大连接数
+- `write-queue-size`: 单个客户端发送队列长度,队列满时关闭慢客户端
+- `read-limit`: 单条消息最大字节数
+- `write-wait`: 写入超时时间
+- `pong-wait`: 等待Pong的超时时间
+- `ping-interval`: 服务端发送Ping的间隔,必须小于`pong-wait`
+- `close-wait`: 服务关闭时等待连接退出的时间
+- `allowed-origins`: 允许跨域连接的Origin列表,空列表表示只允许同源,`*`表示允许全部
+- `compression`: 是否启用WebSocket压缩
+
+开发环境测试页地址为:
+
+```text
+http://127.0.0.1:8080/public/ws-test.html
+```
+
+WebSocket连接地址为:
+
+```text
+ws://127.0.0.1:8080/ws
+```
+
+## WebSocket目录结构
+
+```text
+websocket/
+├── message.go              # 业务消息处理器
+└── registry.go             # 消息处理器注册
+
+pkg/serviceprovider/ws/
+├── manager.go              # WebSocket连接管理器
+├── client.go               # 客户端连接、读写协程
+├── handler.go              # Connection和Handler接口
+├── message.go              # WebSocket消息定义
+├── options.go              # 运行配置和默认值
+└── errors.go               # WebSocket错误定义
+
+app/provider/ws.go          # WebSocket服务提供者
+app/facade/ws.go            # WebSocket门面
+router/ws.go                # WebSocket路由
+public/ws-test.html         # 前端测试页面
+```
+
+`gin/websocket`属于业务层,用于处理具体消息。`gin/pkg/serviceprovider/ws`属于框架层,只负责连接、读写、分发、广播和生命周期管理。业务代码不要直接操作底层连接,统一通过`Connection`接口处理消息。
+
+## 消息协议
+
+`pkg/serviceprovider/ws`中的消息结构只描述WebSocket传输层消息:
+
+```go
+type Message struct {
+    Type MessageType
+    Data []byte
+}
+```
+
+业务层默认使用JSON消息:
+
+```json
+{
+  "type": "消息类型",
+  "data": {}
+}
+```
+
+示例消息如下:
+
+| 类型 | 请求 | 响应 | 说明 |
+| --- | --- | --- | --- |
+| `bind` | `{"type":"bind","data":{"userId":1001}}` | `{"type":"bound","data":{"clientId":"1","userId":1001}}` | 绑定用户ID |
+| `ping` | `{"type":"ping"}` | `{"type":"pong"}` | 心跳检测 |
+| `chat` | `{"type":"chat","data":"hello"}` | `{"type":"chat","data":"hello"}` | 回显聊天内容 |
+| 未知类型 | `{"type":"unknown"}` | `{"type":"error","data":{"message":"不支持的消息类型: unknown"}}` | 返回错误消息 |
+
+客户端和服务端也可以发送二进制消息,只需要使用`ws.MessageBinary`作为消息类型。当前示例业务处理器只解析JSON文本消息。
+
+## 消息处理器
+
+业务消息处理器需要实现`ws.Handler`接口:
+
+```go
+type Connection interface {
+    ID() string
+    UserID() int64
+    BindUser(userID int64)
+    Send(message Message) error
+    Close()
+}
+
+type Handler interface {
+    Handle(ctx context.Context, connection Connection, message Message) error
+}
+
+type HandlerMatcher interface {
+    Match(message Message) bool
+}
+```
+
+实现`HandlerMatcher`的处理器会先匹配消息。任意匹配处理器命中时只执行匹配处理器,普通`Handler`不会执行。`make:ws`生成的处理器会自动实现该接口。
+
+新增处理器:
+
+```go
+package websocket
+
+import (
+    "context"
+    "fmt"
+
+    "gin/pkg/serviceprovider/ws"
+)
+
+type NoticeHandler struct{}
+
+func (h *NoticeHandler) Handle(_ context.Context, client ws.Connection, message ws.Message) error {
+    fmt.Println(client.ID(), client.UserID(), string(message.Data))
+    return nil
+}
+```
+
+在`websocket/registry.go`中注册:
+
+```go
+package websocket
+
+import "gin/pkg/serviceprovider/ws"
+
+// All ws消息处理器列表
+func All() []ws.Handler {
+    return []ws.Handler{
+        &MessageHandler{},
+        &NoticeHandler{},
+    }
+}
+```
+
+`WsProvider`会自动使用`websocket.All()`中的处理器:
+
+```go
+import (
+    "gin/pkg/serviceprovider/ws"
+    "gin/websocket"
+)
+
+manager := ws.NewManager(options, websocket.All()...)
+```
+
+多个处理器会按注册顺序依次执行。处理器返回错误时,当前连接会收到错误文本。
+
+## 发送消息
+
+在消息处理器中可以通过`Connection`向当前连接发送消息:
+
+```go
+client.Send(ws.Message{
+    Type: ws.MessageText,
+    Data: []byte(`{"type":"notice","data":"你有新消息"}`),
+})
+```
+
+在业务代码中可以通过门面向指定客户端、用户或全部连接发送消息:
+
+```go
+message := ws.Message{
+    Type: ws.MessageText,
+    Data: []byte(`{"type":"notice","data":"你有新消息"}`),
+}
+
+// 发送给指定客户端
+err := facade.WS().Send(clientID, message)
+
+// 发送给用户的全部连接,返回成功发送的连接数
+count := facade.WS().SendToUser(userID, message)
+
+// 广播给全部连接,返回成功发送的连接数
+count = facade.WS().Broadcast(message)
+```
+
+连接统计:
+
+```go
+facade.WS().Count()
+facade.WS().Stats()
+```
+
+## 前端测试
+
+启动服务后打开测试页面:
+
+```text
+http://127.0.0.1:8080/public/ws-test.html
+```
+
+测试页面默认连接:
+
+```text
+ws://127.0.0.1:8080/ws
+```
+
+基础前端示例:
+
+```javascript
+const socket = new WebSocket("ws://127.0.0.1:8080/ws")
+
+socket.onopen = function () {
+    socket.send(JSON.stringify({
+        type: "bind",
+        data: { userId: 1001 }
+    }))
+}
+
+socket.onmessage = function (event) {
+    console.log(JSON.parse(event.data))
+}
+```
+
+如果使用测试页面,可以在浏览器控制台查看全局连接:
+
+```javascript
+window.wsTestSocket.readyState
+```
+
+也可以在控制台执行:
+
+```javascript
+window.wsTestSocket.send(JSON.stringify({
+    type: "ping"
+}))
+```
+> 具体使用查看前端项目通知管理
+
+## 后台调试
+
+WebSocket调试建议按以下路径排查:
+
+1. WebSocket消息入口: `pkg/serviceprovider/ws/client.go`中的`readPump`
+2. WebSocket消息分发: `pkg/serviceprovider/ws/manager.go`中的`dispatch`
+3. 业务消息处理: `websocket/message.go`中的`Handle`
+4. WebSocket路由: `router/ws.go`
+5. WebSocket服务提供者: `app/provider/ws.go`
+
+浏览器调试时需要注意:
+
+- 浏览器`Network`面板需要切换到`WS`筛选,WebSocket握手不会出现在`Fetch/XHR`中
+- 控制台中的`[ws] send`、`[ws] receive`、`[ws] error`日志来自`public/ws-test.html`
+- 服务端日志来自`websocket/message.go`中的`facade.Log()`调用
+- 连接关闭后`facade.WS().Client(clientID)`会返回`nil`
+
+`WsRouter.IsAuth()`当前返回`false`,示例路由不经过JWT和权限中间件。生产环境需要改为鉴权路由,或者在校验连接参数和用户身份后再允许绑定用户。
 
 # 发布事件
 
