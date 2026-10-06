@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/pkg/errcode"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 )
 
 func TestTimeoutMiddleware(t *testing.T) {

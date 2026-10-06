@@ -2,11 +2,10 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"gin/pkg/serviceprovider/mcp"
 	"time"
-
-	"github.com/goccy/go-json"
 )
 
 // Agent AI智能体

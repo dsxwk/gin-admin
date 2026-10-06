@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
@@ -8,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 )
 
 type OperatorLog struct {

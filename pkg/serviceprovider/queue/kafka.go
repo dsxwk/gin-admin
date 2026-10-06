@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"gin/common/ctxkey"
 	"gin/common/flag"
@@ -13,7 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/segmentio/kafka-go"
 )
 

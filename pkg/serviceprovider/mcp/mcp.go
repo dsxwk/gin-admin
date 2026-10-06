@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gin/app/errcode"
@@ -10,7 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/goccy/go-json"
 	"github.com/golang-jwt/jwt/v5"
 )
 

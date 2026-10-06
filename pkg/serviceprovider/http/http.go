@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
@@ -17,8 +18,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/goccy/go-json"
 )
 
 const defaultTimeout = 5 * time.Second

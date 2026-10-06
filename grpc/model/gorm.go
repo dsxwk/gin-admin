@@ -2,13 +2,13 @@ package model
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"gin/pkg"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"

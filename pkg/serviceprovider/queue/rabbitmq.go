@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
@@ -12,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/rabbitmq/amqp091-go"
 )
 

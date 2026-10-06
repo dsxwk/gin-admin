@@ -2,6 +2,7 @@ package providers
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"gin/common/flag"
 	"gin/config"
@@ -10,8 +11,6 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	"github.com/goccy/go-json"
 )
 
 // OpenAICompat OpenAI兼容Provider,支持所有OpenAI兼容API

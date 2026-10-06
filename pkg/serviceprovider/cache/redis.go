@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/config"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/goccy/go-json"
 )
 
 type redisHookContextKey int

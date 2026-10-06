@@ -2,12 +2,11 @@ package websocket
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"gin/app/facade"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/ws"
-
-	"github.com/goccy/go-json"
 )
 
 // MessageHandler 消息处理

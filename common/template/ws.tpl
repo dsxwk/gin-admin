@@ -2,9 +2,8 @@ package {{.Package}}
 
 import (
 	"context"
+	"encoding/json"
 	"gin/pkg/serviceprovider/ws"
-
-	"github.com/goccy/go-json"
 )
 
 const {{.Name}}MessageType = "{{.MessageType}}" // {{.Description}}

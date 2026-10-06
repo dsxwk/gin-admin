@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"gin/app/facade"
 	"gin/common/base"
@@ -11,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/goccy/go-json"
 	"github.com/mattn/go-runewidth"
 	"github.com/samber/lo"
 )

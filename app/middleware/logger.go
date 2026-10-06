@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"encoding/json"
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
@@ -13,7 +14,6 @@ import (
 	"uuid"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 )
 
 type Logger struct {

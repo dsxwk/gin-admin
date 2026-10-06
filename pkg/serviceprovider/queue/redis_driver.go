@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gin/common/flag"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/goccy/go-json"
 )
 
 type RedisConsumer struct {

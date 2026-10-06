@@ -1,10 +1,10 @@
 package ws
 
 import (
+	"encoding/json"
 	"errors"
 	"gin/pkg/errcode"
 
-	"github.com/goccy/go-json"
 	"github.com/gorilla/websocket"
 )
 

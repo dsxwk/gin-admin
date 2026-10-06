@@ -2,6 +2,7 @@ package lang
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"gin/common/ctxkey"
 	"gin/config"
@@ -10,7 +11,6 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/goccy/go-json"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"

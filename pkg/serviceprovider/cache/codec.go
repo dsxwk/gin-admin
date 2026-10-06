@@ -2,13 +2,12 @@ package cache
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
-
-	"github.com/goccy/go-json"
 )
 
 // encodeValue 编码缓存值为JSON

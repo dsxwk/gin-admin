@@ -2,15 +2,13 @@ package websocket
 
 import (
 	"context"
-
+	"encoding/json"
 	"gin/app/enum"
 	"gin/app/facade"
 	"gin/app/request"
 	"gin/app/service"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/ws"
-
-	"github.com/goccy/go-json"
 )
 
 const (

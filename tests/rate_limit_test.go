@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/common/ctxkey"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"golang.org/x/time/rate"
 )
 

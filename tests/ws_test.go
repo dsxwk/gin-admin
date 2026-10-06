@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"gin/pkg/serviceprovider/ws"
 	ws1 "gin/websocket"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/require"
 )

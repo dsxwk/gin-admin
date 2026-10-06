@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"gin/app/errcode"
 	"gin/router"
 	"net/http"
@@ -8,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/require"
 )
 

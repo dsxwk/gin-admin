@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
@@ -10,8 +11,6 @@ import (
 	"gin/pkg/serviceprovider/logger"
 	"sync"
 	"time"
-
-	"github.com/goccy/go-json"
 )
 
 // Cache 缓存接口
