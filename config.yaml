@@ -90,6 +90,41 @@ cache:
   disk:
     path: "storage/cache" # 缓存文件存放路径
 
+# 文件系统
+filesystem:
+  default: local # local|oss|cos|bos|kodo
+  # 本地存储
+  local:
+    cdn: "" # 本地访问域名
+    root: storage/uploads # 本地存储根目录
+  # 阿里云存储
+  oss:
+    cdn: ""
+    bucket: ""
+    endpoint: ""
+    access-key-id: ""
+    access-key-secret: ""
+  # 腾讯云存储
+  cos:
+    cdn: ""
+    bucket-url: ""
+    secret-id: ""
+    secret-key: ""
+  # 百度云存储
+  bos:
+    cdn: ""
+    ak: ""
+    sk: ""
+    endpoint: ""
+    bucket: ""
+    redirect-disabled: false
+  # 七牛云存储
+  kodo:
+    cdn: ""
+    access-key: ""
+    secret-key: ""
+    bucket: ""
+
 # 跨域
 cors:
   enabled: true # 是否开启跨域
