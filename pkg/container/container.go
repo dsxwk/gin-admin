@@ -6,6 +6,7 @@ import (
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/es"
 	"gin/pkg/serviceprovider/eventbus"
+	"gin/pkg/serviceprovider/filesystem"
 	"gin/pkg/serviceprovider/grpcclient"
 	"gin/pkg/serviceprovider/http"
 	"gin/pkg/serviceprovider/job"
@@ -33,6 +34,7 @@ type Container struct {
 	log       atomic.Pointer[logger.Logger]
 	db        atomic.Pointer[orm.Manager]
 	cache     atomic.Pointer[cache.Manager]
+	file      atomic.Pointer[filesystem.Manager]
 	event     atomic.Pointer[eventbus.Registry]
 	debugger  atomic.Pointer[debugger.Debugger]
 	http      atomic.Pointer[http.Client]
@@ -90,6 +92,16 @@ func (c *Container) SetCache(value *cache.Manager) {
 // Cache 获取缓存服务
 func (c *Container) Cache() *cache.Manager {
 	return c.cache.Load()
+}
+
+// SetFile 设置文件系统服务
+func (c *Container) SetFile(value *filesystem.Manager) {
+	c.file.Store(value)
+}
+
+// File 获取文件系统服务
+func (c *Container) File() *filesystem.Manager {
+	return c.file.Load()
 }
 
 // Redis 获取Redis服务

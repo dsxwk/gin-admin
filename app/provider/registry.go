@@ -11,6 +11,7 @@ func All() []serviceprovider.ServiceProvider {
 		&LogProvider{},
 		&DbProvider{},
 		&CacheProvider{},
+		&FileProvider{},
 		&EventProvider{},
 		&DebuggerProvider{},
 		&RequestProvider{},

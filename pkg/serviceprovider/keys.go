@@ -9,6 +9,8 @@ const (
 	ServiceDB = "db"
 	// ServiceCache 缓存服务
 	ServiceCache = "cache"
+	// ServiceFile 文件系统服务
+	ServiceFile = "file"
 	// ServiceEvent 事件服务
 	ServiceEvent = "event"
 	// ServiceDebugger 调试服务
