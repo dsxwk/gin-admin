@@ -1,5 +1,12 @@
 # Version History
 
+## v3.3.4
+> - Update and replace the JSON import package
+> - Fixing issues in test case enumeration
+> - Add file upload configuration
+> - Add file upload service and facade
+> - Upload the newly added document along with the test case
+
 ## v3.3.3
 > - Queue method renaming
 > - Add system notification model requests and services
