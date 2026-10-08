@@ -85,6 +85,12 @@
     - [Redis缓存](#Redis缓存)
     - [内存缓存](#内存缓存)
     - [磁盘缓存](#磁盘缓存)
+- [文件系统](#文件系统)
+    - [文件系统配置](#文件系统配置)
+    - [文件上传](#文件上传)
+    - [上传来源](#上传来源)
+    - [上传结果](#上传结果)
+    - [前端FormData](#前端FormData)
 - [事件](#事件)
     - [事件创建帮助](#事件创建帮助)
     - [事件创建](#事件创建)
@@ -2290,6 +2296,142 @@ func (s *TestController) Test() {
     
     // ... 其他	
 }
+```
+
+# 文件系统
+
+> 文件系统基于 `github.com/pkg6/gfs` 实现, 支持本地、阿里云OSS、腾讯云COS、百度云BOS、七牛云KODO。
+> 所有驱动统一通过 `facade.File()` 调用。
+
+## 文件系统配置
+
+```yaml
+filesystem:
+  default: local # local|oss|cos|bos|kodo
+  local:
+    cdn: ""
+    root: storage/uploads
+  oss:
+    cdn: ""
+    bucket: ""
+    endpoint: ""
+    access-key-id: ""
+    access-key-secret: ""
+  cos:
+    cdn: ""
+    bucket-url: ""
+    secret-id: ""
+    secret-key: ""
+  bos:
+    cdn: ""
+    ak: ""
+    sk: ""
+    endpoint: ""
+    bucket: ""
+    redirect-disabled: false
+  kodo:
+    cdn: ""
+    access-key: ""
+    secret-key: ""
+    bucket: ""
+```
+
+支持的磁盘名称和别名:
+
+| 驱动 | 名称 |
+| --- | --- |
+| 本地 | `local` |
+| 阿里云OSS | `oss`, `aliyun` |
+| 腾讯云COS | `cos`, `tencent` |
+| 百度云BOS | `bos`, `baidu` |
+| 七牛云KODO | `kodo`, `qiniu` |
+
+云存储只有配置完整凭据后才会注册; 调用未配置的磁盘会返回 `filesystem.ErrDiskNotFound`。
+
+## 文件上传
+
+```go
+fileHeader, err := c.FormFile("file")
+if err != nil {
+	return err
+}
+
+objectPath := "avatar/" + uuid.New().String() + strings.ToLower(path.Ext(fileHeader.Filename))
+result, err := facade.File().Disk("local").Upload(fileHeader, objectPath)
+if err != nil {
+	return err
+}
+```
+
+不传磁盘名称时使用默认磁盘:
+
+```go
+result, err := facade.File().Disk().Upload(fileHeader, "avatar/1.png")
+result, err := facade.File().Default().Upload(fileHeader, "avatar/1.png")
+```
+
+其他磁盘操作:
+
+```go
+data, err := facade.File().Disk("local").Read("storage/uploads/avatar/1.png")
+exists, err := facade.File().Disk("local").Exists("storage/uploads/avatar/1.png")
+url, err := facade.File().Disk("local").URL("storage/uploads/avatar/1.png")
+deleted, err := facade.File().Disk("local").Delete("storage/uploads/avatar/1.png")
+```
+
+`Read`、`Exists`、`URL`、`Delete` 同时支持对象路径和 `Upload` 返回的完整路径。
+
+## 上传来源
+
+`Upload` 支持以下来源:
+
+- `*multipart.FileHeader`
+- `multipart.File`
+- `io.Reader`
+- `*os.File`
+- 本地文件路径 `string`
+- `[]byte`
+
+未知文件大小时可使用 `UploadReader`, 已知文件大小时可使用 `UploadReaderWithSize`。
+
+## 上传结果
+
+```go
+type UploadResult struct {
+	Disk     string `json:"disk"`
+	Path     string `json:"path"`
+	URL      string `json:"url"`
+	Size     int64  `json:"size"`
+	MimeType string `json:"mimeType"`
+}
+```
+
+当配置了 `filesystem.local.root` 时, 本地磁盘会在 `Path` 和 `URL` 中拼接根目录:
+
+```json
+{
+  "disk": "local",
+  "path": "storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
+  "url": "/storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
+  "size": 1024,
+  "mimeType": "image/png"
+}
+```
+
+## 前端FormData
+
+```javascript
+const formData = new FormData()
+formData.append("file", file)
+
+const response = await fetch("/api/v1/test", {
+  method: "POST",
+  body: formData
+})
+```
+
+```bash
+curl -F "file=@avatar.png" http://127.0.0.1:8080/api/v1/test
 ```
 
 # 事件

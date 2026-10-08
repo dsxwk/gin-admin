@@ -85,6 +85,12 @@
     - [Redis Cache](#Redis-Cache)
     - [Memory Cache](#Memory-Cache)
     - [Disk Cache](#Disk-Cache)
+- [File System](#File-System)
+    - [File System Configuration](#File-System-Configuration)
+    - [File Upload](#File-Upload)
+    - [Upload Sources](#Upload-Sources)
+    - [Upload Result](#Upload-Result)
+    - [Frontend FormData](#Frontend-FormData)
 - [Event](#Event)
     - [Event Creation Help](#Event-Creation-Help)
     - [Event Creation](#Event-Creation)
@@ -2300,6 +2306,142 @@ func (s *TestController) Test() {
 
 	// ... Other
 }    
+```
+
+# File System
+
+> The file system is based on `github.com/pkg6/gfs` and supports Local, Aliyun OSS, Tencent COS, Baidu BOS and Qiniu KODO.
+> All storage drivers use the same `facade.File()` API.
+
+## File System Configuration
+
+```yaml
+filesystem:
+  default: local # local|oss|cos|bos|kodo
+  local:
+    cdn: ""
+    root: storage/uploads
+  oss:
+    cdn: ""
+    bucket: ""
+    endpoint: ""
+    access-key-id: ""
+    access-key-secret: ""
+  cos:
+    cdn: ""
+    bucket-url: ""
+    secret-id: ""
+    secret-key: ""
+  bos:
+    cdn: ""
+    ak: ""
+    sk: ""
+    endpoint: ""
+    bucket: ""
+    redirect-disabled: false
+  kodo:
+    cdn: ""
+    access-key: ""
+    secret-key: ""
+    bucket: ""
+```
+
+Available disk names and aliases:
+
+| Driver | Names |
+| --- | --- |
+| Local | `local` |
+| Aliyun OSS | `oss`, `aliyun` |
+| Tencent COS | `cos`, `tencent` |
+| Baidu BOS | `bos`, `baidu` |
+| Qiniu KODO | `kodo`, `qiniu` |
+
+Cloud disks are registered only after the required credentials are configured. Calling an unconfigured disk returns `filesystem.ErrDiskNotFound`.
+
+## File Upload
+
+```go
+fileHeader, err := c.FormFile("file")
+if err != nil {
+	return err
+}
+
+objectPath := "avatar/" + uuid.New().String() + strings.ToLower(path.Ext(fileHeader.Filename))
+result, err := facade.File().Disk("local").Upload(fileHeader, objectPath)
+if err != nil {
+	return err
+}
+```
+
+Use the default disk when no disk name is passed:
+
+```go
+result, err := facade.File().Disk().Upload(fileHeader, "avatar/1.png")
+result, err := facade.File().Default().Upload(fileHeader, "avatar/1.png")
+```
+
+Additional disk operations:
+
+```go
+data, err := facade.File().Disk("local").Read("storage/uploads/avatar/1.png")
+exists, err := facade.File().Disk("local").Exists("storage/uploads/avatar/1.png")
+url, err := facade.File().Disk("local").URL("storage/uploads/avatar/1.png")
+deleted, err := facade.File().Disk("local").Delete("storage/uploads/avatar/1.png")
+```
+
+`Read`, `Exists`, `URL` and `Delete` accept both the object path and the complete path returned by `Upload`.
+
+## Upload Sources
+
+`Upload` supports the following sources:
+
+- `*multipart.FileHeader`
+- `multipart.File`
+- `io.Reader`
+- `*os.File`
+- local file path as `string`
+- `[]byte`
+
+Use `UploadReader` to upload a stream when the size is unknown, or `UploadReaderWithSize` when the size is known.
+
+## Upload Result
+
+```go
+type UploadResult struct {
+	Disk     string `json:"disk"`
+	Path     string `json:"path"`
+	URL      string `json:"url"`
+	Size     int64  `json:"size"`
+	MimeType string `json:"mimeType"`
+}
+```
+
+When `filesystem.local.root` is set, the local disk adds the root to both `Path` and `URL`:
+
+```json
+{
+  "disk": "local",
+  "path": "storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
+  "url": "/storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
+  "size": 1024,
+  "mimeType": "image/png"
+}
+```
+
+## Frontend FormData
+
+```javascript
+const formData = new FormData()
+formData.append("file", file)
+
+const response = await fetch("/api/v1/test", {
+  method: "POST",
+  body: formData
+})
+```
+
+```bash
+curl -F "file=@avatar.png" http://127.0.0.1:8080/api/v1/test
 ```
 
 # Event
