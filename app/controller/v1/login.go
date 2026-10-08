@@ -211,11 +211,11 @@ func (s *LoginController) Test(c *gin.Context) {
 		s.Response.Error(c, err)
 		return
 	}
-	//fileCount, err := facade.File().Disk().Delete(objectPath)
-	//if err != nil {
-	//	s.Response.Error(c, err)
-	//	return
-	//}
+	err = facade.File().Disk().Delete(objectPath)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
 
 	s.Response.Success(c, errcode.Success().WithData(map[string]any{
 		"status":         status,
@@ -236,7 +236,6 @@ func (s *LoginController) Test(c *gin.Context) {
 		"resp":           resp,
 		"httpRes":        httpRes,
 		"fileUpload":     fileUpload,
-		//"fileCount":      fileCount,
 	}))
 }
 

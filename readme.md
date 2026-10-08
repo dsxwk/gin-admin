@@ -2386,7 +2386,7 @@ Additional disk operations:
 data, err := facade.File().Disk("local").Read("storage/uploads/avatar/1.png")
 exists, err := facade.File().Disk("local").Exists("storage/uploads/avatar/1.png")
 url, err := facade.File().Disk("local").URL("storage/uploads/avatar/1.png")
-deleted, err := facade.File().Disk("local").Delete("storage/uploads/avatar/1.png")
+err = facade.File().Disk("local").Delete("storage/uploads/avatar/1.png")
 ```
 
 `Read`, `Exists`, `URL` and `Delete` accept both the object path and the complete path returned by `Upload`.

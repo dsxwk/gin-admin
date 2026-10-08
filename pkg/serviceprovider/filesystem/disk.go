@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/pkg6/gfs"
+	"github.com/pkg6/gfs/localfs"
 )
 
 // Disk 文件磁盘
@@ -141,23 +142,35 @@ func (d *Disk) Read(objectPath string) ([]byte, error) {
 }
 
 // Delete 删除文件
-func (d *Disk) Delete(objectPath string) (int64, error) {
+func (d *Disk) Delete(objectPath string) error {
 	if err := d.ready(); err != nil {
-		return 0, err
+		return err
 	}
 
 	objectPath, err := normalizeObjectPath(objectPath)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	objectPath = d.objectKey(objectPath)
 
 	storedPath, err := d.storedPath(objectPath)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return d.adapter.Delete(storedPath)
+	if _, err = d.adapter.Delete(storedPath); err != nil {
+		return err
+	}
+
+	if _, ok := d.adapter.(*localfs.Adapter); ok {
+		if _, statErr := os.Stat(storedPath); statErr == nil {
+			return fmt.Errorf("删除文件失败: %s", objectPath)
+		} else if !errors.Is(statErr, os.ErrNotExist) {
+			return statErr
+		}
+	}
+
+	return nil
 }
 
 // Exists 判断文件是否存在

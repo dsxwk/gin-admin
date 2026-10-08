@@ -20,7 +20,7 @@ func TestLocalUpload(t *testing.T) {
 	disk := facade.File().Disk("local")
 	objectPath := "tests/filesystem/local-upload.txt"
 	t.Cleanup(func() {
-		_, _ = disk.Delete(objectPath)
+		_ = disk.Delete(objectPath)
 	})
 
 	result, err := disk.Upload([]byte("hello"), objectPath)
@@ -46,7 +46,7 @@ func TestMultipartUpload(t *testing.T) {
 	disk := facade.File().Disk()
 	objectPath := "tests/filesystem/multipart-upload.png"
 	t.Cleanup(func() {
-		_, _ = disk.Delete(objectPath)
+		_ = disk.Delete(objectPath)
 	})
 
 	var body bytes.Buffer

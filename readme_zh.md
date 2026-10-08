@@ -2376,7 +2376,7 @@ result, err := facade.File().Default().Upload(fileHeader, "avatar/1.png")
 data, err := facade.File().Disk("local").Read("storage/uploads/avatar/1.png")
 exists, err := facade.File().Disk("local").Exists("storage/uploads/avatar/1.png")
 url, err := facade.File().Disk("local").URL("storage/uploads/avatar/1.png")
-deleted, err := facade.File().Disk("local").Delete("storage/uploads/avatar/1.png")
+err = facade.File().Disk("local").Delete("storage/uploads/avatar/1.png")
 ```
 
 `Read`、`Exists`、`URL`、`Delete` 同时支持对象路径和 `Upload` 返回的完整路径。
