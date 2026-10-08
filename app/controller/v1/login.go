@@ -13,7 +13,9 @@ import (
 	"gin/grpc/proto"
 	"gin/pkg"
 	"image/color"
+	"path"
 	"strings"
+	"uuid"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
@@ -141,8 +143,9 @@ func (s *LoginController) RefreshToken(c *gin.Context) {
 // @Tags 登录相关
 // @Summary 测试
 // @Description 测试
-// @Accept json
+// @Accept multipart/form-data
 // @Produce json
+// @Param file formData file true "上传文件"
 // @Success 200 {object} errcode.SuccessResponse{data=map[string]any{}} "成功"
 // @Router /api/v1/test [post]
 func (s *LoginController) Test(c *gin.Context) {
@@ -196,6 +199,24 @@ func (s *LoginController) Test(c *gin.Context) {
 		return
 	}
 
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		s.Response.Error(c, errcode.ArgsError().WithMsg("请上传file文件"))
+		return
+	}
+
+	objectPath := uuid.New().String() + strings.ToLower(path.Ext(fileHeader.Filename))
+	fileUpload, err := facade.File().Disk("local").Upload(fileHeader, objectPath)
+	if err != nil {
+		s.Response.Error(c, err)
+		return
+	}
+	//fileCount, err := facade.File().Disk().Delete(objectPath)
+	//if err != nil {
+	//	s.Response.Error(c, err)
+	//	return
+	//}
+
 	s.Response.Success(c, errcode.Success().WithData(map[string]any{
 		"status":         status,
 		"desc1":          desc1,
@@ -214,6 +235,8 @@ func (s *LoginController) Test(c *gin.Context) {
 		"grpcResp":       grpcResp,
 		"resp":           resp,
 		"httpRes":        httpRes,
+		"fileUpload":     fileUpload,
+		//"fileCount":      fileCount,
 	}))
 }
 
