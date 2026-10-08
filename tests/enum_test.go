@@ -213,7 +213,7 @@ func ExampleUserEnum() {
 
 	// 获取状态值
 	value := userEnum.Status().Value("启用")
-	fmt.Printf("启用的值: %s\n", value) // 去掉空格
+	fmt.Printf("启用的值: %d\n", value) // 去掉空格
 
 	// Output:
 	// 状态列表: [{Value:1 Desc:启用} {Value:2 Desc:停用}]
