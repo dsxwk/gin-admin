@@ -207,6 +207,10 @@ agent:
   default: deepseek # 默认Agent
   max-tokens: 4096 # 最大token数
   temperature: 0.7 # 温度参数,控制大模型输出随机性/创造性的参数,接近 0 更确定,接近 1 更随机
+  request-timeout: 3m # 非流式模型请求超时
+  sse:
+    heartbeat: 15s # SSE心跳间隔
+    retry: 3000 # 客户端重连时间(毫秒)
   providers: # 模型提供商列表
     deepseek:
       api-key: "sk-xxxxxx" # APIKey

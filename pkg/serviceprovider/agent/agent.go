@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"gin/pkg/serviceprovider/mcp"
+	"strings"
 	"time"
 )
 
@@ -89,7 +90,7 @@ func (a *Agent) Ask(question string) (string, error) {
 	for step := 0; step < a.maxSteps; step++ {
 		// 调用模型
 		start := time.Now()
-		result, err := a.provider.Chat(messages, a.toolDefs)
+		result, err := a.provider.Chat(a.ctx, messages, a.toolDefs)
 		costMs := float64(time.Since(start).Milliseconds())
 		if err != nil {
 			return "", err
@@ -155,6 +156,114 @@ func (a *Agent) Ask(question string) (string, error) {
 	}
 
 	return "", errors.New("达到最大工具调用轮次")
+}
+
+// StreamAsk 流式发送问题并返回完整回答,支持工具调用多轮
+func (a *Agent) StreamAsk(question string, emit func(StreamChunk) error) (string, error) {
+	messages := a.buildMessages(question)
+	a.record(MessageRecord{Role: "user", Content: question})
+
+	start := time.Now()
+	var answer strings.Builder
+
+	//累积并输出增量内容
+	emitContent := func(content string) error {
+		if content == "" {
+			return nil
+		}
+		answer.WriteString(content)
+		if emit == nil {
+			return nil
+		}
+		return emit(StreamChunk{Content: content})
+	}
+
+	for step := 0; step < a.maxSteps; step++ {
+		stream, err := a.provider.StreamChat(a.ctx, messages, a.toolDefs)
+		if err != nil {
+			return answer.String(), err
+		}
+
+		var (
+			roundContent strings.Builder
+			toolCalls    []*ToolCallInfo
+		)
+		for chunk := range stream {
+			if chunk.Err != nil {
+				return answer.String(), chunk.Err
+			}
+			if chunk.Content != "" {
+				roundContent.WriteString(chunk.Content)
+				if err = emitContent(chunk.Content); err != nil {
+					return answer.String(), err
+				}
+			}
+			if len(chunk.ToolCalls) > 0 {
+				toolCalls = chunk.ToolCalls
+			}
+			if chunk.Done {
+				break
+			}
+		}
+
+		//没有工具调用,本轮即最终回答
+		if len(toolCalls) == 0 {
+			a.record(MessageRecord{
+				Role:    "assistant",
+				Content: roundContent.String(),
+				CostMs:  float64(time.Since(start).Milliseconds()),
+			})
+			return answer.String(), nil
+		}
+
+		//构建assistant消息(含tool_calls)
+		assistantMsg := Message{Role: "assistant", Content: roundContent.String()}
+		for _, tc := range toolCalls {
+			assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, &MessageToolCall{
+				Id:   tc.Id,
+				Type: "function",
+				Function: struct {
+					Name      string `json:"name"`
+					Arguments string `json:"arguments"`
+				}{Name: tc.Name, Arguments: tc.Arguments},
+			})
+		}
+		messages = append(messages, assistantMsg)
+
+		//记录assistant工具调用消息
+		for _, tc := range toolCalls {
+			a.record(MessageRecord{
+				Role:       "assistant",
+				Content:    roundContent.String(),
+				ToolName:   tc.Name,
+				ToolCallId: tc.Id,
+				ToolArgs:   a.parseArgs(tc.Arguments),
+			})
+		}
+
+		//执行工具并追加结果
+		for _, tc := range toolCalls {
+			args := a.parseArgs(tc.Arguments)
+			toolResult, _err := a.callTool(tc.Name, args)
+			if _err != nil {
+				toolResult = map[string]any{"error": _err.Error()}
+			}
+			resultJson, _ := json.Marshal(toolResult)
+			messages = append(messages, Message{
+				Role:       "tool",
+				ToolCallId: tc.Id,
+				Content:    string(resultJson),
+			})
+			a.record(MessageRecord{
+				Role:       "tool",
+				Content:    string(resultJson),
+				ToolName:   tc.Name,
+				ToolCallId: tc.Id,
+			})
+		}
+	}
+
+	return answer.String(), errors.New("达到最大工具调用轮次")
 }
 
 // parseArgs 解析工具参数

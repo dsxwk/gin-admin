@@ -18,6 +18,14 @@ type ToolCallInfo struct {
 	Arguments string // 参数JSON
 }
 
+// StreamChunk 流式对话分片
+type StreamChunk struct {
+	Content   string          // 文本增量
+	ToolCalls []*ToolCallInfo // 本轮工具调用,流结束时给出
+	Done      bool            // 是否结束
+	Err       error           // 流式错误
+}
+
 // MessageToolCall 消息中的工具调用
 type MessageToolCall struct {
 	Id       string `json:"id"`
@@ -54,7 +62,7 @@ type Recorder interface {
 
 // Provider 模型提供商接口
 type Provider interface {
-	Name() string                                                              // 提供商名称
-	Chat(messages []Message, tools []mcp.ToolDef) (*ChatResult, error)         // 对话
-	StreamChat(messages []Message, tools []mcp.ToolDef) (<-chan string, error) // 流式对话
+	Name() string                                                                                        // 提供商名称
+	Chat(ctx context.Context, messages []Message, tools []mcp.ToolDef) (*ChatResult, error)              // 对话
+	StreamChat(ctx context.Context, messages []Message, tools []mcp.ToolDef) (<-chan StreamChunk, error) // 流式对话
 }
