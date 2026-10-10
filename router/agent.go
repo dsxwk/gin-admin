@@ -19,7 +19,9 @@ func (r *AgentRouter) Register(routerGroup *gin.RouterGroup) {
 	{
 		// 跳过全局超时,使用独立的3分钟超时
 		router.POST("/ask", r.skipGlobalTimeout, agentTimeout, agent.Ask)
+		router.GET("/stream", r.skipGlobalTimeout, agentTimeout, agent.Stream)
 		router.GET("/history", agent.History)
+		router.DELETE("/sessions/:id", agent.Delete)
 		router.GET("/sessions", agent.Sessions)
 	}
 }

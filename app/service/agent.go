@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"gin/app/errcode"
 	"gin/app/model"
 	"gin/common/base"
 	"gin/pkg/serviceprovider/agent"
@@ -119,6 +121,29 @@ func (s *AgentService) LoadHistory(ctx context.Context, sessionId int64) ([]agen
 // History 获取会话历史记录
 func (s *AgentService) History(ctx context.Context, sessionId int64) ([]model.AgentMessage, error) {
 	return s.findMessages(ctx, sessionId)
+}
+
+// DeleteSession 删除用户会话及全部消息
+func (s *AgentService) DeleteSession(ctx context.Context, userId, sessionId int64) error {
+	var (
+		session model.AgentSession
+		db      = s.DB(ctx, &session)
+	)
+
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id = ? AND user_id = ?", sessionId, userId).First(&session).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errcode.NotFound().WithMsg("会话不存在或无权限")
+			}
+			return err
+		}
+
+		if err := tx.Where("session_id = ?", sessionId).Delete(&model.AgentMessage{}).Error; err != nil {
+			return err
+		}
+
+		return tx.Delete(&session).Error
+	})
 }
 
 // toAgentMessage 转换数据库消息为agent消息

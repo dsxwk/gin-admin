@@ -32,7 +32,7 @@ func (a *AgentFacade) Provider(name ...string) *AgentFacade {
 		return nil
 	}
 
-	provider := providers.NewOpenAICompat(providerName, providerCfg, cfg.Agent.MaxTokens, cfg.Agent.Temperature)
+	provider := providers.NewOpenAICompat(providerName, providerCfg, cfg.Agent.MaxTokens, cfg.Agent.Temperature, cfg.Agent.RequestTimeout)
 	facade := a
 	if facade == nil {
 		facade = &AgentFacade{}
