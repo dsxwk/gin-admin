@@ -1517,6 +1517,66 @@ paths:
       summary: 会话列表
       tags:
       - AI助手
+  /api/v1/agent/sessions/{id}:
+    delete:
+      description: 删除当前用户指定会话及其全部消息
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 会话ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+        "400":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/errcode.ArgsErrorResponse'
+        "404":
+          description: 会话不存在
+          schema:
+            $ref: '#/definitions/errcode.SuccessResponse'
+      summary: 删除会话
+      tags:
+      - AI助手
+  /api/v1/agent/stream:
+    get:
+      description: 使用SSE返回模型流式输出,支持客户端断开取消
+      parameters:
+      - description: 认证Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 问题
+        in: query
+        name: question
+        required: true
+        type: string
+      - description: 模型提供商
+        in: query
+        name: provider
+        type: string
+      - description: 会话ID
+        in: query
+        name: sessionId
+        type: integer
+      responses:
+        "200":
+          description: SSE流
+          schema:
+            type: string
+      summary: 流式对话(SSE)
+      tags:
+      - AI助手
   /api/v1/article:
     get:
       description: 文章列表
@@ -3151,8 +3211,14 @@ paths:
   /api/v1/test:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: 测试
+      parameters:
+      - description: 上传文件
+        in: formData
+        name: file
+        required: true
+        type: file
       produces:
       - application/json
       responses:

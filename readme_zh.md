@@ -97,6 +97,11 @@
 - [监听](#监听)
     - [监听创建帮助](#监听创建帮助)
     - [监听创建](#监听创建)
+- [AI助手流式对话](#AI助手流式对话)
+    - [SSE配置](#SSE配置)
+    - [SSE接口](#SSE接口)
+    - [WebSocket流式对话](#WebSocket流式对话)
+    - [Nginx SSE配置](#Nginx-SSE配置)
 - [队列](#队列)
     - [队列创建帮助](#队列创建帮助)
     - [队列创建](#队列创建)
@@ -3079,6 +3084,113 @@ curl -X POST "http://127.0.0.1:8080/mcp" \
       }
     }
   }'
+```
+
+# AI助手流式对话
+
+Agent支持OpenAI兼容的SSE流式输出,同一套流式分片可以同时被HTTP SSE接口和WebSocket Agent处理器消费。
+
+> 流式对话当前支持文本输出。MCP工具调用请继续使用非流式接口 `agent/ask`。
+
+## SSE配置
+
+```yaml
+agent:
+  enabled: true
+  request-timeout: 3m # 非流式模型请求超时
+  sse:
+    heartbeat: 15s # SSE心跳间隔
+    retry: 3000 # 客户端重连时间(毫秒)
+```
+
+服务端会自动设置以下响应头:
+
+```text
+Content-Type: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+X-Accel-Buffering: no
+```
+
+## SSE接口
+
+```text
+GET /api/v1/agent/stream?question=你好&provider=deepseek&sessionId=0
+```
+
+接口需要正常认证。浏览器原生`EventSource`不能设置自定义请求头,需要认证头时请使用`fetch`流式读取。
+
+```javascript
+const response = await fetch(
+  "/api/v1/agent/stream?question=你好&provider=deepseek",
+  {
+    headers: { Authorization: `Bearer ${token}` }
+  }
+)
+
+const reader = response.body.getReader()
+const decoder = new TextDecoder()
+
+while (true) {
+  const { value, done } = await reader.read()
+  if (done) break
+  console.log(decoder.decode(value))
+}
+```
+
+SSE事件:
+
+```text
+event: message
+data: {"content":"你好"}
+
+event: done
+data: {"sessionId":1,"provider":"deepseek","model":"deepseek-v4-pro","answer":"你好世界"}
+
+event: error
+data: {"message":"错误信息"}
+```
+
+以`:`开头的行是心跳注释,客户端可以忽略。
+
+## WebSocket流式对话
+
+发送`agent.chat`消息:
+
+```json
+{
+  "type": "agent.chat",
+  "data": {
+    "question": "你好",
+    "provider": "deepseek",
+    "sessionId": 0
+  }
+}
+```
+
+服务端消息:
+
+```json
+{"type":"agent.start","data":{"sessionId":1,"provider":"deepseek","model":"deepseek-v4-pro"}}
+{"type":"agent.chunk","data":{"content":"你好"}}
+{"type":"agent.done","data":{"sessionId":1,"answer":"你好世界"}}
+{"type":"error","data":{"code":500,"message":"错误信息"}}
+```
+
+## Nginx SSE配置
+
+Nginx需要关闭代理缓冲并允许较长的读取超时:
+
+```nginx
+location /api/v1/agent/stream {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Connection '';
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 3600s;
+    chunked_transfer_encoding off;
+}
 ```
 
 # Es
