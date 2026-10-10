@@ -261,7 +261,7 @@
 
 # Version History
 
-> - Latest Version [v3.3.4](version_history.md#v334)
+> - Latest Version [v3.3.5](version_history.md#v335)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions

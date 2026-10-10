@@ -1,5 +1,12 @@
 # Version History
 
+## v3.3.5
+> - Adjust the return value for file upload and deletion
+> - WebSocket introduces an AI assistant for streaming dialogues
+> - The AI assistant has added SSE streaming dialog
+> - Added SSE streaming dialog and session deletion API interfaces
+> - Update the document and add version records
+
 ## v3.3.4
 > - Update and replace the JSON import package
 > - Fixing issues in test case enumeration
