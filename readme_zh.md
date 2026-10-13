@@ -227,9 +227,8 @@
 ![image](docs/images/Dept_2026-08-07_16-40-36.png)
 ![image](docs/images/Role_2026-08-10_11-34-01.png)
 ![image](docs/images/System_2026-08-10_11-34-26.png)
-![image](docs/images/Ai_assistant_2026-08-13_14-10-24_1.png)
-![image](docs/images/Ai_assistant_2026-08-13_14-08-37_2.png)
-![image](docs/images/Ai_assistant_2026-08-13_14-09-41_3.png)
+![image](docs/images/AI_ASSISTANT_1.png)
+![image](docs/images/AI_ASSISTANT_2.png)
 
 ## Gin框架介绍
 
