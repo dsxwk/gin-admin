@@ -7,7 +7,6 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -79,10 +78,6 @@ func (m *MakeModelOld) Execute(values map[string]string) {
 	}
 
 	m.generateFiles(p, values["connection"], tables, m.StringToBool(values["camel"]))
-}
-
-func init() {
-	cli.Register(&MakeModelOld{})
 }
 
 // generateFiles 生成模型文件

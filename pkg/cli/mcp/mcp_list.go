@@ -55,7 +55,3 @@ func (s *McpList) Execute(_ map[string]string) {
 	fmt.Println(writer.Render())
 	color.Cyan("总计 %d 个MCP工具\n", len(tools))
 }
-
-func init() {
-	cli.Register(&McpList{})
-}

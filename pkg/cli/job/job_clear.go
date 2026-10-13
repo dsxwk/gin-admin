@@ -5,7 +5,6 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 
 	"github.com/fatih/color"
 )
@@ -30,8 +29,4 @@ func (s *JobClear) Execute(_ map[string]string) {
 		return
 	}
 	color.Green("所有未消费Job已清除")
-}
-
-func init() {
-	cli.Register(&JobClear{})
 }

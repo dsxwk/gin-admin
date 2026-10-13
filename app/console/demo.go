@@ -1,8 +1,7 @@
-package command
+package console
 
 import (
 	"gin/common/base"
-	"gin/pkg/cli"
 )
 
 type DemoCommand struct {
@@ -32,8 +31,4 @@ func (m *DemoCommand) Help() []base.CommandOption {
 
 func (m *DemoCommand) Execute(_ map[string]string) {
 	// todo
-}
-
-func init() {
-	cli.Register(&DemoCommand{})
 }

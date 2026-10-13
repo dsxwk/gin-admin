@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"time"
@@ -86,8 +85,4 @@ func (m *%s) Rollback(db *gorm.DB) error {
 	}
 
 	flag.Successf("迁移文件生成成功: %s", filePath)
-}
-
-func init() {
-	cli.Register(&MakeMigration{})
 }

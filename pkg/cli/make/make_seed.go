@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"time"
@@ -92,8 +91,4 @@ func (s *%s) Run(db *gorm.DB) error {
 	}
 
 	flag.Successf("seed文件生成成功: %s", filePath)
-}
-
-func init() {
-	cli.Register(&MakeSeed{})
 }

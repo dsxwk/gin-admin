@@ -336,7 +336,7 @@ $ ./cli demo:command --args=11
 
 ```
 ├── app                       # 应用程序
-│   ├── command               # 命令
+│   ├── console               # 命令
 │   ├── controller            # 控制器
 │   ├── enum                  # 枚举
 │   ├── errcode               # 错误码
@@ -518,7 +518,7 @@ event:
 listener:
   listener:list    事件监听列表
 make:
-  make:command     命令创建
+  make:console     控制台命令创建
   make:controller  控制器创建
   make:errcode     错误码创建
   make:es          ES搜索创建
@@ -582,8 +582,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "listener:list"
     },
     {
-      "description": "命令创建",
-      "name": "make:command"
+      "description": "控制台命令创建"
+      "name": "make:console"
     },
     {
       "description": "控制器创建",
@@ -669,7 +669,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
 ## 命令创建帮助
 
 ```bash
-$ go run ./cmd/cli.go make:command -h # --help
+$ go run ./cmd/cli.go make:console -h # --help
   ██████  ██████ ██   ██
   ██   ██ ██      ██ ██
   ██   ██ ██████   ███
@@ -682,18 +682,19 @@ Usage:
   cli [command] [options]
 
 Command:
-  make:command  命令创建
+  make:console  控制台命令创建
 
 Options:
-  -f, --file  文件路径, 如: cronjob/demo  required:true
-  -n, --name  命令名称, 如: demo-test     required:false
-  -d, --desc  描述, 如: command-desc      required:false
+  -p, --path  文件目录, 如: app/console/cronjob, 默认 app/console  required:false
+  -n, --name  命令名称, 如: demo:test     required:true
+  -d, --desc  描述, 如: console-desc      required:false
 ```
 
 ## 命令创建
 
 ```bash
-$ go run ./cmd/cli.go make:command --file=cronjob/demo --name=demo-test --desc=command-desc
+$ go run ./cmd/cli.go make:console --name=demo:test --desc=console-desc
+$ go run ./cmd/cli.go make:console --path=app/console/cronjob --name=demo:test --desc=console-desc
 ```
 
 ## 命令结构
@@ -737,15 +738,11 @@ func (m *DemoCommand) Execute(values map[string]string) {
 	// todo
 }
 
-func init() {
-	cli.Register(&DemoCommand{})
-}
-
 ```
 
 ## 命令注册
 
-> `./cmd/cli.go` 默认注册了 `gin/app/command` 目录下的 `command` 包的所有命令，如果你注册的命令不是一个包，可以在`./cmd/imports/import.go` 中添加导入包的路径。
+> `make:console` 会自动将生成的命令追加到 `app/console/registry.go`；如果命令生成在 `app/console` 之外，也会自动添加对应的包导入。只有手动创建命令文件时，才需要自行维护注册信息。
 
 ```go
 //go:build cli
@@ -753,15 +750,18 @@ func init() {
 package main
 
 import (
-  "gin/app/facade"
-  _ "gin/cmd/import"
+  "gin/app/console"
+  "gin/bootstrap"
   "gin/pkg/cli"
+  "gin/pkg/cli/registry"
+  "slices"
 )
 
 func main() {
-  _ = facade.Config()
+  _ = bootstrap.InitCLI()
 
-  cli.Execute()
+  commands := slices.Concat(console.All(), registry.All())
+  cli.Execute(commands...)
 }
 
 ```

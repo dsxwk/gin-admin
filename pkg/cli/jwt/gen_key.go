@@ -6,7 +6,6 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"strconv"
 )
 
@@ -59,8 +58,4 @@ func (s *Jwt) generateJWTKey(length int) string {
 		flag.Errorf("jwt secret key generate failed: %s", err.Error())
 	}
 	return base64.StdEncoding.EncodeToString(bytes)
-}
-
-func init() {
-	cli.Register(&Jwt{})
 }

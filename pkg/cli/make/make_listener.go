@@ -53,10 +53,6 @@ func (m *MakeListener) Execute(values map[string]string) {
 	m.generateFile(_make, file, eventName)
 }
 
-func init() {
-	cli.Register(&MakeListener{})
-}
-
 func (m *MakeListener) generateFile(_make, file, eventName string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
@@ -92,7 +88,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 	qualifier := ""
 	listenerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if listenerDir != "app/listener" {
-		alias, importErr := addRegistryImport(listenersFile, registryImportPath(file))
+		alias, importErr := cli.AddImport(listenersFile, cli.ImportPath(file))
 		if importErr != nil {
 			flag.Errorf("自动添加监听器导入失败: %s", importErr.Error())
 			return
@@ -106,7 +102,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 		data.Name,
 		eventName,
 	)
-	if err = addRegistryItem(listenersFile, "return []eventbus.ListenerRegistration{", item); err != nil {
+	if err = cli.AddItem(listenersFile, "return []eventbus.ListenerRegistration{", item); err != nil {
 		flag.Errorf("自动注册监听器失败: %s", err.Error())
 		return
 	}

@@ -3,7 +3,6 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -59,10 +58,6 @@ func (m *MakeEvent) Execute(values map[string]string) {
 	name := values["name"]
 	desc := values["desc"]
 	m.generateFile(_make, file, name, desc)
-}
-
-func init() {
-	cli.Register(&MakeEvent{})
 }
 
 func (m *MakeEvent) generateFile(_make, file, name, desc string) {

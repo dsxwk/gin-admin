@@ -3,10 +3,11 @@
 package main
 
 import (
+	"gin/app/console"
 	"gin/bootstrap"
 	"gin/common/flag"
-	_ "gin/common/imports"
 	"gin/pkg/cli"
+	"gin/pkg/cli/registry"
 	"os"
 )
 
@@ -16,5 +17,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	cli.Execute()
+	cli.Execute(append(console.All(), registry.All()...)...)
 }

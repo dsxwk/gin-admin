@@ -84,10 +84,6 @@ func (s *RouteList) Execute(_ map[string]string) {
 	color.Cyan("总计 %d 条路由\n", len(routes))
 }
 
-func init() {
-	cli.Register(&RouteList{})
-}
-
 func (s *RouteList) formatHandlerName(handler string) string {
 	// 去掉 -fm 结尾
 	handler = strings.TrimSuffix(handler, "-fm")

@@ -174,14 +174,14 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, aut
 	servicesFile := filepath.Join("grpc", "service", "registry.go")
 	qualifier := ""
 	if filepath.ToSlash(filepath.Clean(outDir)) != "grpc/service" {
-		alias, importErr := addRegistryImport(servicesFile, registryImportPath(file))
+		alias, importErr := cli.AddImport(servicesFile, cli.ImportPath(file))
 		if importErr != nil {
 			flag.Errorf("自动导入grpc服务失败: %s", importErr.Error())
 			os.Exit(1)
 		}
 		qualifier = alias + "."
 	}
-	if err = addRegistryItem(servicesFile, "return []grpcclient.Service{", qualifier+name+"Service{}"); err != nil {
+	if err = cli.AddItem(servicesFile, "return []grpcclient.Service{", qualifier+name+"Service{}"); err != nil {
 		flag.Errorf("自动注册grpc服务失败: %s", err.Error())
 		os.Exit(1)
 	}
@@ -355,8 +355,4 @@ func buildGrpcUpdateJsonFields(fields []GrpcServiceField) string {
 		lines = append(lines, "    }")
 	}
 	return strings.Join(lines, "\n")
-}
-
-func init() {
-	cli.Register(&MakeGrpcService{})
 }

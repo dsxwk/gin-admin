@@ -55,10 +55,6 @@ func (m *MakeWs) Execute(values map[string]string) {
 	m.generateFile(file, values["file"], values["type"], values["desc"])
 }
 
-func init() {
-	cli.Register(&MakeWs{})
-}
-
 // generateFile 生成WebSocket消息处理器
 func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 	templateFile := m.GetTemplate("ws")
@@ -101,7 +97,7 @@ func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 	qualifier := ""
 	wsDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if wsDir != "websocket" {
-		alias, importErr := addRegistryImport(registryFile, registryImportPath(file))
+		alias, importErr := cli.AddImport(registryFile, cli.ImportPath(file))
 		if importErr != nil {
 			flag.Errorf("自动添加ws处理器导入失败: %s", importErr.Error())
 			return
@@ -110,7 +106,7 @@ func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 	}
 
 	item := "&" + qualifier + name + "Handler{}"
-	if err = addRegistryItem(registryFile, "return []ws.Handler{", item); err != nil {
+	if err = cli.AddItem(registryFile, "return []ws.Handler{", item); err != nil {
 		flag.Errorf("自动注册ws处理器失败: %s", err.Error())
 		return
 	}

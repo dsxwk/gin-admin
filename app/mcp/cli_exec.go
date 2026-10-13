@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"gin/app/console"
 	"gin/pkg/cli"
+	"gin/pkg/cli/registry"
 	"gin/pkg/serviceprovider/mcp"
 	"io"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -47,7 +50,8 @@ func (t *CliExec) Call(_ context.Context, args map[string]any) (any, error) {
 	}
 
 	// 查找命令
-	cmd, exists := cli.Get(cmdName)
+	commands := cli.NewRegistry(slices.Concat(console.All(), registry.All())...)
+	cmd, exists := commands.Get(cmdName)
 	if !exists {
 		available := t.listAvailable()
 		return map[string]any{"error": fmt.Sprintf("命令 %s 不存在。可用命令: %s", cmdName, available)}, nil

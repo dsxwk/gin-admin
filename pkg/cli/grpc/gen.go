@@ -7,7 +7,6 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/pkg"
-	"gin/pkg/cli"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -297,8 +296,4 @@ func (g *GrpcGen) toolName(name string) string {
 		return name + ".exe"
 	}
 	return name
-}
-
-func init() {
-	cli.Register(&GrpcGen{})
 }

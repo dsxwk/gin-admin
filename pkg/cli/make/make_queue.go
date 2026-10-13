@@ -168,7 +168,7 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 		conn,
 		consumerName,
 	)
-	if err = addRegistryItem(filepath.Join("app", "queue", "consumers.go"), "return []servicequeue.ConsumerFactory{", consumerItem); err != nil {
+	if err = cli.AddItem(filepath.Join("app", "queue", "consumers.go"), "return []servicequeue.ConsumerFactory{", consumerItem); err != nil {
 		flag.Errorf("自动注册消费者失败: %s", err.Error())
 		return
 	}
@@ -178,15 +178,11 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 		conn,
 		producerName,
 	)
-	if err = addRegistryItem(filepath.Join("app", "queue", "producers.go"), "return []servicequeue.ProducerFactory{", producerItem); err != nil {
+	if err = cli.AddItem(filepath.Join("app", "queue", "producers.go"), "return []servicequeue.ProducerFactory{", producerItem); err != nil {
 		flag.Errorf("自动注册生产者失败: %s", err.Error())
 		return
 	}
 
 	flag.Successf("消费者文件: %s 生成成功!", f1)
 	flag.Successf("生产者文件: %s 生成成功!", f2)
-}
-
-func init() {
-	cli.Register(&MakeQueue{})
 }

@@ -3,7 +3,6 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
@@ -53,10 +52,6 @@ func (m *MakeFacade) Execute(values map[string]string) {
 
 	file := m.GetMakeFile(fileName, _make)
 	m.generateFacade(_make, file, values["desc"])
-}
-
-func init() {
-	cli.Register(&MakeFacade{})
 }
 
 func (m *MakeFacade) generateFacade(_make, file, facadeDesc string) {

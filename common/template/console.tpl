@@ -2,7 +2,6 @@ package {{.Package}}
 
 import (
 	"gin/common/base"
-	"gin/pkg/cli"
 	"github.com/fatih/color"
 )
 
@@ -35,11 +34,7 @@ func (m *{{.Name}}Command) Help() []base.CommandOption {
     }
 }
 
-func (m *{{.Name}}Command) Execute(args []string) {
-    values := m.ParseFlags(m.Name(), args, m.Help())
+func (m *{{.Name}}Command) Execute(values map[string]string) {
+    _ = values
     color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
-}
-
-func init() {
-	cli.Register(&{{.Name}}Command{})
 }

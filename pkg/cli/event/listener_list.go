@@ -3,7 +3,6 @@ package event
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/cli"
 )
 
 type EventListenerList struct{}
@@ -22,8 +21,4 @@ func (s *EventListenerList) Help() []base.CommandOption {
 
 func (s *EventListenerList) Execute(_ map[string]string) {
 	printEventTable(facade.Event().List(), true)
-}
-
-func init() {
-	cli.Register(&EventListenerList{})
 }

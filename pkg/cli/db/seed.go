@@ -264,7 +264,3 @@ func isSQLCommentEnd(content string, index int) bool {
 		return false
 	}
 }
-
-func init() {
-	cli.Register(&Seed{})
-}

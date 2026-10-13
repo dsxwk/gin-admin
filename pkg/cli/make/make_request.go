@@ -6,7 +6,6 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,10 +54,6 @@ func (m *MakeRequest) Help() []base.CommandOption {
 			false,
 		},
 	}
-}
-
-func init() {
-	cli.Register(&MakeRequest{})
 }
 
 type Field struct {

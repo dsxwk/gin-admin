@@ -3,7 +3,6 @@ package make
 import (
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -50,10 +49,6 @@ func (m *MakeEnum) Execute(values map[string]string) {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, f, values["desc"])
-}
-
-func init() {
-	cli.Register(&MakeEnum{})
 }
 
 func (m *MakeEnum) generateFile(_make, file, desc string) {

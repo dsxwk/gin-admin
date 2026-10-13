@@ -7,7 +7,6 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"go/format"
 	"os"
 	"path/filepath"
@@ -362,8 +361,4 @@ func (m *MakeEs) buildDocFields(fields []esField, indent string) string {
 		))
 	}
 	return strings.Join(lines, "\n")
-}
-
-func init() {
-	cli.Register(&MakeEs{})
 }

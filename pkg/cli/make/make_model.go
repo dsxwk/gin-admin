@@ -7,7 +7,6 @@ import (
 	appmodel "gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"sort"
@@ -139,10 +138,6 @@ func (m *MakeModel) Execute(values map[string]string) {
 		flag.Infof("开始生成模型: %s", table)
 		m.generateModel(_make, db, table, path, conn, camel)
 	}
-}
-
-func init() {
-	cli.Register(&MakeModel{})
 }
 
 // GetColumnInfo 获取完整字段信息

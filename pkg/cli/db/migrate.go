@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/database"
 	"gin/database/migrations"
-	"gin/pkg/cli"
 
 	"github.com/fatih/color"
 )
@@ -69,8 +68,4 @@ CREATE TABLE IF NOT EXISTS migrations (
 		db.Create(&database.Migrations{Migration: m.ID()})
 		flag.Successf("Migration %s 执行成功", m.ID())
 	}
-}
-
-func init() {
-	cli.Register(&Migrate{})
 }

@@ -5,7 +5,6 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
@@ -207,8 +206,4 @@ func grpcModelFieldName(name string) string {
 		return "ID"
 	}
 	return lo.PascalCase(name)
-}
-
-func init() {
-	cli.Register(&MakeGrpcModel{})
 }

@@ -6,7 +6,6 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
@@ -90,10 +89,6 @@ func (m *MakeService) Execute(values map[string]string) {
 	}
 
 	m.generateFile(_make, f, fields)
-}
-
-func init() {
-	cli.Register(&MakeService{})
 }
 
 // Fields 字段信息

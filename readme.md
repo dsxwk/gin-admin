@@ -350,7 +350,7 @@ $ ./cli demo:command --args=11
 
 ```
 ├── app                         # Application
-│   ├── command                 # Command
+│   ├── console                 # Console
 │   ├── controller              # Controller
 │   ├── enum                    # Enum
 │   ├── errcode                 # Errcode
@@ -533,7 +533,7 @@ event:
 listener:
   listener:list    Listener List
 make:
-  make:command     Command Creation
+  make:console     Console Command Creation
   make:controller  Controller Creation
   make:errcode     Errcode Creation
   make:es          ES Search Creation
@@ -597,8 +597,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "listener:list"
     },
     {
-      "description": "Command Creation",
-      "name": "make:command"
+      "description": "Console Command Creation"
+      "name": "make:console"
     },
     {
       "description": "Controller Creation",
@@ -684,7 +684,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
 ## Command Creation Help
 
 ```bash
-$ go run ./cmd/cli.go make:command -h # --help
+$ go run ./cmd/cli.go make:console -h # --help
   ██████  ██████ ██   ██
   ██   ██ ██      ██ ██
   ██   ██ ██████   ███
@@ -697,18 +697,19 @@ Usage:
   cli [command] [options]
 
 Command:
-  make:command  Command Creation
+  make:console  Console Command Creation
 
 Options:
-  -f, --file  File Path, Example: cronjob/demo     required:true
-  -n, --name  Command Name, Example: demo-test     required:false
-  -d, --desc  Description, Example: command-desc   required:false
+  -p, --path  File Directory, Example: app/console/cronjob, default app/console  required:false
+  -n, --name  Command Name, Example: demo:test     required:true
+  -d, --desc  Description, Example: console-desc   required:false
 ```
 
 ## Command Creation
 
 ```bash
-$ go run ./cmd/cli.go make:command --file=cronjob/demo --name=demo-test --desc=command-desc
+$ go run ./cmd/cli.go make:console --name=demo:test --desc=console-desc
+$ go run ./cmd/cli.go make:console --path=app/console/cronjob --name=demo:test --desc=console-desc
 ```
 
 ## Command Structure
@@ -752,15 +753,11 @@ func (m *DemoCommand) Execute(values map[string]string) {
 	// todo
 }
 
-func init() {
-	cli.Register(&DemoCommand{})
-}
-
 ```
 
 ## Command Registration
 
-> `cli.go` registers all commands in the `command` package under the `gin/app/command` directory by default. If the command you registered is not `command` package, you can add the path to import the package in `./common/imports/import.go`.
+> `make:console` automatically appends the generated command to `app/console/registry.go` and adds the package import when the command is generated outside `app/console`. Manual registration is only required when creating command files by hand.
 
 ```go
 //go:build cli
@@ -768,15 +765,18 @@ func init() {
 package main
 
 import (
-	"gin/app/facade"
-	_ "gin/common/imports"
+	"gin/app/console"
+	"gin/bootstrap"
 	"gin/pkg/cli"
+	"gin/pkg/cli/registry"
+	"slices"
 )
 
 func main() {
-	_ = facade.Config()
+	_ = bootstrap.InitCLI()
 
-	cli.Execute()
+	commands := slices.Concat(console.All(), registry.All())
+	cli.Execute(commands...)
 }
 
 ```

@@ -6,7 +6,6 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
@@ -358,8 +357,4 @@ func grpcRequestUpdateValidate(c Column) string {
 		return "float"
 	}
 	return ""
-}
-
-func init() {
-	cli.Register(&MakeGrpcRequest{})
 }

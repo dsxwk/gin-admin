@@ -6,7 +6,6 @@ import (
 	"gin/common/flag"
 	"gin/database"
 	"gin/database/migrations"
-	"gin/pkg/cli"
 
 	"github.com/fatih/color"
 )
@@ -61,8 +60,4 @@ func (s *Rollback) Execute(values map[string]string) {
 		db.Where("migration = ?", m.ID()).Delete(&database.Migrations{})
 		flag.Successf("Migration %s 回滚成功", m.ID())
 	}
-}
-
-func init() {
-	cli.Register(&Rollback{})
 }

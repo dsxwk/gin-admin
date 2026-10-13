@@ -44,5 +44,3 @@ func (s *ConsumerList) Execute(_ map[string]string) {
 	fmt.Println(writer.Render())
 	color.Cyan(fmt.Sprintf("总计 %d 消费者", len(consumers)))
 }
-
-func init() { cli.Register(&ConsumerList{}) }

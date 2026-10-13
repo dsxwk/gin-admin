@@ -52,10 +52,6 @@ func (m *MakeRouter) Execute(values map[string]string) {
 	m.generateFile(_make, f, values["desc"])
 }
 
-func init() {
-	cli.Register(&MakeRouter{})
-}
-
 func (m *MakeRouter) generateFile(_make, file, desc string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
@@ -103,7 +99,7 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 	qualifier := ""
 	routerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if routerDir != "router" {
-		alias, importErr := addRegistryImport(registryFile, registryImportPath(file))
+		alias, importErr := cli.AddImport(registryFile, cli.ImportPath(file))
 		if importErr != nil {
 			flag.Errorf("自动添加路由导入失败: %s", importErr.Error())
 			os.Exit(1)
@@ -112,7 +108,7 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 	}
 
 	item := "&" + qualifier + data.Name + "Router{}"
-	if err = addRegistryItem(registryFile, "return []route.Router{", item); err != nil {
+	if err = cli.AddItem(registryFile, "return []route.Router{", item); err != nil {
 		flag.Errorf("自动注册路由失败: %s", err.Error())
 		os.Exit(1)
 	}

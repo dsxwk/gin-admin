@@ -45,7 +45,7 @@ func (b *BaseCommand) Help() []CommandOption {
 // ParseFlags flag解析
 func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOption) map[string]string {
 	// fs := pflag.NewFlagSet(name, pflag.ExitOnError)
-	// ContinueOnError防止自动退出
+	// ContinueOnError 防止自动退出
 	fs := pflag.NewFlagSet(name, pflag.ContinueOnError)
 	fs.SetOutput(nil) // 禁止默认输出Usage信息
 
@@ -58,7 +58,7 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 	}
 
 	// 解析命令参数
-	err := fs.Parse(args)
+	err := fs.Parse(normalizeArgs(args, opts))
 	if err != nil {
 		flag.Errorf("argument error, %s is not defined.", err.Error())
 		color.Yellow("Usage: ")
@@ -85,6 +85,38 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 	flag.Successf("执行命令: %s %s", name, b.FormatArgs(values))
 
 	return values
+}
+
+// normalizeArgs 规范化单横线长参数
+func normalizeArgs(args []string, opts []CommandOption) []string {
+	if len(args) == 0 {
+		return args
+	}
+
+	longFlags := make(map[string]struct{}, len(opts))
+	for _, opt := range opts {
+		longFlags[opt.Flag.Long] = struct{}{}
+	}
+
+	result := make([]string, len(args))
+	for index, arg := range args {
+		result[index] = arg
+		if len(arg) < 3 || !strings.HasPrefix(arg, "-") || strings.HasPrefix(arg, "--") {
+			continue
+		}
+
+		name := strings.TrimPrefix(arg, "-")
+		value := ""
+		if equalIndex := strings.Index(name, "="); equalIndex >= 0 {
+			value = name[equalIndex:]
+			name = name[:equalIndex]
+		}
+		if _, exists := longFlags[name]; exists {
+			result[index] = "--" + name + value
+		}
+	}
+
+	return result
 }
 
 // PrintArgs 打印参数
@@ -199,7 +231,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 
 	switch _make {
 	case "model-old":
-	case "model", "command", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "ws", "grpc_request", "grpc_service", "grpc_proto":
+	case "model", "console", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "ws", "grpc_request", "grpc_service", "grpc_proto":
 		templateFile = filepath.Join(pkg.RootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")

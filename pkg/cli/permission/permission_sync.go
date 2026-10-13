@@ -42,7 +42,3 @@ func (s *PermissionSync) Execute(_ map[string]string) {
 	cli.StopProgress(tracker, progressDone, true)
 	flag.Successf("权限同步完成")
 }
-
-func init() {
-	cli.Register(&PermissionSync{})
-}

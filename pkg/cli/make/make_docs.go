@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os/exec"
 )
 
@@ -33,8 +32,4 @@ func (m *MakeDocs) Execute(_ map[string]string) {
 
 	fmt.Println(string(output))
 	flag.Successf("Swagger文档生成成功")
-}
-
-func init() {
-	cli.Register(&MakeDocs{})
 }

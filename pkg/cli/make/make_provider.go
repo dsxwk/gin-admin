@@ -72,10 +72,6 @@ func (m *MakeProvider) Execute(values map[string]string) {
 	m.generateProvider(_make, file, values["desc"], values["deps"], values["runner"])
 }
 
-func init() {
-	cli.Register(&MakeProvider{})
-}
-
 func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunner string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
@@ -135,7 +131,7 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 	qualifier := ""
 	providerDir := filepath.ToSlash(filepath.Clean(filepath.Dir(file)))
 	if providerDir != "app/provider" {
-		alias, importErr := addRegistryImport(providersFile, registryImportPath(file))
+		alias, importErr := cli.AddImport(providersFile, cli.ImportPath(file))
 		if importErr != nil {
 			flag.Errorf("自动添加服务提供者导入失败: %s", importErr.Error())
 			return
@@ -143,7 +139,7 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 		qualifier = alias + "."
 	}
 	providerItem := "&" + qualifier + providerName + "Provider{}"
-	if err = addRegistryItem(providersFile, "return []serviceprovider.ServiceProvider{", providerItem); err != nil {
+	if err = cli.AddItem(providersFile, "return []serviceprovider.ServiceProvider{", providerItem); err != nil {
 		flag.Errorf("自动注册服务提供者失败: %s", err.Error())
 		return
 	}

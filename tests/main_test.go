@@ -4,7 +4,6 @@ import (
 	"gin/app/facade"
 	"gin/app/provider"
 	"gin/common/flag"
-	_ "gin/common/imports"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider"
 	"os"

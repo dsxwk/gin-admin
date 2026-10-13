@@ -6,7 +6,6 @@ import (
 	"gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
@@ -207,8 +206,4 @@ func grpcProtoType(c Column) string {
 	}
 
 	return "string"
-}
-
-func init() {
-	cli.Register(&MakeGrpcProto{})
 }

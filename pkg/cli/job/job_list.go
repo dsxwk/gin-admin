@@ -68,7 +68,3 @@ func (s *JobList) Execute(_ map[string]string) {
 	fmt.Println(writer.Render())
 	color.Cyan(fmt.Sprintf("总计 %d 个Job\n", len(jobs)))
 }
-
-func init() {
-	cli.Register(&JobList{})
-}

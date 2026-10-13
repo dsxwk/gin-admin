@@ -9,7 +9,6 @@ import (
 
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg/cli"
 
 	"github.com/samber/lo"
 )
@@ -112,8 +111,4 @@ func (m *MakeErrCode) generateFile(file, structName, snakeName string, prefix in
 	}
 
 	flag.Successf("错误码文件: " + file + " 生成成功!")
-}
-
-func init() {
-	cli.Register(&MakeErrCode{})
 }

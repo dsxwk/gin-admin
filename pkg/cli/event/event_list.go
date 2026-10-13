@@ -79,7 +79,3 @@ func printEventTable(events []eventbus.EventInfo, showListeners bool) {
 
 	color.Cyan(fmt.Sprintf("总计 %d 个事件\n", len(events)))
 }
-
-func init() {
-	cli.Register(&EventList{})
-}
