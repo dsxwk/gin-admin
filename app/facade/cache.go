@@ -1,7 +1,6 @@
 package facade
 
 import (
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/cache"
 
 	"github.com/go-redis/redis/v8"
@@ -19,7 +18,7 @@ import (
 //	facade.Cache("redis").Set("key", "value", 5*time.Minute)
 //	facade.Cache("memory").Get("key")
 func Cache(cacheType ...string) *cache.CacheProxy {
-	manager := container.Default().Cache()
+	manager := App().Cache()
 	if manager == nil {
 		return nil
 	}
@@ -28,7 +27,7 @@ func Cache(cacheType ...string) *cache.CacheProxy {
 
 // Redis 获取Redis缓存实例
 func Redis() *cache.RedisCache {
-	manager := container.Default().Cache()
+	manager := App().Cache()
 	if manager == nil {
 		return nil
 	}

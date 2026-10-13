@@ -2,7 +2,6 @@ package facade
 
 import (
 	"context"
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/http"
 	"time"
 )
@@ -15,7 +14,7 @@ import (
 //	response := facade.Http().WithHeader("Authorization", "Bearer token").WithBody(data).Post(ctx, "https://api.example.com/user")
 func Http() HttpFacade {
 	return HttpFacade{
-		client: container.Default().HTTP(),
+		client: App().HTTP(),
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"gin/app/facade"
 	"gin/app/middleware"
 	"gin/common/ctxkey"
-	"gin/pkg/container"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/ratelimit"
 	"net/http"
@@ -23,11 +22,11 @@ func useRateLimiter(t *testing.T, manager *ratelimit.Manager) {
 	t.Helper()
 
 	previous := facade.RateLimiter()
-	container.Default().SetRateLimit(manager)
+	facade.App().SetRateLimit(manager)
 
 	t.Cleanup(func() {
 		manager.Close()
-		container.Default().SetRateLimit(previous)
+		facade.App().SetRateLimit(previous)
 	})
 }
 

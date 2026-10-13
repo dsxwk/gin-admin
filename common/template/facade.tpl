@@ -2,8 +2,10 @@ package {{.Package}}
 
 // {{.FacadeName}} {{.Desc}}
 // 使用示例:
-//   facade.{{.FacadeVar}}.Method()
-var {{.FacadeName}} = &{{.FacadeVar}}Facade{}
+//   facade.{{.FacadeName}}().Method()
+func {{.FacadeName}}() *{{.FacadeVar}}Facade {
+	return &{{.FacadeVar}}Facade{}
+}
 
 type {{.FacadeVar}}Facade struct{}
 

@@ -3,13 +3,12 @@ package facade
 import (
 	"context"
 	"fmt"
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/job"
 )
 
 // Job 任务门面实例
 func Job() *JobFacade {
-	return &JobFacade{manager: container.Default().Job()}
+	return &JobFacade{manager: App().Job()}
 }
 
 // JobFacade 任务门面

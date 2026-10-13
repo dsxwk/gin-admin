@@ -1,14 +1,12 @@
 package facade
 
 import (
-	"gin/pkg/container"
-
 	"gorm.io/gorm"
 )
 
 // DB 数据库门面-数据库访问统一入口
 func DB(conn ...string) *gorm.DB {
-	manager := container.Default().DB()
+	manager := App().DB()
 	if manager == nil {
 		return nil
 	}

@@ -1,13 +1,12 @@
 package facade
 
 import (
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/queue"
 )
 
 // Queue 队列门面
 func Queue() *QueueFacade {
-	return &QueueFacade{manager: container.Default().Queue()}
+	return &QueueFacade{manager: App().Queue()}
 }
 
 // QueueFacade 队列门面

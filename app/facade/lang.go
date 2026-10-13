@@ -2,7 +2,6 @@ package facade
 
 import (
 	"context"
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/lang"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -15,7 +14,7 @@ import (
 //	localizer := facade.Lang().Localizer("en")
 func Lang() *LangFacade {
 	return &LangFacade{
-		service: container.Default().Lang(),
+		service: App().Lang(),
 	}
 }
 

@@ -1,7 +1,6 @@
 package facade
 
 import (
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/filesystem"
 )
 
@@ -11,5 +10,5 @@ import (
 //	facade.File().Disk("local").Upload(file, "avatar/1.png")
 //	facade.File().Disk("oss").Upload(file, "avatar/1.png")
 func File() *filesystem.Manager {
-	return container.Default().File()
+	return App().File()
 }

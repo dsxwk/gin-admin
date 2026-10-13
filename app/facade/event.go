@@ -2,7 +2,6 @@ package facade
 
 import (
 	"context"
-	"gin/pkg/container"
 	"gin/pkg/serviceprovider/eventbus"
 )
 
@@ -13,7 +12,7 @@ import (
 //	facade.Event().Publish[event.UserLoginEvent](ctx, event)
 func Event() EventFacade {
 	return EventFacade{
-		registry: container.Default().Event(),
+		registry: App().Event(),
 	}
 }
 
