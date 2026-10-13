@@ -250,7 +250,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.3.5](version_history_zh.md#v335)
+> - 最新版本 [v3.3.6](version_history_zh.md#v336)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明

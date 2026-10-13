@@ -1,5 +1,9 @@
 # Version History
 
+## v3.3.6
+> - Addition of `App()` method to the facade and facade optimization
+> - Command line function code refactoring
+
 ## v3.3.5
 > - Adjust the return value for file upload and deletion
 > - WebSocket introduces an AI assistant for streaming dialogues
