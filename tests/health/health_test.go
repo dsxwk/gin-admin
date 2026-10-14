@@ -1,4 +1,4 @@
-package tests
+package health
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package tests
+package middleware
 
 import (
 	"encoding/json"

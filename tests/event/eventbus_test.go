@@ -1,4 +1,4 @@
-package tests
+package event
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package tests
+package cache
 
 import (
 	"gin/app/facade"

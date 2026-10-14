@@ -1,4 +1,4 @@
-package tests
+package notification
 
 import (
 	"gin/app/request"

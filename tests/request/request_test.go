@@ -1,4 +1,4 @@
-package tests
+package request
 
 import (
 	"net/http/httptest"

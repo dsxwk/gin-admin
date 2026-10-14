@@ -1,4 +1,4 @@
-package tests
+package job
 
 import (
 	"context"
