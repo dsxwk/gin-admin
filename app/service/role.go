@@ -110,7 +110,7 @@ func (s *RoleService) Create(ctx context.Context, req request.Roles) (m model.Ro
 		return m, err
 	}
 
-	if req.UserRoles != nil {
+	if len(req.UserRoles) > 0 {
 		for _, v := range req.UserRoles {
 			userRoles = append(userRoles, model.UserRoles{
 				UserID: v.UserId,
@@ -125,7 +125,7 @@ func (s *RoleService) Create(ctx context.Context, req request.Roles) (m model.Ro
 		}
 	}
 
-	if req.RoleMenus != nil {
+	if len(req.RoleMenus) > 0 {
 		for _, v := range req.RoleMenus {
 			roleMenus = append(roleMenus, model.RoleMenus{
 				RoleId: m.ID,
@@ -140,7 +140,7 @@ func (s *RoleService) Create(ctx context.Context, req request.Roles) (m model.Ro
 		}
 	}
 
-	if req.RolePermissions != nil {
+	if len(req.RolePermissions) > 0 {
 		for _, v := range req.RolePermissions {
 			rolePermissions = append(rolePermissions, model.RolePermissions{
 				RoleId:       m.ID,
@@ -157,7 +157,7 @@ func (s *RoleService) Create(ctx context.Context, req request.Roles) (m model.Ro
 	tx.Commit()
 
 	// 同步权限到Redis permission:user:{userId}
-	if req.RolePermissions != nil {
+	if len(req.RolePermissions) > 0 {
 		_ = s.syncRolePermissionsToRedis(ctx, m.ID)
 	}
 

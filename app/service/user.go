@@ -124,7 +124,7 @@ func (s *UserService) Create(ctx context.Context, req request.User) (m model.Use
 		return m, err
 	}
 
-	if req.UserRoles != nil {
+	if len(req.UserRoles) > 0 {
 		for _, v := range req.UserRoles {
 			userRoles = append(userRoles, model.UserRoles{
 				UserID: m.ID,

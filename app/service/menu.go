@@ -173,7 +173,7 @@ func (s *MenuService) Create(ctx context.Context, req request.Menu) (model.Menu,
 		}
 	}
 
-	if req.RoleMenus != nil {
+	if len(req.RoleMenus) > 0 {
 		for _, v := range req.RoleMenus {
 			roleMenus = append(roleMenus, model.RoleMenus{
 				RoleId: v.RoleId,
