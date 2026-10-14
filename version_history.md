@@ -1,5 +1,12 @@
 # Version History
 
+## v3.3.7
+> - Update the front-end effect preview image
+> - Fixing the empty slice issue
+> - Request service and facade optimization
+> - Test cases are grouped by functional categories
+> - Database backup after menu routing structure adjustmen
+
 ## v3.3.6
 > - Addition of `App()` method to the facade and facade optimization
 > - Command line function code refactoring
