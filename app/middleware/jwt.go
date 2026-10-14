@@ -19,8 +19,8 @@ type Jwt struct {
 // Handle jwt中间件
 func (s Jwt) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := facade.Request().GetHeader[string](c, "token", "")
-		if token == "" /* || token == "null"*/ {
+		token := facade.Request().Header[string](c, "token", "")
+		if token == "" {
 			s.Response.Error(c, errcode.Unauthorized())
 			return
 		}

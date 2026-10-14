@@ -192,7 +192,7 @@ func (s *LoginController) Test(c *gin.Context) {
 	_ = facade.Job().Dispatch(ctx, "sync_user", job.SyncUser{UserID: 1, Action: "update"})
 
 	userGrpc, _ := facade.Grpc().Service(proto.NewUserServiceClient)
-	ctx = facade.Grpc().WithToken(ctx, facade.Request().GetHeader[string](c, "token", ""))
+	ctx = facade.Grpc().WithToken(ctx, facade.Request().Header[string](c, "token", ""))
 	grpcResp, err := userGrpc.Detail(ctx, &proto.UserRequest{Id: 1})
 	if err != nil {
 		s.Response.Error(c, err)

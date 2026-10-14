@@ -1,14 +1,10 @@
 package middleware
 
 import (
-	"bytes"
-	"encoding/json"
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
-	"io"
-	"net/http"
 	"strings"
 	"time"
 	"uuid"
@@ -35,15 +31,14 @@ func (s Logger) Handle() gin.HandlerFunc {
 		ctx = ctxkey.WithValue(ctx, ctxkey.IpKey, c.ClientIP())
 		ctx = ctxkey.WithValue(ctx, ctxkey.PathKey, c.Request.URL.Path)
 		ctx = ctxkey.WithValue(ctx, ctxkey.MethodKey, c.Request.Method)
-		ctx = ctxkey.WithValue(ctx, ctxkey.ParamsKey, GetParams(c))
+		ctx = ctxkey.WithValue(ctx, ctxkey.ParamsKey, facade.Request().Params(c))
 		ctx = ctxkey.WithValue(ctx, ctxkey.LangKey, lang)
 		ctx = ctxkey.WithValue(ctx, ctxkey.StartTimeKey, start)
 
 		c.Header("Trace-Id", traceId)
 
 		// 注入日志
-		log := facade.Log()
-		ctx = ctxkey.WithValue(ctx, ctxkey.DebuggerKey, log.WithDebugger(ctx))
+		ctx = ctxkey.WithValue(ctx, ctxkey.DebuggerKey, facade.Log().WithDebugger(ctx))
 
 		// 更新请求的context
 		c.Request = c.Request.WithContext(ctx)
@@ -58,7 +53,7 @@ func (s Logger) Handle() gin.HandlerFunc {
 			c.Request = c.Request.WithContext(currentCtx)
 
 			if facade.Config().Log.Access {
-				log.WithDebugger(currentCtx).Info("Access Log")
+				facade.Log().WithDebugger(currentCtx).Info("Access Log")
 			}
 			debugger.Store.Delete(traceId)
 		}()
@@ -66,36 +61,6 @@ func (s Logger) Handle() gin.HandlerFunc {
 		// 执行后续处理
 		c.Next()
 	}
-}
-
-// GetParams 获取请求参数
-func GetParams(c *gin.Context) any {
-	// GET/DELETE/query 参数
-	if c.Request.Method == http.MethodGet || c.Request.Method == http.MethodDelete {
-		return queryToMap(c.Request.URL.Query())
-	}
-
-	// 其他方法尝试读取body
-	if c.Request.Body == nil {
-		return map[string]any{}
-	}
-
-	body, _err := io.ReadAll(c.Request.Body)
-	if _err != nil || len(body) == 0 {
-		return map[string]any{}
-	}
-
-	// 读完要塞回去,避免后续handler读不到
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-
-	// 尝试解析json
-	var m map[string]any
-	if _e := json.Unmarshal(body, &m); _e == nil {
-		return m
-	}
-
-	// 非json原样记录
-	return string(body)
 }
 
 // getLang 获取语言
@@ -128,15 +93,4 @@ func (s Logger) matchLang(input string, supported []string) string {
 		}
 	}
 	return ""
-}
-
-// queryToMap 将url.Values转为map 避免值变成数组
-func queryToMap(values map[string][]string) map[string]string {
-	m := make(map[string]string, len(values))
-	for k, v := range values {
-		if len(v) > 0 {
-			m[k] = v[0]
-		}
-	}
-	return m
 }

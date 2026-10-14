@@ -24,6 +24,22 @@ type RequestFacade struct {
 	client *request.Client
 }
 
+// Query 获取请求查询参数
+func (r RequestFacade) Query[T any](ctx *gin.Context, key string, defaultValue T) T {
+	if r.client == nil {
+		return defaultValue
+	}
+	return r.client.Query(ctx, key, defaultValue)
+}
+
+// Form 获取请求表单参数
+func (r RequestFacade) Form[T any](ctx *gin.Context, key string, defaultValue T) T {
+	if r.client == nil {
+		return defaultValue
+	}
+	return r.client.Form(ctx, key, defaultValue)
+}
+
 // Path 获取请求路径参数
 // 使用示例:
 //
@@ -32,23 +48,31 @@ func (r RequestFacade) Path[T any](ctx *gin.Context, key string, defaultValue T)
 	if r.client == nil {
 		return defaultValue
 	}
-	return r.client.Path[T](ctx, key, defaultValue)
+	return r.client.Path(ctx, key, defaultValue)
 }
 
-// GetHeader 获取请求头
-func (r RequestFacade) GetHeader[T any](ctx *gin.Context, key string, defaultValue T) T {
+// Header 获取请求头
+func (r RequestFacade) Header[T any](ctx *gin.Context, key string, defaultValue T) T {
 	if r.client == nil {
 		return defaultValue
 	}
-	return r.client.GetHeader[T](ctx, key, defaultValue)
+	return r.client.Header(ctx, key, defaultValue)
 }
 
-// Header 设置请求头
-func (r RequestFacade) Header[T any](ctx *gin.Context, key string, value T) {
+// SetHeader 设置请求头
+func (r RequestFacade) SetHeader[T any](ctx *gin.Context, key string, value T) {
 	if r.client == nil {
 		return
 	}
-	r.client.Header[T](ctx, key, value)
+	r.client.SetHeader(ctx, key, value)
+}
+
+// Params 获取请求参数
+func (r RequestFacade) Params(ctx *gin.Context) any {
+	if r.client == nil {
+		return map[string]any{}
+	}
+	return r.client.Params(ctx)
 }
 
 // Bind 绑定请求参数
