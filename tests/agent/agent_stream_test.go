@@ -8,15 +8,23 @@ import (
 	"gin/pkg/serviceprovider/agent"
 	"gin/pkg/serviceprovider/agent/providers"
 	"gin/pkg/serviceprovider/mcp"
-	wsprovider "gin/pkg/serviceprovider/ws"
+	"gin/pkg/serviceprovider/ws"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/require"
 )
+
+// wsResponse WebSocket测试响应
+type wsResponse struct {
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
+}
 
 // newAgentStreamServer 创建模拟OpenAI SSE服务
 func newAgentStreamServer(t *testing.T, requestBody chan map[string]any) *httptest.Server {
@@ -110,11 +118,11 @@ func (p *agentStreamTestProvider) StreamChat(_ context.Context, _ []agent.Messag
 type agentStreamTestHandler struct{}
 
 // Match 匹配全部消息
-func (h *agentStreamTestHandler) Match(_ wsprovider.Message) bool { return true }
+func (h *agentStreamTestHandler) Match(_ ws.Message) bool { return true }
 
 // Handle 处理流式对话
-func (h *agentStreamTestHandler) Handle(ctx context.Context, connection wsprovider.Connection, _ wsprovider.Message) error {
-	if err := wsprovider.SendJSON(connection, "agent.start", map[string]any{"sessionId": 1}); err != nil {
+func (h *agentStreamTestHandler) Handle(ctx context.Context, connection ws.Connection, _ ws.Message) error {
+	if err := ws.SendJSON(connection, "agent.start", map[string]any{"sessionId": 1}); err != nil {
 		return err
 	}
 
@@ -123,13 +131,13 @@ func (h *agentStreamTestHandler) Handle(ctx context.Context, connection wsprovid
 		if chunk.Content == "" {
 			return nil
 		}
-		return wsprovider.SendJSON(connection, "agent.chunk", map[string]any{"content": chunk.Content})
+		return ws.SendJSON(connection, "agent.chunk", map[string]any{"content": chunk.Content})
 	})
 	if err != nil {
-		return wsprovider.SendError(connection, err)
+		return ws.SendError(connection, err)
 	}
 
-	return wsprovider.SendJSON(connection, "agent.done", map[string]any{"answer": answer})
+	return ws.SendJSON(connection, "agent.done", map[string]any{"answer": answer})
 }
 
 // TestOpenAICompatChatTimeout 非流式请求超时测试
@@ -152,8 +160,8 @@ func TestOpenAICompatChatTimeout(t *testing.T) {
 
 // TestWebSocketAgentStream WebSocket流式对话测试
 func TestWebSocketAgentStream(t *testing.T) {
-	manager := wsprovider.NewManager(
-		wsprovider.Options{Shards: 1, MaxConnections: 2},
+	manager := ws.NewManager(
+		ws.Options{Shards: 1, MaxConnections: 2},
 		&agentStreamTestHandler{},
 	)
 	t.Cleanup(func() { _ = manager.Close(context.Background()) })
@@ -195,4 +203,56 @@ func TestWebSocketAgentStream(t *testing.T) {
 
 	require.True(t, done)
 	require.Equal(t, "你好，流式对话", answer)
+}
+
+// dialWsTestServer 连接WebSocket测试服务
+func dialWsTestServer(t *testing.T, serverURL string) *websocket.Conn {
+	t.Helper()
+
+	target := "ws" + strings.TrimPrefix(serverURL, "http") + "/ws"
+	conn, response, err := websocket.DefaultDialer.Dial(target, nil)
+	if response != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
+	require.NoError(t, err)
+	require.NotNil(t, conn)
+
+	t.Cleanup(func() { _ = conn.Close() })
+
+	return conn
+}
+
+// newWsAuthTestServer 创建带登录用户的WebSocket测试服务
+func newWsAuthTestServer(t *testing.T, manager *ws.Manager, userID int64) *httptest.Server {
+	t.Helper()
+
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.GET("/ws", func(c *gin.Context) {
+		ctx := ws.WithUserID(c.Request.Context(), userID)
+		c.Request = c.Request.WithContext(ctx)
+		manager.ServeHTTP(c.Writer, c.Request)
+	})
+
+	server := httptest.NewServer(engine)
+	t.Cleanup(server.Close)
+
+	return server
+}
+
+// writeWsMessage 写入WebSocket消息
+func writeWsMessage(t *testing.T, conn *websocket.Conn, messageType int, data []byte) {
+	t.Helper()
+	require.NoError(t, conn.WriteMessage(messageType, data))
+}
+
+// readWsMessage 读取WebSocket消息
+func readWsMessage(t *testing.T, conn *websocket.Conn) (int, []byte) {
+	t.Helper()
+
+	require.NoError(t, conn.SetReadDeadline(time.Now().Add(2*time.Second)))
+	messageType, data, err := conn.ReadMessage()
+	require.NoError(t, err)
+
+	return messageType, data
 }
