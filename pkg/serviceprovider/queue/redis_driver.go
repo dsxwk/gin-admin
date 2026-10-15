@@ -2,7 +2,6 @@ package queue
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"gin/common/flag"
@@ -13,6 +12,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// RedisConsumer Redis消费者基类
 type RedisConsumer struct {
 	Queue        string
 	DelayedQueue string
@@ -25,6 +25,7 @@ type RedisConsumer struct {
 	cancel       context.CancelFunc
 }
 
+// Status 获取消费者状态
 func (c *RedisConsumer) Status() string {
 	c.statusMu.RLock()
 	defer c.statusMu.RUnlock()
@@ -34,6 +35,7 @@ func (c *RedisConsumer) Status() string {
 	return c.status
 }
 
+// setStatus 设置消费者状态
 func (c *RedisConsumer) setStatus(status string) {
 	c.statusMu.Lock()
 	defer c.statusMu.Unlock()
@@ -56,7 +58,8 @@ func (c *RedisConsumer) delayedQueue() string {
 	return c.Queue + ":delayed"
 }
 
-func (c *RedisConsumer) Start[T ConsumerHandler](h T) {
+// Start 启动消费者
+func (c *RedisConsumer) Start(handler ConsumerHandler) {
 	c.setStatus(ConsumerStatusStarting)
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 	go func() {
@@ -67,13 +70,14 @@ func (c *RedisConsumer) Start[T ConsumerHandler](h T) {
 				flag.Infof("[Redis] consumer %s stopped", c.Queue)
 				return
 			default:
-				c.consumeLoop(h)
+				c.consumeLoop(handler)
 			}
 		}
 	}()
 }
 
-func (c *RedisConsumer) consumeLoop[T ConsumerHandler](h T) {
+// consumeLoop 循环消费消息
+func (c *RedisConsumer) consumeLoop(handler ConsumerHandler) {
 	client := c.client()
 	if client == nil {
 		c.setStatus(ConsumerStatusError)
@@ -81,19 +85,20 @@ func (c *RedisConsumer) consumeLoop[T ConsumerHandler](h T) {
 		return
 	}
 	c.setStatus(ConsumerStatusRunning)
-	if h.IsDelay() || c.Dual {
-		c.processDelayed(client, h)
+	if handler.IsDelay() || c.Dual {
+		c.processDelayed(client, handler)
 	}
-	if h.IsDelay() && !c.Dual {
+	if handler.IsDelay() && !c.Dual {
 		time.Sleep(time.Second)
 		return
 	}
-	if err := c.processNormal(client, h); err != nil {
+	if err := c.processNormal(client, handler); err != nil {
 		time.Sleep(time.Second)
 	}
 }
 
-func (c *RedisConsumer) processNormal[T ConsumerHandler](client *redis.Client, h T) error {
+// processNormal 处理普通队列消息
+func (c *RedisConsumer) processNormal(client *redis.Client, handler ConsumerHandler) error {
 	result, err := client.BRPop(c.ctx, 3*time.Second, c.Queue).Result()
 	if err != nil {
 		if c.ctx.Err() != nil || errors.Is(err, redis.Nil) {
@@ -103,11 +108,12 @@ func (c *RedisConsumer) processNormal[T ConsumerHandler](client *redis.Client, h
 		return err
 	}
 	c.setStatus(ConsumerStatusRunning)
-	c.handleMessage([]byte(result[1]), h)
+	c.handleMessage([]byte(result[1]), handler)
 	return nil
 }
 
-func (c *RedisConsumer) processDelayed[T ConsumerHandler](client *redis.Client, h T) {
+// processDelayed 处理延迟队列消息
+func (c *RedisConsumer) processDelayed(client *redis.Client, handler ConsumerHandler) {
 	delayedKey := c.delayedQueue()
 	now := float64(time.Now().UnixMilli())
 	members, err := ClaimRedisDelayedMessages(c.ctx, client, delayedKey, now, 10)
@@ -122,29 +128,20 @@ func (c *RedisConsumer) processDelayed[T ConsumerHandler](client *redis.Client, 
 	}
 	c.setStatus(ConsumerStatusRunning)
 	for _, member := range members {
-		c.handleMessage(DecodeRedisDelayedMessage(member), h)
+		c.handleMessage(DecodeRedisDelayedMessage(member), handler)
 	}
 }
 
-func (c *RedisConsumer) handleMessage[T ConsumerHandler](body []byte, h T) {
-	retry := h.Retry()
-	var handleErr error
-	for attempt := 0; attempt < retry || attempt == 0; attempt++ {
-		handleErr = TryHandle(c.ctx, h, body)
-		if handleErr == nil {
-			return
-		}
-		if retry > 0 && attempt < retry {
-			time.Sleep(time.Second)
-		}
-	}
-	if handleErr != nil {
+// handleMessage 处理消息
+func (c *RedisConsumer) handleMessage(body []byte, handler ConsumerHandler) {
+	if handleErr := handleWithRetry(c.ctx, handler, body, handler.Retry()); handleErr != nil {
 		if c.Log != nil {
 			c.Log.Error(fmt.Sprintf("[Redis] handle error: %v", handleErr))
 		}
 	}
 }
 
+// Stop 停止消费者
 func (c *RedisConsumer) Stop() error {
 	if c.cancel != nil {
 		c.cancel()
@@ -153,6 +150,7 @@ func (c *RedisConsumer) Stop() error {
 	return nil
 }
 
+// RedisProducer Redis生产者基类
 type RedisProducer struct {
 	Queue        string
 	DelayedQueue string
@@ -160,19 +158,16 @@ type RedisProducer struct {
 	Owner        Producer
 }
 
+// SetOwner 设置生产者归属
+func (p *RedisProducer) SetOwner(owner Producer) {
+	p.Owner = owner
+}
+
+// Publish 发布消息
 func (p *RedisProducer) Publish(ctx context.Context, msg any) error {
-	var body []byte
-	switch v := msg.(type) {
-	case []byte:
-		body = v
-	case string:
-		body = []byte(v)
-	default:
-		var err error
-		body, err = json.Marshal(msg)
-		if err != nil {
-			return err
-		}
+	body, err := marshalMessage(msg)
+	if err != nil {
+		return err
 	}
 	var delay time.Duration
 	if p.Owner != nil && p.Owner.IsDelay() && p.Owner.DelayMs() > 0 {
@@ -197,4 +192,5 @@ func (p *RedisProducer) PublishRaw(ctx context.Context, body []byte, delay time.
 	return PublishRedisMessage(ctx, client, p.Queue, delayedQueue, body, delay)
 }
 
+// Close 关闭生产者
 func (p *RedisProducer) Close() error { return nil }

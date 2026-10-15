@@ -1,7 +1,7 @@
 package provider
 
 import (
-	appmcp "gin/app/mcp"
+	"gin/app/mcp"
 	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
@@ -26,7 +26,7 @@ func (p *McpProvider) Register(app *container.Container) {
 	handler, err := servicemcp.NewHandler(servicemcp.ServerInfo{
 		Name:    cfg.App.Name,
 		Version: cfg.App.CliVersion,
-	}, cfg, appmcp.All())
+	}, cfg, mcp.All())
 	if err != nil {
 		flag.Errorf("MCP服务注册失败: %v", err)
 		return

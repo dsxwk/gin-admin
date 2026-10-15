@@ -2,13 +2,13 @@ package provider
 
 import (
 	"context"
-	appjob "gin/app/job"
+	"gin/app/job"
 	"gin/common/flag"
 	"gin/pkg"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/eventbus"
-	"gin/pkg/serviceprovider/job"
+	servicejob "gin/pkg/serviceprovider/job"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
 	"time"
@@ -36,8 +36,8 @@ func (p *JobProvider) Register(app *container.Container) {
 		bus = registry.Bus()
 	}
 
-	jobs := appjob.All()
-	manager, err := job.NewManager(
+	jobs := job.All()
+	manager, err := servicejob.NewManager(
 		app.Config,
 		app.Log(),
 		func() *redis.Client {
@@ -91,7 +91,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 	for conn := range connSet {
 		switch conn {
 		case "redis":
-			p.consumers = append(p.consumers, job.NewRedisConsumer(manager, &queue.RedisConsumer{
+			p.consumers = append(p.consumers, servicejob.NewRedisConsumer(manager, &queue.RedisConsumer{
 				Queue:        "job:queue",
 				DelayedQueue: "job:queue:delayed",
 				GetClient: func() *redis.Client {
@@ -117,7 +117,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 					CommitInterval: 0,
 					MaxWait:        5 * time.Second,
 				})
-				p.consumers = append(p.consumers, job.NewKafkaConsumer(manager, &queue.KafkaConsumer{
+				p.consumers = append(p.consumers, servicejob.NewKafkaConsumer(manager, &queue.KafkaConsumer{
 					Kafka: driver,
 					Topic: "job",
 					Group: "job_group",
@@ -132,7 +132,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 					p.log.Error(pkg.Sprintf("Job RabbitMQ 连接失败: %v", err))
 					continue
 				}
-				p.consumers = append(p.consumers, job.NewRabbitmqConsumer(manager, &queue.RabbitmqConsumer{
+				p.consumers = append(p.consumers, servicejob.NewRabbitmqConsumer(manager, &queue.RabbitmqConsumer{
 					Mq:       driver,
 					Queue:    "job",
 					Exchange: "job_exchange",

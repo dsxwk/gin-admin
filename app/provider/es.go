@@ -5,12 +5,12 @@ import (
 	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
-	esclient "gin/pkg/serviceprovider/es"
+	servicees "gin/pkg/serviceprovider/es"
 )
 
 // EsProvider ES服务提供者
 type EsProvider struct {
-	client *esclient.Client
+	client *servicees.Client
 }
 
 // Name 服务提供者名称
@@ -29,7 +29,7 @@ func (p *EsProvider) Register(app *container.Container) {
 		return
 	}
 
-	p.client = esclient.NewClient(cfg.Es)
+	p.client = servicees.NewClient(cfg.Es)
 	app.SetES(p.client)
 }
 

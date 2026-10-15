@@ -1,7 +1,7 @@
 package provider
 
 import (
-	applistener "gin/app/listener"
+	"gin/app/listener"
 	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
@@ -20,7 +20,7 @@ func (p *EventProvider) Name() string {
 func (p *EventProvider) Register(app *container.Container) {
 	registry := eventbus.NewRegistry(eventbus.Default())
 	app.SetEvent(registry)
-	eventbus.Register(registry, applistener.All())
+	eventbus.Register(registry, listener.All())
 }
 
 // Boot 启动事件服务
