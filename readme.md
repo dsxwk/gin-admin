@@ -2581,7 +2581,7 @@ listenerRegister(&UserLoginListener{}, event.UserLoginEvent{})
 > Executing the queue creation command will create both consumers and producers based on the connection type
 > (kafka/rabbitmq/redis). You only need to implement the `Handle` method to process your business logic, with automatic
 > error retries and delayed queue support. Generated consumers and producers are also appended to the registration
-> lists in `app/queue/consumers.go` and `app/queue/producers.go`.
+> lists in `app/queue/registry.go`.
 
 ## Queue Creation Help
 
@@ -2733,10 +2733,10 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 }
 ```
 
-`make:queue` automatically appends the generated consumer to `app/queue/consumers.go`:
+`make:queue` automatically appends the generated consumer to `app/queue/registry.go`:
 
 ```go
-ConsumerFactory("kafka", appconsumer.NewKafkaDemoConsumer)
+sq.NewConsumerFactory("kafka", consumer.NewKafkaDemoConsumer)
 ```
 
 ### Generated Producer Example (Kafka)
@@ -2805,10 +2805,10 @@ func (p *KafkaDemoProducer) Close() error {
 }
 ```
 
-`make:queue` automatically appends the generated producer to `app/queue/producers.go`:
+`make:queue` automatically appends the generated producer to `app/queue/registry.go`:
 
 ```go
-ProducerFactory("kafka", appproducer.NewKafkaDemoProducer)
+sq.NewProducerFactory("kafka", producer.NewKafkaDemoProducer)
 ```
 
 ## Queue Usage

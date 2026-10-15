@@ -2567,7 +2567,7 @@ listenerRegister(&UserLoginListener{}, event.UserLoginEvent{})
 # 队列
 
 > 执行队列创建命令会根据连接类型 (kafka/rabbitmq/redis)同时创建消费者和生产者. 你只需要实现`Handle`方法完善业务逻辑即可,
-> 支持自动错误重试以及延迟队列.生成的消费者和生产者也会被添加到注册表中,在`app/queue/consumers.go`和`app/queue/producers.go`中的列表。
+> 支持自动错误重试以及延迟队列.生成的消费者和生产者也会被添加到注册表`app/queue/registry.go`中。
 
 ## 队列创建帮助
 
@@ -2718,10 +2718,10 @@ func (c *KafkaDemoConsumer) Handle(payload any) error {
 }
 ```
 
-`make:queue` 会自动将生成的消费者追加到 `app/queue/consumers.go`:
+`make:queue` 会自动将生成的消费者追加到 `app/queue/registry.go`:
 
 ```go
-ConsumerFactory("kafka", appconsumer.NewKafkaDemoConsumer)
+sq.NewConsumerFactory("kafka", consumer.NewKafkaDemoConsumer)
 ```
 
 ### 生成的生产者示例 (Kafka)
@@ -2790,10 +2790,10 @@ func (p *KafkaDemoProducer) Close() error {
 }
 ```
 
-`make:queue` 会自动将生成的生产者追加到 `app/queue/producers.go`:
+`make:queue` 会自动将生成的生产者追加到 `app/queue/registry.go`:
 
 ```go
-ProducerFactory("kafka", appproducer.NewKafkaDemoProducer)
+sq.NewProducerFactory("kafka", producer.NewKafkaDemoProducer)
 ```
 
 ## 队列使用
