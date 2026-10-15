@@ -10,10 +10,10 @@ type ExportReportJob struct{}
 
 // ExportReport 导出报表参数
 type ExportReport struct {
-	ReportType string `json:"report_type"`
-	StartDate  string `json:"start_date"`
-	EndDate    string `json:"end_date"`
-	UserID     int64  `json:"user_id"`
+	ReportType string `json:"reportType"`
+	StartDate  string `json:"startDate"`
+	EndDate    string `json:"endDate"`
+	UserID     int64  `json:"userId"`
 }
 
 func (j *ExportReportJob) Name() string        { return "export_report" }

@@ -10,7 +10,7 @@ type SyncUserJob struct{}
 
 // SyncUser 同步用户参数
 type SyncUser struct {
-	UserID int64  `json:"user_id"`
+	UserID int64  `json:"userId"`
 	Action string `json:"action"`
 }
 
