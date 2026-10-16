@@ -3,7 +3,7 @@ package {{.Package}}
 import (
 	"gin/app/facade"
 	{{- if eq .Type "rabbitmq"}}
-	"gin/pkg"
+	"fmt"
 	{{- end}}
 	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
@@ -27,7 +27,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Producer() *queue.ProducerAdapter {
 	log := facade.Log()
 	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
-		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+		log.Error(fmt.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 	{{- end}}

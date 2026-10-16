@@ -2,8 +2,8 @@ package {{.Package}}
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
-	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
 	{{- if eq .Type "kafka"}}
 	"time"
@@ -35,7 +35,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *queue.ConsumerAdapter[{{
 	log := facade.Log()
 	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
-		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+		log.Error(fmt.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 	{{- end}}
@@ -77,7 +77,7 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *queue.ConsumerAdapter[{{
 
 // handle{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}} 处理{{.TypeTitle}}消息
 func handle{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}}(_ context.Context, data *{{.TypeTitle}}{{.Name}}Payload) error {
-	facade.Log().Info(pkg.Sprintf("{{.TypeTitle}} Received Msg: %v", data))
+	facade.Log().Info(fmt.Sprintf("{{.TypeTitle}} Received Msg: %v", data))
 	// 待处理业务逻辑
 	return nil
 }

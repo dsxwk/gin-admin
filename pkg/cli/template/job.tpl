@@ -2,8 +2,8 @@ package job
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
-	"gin/pkg"
 	servicejob "gin/pkg/serviceprovider/job"
 )
 
@@ -27,7 +27,7 @@ func New{{.CamelName}}Job() *servicejob.Adapter[{{.CamelName}}] {
 
 // handle{{.CamelName}} 处理{{.Description}}
 func handle{{.CamelName}}(_ context.Context, data *{{.CamelName}}) error {
-	facade.Log().Info(pkg.Sprintf("Job [{{.Name}}] 处理: %v", data))
+	facade.Log().Info(fmt.Sprintf("Job [{{.Name}}] 处理: %v", data))
 	// 待处理业务逻辑
 	return nil
 }
