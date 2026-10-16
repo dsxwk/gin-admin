@@ -8,7 +8,7 @@ import (
 
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/database/migrations"
 	"gin/pkg/cli"
 
@@ -45,7 +45,7 @@ func (s *Seed) Help() []base.CommandOption {
 }
 
 func (s *Seed) Execute(values map[string]string) {
-	flag.Infof("开始执行数据填充...")
+	terminal.Infof("开始执行数据填充...")
 
 	if s.StringToBool(values["init"]) {
 		s.initDatabase()
@@ -54,7 +54,7 @@ func (s *Seed) Execute(values map[string]string) {
 
 	db := facade.DB()
 	if db == nil {
-		flag.Errorf("数据库未初始化")
+		terminal.Errorf("数据库未初始化")
 		return
 	}
 	db = withoutSQLLog(db)
@@ -69,7 +69,7 @@ func (s *Seed) Execute(values map[string]string) {
 	}
 
 	if id != "" && total == 0 {
-		flag.Errorf("Seed ID: %s 不存在", id)
+		terminal.Errorf("Seed ID: %s 不存在", id)
 		return
 	}
 
@@ -80,11 +80,11 @@ func (s *Seed) Execute(values map[string]string) {
 		}
 		if err := seed.Run(db); err != nil {
 			cli.StopProgress(tracker, progressDone, false)
-			flag.Errorf("Seed %s 执行失败: %v", seed.ID(), err)
+			terminal.Errorf("Seed %s 执行失败: %v", seed.ID(), err)
 			return
 		}
 		tracker.Increment(1)
-		flag.Successf("Seed %s 执行成功", seed.ID())
+		terminal.Successf("Seed %s 执行成功", seed.ID())
 	}
 	cli.StopProgress(tracker, progressDone, true)
 }
@@ -94,36 +94,36 @@ func (s *Seed) initDatabase() {
 	file := filepath.Join(pathx.RootPath(), "database", "gin.sql")
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		flag.Errorf("初始化sql文件不存在: %s", file)
+		terminal.Errorf("初始化sql文件不存在: %s", file)
 		return
 	}
 
 	sqlBytes, err := os.ReadFile(file)
 	if err != nil {
-		flag.Errorf("读取初始化sql文件失败: %v", err)
+		terminal.Errorf("读取初始化sql文件失败: %v", err)
 		return
 	}
 
 	statements, err := parseSQLStatements(string(sqlBytes))
 	if err != nil {
-		flag.Errorf("解析初始化sql文件失败: %v", err)
+		terminal.Errorf("解析初始化sql文件失败: %v", err)
 		return
 	}
 	if len(statements) == 0 {
-		flag.Errorf("初始化sql文件没有可执行语句")
+		terminal.Errorf("初始化sql文件没有可执行语句")
 		return
 	}
 
 	db := facade.DB()
 	if db == nil {
-		flag.Errorf("数据库未初始化")
+		terminal.Errorf("数据库未初始化")
 		return
 	}
 	db = withoutSQLLog(db)
 
 	tx := db.Begin()
 	if tx.Error != nil {
-		flag.Errorf("开启事务失败: %v", tx.Error)
+		terminal.Errorf("开启事务失败: %v", tx.Error)
 		return
 	}
 
@@ -132,7 +132,7 @@ func (s *Seed) initDatabase() {
 		if err = tx.Exec(stmt).Error; err != nil {
 			_ = tx.Rollback().Error
 			cli.StopProgress(tracker, progressDone, false)
-			flag.Errorf("执行sql失败: %v\nsql: %s", err, stmt)
+			terminal.Errorf("执行sql失败: %v\nsql: %s", err, stmt)
 			return
 		}
 		tracker.Increment(1)
@@ -140,12 +140,12 @@ func (s *Seed) initDatabase() {
 
 	if err = tx.Commit().Error; err != nil {
 		cli.StopProgress(tracker, progressDone, false)
-		flag.Errorf("提交事务失败: %v", err)
+		terminal.Errorf("提交事务失败: %v", err)
 		return
 	}
 
 	cli.StopProgress(tracker, progressDone, true)
-	flag.Successf("数据库初始化成功, 共执行 %d 条sql", len(statements))
+	terminal.Successf("数据库初始化成功, 共执行 %d 条sql", len(statements))
 }
 
 // withoutSQLLog 临时关闭sql输出

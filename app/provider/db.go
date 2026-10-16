@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/orm"
+	"gin/pkg/terminal"
 )
 
 // DbProvider 数据库服务提供者
@@ -27,10 +27,10 @@ func (p *DbProvider) Register(app *container.Container) {
 func (p *DbProvider) Boot(app *container.Container) {
 	driver := app.Config().Databases.Driver
 	if _, err := p.manager.Connect(driver); err != nil {
-		flag.Errorf("%v", err)
+		terminal.Errorf("%v", err)
 		return
 	}
-	flag.Infof("%s数据库连接成功", driver)
+	terminal.Infof("%s数据库连接成功", driver)
 }
 
 // Dependencies 依赖配置和日志服务

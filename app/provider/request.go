@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/request"
+	"gin/pkg/terminal"
 )
 
 // RequestProvider 请求验证服务提供者
@@ -22,7 +22,7 @@ func (p *RequestProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *RequestProvider) Boot(_ *container.Container) {
-	flag.Infof("请求验证服务启动成功")
+	terminal.Infof("请求验证服务启动成功")
 }
 
 // Dependencies 依赖服务

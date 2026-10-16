@@ -4,7 +4,7 @@ import (
 {{- if .HasRunner}}
 	"context"
 {{- end}}
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 )
@@ -26,7 +26,7 @@ func (p *{{.ProviderName}}Provider) Register(app *container.Container) {
 // Boot 启动服务
 func (p *{{.ProviderName}}Provider) Boot(app *container.Container) {
 	// TODO: 初始化服务
-	flag.Infof("{{.ProviderName}}服务启动成功")
+	terminal.Infof("{{.ProviderName}}服务启动成功")
 }
 {{- if .HasRunner}}
 

@@ -2,7 +2,7 @@ package orm
 
 import (
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 	servicelogger "gin/pkg/serviceprovider/logger"
 	"sync"
@@ -95,7 +95,7 @@ func (m *Manager) Connect(name string) (*gorm.DB, error) {
 func (m *Manager) Connection(name string) *gorm.DB {
 	db, err := m.Connect(name)
 	if err != nil {
-		flag.Errorf("%v", err)
+		terminal.Errorf("%v", err)
 		return nil
 	}
 	return db
@@ -105,7 +105,7 @@ func (m *Manager) Connection(name string) *gorm.DB {
 func (m *Manager) Reset(name string) *gorm.DB {
 	db, err := m.Reconnect(name)
 	if err != nil {
-		flag.Errorf("%v", err)
+		terminal.Errorf("%v", err)
 		return nil
 	}
 	return db

@@ -376,9 +376,7 @@ $ ./cli demo:command --args=11
 ├── cmd                         # Command Script Tool
 │   └── cli.go                  # Entry File
 ├── common                      # Common Module
-│   ├── base                    # Base
-│   ├── flag                    # Flag
-│   └── template                # Template
+│   └── base                    # Base
 ├── config                      # Config File
 ├── database                    # Database Test File
 ├── docs                        # Swagger Doc
@@ -390,7 +388,8 @@ $ ./cli demo:command --args=11
 ├── pkg                         # Package
 │   ├── cli                     # Command
 │   │   ├── grpcgen             # gRPC Code Generator
-│   │   └── make                # Make Command
+│   │   ├── make                # Make Command
+│   │   └── template            # Generation Template
 │   ├── container               # Container
 │   ├── convert                 # Type Conversion
 │   ├── cryptox                 # Crypto Utilities
@@ -416,6 +415,7 @@ $ ./cli demo:command --args=11
 │   │   ├── request             # Request
 │   │   └── ws                  # WebSocket
 │   ├── stringx                 # String Utilities
+│   ├── terminal                # Terminal Output
 │   ├── timex                   # Time Processing
 │   └── treex                   # Tree Utilities
 ├── public                      # Static Resources

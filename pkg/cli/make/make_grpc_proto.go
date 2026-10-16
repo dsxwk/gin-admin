@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -76,7 +76,7 @@ func (m *MakeGrpcProto) Execute(values map[string]string) {
 		if table == "" {
 			continue
 		}
-		flag.Infof("开始生成grpc proto: %s", table)
+		terminal.Infof("开始生成grpc proto: %s", table)
 		m.generateProto(db, table, outDir)
 	}
 }
@@ -85,7 +85,7 @@ func (m *MakeGrpcProto) Execute(values map[string]string) {
 func (m *MakeGrpcProto) generateProto(db *gorm.DB, table, outDir string) {
 	columns, err := GetColumnInfo(db, table)
 	if err != nil {
-		flag.Errorf("获取表字段失败: %s", err.Error())
+		terminal.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -94,7 +94,7 @@ func (m *MakeGrpcProto) generateProto(db *gorm.DB, table, outDir string) {
 
 	tpl, err := template.ParseFiles(m.GetTemplate("grpc_proto"))
 	if err != nil {
-		flag.Errorf("解析grpc proto模板失败: %s", err.Error())
+		terminal.Errorf("解析grpc proto模板失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -124,11 +124,11 @@ func (m *MakeGrpcProto) generateProto(db *gorm.DB, table, outDir string) {
 		return
 	}
 	if err = tpl.Execute(f, data); err != nil {
-		flag.Errorf("生成grpc proto失败: %s", err.Error())
+		terminal.Errorf("生成grpc proto失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("grpc proto文件: " + file + " 生成成功!")
+	terminal.Successf("grpc proto文件: " + file + " 生成成功!")
 }
 
 // buildGrpcProtoFields 构建grpc proto字段

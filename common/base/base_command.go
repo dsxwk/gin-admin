@@ -3,13 +3,13 @@ package base
 import (
 	"bufio"
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/pathx"
+	"gin/pkg/stringx"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"gin/pkg/pathx"
-	"gin/pkg/stringx"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/spf13/pflag"
@@ -61,7 +61,7 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 	// 解析命令参数
 	err := fs.Parse(normalizeArgs(args, opts))
 	if err != nil {
-		flag.Errorf("argument error, %s is not defined.", err.Error())
+		terminal.Errorf("argument error, %s is not defined.", err.Error())
 		color.Yellow("Usage: ")
 		fmt.Printf("  cli %s [args]\n", name)
 		color.Yellow("\nAvailable args:")
@@ -83,7 +83,7 @@ func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOptio
 		}
 	}
 
-	flag.Successf("执行命令: %s %s", name, b.FormatArgs(values))
+	terminal.Successf("执行命令: %s %s", name, b.FormatArgs(values))
 
 	return values
 }
@@ -189,7 +189,7 @@ func (b *BaseCommand) StringToBool(s string) bool {
 }
 
 func (b *BaseCommand) ExitError(msg string) {
-	flag.Errorf("%s", msg)
+	terminal.Errorf("%s", msg)
 	os.Exit(1)
 }
 
@@ -233,7 +233,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 	switch _make {
 	case "model-old":
 	case "model", "console", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "ws", "grpc_request", "grpc_service", "grpc_proto":
-		templateFile = filepath.Join(pathx.RootPath(), "common", "template", _make+".tpl")
+		templateFile = filepath.Join(pathx.RootPath(), "pkg", "cli", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")
 	}
@@ -244,8 +244,8 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 // GetQueueTemplates 获取队列模版文件
 func (b *BaseCommand) GetQueueTemplates() map[string]string {
 	return map[string]string{
-		"consumer": filepath.Join(pathx.RootPath(), "common", "template", "consumer.tpl"),
-		"producer": filepath.Join(pathx.RootPath(), "common", "template", "producer.tpl"),
+		"consumer": filepath.Join(pathx.RootPath(), "pkg", "cli", "template", "consumer.tpl"),
+		"producer": filepath.Join(pathx.RootPath(), "pkg", "cli", "template", "producer.tpl"),
 	}
 }
 
@@ -254,13 +254,13 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 	// 如果目录不存在则创建
 	dir := filepath.Dir(file)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		flag.Errorf("Failed to create directory: %s", err)
+		terminal.Errorf("Failed to create directory: %s", err)
 		return nil
 	}
 
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
 		fmt.Printf("%s文件 %s 已存在,是否覆盖?(%s/%s): ",
-			color.YellowString(flag.Warning()),
+			color.YellowString(terminal.Warning()),
 			color.CyanString(file),
 			color.GreenString("Y"),
 			color.RedString("N"),
@@ -276,10 +276,10 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 		}
 	}
 
-	flag.Successf(flag.FileIco+" 创建文件: %s", color.CyanString(file))
+	terminal.Successf(terminal.FileIco+" 创建文件: %s", color.CyanString(file))
 	f, err := os.Create(file)
 	if err != nil {
-		flag.Errorf("Failed to create file: %s", err.Error())
+		terminal.Errorf("Failed to create file: %s", err.Error())
 		return nil
 	}
 	return f

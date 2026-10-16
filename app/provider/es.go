@@ -2,10 +2,10 @@ package provider
 
 import (
 	"context"
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	servicees "gin/pkg/serviceprovider/es"
+	"gin/pkg/terminal"
 )
 
 // EsProvider ES服务提供者
@@ -25,7 +25,7 @@ func (p *EsProvider) Register(app *container.Container) {
 		return
 	}
 	if len(cfg.Es.Addresses) == 0 {
-		flag.Errorf("ES地址未配置")
+		terminal.Errorf("ES地址未配置")
 		return
 	}
 
@@ -39,10 +39,10 @@ func (p *EsProvider) Boot(_ *container.Container) {
 		return
 	}
 	if err := p.client.Ping(context.Background()); err != nil {
-		flag.Errorf("ES服务连接失败: %v", err)
+		terminal.Errorf("ES服务连接失败: %v", err)
 		return
 	}
-	flag.Infof("ES服务启动成功")
+	terminal.Infof("ES服务启动成功")
 }
 
 // Dependencies 依赖服务

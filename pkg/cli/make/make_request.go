@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -158,7 +158,7 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("template parse error: %s", err.Error())
+		terminal.Errorf("template parse error: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -235,11 +235,11 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("template execute error: %s", err.Error())
+		terminal.Errorf("template execute error: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("request generated: " + file)
+	terminal.Successf("request generated: " + file)
 }
 
 // 加载表字段
@@ -249,7 +249,7 @@ func (m *MakeRequest) loadTableFields(conn, table string, camel bool) []Field {
 	// 获取表字段
 	cols, err := db.Migrator().ColumnTypes(table)
 	if err != nil {
-		flag.Errorf("load table fields error: %s", err.Error())
+		terminal.Errorf("load table fields error: %s", err.Error())
 		return []Field{}
 	}
 
@@ -269,7 +269,7 @@ func (m *MakeRequest) loadTableFields(conn, table string, camel bool) []Field {
 	}
 
 	if len(columns) == 0 {
-		flag.Errorf("No columns found for table: %s", table)
+		terminal.Errorf("No columns found for table: %s", table)
 		return []Field{}
 	}
 

@@ -1,13 +1,13 @@
 package provider
 
 import (
+	"fmt"
 	"gin/app/queue"
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/logger"
 	sq "gin/pkg/serviceprovider/queue"
-	"fmt"
+	"gin/pkg/terminal"
 )
 
 // QueueProvider 队列服务提供者
@@ -25,13 +25,13 @@ func (p *QueueProvider) Name() string {
 func (p *QueueProvider) Register(app *container.Container) {
 	manager, err := sq.NewManager(app.Config, queue.Consumers(), queue.Producers())
 	if err != nil {
-		flag.Errorf("队列服务注册失败: %v", err)
+		terminal.Errorf("队列服务注册失败: %v", err)
 		return
 	}
 
 	app.SetQueue(manager)
 	p.manager = manager
-	flag.Infof(fmt.Sprintf("已注册 %d 个消费者, %d 个生产者", len(manager.Consumers()), len(manager.Producers())))
+	terminal.Infof(fmt.Sprintf("已注册 %d 个消费者, %d 个生产者", len(manager.Consumers()), len(manager.Producers())))
 }
 
 // Boot 启动服务

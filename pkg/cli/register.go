@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path"
 	"path/filepath"
@@ -48,7 +48,7 @@ func (r *Registry) Register(cmd base.Command) {
 
 	name := cmd.Name()
 	if _, exists := r.commands[name]; exists {
-		flag.Errorf("Command \"%s\" already registered, skipped.", name)
+		terminal.Errorf("Command \"%s\" already registered, skipped.", name)
 		os.Exit(1)
 	}
 	r.commands[name] = cmd
@@ -110,7 +110,7 @@ func (r *Registry) Execute(args []string) {
 
 	cmd, exists := r.Get(name)
 	if !exists {
-		flag.Errorf("Command \"%s\" is not defined.", name)
+		terminal.Errorf("Command \"%s\" is not defined.", name)
 		r.printUsage("txt")
 		os.Exit(1)
 	}

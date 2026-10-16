@@ -2,11 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"gin/common/flag"
 	grpcservice "gin/grpc/service"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/grpcclient"
+	"gin/pkg/terminal"
 )
 
 // GrpcProvider grpc服务提供者
@@ -33,7 +33,7 @@ func (p *GrpcProvider) Boot(app *container.Container) {
 
 	client, err := grpcclient.NewClient(fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port))
 	if err != nil {
-		flag.Errorf("grpc客户端创建失败: %v", err)
+		terminal.Errorf("grpc客户端创建失败: %v", err)
 		return
 	}
 
@@ -45,21 +45,21 @@ func (p *GrpcProvider) Boot(app *container.Container) {
 	)
 	if err != nil {
 		_ = client.Close()
-		flag.Errorf("grpc服务启动失败: %v", err)
+		terminal.Errorf("grpc服务启动失败: %v", err)
 		return
 	}
 
 	if err = srv.Start(); err != nil {
 		_ = srv.Stop()
 		_ = client.Close()
-		flag.Errorf("grpc服务启动失败: %v", err)
+		terminal.Errorf("grpc服务启动失败: %v", err)
 		return
 	}
 
 	p.client = client
 	p.server = srv
 	app.SetGRPC(client)
-	flag.Infof("grpc服务启动成功: %s", srv.Addr())
+	terminal.Infof("grpc服务启动成功: %s", srv.Addr())
 }
 
 // Runners 后台运行任务

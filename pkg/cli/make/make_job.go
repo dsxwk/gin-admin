@@ -3,7 +3,7 @@ package make
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
@@ -90,10 +90,10 @@ func (m *MakeJob) Execute(values map[string]string) {
 		"Delay":       delay,
 	}
 
-	tplFile := filepath.Join(pathx.RootPath(), "common", "template", "job.tpl")
+	tplFile := filepath.Join(pathx.RootPath(), "pkg", "cli", "template", "job.tpl")
 	tpl, err := template.ParseFiles(tplFile)
 	if err != nil {
-		flag.Errorf("Error parsing job template: %s", err.Error())
+		terminal.Errorf("Error parsing job template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -104,15 +104,15 @@ func (m *MakeJob) Execute(values map[string]string) {
 	}
 
 	if err = tpl.Execute(f, data); err != nil {
-		flag.Errorf("Error executing job template: %s", err.Error())
+		terminal.Errorf("Error executing job template: %s", err.Error())
 		os.Exit(1)
 	}
 
 	jobsFile := filepath.Join("app", "job", "registry.go")
 	if err = cli.AddItem(jobsFile, "return []servicejob.Job{", "New"+camelName+"Job()"); err != nil {
-		flag.Errorf("自动注册Job失败: %s", err.Error())
+		terminal.Errorf("自动注册Job失败: %s", err.Error())
 		return
 	}
 
-	flag.Successf("Job文件: %s 生成成功!", outFile)
+	terminal.Successf("Job文件: %s 生成成功!", outFile)
 }

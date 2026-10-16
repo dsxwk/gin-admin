@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -76,17 +76,17 @@ func (g *GrpcGen) Execute(values map[string]string) {
 	root := pathx.RootPath()
 	genType := values["type"]
 	if genType != "all" && genType != "pb" && genType != "grpc" {
-		flag.Errorf("参数 --type 只能是 all/pb/grpc")
+		terminal.Errorf("参数 --type 只能是 all/pb/grpc")
 		return
 	}
 
 	files, err := g.protoFiles(root, values["file"])
 	if err != nil {
-		flag.Errorf("查找proto文件失败: %s", err.Error())
+		terminal.Errorf("查找proto文件失败: %s", err.Error())
 		return
 	}
 	if len(files) == 0 {
-		flag.Errorf("未找到proto文件")
+		terminal.Errorf("未找到proto文件")
 		return
 	}
 
@@ -95,19 +95,19 @@ func (g *GrpcGen) Execute(values map[string]string) {
 		toolDir = g.absPath(root, dir)
 	}
 	if err = os.MkdirAll(toolDir, 0755); err != nil {
-		flag.Errorf("创建插件目录失败: %s", err.Error())
+		terminal.Errorf("创建插件目录失败: %s", err.Error())
 		return
 	}
 
 	if genType == "all" || genType == "pb" {
 		if err = g.ensureTool(toolDir, "protoc-gen-go", "google.golang.org/protobuf/cmd/protoc-gen-go", protocGenGoVersion); err != nil {
-			flag.Errorf("安装protoc-gen-go失败: %s", err.Error())
+			terminal.Errorf("安装protoc-gen-go失败: %s", err.Error())
 			return
 		}
 	}
 	if genType == "all" || genType == "grpc" {
 		if err = g.ensureTool(toolDir, "protoc-gen-go-grpc", "google.golang.org/grpc/cmd/protoc-gen-go-grpc", protocGenGoGrpcVersion); err != nil {
-			flag.Errorf("安装protoc-gen-go-grpc失败: %s", err.Error())
+			terminal.Errorf("安装protoc-gen-go-grpc失败: %s", err.Error())
 			return
 		}
 	}
@@ -116,7 +116,7 @@ func (g *GrpcGen) Execute(values map[string]string) {
 	for i, file := range files {
 		rel, relErr := filepath.Rel(root, file)
 		if relErr != nil {
-			flag.Errorf("计算proto文件路径失败: %s", relErr.Error())
+			terminal.Errorf("计算proto文件路径失败: %s", relErr.Error())
 			return
 		}
 		relNames[i] = filepath.ToSlash(rel)
@@ -124,24 +124,24 @@ func (g *GrpcGen) Execute(values map[string]string) {
 
 	req, err := g.buildRequest(root, relNames)
 	if err != nil {
-		flag.Errorf("解析proto文件失败: %s", err.Error())
+		terminal.Errorf("解析proto文件失败: %s", err.Error())
 		return
 	}
 
 	if genType == "all" || genType == "pb" {
 		if err = g.runPlugin(filepath.Join(toolDir, g.toolName("protoc-gen-go")), req, root); err != nil {
-			flag.Errorf("生成pb代码失败: %s", err.Error())
+			terminal.Errorf("生成pb代码失败: %s", err.Error())
 			return
 		}
 	}
 	if genType == "all" || genType == "grpc" {
 		if err = g.runPlugin(filepath.Join(toolDir, g.toolName("protoc-gen-go-grpc")), req, root); err != nil {
-			flag.Errorf("生成grpc代码失败: %s", err.Error())
+			terminal.Errorf("生成grpc代码失败: %s", err.Error())
 			return
 		}
 	}
 
-	flag.Successf("grpc代码生成完成")
+	terminal.Successf("grpc代码生成完成")
 }
 
 // protoFiles 获取proto文件列表
@@ -239,7 +239,7 @@ func (g *GrpcGen) ensureTool(toolDir, name, module, version string) error {
 		return fmt.Errorf("未找到go命令: %s", err.Error())
 	}
 
-	flag.Infof("安装%s %s", name, version)
+	terminal.Infof("安装%s %s", name, version)
 	cmd := exec.Command(goBin, "install", module+"@"+version)
 	cmd.Env = append(os.Environ(), "GOBIN="+toolDir)
 	cmd.Dir = filepath.Dir(toolDir)
@@ -285,7 +285,7 @@ func (g *GrpcGen) runPlugin(tool string, req *pluginpb.CodeGeneratorRequest, out
 		if err = os.WriteFile(path, []byte(file.GetContent()), 0644); err != nil {
 			return err
 		}
-		flag.Successf("生成文件: " + path)
+		terminal.Successf("生成文件: " + path)
 	}
 	return nil
 }

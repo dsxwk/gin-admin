@@ -2,7 +2,7 @@ package queue
 
 import (
 	"context"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
@@ -92,7 +92,7 @@ func (c *RabbitmqConsumer) Start(handler ConsumerHandler) {
 		for {
 			select {
 			case <-c.ctx.Done():
-				flag.Infof("[RabbitMq] 消费者 %s 已停止", c.Queue)
+				terminal.Infof("[RabbitMq] 消费者 %s 已停止", c.Queue)
 				return
 			default:
 				c.consumeLoop(handler)

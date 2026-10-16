@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -115,7 +115,7 @@ func (m *MakeService) generateFile(_make, file string, fields []Fields) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -142,11 +142,11 @@ func (m *MakeService) generateFile(_make, file string, fields []Fields) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("服务文件: " + file + " 生成成功!")
+	terminal.Successf("服务文件: " + file + " 生成成功!")
 }
 
 // buildModelFields 构建模型字段

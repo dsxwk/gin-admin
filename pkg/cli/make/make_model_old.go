@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	appmodel "gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -74,7 +74,7 @@ func (m *MakeModelOld) Execute(values map[string]string) {
 	tables := strings.Split(values["table"], ",")
 	for i := range tables {
 		tables[i] = strings.TrimSpace(tables[i])
-		flag.Successf("创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
+		terminal.Successf("创建模型: %s (表名: %s 是否使用驼峰: %v)\n", p+"/"+tables[i]+".gen.go", tables[i], values["camel"])
 	}
 
 	m.generateFiles(p, values["connection"], tables, m.StringToBool(values["camel"]))
@@ -144,10 +144,10 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 		})
 	}
 
-	flag.Infof("开始生成模型, 共 %d 张表", len(tables))
+	terminal.Infof("开始生成模型, 共 %d 张表", len(tables))
 
 	for _, table := range tables {
-		flag.Infof("→ 正在生成表: %s", table)
+		terminal.Infof("→ 正在生成表: %s", table)
 		fileName := filepath.Join(path, table+".gen.go")
 		structName := lo.PascalCase(table)
 		f := m.CheckDirAndFile(fileName)
@@ -167,7 +167,7 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 		text = addSoftDeleteSwaggerIgnore(text)
 
 		if err = os.WriteFile(fileName, []byte(text), 0644); err != nil {
-			flag.Errorf("为文件 %s 添加 swaggerignore 失败", fileName)
+			terminal.Errorf("为文件 %s 添加 swaggerignore 失败", fileName)
 			os.Exit(1)
 		}
 
@@ -175,11 +175,11 @@ func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel b
 		if conn != "" {
 			err = appendConnection(path, table, structName, conn)
 			if err != nil {
-				flag.Errorf("为模型 %s 追加 Connection 方法失败: %s", table, err.Error())
+				terminal.Errorf("为模型 %s 追加 Connection 方法失败: %s", table, err.Error())
 			}
 		}
 
-		flag.Successf("模型文件: " + fileName + " 生成成功!")
+		terminal.Successf("模型文件: " + fileName + " 生成成功!")
 	}
 
 	_ = os.RemoveAll(outPath)
@@ -207,7 +207,7 @@ func appendModelMethod(path, table, structName, methodName, function string) err
 	text := string(content)
 	// 检查方法是否已经存在
 	if strings.Contains(text, "func (*"+structName+") "+methodName+"()") {
-		flag.Infof("模型 %s 已存在 %s 方法,跳过添加", structName, methodName)
+		terminal.Infof("模型 %s 已存在 %s 方法,跳过添加", structName, methodName)
 		return nil
 	}
 

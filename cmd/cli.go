@@ -5,7 +5,7 @@ package main
 import (
 	"gin/app/console"
 	"gin/bootstrap"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"gin/pkg/cli/registry"
 	"os"
@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if err := bootstrap.SetupCLI(); err != nil {
-		flag.Errorf("初始化CLI失败: %v", err)
+		terminal.Errorf("初始化CLI失败: %v", err)
 		os.Exit(1)
 	}
 

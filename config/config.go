@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -65,7 +65,7 @@ func NewConfig() *Config {
 
 		// 读取主配置文件 config.yaml
 		if err := v.ReadInConfig(); err != nil {
-			flag.Errorf("读取配置文件失败: %v", err)
+			terminal.Errorf("读取配置文件失败: %v", err)
 		}
 
 		// 获取环境类型
@@ -79,19 +79,19 @@ func NewConfig() *Config {
 		if _, err := os.Stat(configFile); err == nil {
 			v.SetConfigFile(configFile)
 			if err = v.MergeInConfig(); err != nil {
-				flag.Errorf("合并环境配置失败: %v", err)
+				terminal.Errorf("合并环境配置失败: %v", err)
 				os.Exit(1)
 			}
-			flag.Infof("已加载环境配置文件: %s", configFile)
+			terminal.Infof("已加载环境配置文件: %s", configFile)
 		} else {
 			defaultConfigFile := filepath.Join(configDir, "config.yaml")
-			flag.Warningf("未找到环境配置文件 %s,使用默认配置 %s\n", configFile, defaultConfigFile)
+			terminal.Warningf("未找到环境配置文件 %s,使用默认配置 %s\n", configFile, defaultConfigFile)
 		}
 
 		// 自动映射到结构体
 		cfg, err := unmarshalConfig(v)
 		if err != nil {
-			flag.Errorf("解析配置文件失败: %v", err)
+			terminal.Errorf("解析配置文件失败: %v", err)
 			os.Exit(1)
 		}
 
@@ -107,13 +107,13 @@ func NewConfig() *Config {
 				return
 			}
 
-			flag.Infof("配置文件修改: %s", e.Name)
+			terminal.Infof("配置文件修改: %s", e.Name)
 
 			mu.Lock()
 			next, err := unmarshalConfig(v)
 			mu.Unlock()
 			if err != nil {
-				flag.Errorf("配置热更新失败: %v", err)
+				terminal.Errorf("配置热更新失败: %v", err)
 				return
 			}
 
@@ -237,7 +237,7 @@ func (c *Config) Set(key string, value any) error {
 	conf.Store(next)
 	mu.Unlock()
 
-	flag.Infof("配置已更新: %s = %v", key, value)
+	terminal.Infof("配置已更新: %s = %v", key, value)
 	notifyConfigUpdated(next)
 	return nil
 }

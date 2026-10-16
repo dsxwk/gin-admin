@@ -3,7 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"html/template"
 	"os"
@@ -57,7 +57,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -80,7 +80,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -90,7 +90,7 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 	if listenerDir != "app/listener" {
 		alias, importErr := cli.AddImport(listenersFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动添加监听器导入失败: %s", importErr.Error())
+			terminal.Errorf("自动添加监听器导入失败: %s", importErr.Error())
 			return
 		}
 		qualifier = alias + "."
@@ -103,9 +103,9 @@ func (m *MakeListener) generateFile(_make, file, eventName string) {
 		eventName,
 	)
 	if err = cli.AddItem(listenersFile, "return []eventbus.ListenerRegistration{", item); err != nil {
-		flag.Errorf("自动注册监听器失败: %s", err.Error())
+		terminal.Errorf("自动注册监听器失败: %s", err.Error())
 		return
 	}
 
-	flag.Successf("监听文件: %s 生成成功!", file)
+	terminal.Successf("监听文件: %s 生成成功!", file)
 }

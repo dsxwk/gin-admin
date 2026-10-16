@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/debugger"
+	"gin/pkg/terminal"
 )
 
 // DebuggerProvider 调试器服务提供者
@@ -26,7 +26,7 @@ func (p *DebuggerProvider) Register(app *container.Container) {
 // Boot 启动调试器
 func (p *DebuggerProvider) Boot(_ *container.Container) {
 	p.instance.Start()
-	flag.Infof("调试器服务启动成功")
+	terminal.Infof("调试器服务启动成功")
 }
 
 // Runners 后台运行任务

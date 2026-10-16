@@ -3,7 +3,7 @@ package grpcclient
 import (
 	"errors"
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"net"
 
 	grpclib "google.golang.org/grpc"
@@ -52,7 +52,7 @@ func (s *Server) Addr() string {
 func (s *Server) Start() error {
 	go func() {
 		if err := s.server.Serve(s.listener); err != nil && !errors.Is(err, grpclib.ErrServerStopped) {
-			flag.Errorf("grpc服务停止: %v", err)
+			terminal.Errorf("grpc服务停止: %v", err)
 		}
 	}()
 	return nil

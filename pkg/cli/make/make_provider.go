@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
@@ -76,7 +76,7 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -123,7 +123,7 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -133,16 +133,16 @@ func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunn
 	if providerDir != "app/provider" {
 		alias, importErr := cli.AddImport(providersFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动添加服务提供者导入失败: %s", importErr.Error())
+			terminal.Errorf("自动添加服务提供者导入失败: %s", importErr.Error())
 			return
 		}
 		qualifier = alias + "."
 	}
 	providerItem := "&" + qualifier + providerName + "Provider{}"
 	if err = cli.AddItem(providersFile, "return []serviceprovider.ServiceProvider{", providerItem); err != nil {
-		flag.Errorf("自动注册服务提供者失败: %s", err.Error())
+		terminal.Errorf("自动注册服务提供者失败: %s", err.Error())
 		return
 	}
 
-	flag.Successf("服务提供者文件: " + file + " 生成成功!")
+	terminal.Successf("服务提供者文件: " + file + " 生成成功!")
 }

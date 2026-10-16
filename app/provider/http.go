@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/http"
+	"gin/pkg/terminal"
 )
 
 // HttpProvider HTTP客户端服务提供者
@@ -23,7 +23,7 @@ func (p *HttpProvider) Register(app *container.Container) {
 // Boot 启动服务
 func (p *HttpProvider) Boot(_ *container.Container) {
 	http.GetClient()
-	flag.Infof("HTTP客户端服务启动成功")
+	terminal.Infof("HTTP客户端服务启动成功")
 }
 
 // Dependencies 依赖的服务

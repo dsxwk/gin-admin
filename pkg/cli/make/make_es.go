@@ -6,7 +6,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"go/format"
 	"os"
 	"path/filepath"
@@ -96,7 +96,7 @@ func (m *MakeEs) Execute(values map[string]string) {
 		if table == "" {
 			continue
 		}
-		flag.Infof("开始生成ES搜索: %s", table)
+		terminal.Infof("开始生成ES搜索: %s", table)
 		m.generateEs(db, table, outDir, exclude)
 	}
 }
@@ -105,7 +105,7 @@ func (m *MakeEs) Execute(values map[string]string) {
 func (m *MakeEs) generateEs(db *gorm.DB, table, outDir string, exclude map[string]bool) {
 	columns, err := GetColumnInfo(db, table)
 	if err != nil {
-		flag.Errorf("获取表字段失败: %s", err.Error())
+		terminal.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -129,13 +129,13 @@ func (m *MakeEs) generateEs(db *gorm.DB, table, outDir string, exclude map[strin
 	}
 
 	if len(fields) == 0 {
-		flag.Errorf("表 %s 没有可生成的ES字段", table)
+		terminal.Errorf("表 %s 没有可生成的ES字段", table)
 		os.Exit(1)
 	}
 
 	tpl, err := template.ParseFiles(m.GetTemplate("es"))
 	if err != nil {
-		flag.Errorf("解析ES搜索模板失败: %s", err.Error())
+		terminal.Errorf("解析ES搜索模板失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -170,20 +170,20 @@ func (m *MakeEs) generateEs(db *gorm.DB, table, outDir string, exclude map[strin
 
 	var buf bytes.Buffer
 	if err = tpl.Execute(&buf, data); err != nil {
-		flag.Errorf("生成ES搜索文件失败: %s", err.Error())
+		terminal.Errorf("生成ES搜索文件失败: %s", err.Error())
 		os.Exit(1)
 	}
 	source, err := format.Source(buf.Bytes())
 	if err != nil {
-		flag.Errorf("格式化ES搜索文件失败: %s", err.Error())
+		terminal.Errorf("格式化ES搜索文件失败: %s", err.Error())
 		os.Exit(1)
 	}
 	if _, err = f.Write(source); err != nil {
-		flag.Errorf("写入ES搜索文件失败: %s", err.Error())
+		terminal.Errorf("写入ES搜索文件失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("ES搜索文件: " + file + " 生成成功!")
+	terminal.Successf("ES搜索文件: " + file + " 生成成功!")
 }
 
 // esField ES字段信息

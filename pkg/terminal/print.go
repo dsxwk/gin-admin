@@ -1,4 +1,4 @@
-package flag
+package terminal
 
 import (
 	"fmt"
@@ -43,28 +43,28 @@ const (
 )
 
 // Error 错误前缀(红色背景)
-// 使用示例: fmt.Printf("%s数据库连接失败: %v", flag.Error(), err)
+// 使用示例: fmt.Printf("%s数据库连接失败: %v", terminal.Error(), err)
 func Error() string {
-	return color.New(color.BgRed, color.FgWhite, color.Bold).Sprint("  ERROR  ") + " "
+	return errorLabel.Sprint("  ERROR  ") + " "
 }
 
 // Warning 警告前缀(黄色背景)
 func Warning() string {
-	return color.New(color.BgYellow, color.FgBlack, color.Bold).Sprint(" WARNING ") + " "
+	return warningLabel.Sprint(" WARNING ") + " "
 }
 
 // Success 成功前缀(绿色背景)
 func Success() string {
-	return color.New(color.BgGreen, color.FgWhite, color.Bold).Sprint(" SUCCESS ") + " "
+	return successLabel.Sprint(" SUCCESS ") + " "
 }
 
 // Info 信息前缀(蓝色背景)
 func Info() string {
-	return color.New(color.BgBlue, color.FgWhite, color.Bold).Sprint("   INFO  ") + " "
+	return infoLabel.Sprint("   INFO  ") + " "
 }
 
 // Errorf 错误日志(前缀背景色 + 文字颜色)
-// 使用示例: flag.Errorf("%s数据库连接失败: %v", "mysql", err)
+// 使用示例: terminal.Errorf("%s数据库连接失败: %v", "mysql", err)
 func Errorf(format string, args ...any) {
 	printLine(errorLabel, errorText, "  ERROR  ", format, args...)
 }
@@ -117,20 +117,20 @@ func printLine(label, text *color.Color, prefix, format string, args ...any) {
 
 // ErrorEmoji 带Emoji的错误前缀
 func ErrorEmoji() string {
-	return fmt.Sprintf("%s %s ", ErrorIco, color.New(color.BgRed, color.FgWhite, color.Bold).Sprint(" ERROR  "))
+	return fmt.Sprintf("%s %s ", ErrorIco, errorLabel.Sprint(" ERROR  "))
 }
 
 // WarningEmoji 带Emoji的警告前缀
 func WarningEmoji() string {
-	return fmt.Sprintf("%s %s ", WarningIco, color.New(color.BgYellow, color.FgBlack, color.Bold).Sprint(" WARNING"))
+	return fmt.Sprintf("%s %s ", WarningIco, warningLabel.Sprint(" WARNING"))
 }
 
 // SuccessEmoji 带Emoji的成功前缀
 func SuccessEmoji() string {
-	return fmt.Sprintf("%s %s ", SuccessIco, color.New(color.BgGreen, color.FgWhite, color.Bold).Sprint(" SUCCESS"))
+	return fmt.Sprintf("%s %s ", SuccessIco, successLabel.Sprint(" SUCCESS"))
 }
 
 // InfoEmoji 带Emoji的信息前缀
 func InfoEmoji() string {
-	return fmt.Sprintf("%s %s ", InfoIco, color.New(color.BgBlue, color.FgWhite, color.Bold).Sprint(" INFO   "))
+	return fmt.Sprintf("%s %s ", InfoIco, infoLabel.Sprint(" INFO   "))
 }

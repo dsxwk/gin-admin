@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"gin/pkg/ctxkey"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
@@ -69,7 +69,7 @@ func NewCache(driver string, conf *config.Config) *CacheProxy {
 	}
 
 	cacheInstance[driver] = c
-	flag.Infof("%s缓存初始化成功", driver)
+	terminal.Infof("%s缓存初始化成功", driver)
 	return c
 }
 

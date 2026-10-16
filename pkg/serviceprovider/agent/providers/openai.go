@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 	"gin/pkg/serviceprovider/agent"
 	"gin/pkg/serviceprovider/mcp"
@@ -102,7 +102,7 @@ func (p *OpenAICompat) Chat(ctx context.Context, messages []agent.Message, tools
 	}
 
 	// 调试打印请求体
-	flag.Infof("[Agent] 请求模型:%s tools数:%d tool_choice:%s", p.model, len(tools), reqBody.ToolChoice)
+	terminal.Infof("[Agent] 请求模型:%s tools数:%d tool_choice:%s", p.model, len(tools), reqBody.ToolChoice)
 
 	// 发送请求
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.baseUrl+"/chat/completions", bytes.NewReader(body))
@@ -134,14 +134,14 @@ func (p *OpenAICompat) Chat(ctx context.Context, messages []agent.Message, tools
 
 	var chatResp chatResponse
 	if err = json.Unmarshal(respBody, &chatResp); err != nil {
-		flag.Errorf("[Agent] 解析响应失败: %v, body: %s", err, string(respBody)[:200])
+		terminal.Errorf("[Agent] 解析响应失败: %v, body: %s", err, string(respBody)[:200])
 		return nil, err
 	}
 
 	// 调试:打印响应摘要
 	if len(chatResp.Choices) > 0 {
 		c := chatResp.Choices[0]
-		flag.Infof("[Agent] 响应 content长度:%d tool_calls:%d", len(c.Message.Content), len(c.Message.ToolCalls))
+		terminal.Infof("[Agent] 响应 content长度:%d tool_calls:%d", len(c.Message.Content), len(c.Message.ToolCalls))
 	}
 
 	if len(chatResp.Choices) == 0 {
@@ -197,7 +197,7 @@ func (p *OpenAICompat) StreamChat(ctx context.Context, messages []agent.Message,
 		req.Header.Set("Authorization", "Bearer "+p.apiKey)
 	}
 
-	flag.Infof("[Agent] 流式请求模型:%s tools数:%d", p.model, len(tools))
+	terminal.Infof("[Agent] 流式请求模型:%s tools数:%d", p.model, len(tools))
 
 	resp, err := p.streamClient.Do(req)
 	if err != nil {
@@ -209,7 +209,7 @@ func (p *OpenAICompat) StreamChat(ctx context.Context, messages []agent.Message,
 		if readErr != nil {
 			return nil, readErr
 		}
-		flag.Errorf("[Agent] 流式响应异常 %d: %s", resp.StatusCode, string(respBody))
+		terminal.Errorf("[Agent] 流式响应异常 %d: %s", resp.StatusCode, string(respBody))
 		return nil, fmt.Errorf("API error %d: %s", resp.StatusCode, string(respBody))
 	}
 
@@ -277,7 +277,7 @@ func (p *OpenAICompat) readStream(ctx context.Context, body io.ReadCloser, ch ch
 
 		var streamResp streamResponse
 		if err := json.Unmarshal([]byte(data), &streamResp); err != nil {
-			flag.Errorf("[Agent] 解析流式响应失败: %v, body: %s", err, data)
+			terminal.Errorf("[Agent] 解析流式响应失败: %v, body: %s", err, data)
 			send(agent.StreamChunk{Err: err})
 			return
 		}
@@ -306,7 +306,7 @@ func (p *OpenAICompat) readStream(ctx context.Context, body io.ReadCloser, ch ch
 	}
 
 	if err := scanner.Err(); err != nil {
-		flag.Errorf("[Agent] 读取流式响应失败: %v", err)
+		terminal.Errorf("[Agent] 读取流式响应失败: %v", err)
 		send(agent.StreamChunk{Err: err})
 		return
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
@@ -71,7 +71,7 @@ func (m *MakeQueue) Execute(values map[string]string) {
 	}
 
 	if conn != "kafka" && conn != "rabbitmq" && conn != "redis" {
-		flag.Errorf("不支持的连接类型: %s, 仅支持 kafka, rabbitmq, redis", conn)
+		terminal.Errorf("不支持的连接类型: %s, 仅支持 kafka, rabbitmq, redis", conn)
 		os.Exit(1)
 	}
 
@@ -120,13 +120,13 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 	consumerFile := m.GetTemplate("consumer")
 	consumerTpl, err := template.ParseFiles(consumerFile)
 	if err != nil {
-		flag.Errorf("Error parsing consumer template: %s", err.Error())
+		terminal.Errorf("Error parsing consumer template: %s", err.Error())
 		os.Exit(1)
 	}
 	producerFile := m.GetTemplate("producer")
 	producerTpl, err := template.ParseFiles(producerFile)
 	if err != nil {
-		flag.Errorf("Error parsing producer template: %s", err.Error())
+		terminal.Errorf("Error parsing producer template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -145,14 +145,14 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 	data["Package"] = "consumer"
 	err = consumerTpl.Execute(cf, data)
 	if err != nil {
-		flag.Errorf("Error executing consumer template: %s", err.Error())
+		terminal.Errorf("Error executing consumer template: %s", err.Error())
 		os.Exit(1)
 	}
 
 	data["Package"] = "producer"
 	err = producerTpl.Execute(pf, data)
 	if err != nil {
-		flag.Errorf("Error executing producer template: %s", err.Error())
+		terminal.Errorf("Error executing producer template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -169,7 +169,7 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 		consumerName,
 	)
 	if err = cli.AddItem(filepath.Join("app", "queue", "registry.go"), "return []sq.ConsumerFactory{", consumerItem); err != nil {
-		flag.Errorf("自动注册消费者失败: %s", err.Error())
+		terminal.Errorf("自动注册消费者失败: %s", err.Error())
 		return
 	}
 
@@ -179,10 +179,10 @@ func (m *MakeQueue) generateQueue(conn, name string, isDelay bool, values map[st
 		producerName,
 	)
 	if err = cli.AddItem(filepath.Join("app", "queue", "registry.go"), "return []sq.ProducerFactory{", producerItem); err != nil {
-		flag.Errorf("自动注册生产者失败: %s", err.Error())
+		terminal.Errorf("自动注册生产者失败: %s", err.Error())
 		return
 	}
 
-	flag.Successf("消费者文件: %s 生成成功!", f1)
-	flag.Successf("生产者文件: %s 生成成功!", f2)
+	terminal.Successf("消费者文件: %s 生成成功!", f1)
+	terminal.Successf("生产者文件: %s 生成成功!", f2)
 }

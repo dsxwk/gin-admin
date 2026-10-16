@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
@@ -60,7 +60,7 @@ func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 	templateFile := m.GetTemplate("ws")
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing ws template: %s", err.Error())
+		terminal.Errorf("Error parsing ws template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -89,7 +89,7 @@ func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 	defer func() { _ = output.Close() }()
 
 	if err = tmpl.Execute(output, data); err != nil {
-		flag.Errorf("Error executing ws template: %s", err.Error())
+		terminal.Errorf("Error executing ws template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -99,7 +99,7 @@ func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 	if wsDir != "websocket" {
 		alias, importErr := cli.AddImport(registryFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动添加ws处理器导入失败: %s", importErr.Error())
+			terminal.Errorf("自动添加ws处理器导入失败: %s", importErr.Error())
 			return
 		}
 		qualifier = alias + "."
@@ -107,9 +107,9 @@ func (m *MakeWs) generateFile(file, rawName, messageType, description string) {
 
 	item := "&" + qualifier + name + "Handler{}"
 	if err = cli.AddItem(registryFile, "return []ws.Handler{", item); err != nil {
-		flag.Errorf("自动注册ws处理器失败: %s", err.Error())
+		terminal.Errorf("自动注册ws处理器失败: %s", err.Error())
 		return
 	}
 
-	flag.Successf("ws处理器文件: %s 生成成功!", file)
+	terminal.Successf("ws处理器文件: %s 生成成功!", file)
 }

@@ -2,10 +2,10 @@ package provider
 
 import (
 	"context"
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/ws"
+	"gin/pkg/terminal"
 	"gin/websocket"
 	"time"
 )
@@ -52,7 +52,7 @@ func (p *WsProvider) Register(app *container.Container) {
 	if path == "" {
 		path = "/ws"
 	}
-	flag.Infof("ws服务注册成功,地址: %s", path)
+	terminal.Infof("ws服务注册成功,地址: %s", path)
 }
 
 // Boot 启动WebSocket服务

@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"html/template"
 	"os"
@@ -63,7 +63,7 @@ func (m *MakeConsole) generateFile(file, name, desc string) {
 	templateFile := m.GetTemplate("console")
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -98,7 +98,7 @@ func (m *MakeConsole) generateFile(file, name, desc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -108,7 +108,7 @@ func (m *MakeConsole) generateFile(file, name, desc string) {
 	if commandDir != "app/console" {
 		alias, importErr := cli.AddImport(registryFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动添加控制台命令导入失败: %s", importErr.Error())
+			terminal.Errorf("自动添加控制台命令导入失败: %s", importErr.Error())
 			os.Exit(1)
 		}
 		qualifier = alias + "."
@@ -116,11 +116,11 @@ func (m *MakeConsole) generateFile(file, name, desc string) {
 
 	item := "&" + qualifier + lo.PascalCase(baseName) + "Command{}"
 	if err = cli.AddItem(registryFile, "return []base.Command{", item); err != nil {
-		flag.Errorf("自动注册控制台命令失败: %s", err.Error())
+		terminal.Errorf("自动注册控制台命令失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("控制台命令文件: " + file + " 生成成功!")
+	terminal.Successf("控制台命令文件: " + file + " 生成成功!")
 }
 
 // resolveFile 解析控制台命令文件路径

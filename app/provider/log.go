@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/logger"
+	"gin/pkg/terminal"
 )
 
 // LogProvider 日志服务提供者
@@ -22,7 +22,7 @@ func (p *LogProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *LogProvider) Boot(_ *container.Container) {
-	flag.Infof("日志服务启动成功")
+	terminal.Infof("日志服务启动成功")
 }
 
 // Dependencies 依赖服务

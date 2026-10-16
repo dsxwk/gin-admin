@@ -2,10 +2,10 @@ package provider
 
 import (
 	"gin/app/listener"
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/eventbus"
+	"gin/pkg/terminal"
 )
 
 // EventProvider 事件服务提供者
@@ -25,7 +25,7 @@ func (p *EventProvider) Register(app *container.Container) {
 
 // Boot 启动事件服务
 func (p *EventProvider) Boot(_ *container.Container) {
-	flag.Infof("事件服务启动成功")
+	terminal.Infof("事件服务启动成功")
 }
 
 // Dependencies 依赖服务

@@ -3,7 +3,7 @@ package db
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/database"
 	"gin/database/migrations"
 
@@ -36,7 +36,7 @@ func (s *Migrate) Help() []base.CommandOption {
 }
 
 func (s *Migrate) Execute(values map[string]string) {
-	flag.Infof("开始执行数据迁移...")
+	terminal.Infof("开始执行数据迁移...")
 
 	db := facade.DB()
 	db.Exec(`
@@ -61,11 +61,11 @@ CREATE TABLE IF NOT EXISTS migrations (
 		}
 
 		if err := m.Migrate(db); err != nil {
-			flag.Errorf("Migration %s 执行失败: %v", m.ID(), err)
+			terminal.Errorf("Migration %s 执行失败: %v", m.ID(), err)
 			return
 		}
 
 		db.Create(&database.Migrations{Migration: m.ID()})
-		flag.Successf("Migration %s 执行成功", m.ID())
+		terminal.Successf("Migration %s 执行成功", m.ID())
 	}
 }

@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"html/template"
 	"os"
 	"path"
@@ -64,7 +64,7 @@ func (m *MakeController) generateFile(_make, file, desc string) {
 	// 使用Funcs注册函数
 	tmpl, err := template.New(filepath.Base(templateFile)). /*Funcs(funcMap).*/ ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -109,9 +109,9 @@ func (m *MakeController) generateFile(_make, file, desc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("控制器文件: %s 生成成功!", file)
+	terminal.Successf("控制器文件: %s 生成成功!", file)
 }

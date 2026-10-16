@@ -3,7 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os/exec"
 )
 
@@ -20,16 +20,16 @@ func (m *MakeDocs) Description() string {
 }
 
 func (m *MakeDocs) Execute(_ map[string]string) {
-	flag.Infof("开始生成Swagger文档...")
+	terminal.Infof("开始生成Swagger文档...")
 
 	// 排除远程调用服务目录,避免同名模型导致文档解析失败
 	cmd := exec.Command("swag", "init", "-g", "main.go", "--exclude", "grpc")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		flag.Errorf("Swagger文档生成失败: %v\n%s", err, string(output))
+		terminal.Errorf("Swagger文档生成失败: %v\n%s", err, string(output))
 		return
 	}
 
 	fmt.Println(string(output))
-	flag.Successf("Swagger文档生成成功")
+	terminal.Successf("Swagger文档生成成功")
 }

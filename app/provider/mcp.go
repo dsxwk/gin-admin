@@ -2,10 +2,10 @@ package provider
 
 import (
 	"gin/app/mcp"
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	servicemcp "gin/pkg/serviceprovider/mcp"
+	"gin/pkg/terminal"
 )
 
 // McpProvider MCP服务提供者
@@ -28,12 +28,12 @@ func (p *McpProvider) Register(app *container.Container) {
 		Version: cfg.App.CliVersion,
 	}, cfg, mcp.All())
 	if err != nil {
-		flag.Errorf("MCP服务注册失败: %v", err)
+		terminal.Errorf("MCP服务注册失败: %v", err)
 		return
 	}
 
 	app.SetMCP(handler)
-	flag.Infof("MCP服务注册成功,路径: %s", cfg.Mcp.Path)
+	terminal.Infof("MCP服务注册成功,路径: %s", cfg.Mcp.Path)
 }
 
 // Boot 启动服务

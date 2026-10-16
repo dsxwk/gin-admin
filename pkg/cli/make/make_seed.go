@@ -3,7 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"time"
@@ -86,9 +86,9 @@ func (s *%s) Run(db *gorm.DB) error {
 	}
 
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-		flag.Errorf("写入文件失败: %v", err)
+		terminal.Errorf("写入文件失败: %v", err)
 		return
 	}
 
-	flag.Successf("seed文件生成成功: %s", filePath)
+	terminal.Successf("seed文件生成成功: %s", filePath)
 }

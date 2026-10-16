@@ -2,7 +2,7 @@ package logger
 
 import (
 	"context"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
@@ -38,7 +38,7 @@ func NewLogger(conf *config.Config) *Logger {
 		// 确保日志目录存在
 		logDir := filepath.Join(config.RootPath(), "storage", "logs")
 		if err := os.MkdirAll(logDir, 0755); err != nil {
-			flag.Errorf("创建日志目录失败: %v", err)
+			terminal.Errorf("创建日志目录失败: %v", err)
 			os.Exit(1)
 		}
 

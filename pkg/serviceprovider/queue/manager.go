@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 )
 
@@ -75,7 +75,7 @@ func (m *Manager) Start() error {
 		if consumer == nil || !connectionEnabled(cfg, consumer.Connection()) {
 			continue
 		}
-		flag.Infof("启动消费者: %s", consumer.Name())
+		terminal.Infof("启动消费者: %s", consumer.Name())
 		if err := consumer.Start(); err != nil {
 			errs = append(errs, fmt.Errorf("启动消费者 %s 失败: %w", consumer.Name(), err))
 		}
@@ -109,7 +109,7 @@ func (m *Manager) Stop() error {
 	if err := errors.Join(errs...); err != nil {
 		return err
 	}
-	flag.Infof("所有队列服务已关闭")
+	terminal.Infof("所有队列服务已关闭")
 	return nil
 }
 
@@ -119,7 +119,7 @@ func (m *Manager) RegisterConsumer(consumer Consumer) {
 		return
 	}
 	if err := m.consumers.Register(consumer); err != nil {
-		flag.Errorf("%v", err)
+		terminal.Errorf("%v", err)
 	}
 }
 
@@ -129,20 +129,20 @@ func (m *Manager) RegisterProducer(producer Producer) {
 		return
 	}
 	if err := m.producers.Register(producer); err != nil {
-		flag.Errorf("%v", err)
+		terminal.Errorf("%v", err)
 	}
 }
 
 // Producer 获取生产者
 func (m *Manager) Producer(name string) Producer {
 	if m == nil {
-		flag.Errorf("queue producer [%s] not registered", name)
+		terminal.Errorf("queue producer [%s] not registered", name)
 		return &nilProducer{name: name}
 	}
 
 	registered, ok := m.producers.Get(name)
 	if !ok {
-		flag.Errorf("queue producer [%s] not registered", name)
+		terminal.Errorf("queue producer [%s] not registered", name)
 		return &nilProducer{name: name}
 	}
 	return registered

@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/lang"
+	"gin/pkg/terminal"
 )
 
 // LangProvider 翻译服务提供者
@@ -26,10 +26,10 @@ func (p *LangProvider) Register(app *container.Container) {
 // Boot 启动服务
 func (p *LangProvider) Boot(app *container.Container) {
 	if err := p.service.Load(app.Config()); err != nil {
-		flag.Errorf("翻译服务启动失败: %v", err)
+		terminal.Errorf("翻译服务启动失败: %v", err)
 		return
 	}
-	flag.Infof("翻译服务启动成功")
+	terminal.Infof("翻译服务启动成功")
 }
 
 // Dependencies 依赖服务

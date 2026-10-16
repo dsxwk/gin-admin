@@ -362,9 +362,7 @@ $ ./cli demo:command --args=11
 ├── cmd                       # 命令行工具
 │   └── cli.go                # 命令行工具入口文件
 ├── common                    # 公共模块
-│   ├── base                  # 基类
-│   ├── flag                  # 特殊符号
-│   └── template              # 模版
+│   └── base                  # 基类
 ├── config                    # 配置文件
 ├── database                  # 数据库测试文件
 ├── docs                      # 文档
@@ -376,7 +374,8 @@ $ ./cli demo:command --args=11
 ├── pkg                       # 工具包
 │   ├── cli                   # 命令行
 │   │   ├── grpcgen           # gRPC代码生成
-│   │   └── make              # 生成命令
+│   │   ├── make              # 生成命令
+│   │   └── template          # 生成模版
 │   ├── container             # 容器
 │   ├── convert               # 类型转换
 │   ├── cryptox               # 加密工具
@@ -402,6 +401,7 @@ $ ./cli demo:command --args=11
 │   │   ├── request           # 请求
 │   │   └── ws                # WebSocket
 │   ├── stringx               # 字符串工具
+│   ├── terminal              # 终端输出
 │   ├── timex                 # 时间处理
 │   └── treex                 # 树形结构
 ├── public                    # 静态资源目录

@@ -6,7 +6,7 @@ import (
 	"gin/app/facade"
 	appmodel "gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"sort"
@@ -135,7 +135,7 @@ func (m *MakeModel) Execute(values map[string]string) {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	db := facade.DB(conn)
 	for _, table := range tables {
-		flag.Infof("开始生成模型: %s", table)
+		terminal.Infof("开始生成模型: %s", table)
 		m.generateModel(_make, db, table, path, conn, camel)
 	}
 }
@@ -210,7 +210,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	// 获取完整字段信息
 	columns, err := GetColumnInfo(db, table)
 	if err != nil {
-		flag.Errorf("获取表字段失败: %s", err.Error())
+		terminal.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
 	columns = filterSoftDeleteColumns(columns)
@@ -288,7 +288,7 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	templateFile := m.GetTemplate(_make)
 	tpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -317,11 +317,11 @@ func (m *MakeModel) generateModel(_make string, db *gorm.DB, table string, outDi
 	}
 	err = tpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("模型文件: " + file + " 生成成功!")
+	terminal.Successf("模型文件: " + file + " 生成成功!")
 }
 
 // cliSoftDeleteEnabled 获取命令行软删除配置

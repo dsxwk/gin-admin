@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"gin/bootstrap"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 )
 
 //go:generate go env -w GO111MODULE=on
@@ -25,7 +25,7 @@ import (
 func main() {
 	app := bootstrap.NewApp()
 	if err := app.Boot(); err != nil {
-		flag.Errorf("初始化应用失败: %v", err)
+		terminal.Errorf("初始化应用失败: %v", err)
 		os.Exit(1)
 	}
 

@@ -3,7 +3,7 @@ package db
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/database"
 	"gin/database/migrations"
 
@@ -36,7 +36,7 @@ func (s *Rollback) Help() []base.CommandOption {
 }
 
 func (s *Rollback) Execute(values map[string]string) {
-	flag.Infof("开始执行数据回滚...")
+	terminal.Infof("开始执行数据回滚...")
 
 	db := facade.DB()
 	id := values["id"]
@@ -53,11 +53,11 @@ func (s *Rollback) Execute(values map[string]string) {
 		}
 
 		if err := m.Rollback(db); err != nil {
-			flag.Errorf("Migration %s 回滚失败: %v", m.ID(), err)
+			terminal.Errorf("Migration %s 回滚失败: %v", m.ID(), err)
 			return
 		}
 
 		db.Where("migration = ?", m.ID()).Delete(&database.Migrations{})
-		flag.Successf("Migration %s 回滚成功", m.ID())
+		terminal.Successf("Migration %s 回滚成功", m.ID())
 	}
 }

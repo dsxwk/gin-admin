@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -55,7 +55,7 @@ func (m *MakeMiddleware) generateFile(_make, file, desc string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -80,9 +80,9 @@ func (m *MakeMiddleware) generateFile(_make, file, desc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("中间件文件: " + file + " 生成成功!")
+	terminal.Successf("中间件文件: " + file + " 生成成功!")
 }

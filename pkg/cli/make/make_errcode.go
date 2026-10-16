@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 
 	"github.com/samber/lo"
 )
@@ -81,7 +81,7 @@ func (m *MakeErrCode) generateFile(file, structName, snakeName string, prefix in
 	templateFile := m.GetTemplate("errcode")
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("解析错误码模板失败: %s", err.Error())
+		terminal.Errorf("解析错误码模板失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -106,9 +106,9 @@ func (m *MakeErrCode) generateFile(file, structName, snakeName string, prefix in
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("生成错误码文件失败: %s", err.Error())
+		terminal.Errorf("生成错误码文件失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("错误码文件: " + file + " 生成成功!")
+	terminal.Successf("错误码文件: " + file + " 生成成功!")
 }

@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
@@ -95,7 +95,7 @@ func (m *MakeGrpcService) Execute(values map[string]string) {
 		if table == "" {
 			continue
 		}
-		flag.Infof("开始生成grpc服务: %s", table)
+		terminal.Infof("开始生成grpc服务: %s", table)
 		m.generateService(db, table, outDir, auth)
 	}
 }
@@ -104,7 +104,7 @@ func (m *MakeGrpcService) Execute(values map[string]string) {
 func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, auth bool) {
 	columns, err := GetColumnInfo(db, table)
 	if err != nil {
-		flag.Errorf("获取表字段失败: %s", err.Error())
+		terminal.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -135,7 +135,7 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, aut
 
 	tpl, err := template.ParseFiles(m.GetTemplate("grpc_service"))
 	if err != nil {
-		flag.Errorf("解析grpc服务模板失败: %s", err.Error())
+		terminal.Errorf("解析grpc服务模板失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -167,7 +167,7 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, aut
 		return
 	}
 	if err = tpl.Execute(f, data); err != nil {
-		flag.Errorf("生成grpc服务失败: %s", err.Error())
+		terminal.Errorf("生成grpc服务失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -176,17 +176,17 @@ func (m *MakeGrpcService) generateService(db *gorm.DB, table, outDir string, aut
 	if filepath.ToSlash(filepath.Clean(outDir)) != "grpc/service" {
 		alias, importErr := cli.AddImport(servicesFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动导入grpc服务失败: %s", importErr.Error())
+			terminal.Errorf("自动导入grpc服务失败: %s", importErr.Error())
 			os.Exit(1)
 		}
 		qualifier = alias + "."
 	}
 	if err = cli.AddItem(servicesFile, "return []grpcclient.Service{", qualifier+name+"Service{}"); err != nil {
-		flag.Errorf("自动注册grpc服务失败: %s", err.Error())
+		terminal.Errorf("自动注册grpc服务失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("grpc服务文件: " + file + " 生成成功!")
+	terminal.Successf("grpc服务文件: " + file + " 生成成功!")
 }
 
 // grpcServiceDescription 获取grpc服务描述

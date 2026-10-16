@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 
 	"github.com/fatih/color"
 )
@@ -25,7 +25,7 @@ func (s *JobClear) Help() []base.CommandOption {
 
 func (s *JobClear) Execute(_ map[string]string) {
 	if err := facade.Job().Clear(context.Background()); err != nil {
-		flag.Errorf("清除Job失败: %v", err)
+		terminal.Errorf("清除Job失败: %v", err)
 		return
 	}
 	color.Green("所有未消费Job已清除")

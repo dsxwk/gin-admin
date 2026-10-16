@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/app/service"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 )
 
@@ -35,10 +35,10 @@ func (s *PermissionSync) Execute(_ map[string]string) {
 	})
 	if err != nil {
 		cli.StopProgress(tracker, progressDone, false)
-		flag.Errorf("权限同步失败: %v", err)
+		terminal.Errorf("权限同步失败: %v", err)
 		return
 	}
 
 	cli.StopProgress(tracker, progressDone, true)
-	flag.Successf("权限同步完成")
+	terminal.Successf("权限同步完成")
 }

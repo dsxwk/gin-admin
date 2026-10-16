@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"html/template"
 	"os"
@@ -56,7 +56,7 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -91,7 +91,7 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Successf("Error executing template: %s", err.Error())
+		terminal.Successf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -101,7 +101,7 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 	if routerDir != "router" {
 		alias, importErr := cli.AddImport(registryFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动添加路由导入失败: %s", importErr.Error())
+			terminal.Errorf("自动添加路由导入失败: %s", importErr.Error())
 			os.Exit(1)
 		}
 		qualifier = alias + "."
@@ -109,9 +109,9 @@ func (m *MakeRouter) generateFile(_make, file, desc string) {
 
 	item := "&" + qualifier + data.Name + "Router{}"
 	if err = cli.AddItem(registryFile, "return []route.Router{", item); err != nil {
-		flag.Errorf("自动注册路由失败: %s", err.Error())
+		terminal.Errorf("自动注册路由失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("路由文件: " + file + " 生成成功!")
+	terminal.Successf("路由文件: " + file + " 生成成功!")
 }

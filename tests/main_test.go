@@ -3,7 +3,7 @@ package tests
 import (
 	"gin/app/facade"
 	"gin/app/provider"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider"
 	"os"
@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 
 	err := app.Boot()
 	if err != nil {
-		flag.Errorf("初始化应用失败: %v", err)
+		terminal.Errorf("初始化应用失败: %v", err)
 		os.Exit(1)
 	}
 

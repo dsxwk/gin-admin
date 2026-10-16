@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/ratelimit"
+	"gin/pkg/terminal"
 	"time"
 )
 
@@ -26,7 +26,7 @@ func (p *RateLimitProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *RateLimitProvider) Boot(_ *container.Container) {
-	flag.Infof("限流服务启动成功")
+	terminal.Infof("限流服务启动成功")
 }
 
 // Runners 后台运行任务(用于优雅关闭)

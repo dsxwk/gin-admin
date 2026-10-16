@@ -2,18 +2,19 @@ package provider
 
 import (
 	"gin/app/job"
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/eventbus"
 	servicejob "gin/pkg/serviceprovider/job"
 	"gin/pkg/serviceprovider/logger"
 	"gin/pkg/serviceprovider/queue"
+	"gin/pkg/terminal"
 	"time"
+
+	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/segmentio/kafka-go"
-	"fmt"
 )
 
 // JobProvider 任务服务提供者
@@ -50,12 +51,12 @@ func (p *JobProvider) Register(app *container.Container) {
 		jobs,
 	)
 	if err != nil {
-		flag.Errorf("Job服务注册失败: %v", err)
+		terminal.Errorf("Job服务注册失败: %v", err)
 		return
 	}
 
 	app.SetJob(manager)
-	flag.Infof(fmt.Sprintf("已注册 %d 个Job", len(jobs)))
+	terminal.Infof(fmt.Sprintf("已注册 %d 个Job", len(jobs)))
 }
 
 // Boot 启动服务
@@ -122,7 +123,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 					Group: "job_group",
 				}))
 			} else {
-				flag.Warningf("存在使用 kafka 连接的Job, 但 queue.kafka.enabled 为 false")
+				terminal.Warningf("存在使用 kafka 连接的Job, 但 queue.kafka.enabled 为 false")
 			}
 		case "rabbitmq":
 			if cfg.Queue.Rabbitmq.Enabled {
@@ -138,7 +139,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 					Routing:  "job",
 				}))
 			} else {
-				flag.Warningf("存在使用 rabbitmq 连接的Job, 但 queue.rabbitmq.enabled 为 false")
+				terminal.Warningf("存在使用 rabbitmq 连接的Job, 但 queue.rabbitmq.enabled 为 false")
 			}
 		}
 	}
@@ -148,7 +149,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 			p.log.Error(fmt.Sprintf("Job消费者 %s 启动失败: %v", consumer.Name(), err))
 			continue
 		}
-		flag.Infof("Job消费者已启动: %s", consumer.Name())
+		terminal.Infof("Job消费者已启动: %s", consumer.Name())
 	}
 }
 
@@ -163,7 +164,7 @@ func (p *JobProvider) Runners() []serviceprovider.Runner {
 					log.Error(fmt.Sprintf("Job消费者 %s 关闭失败: %v", consumer.Name(), err))
 				}
 			}
-			flag.Infof("所有Job消费者已关闭")
+			terminal.Infof("所有Job消费者已关闭")
 			return nil
 		}),
 	}

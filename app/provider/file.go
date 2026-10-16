@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/filesystem"
+	"gin/pkg/terminal"
 )
 
 // FileProvider 文件系统服务提供者
@@ -21,7 +21,7 @@ func (p *FileProvider) Name() string {
 func (p *FileProvider) Register(app *container.Container) {
 	manager, err := filesystem.NewManager(app.Config().Filesystem)
 	if err != nil {
-		flag.Errorf("文件系统服务注册失败: %v", err)
+		terminal.Errorf("文件系统服务注册失败: %v", err)
 		return
 	}
 
@@ -34,7 +34,7 @@ func (p *FileProvider) Boot(_ *container.Container) {
 	if p.manager == nil {
 		return
 	}
-	flag.Infof("文件系统服务启动成功")
+	terminal.Infof("文件系统服务启动成功")
 }
 
 // Dependencies 依赖服务

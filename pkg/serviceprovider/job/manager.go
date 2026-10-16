@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gin/pkg/ctxkey"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
@@ -140,7 +140,7 @@ func (m *Manager) Dispatch(ctx context.Context, jobName string, payload any) err
 	}
 
 	if dispatchErr != nil {
-		flag.Errorf(dispatchErr.Error())
+		terminal.Errorf(dispatchErr.Error())
 	}
 
 	return dispatchErr

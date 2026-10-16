@@ -7,11 +7,12 @@ import (
 	"gin/app/facade"
 	"gin/app/provider"
 	"gin/app/service"
-	"gin/common/flag"
 	"gin/config"
+	"gin/pkg/convert"
 	"gin/pkg/errcode"
 	"gin/pkg/route"
 	"gin/pkg/serviceprovider"
+	"gin/pkg/terminal"
 	"gin/router"
 	"net"
 	"net/http"
@@ -22,7 +23,6 @@ import (
 	"syscall"
 	"time"
 
-	"gin/pkg/convert"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/mattn/go-runewidth"
@@ -94,13 +94,13 @@ func syncRoutePermissions() {
 
 	svc := service.PermissionService{}
 	if err := svc.SyncRoutePermissions(context.Background(), permissionKeys); err != nil {
-		flag.Warningf("同步路由权限失败: %s", err.Error())
+		terminal.Warningf("同步路由权限失败: %s", err.Error())
 	}
 }
 
 func (a *App) Run() {
 	if a == nil || a.Engine == nil {
-		flag.Errorf("应用未启动,无法运行服务")
+		terminal.Errorf("应用未启动,无法运行服务")
 		os.Exit(1)
 	}
 
@@ -109,7 +109,7 @@ func (a *App) Run() {
 
 	conf := facade.Config()
 	if conf == nil {
-		flag.Errorf("配置未加载,无法启动服务")
+		terminal.Errorf("配置未加载,无法启动服务")
 		os.Exit(1)
 	}
 
@@ -128,8 +128,8 @@ func (a *App) Run() {
 // SetupCLI 初始化CLI运行环境,不启动后台任务
 func SetupCLI() error {
 	config.NewConfig()
-	flag.SetSilent(true)
-	defer flag.SetSilent(false)
+	terminal.SetSilent(true)
+	defer terminal.SetSilent(false)
 
 	app := serviceprovider.NewApp(provider.All()...)
 	if err := app.RegisterProviders(); err != nil {
@@ -161,17 +161,17 @@ func (a *App) printStartupInfo(conf *config.Config) {
 		{label: "环境", value: conf.App.Env},
 		{label: "端口", value: color.YellowString(convert.IntToString[int64](conf.App.Port))},
 		{label: "数据库", value: conf.Databases.Driver},
-		{label: startupLabel(flag.NetworkIco, "Local Address"), value: "http://" + localHost + ":" + port},
-		{label: startupLabel(flag.NetworkIco, "Network Address"), value: networkAddress},
-		{label: startupLabel(flag.PointerIco, "Local Swagger"), value: "http://" + localHost + ":" + port + "/swagger/index.html"},
-		{label: startupLabel(flag.PointerIco, "Network Swagger"), value: networkSwagger},
-		{label: startupLabel(flag.PointerIco, "Local Test API"), value: "http://" + localHost + ":" + port + "/ping"},
-		{label: startupLabel(flag.PointerIco, "Network Test API"), value: networkTestAPI},
+		{label: startupLabel(terminal.NetworkIco, "Local Address"), value: "http://" + localHost + ":" + port},
+		{label: startupLabel(terminal.NetworkIco, "Network Address"), value: networkAddress},
+		{label: startupLabel(terminal.PointerIco, "Local Swagger"), value: "http://" + localHost + ":" + port + "/swagger/index.html"},
+		{label: startupLabel(terminal.PointerIco, "Network Swagger"), value: networkSwagger},
+		{label: startupLabel(terminal.PointerIco, "Local Test API"), value: "http://" + localHost + ":" + port + "/ping"},
+		{label: startupLabel(terminal.PointerIco, "Network Test API"), value: networkTestAPI},
 	}
 
 	printAligned(items)
 
-	flag.Successf("Gin server started successfully!")
+	terminal.Successf("Gin server started successfully!")
 }
 
 // startupItem 启动信息项
@@ -275,7 +275,7 @@ func (a *App) startHttpServer(conf *config.Config) *http.Server {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			flag.Errorf("服务启动失败: %s", err.Error())
+			terminal.Errorf("服务启动失败: %s", err.Error())
 			os.Exit(1)
 		}
 	}()
@@ -294,7 +294,7 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 	defer func() {
 		err := a.application.Stop()
 		if err != nil {
-			flag.Errorf("关闭应用失败: %s", err.Error())
+			terminal.Errorf("关闭应用失败: %s", err.Error())
 			return
 		}
 	}()
@@ -305,7 +305,7 @@ func (a *App) gracefulShutdown(srv *http.Server) {
 
 	// 关闭http服务
 	if err := srv.Shutdown(ctx); err != nil {
-		flag.Errorf("服务关闭异常: %v", err)
+		terminal.Errorf("服务关闭异常: %v", err)
 	}
 }
 

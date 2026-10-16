@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/cli"
 	"html/template"
 	"os"
@@ -66,7 +66,7 @@ func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -101,7 +101,7 @@ func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -111,15 +111,15 @@ func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {
 	if mcpDir != "app/mcp" {
 		alias, importErr := cli.AddImport(toolsFile, cli.ImportPath(file))
 		if importErr != nil {
-			flag.Errorf("自动添加MCP工具导入失败: %s", importErr.Error())
+			terminal.Errorf("自动添加MCP工具导入失败: %s", importErr.Error())
 			return
 		}
 		qualifier = alias + "."
 	}
 	if err = cli.AddItem(toolsFile, "return []servicemcp.Tool{", qualifier+"New"+structName+"Tool()"); err != nil {
-		flag.Errorf("自动注册MCP工具失败: %s", err.Error())
+		terminal.Errorf("自动注册MCP工具失败: %s", err.Error())
 		return
 	}
 
-	flag.Successf("MCP工具文件: %s 生成成功!", file)
+	terminal.Successf("MCP工具文件: %s 生成成功!", file)
 }

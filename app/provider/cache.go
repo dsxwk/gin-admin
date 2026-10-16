@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/cache"
+	"gin/pkg/terminal"
 )
 
 // CacheProvider 缓存服务提供者
@@ -25,7 +25,7 @@ func (p *CacheProvider) Register(app *container.Container) {
 
 // Boot 启动服务
 func (p *CacheProvider) Boot(_ *container.Container) {
-	flag.Infof("缓存服务启动成功")
+	terminal.Infof("缓存服务启动成功")
 }
 
 // Dependencies 依赖服务

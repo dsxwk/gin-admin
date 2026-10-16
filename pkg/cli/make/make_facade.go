@@ -2,7 +2,7 @@ package make
 
 import (
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,7 +58,7 @@ func (m *MakeFacade) generateFacade(_make, file, facadeDesc string) {
 	templateFile := m.GetTemplate(_make)
 	tmpl, err := template.ParseFiles(templateFile)
 	if err != nil {
-		flag.Errorf("Error parsing template: %s", err.Error())
+		terminal.Errorf("Error parsing template: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -91,9 +91,9 @@ func (m *MakeFacade) generateFacade(_make, file, facadeDesc string) {
 
 	err = tmpl.Execute(f, data)
 	if err != nil {
-		flag.Errorf("Error executing template: %s", err.Error())
+		terminal.Errorf("Error executing template: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("门面文件: " + file + " 生成成功!")
+	terminal.Successf("门面文件: " + file + " 生成成功!")
 }

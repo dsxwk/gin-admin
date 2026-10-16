@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -89,7 +89,7 @@ func (m *MakeGrpcRequest) Execute(values map[string]string) {
 		if table == "" {
 			continue
 		}
-		flag.Infof("开始生成grpc请求: %s", table)
+		terminal.Infof("开始生成grpc请求: %s", table)
 		m.generateRequest(db, table, outDir)
 	}
 }
@@ -98,7 +98,7 @@ func (m *MakeGrpcRequest) Execute(values map[string]string) {
 func (m *MakeGrpcRequest) generateRequest(db *gorm.DB, table, outDir string) {
 	columns, err := GetColumnInfo(db, table)
 	if err != nil {
-		flag.Errorf("获取表字段失败: %s", err.Error())
+		terminal.Errorf("获取表字段失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -133,7 +133,7 @@ func (m *MakeGrpcRequest) generateRequest(db *gorm.DB, table, outDir string) {
 
 	tpl, err := template.ParseFiles(m.GetTemplate("grpc_request"))
 	if err != nil {
-		flag.Errorf("解析grpc请求模板失败: %s", err.Error())
+		terminal.Errorf("解析grpc请求模板失败: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -165,11 +165,11 @@ func (m *MakeGrpcRequest) generateRequest(db *gorm.DB, table, outDir string) {
 		return
 	}
 	if err = tpl.Execute(f, data); err != nil {
-		flag.Errorf("生成grpc请求失败: %s", err.Error())
+		terminal.Errorf("生成grpc请求失败: %s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Successf("grpc请求文件: " + file + " 生成成功!")
+	terminal.Successf("grpc请求文件: " + file + " 生成成功!")
 }
 
 // formatGrpcIdFields 格式化grpc请求Id字段

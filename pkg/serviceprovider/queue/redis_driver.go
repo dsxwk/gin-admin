@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gin/common/flag"
+	"gin/pkg/terminal"
 	"gin/pkg/serviceprovider/logger"
 	"sync"
 	"time"
@@ -67,7 +67,7 @@ func (c *RedisConsumer) Start(handler ConsumerHandler) {
 		for {
 			select {
 			case <-c.ctx.Done():
-				flag.Infof("[Redis] consumer %s stopped", c.Queue)
+				terminal.Infof("[Redis] consumer %s stopped", c.Queue)
 				return
 			default:
 				c.consumeLoop(handler)
