@@ -8,11 +8,12 @@ import (
 
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/database/migrations"
 	"gin/pkg/cli"
+	"gin/pkg/terminal"
 
 	"gin/pkg/pathx"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -61,7 +62,7 @@ func (s *Seed) Execute(values map[string]string) {
 
 	id := values["id"]
 	total := 0
-	for _, seed := range migrations.AllSeeds() {
+	for _, seed := range migrations.Seeds() {
 		if id != "" && seed.ID() != id {
 			continue
 		}
@@ -74,7 +75,7 @@ func (s *Seed) Execute(values map[string]string) {
 	}
 
 	tracker, progressDone := cli.StartProgress("执行数据填充", total)
-	for _, seed := range migrations.AllSeeds() {
+	for _, seed := range migrations.Seeds() {
 		if id != "" && seed.ID() != id {
 			continue
 		}

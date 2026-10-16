@@ -3,9 +3,9 @@ package db
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/database"
 	"gin/database/migrations"
+	"gin/pkg/terminal"
 
 	"github.com/fatih/color"
 )
@@ -40,7 +40,7 @@ func (s *Rollback) Execute(values map[string]string) {
 
 	db := facade.DB()
 	id := values["id"]
-	for _, m := range migrations.AllMigrations() {
+	for _, m := range migrations.Migrations() {
 		if id != "" && m.ID() != id {
 			continue
 		}

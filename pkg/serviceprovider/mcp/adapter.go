@@ -21,10 +21,7 @@ type ToolAdapter[T any] struct {
 }
 
 // NewToolAdapter 创建泛型工具适配器
-func NewToolAdapter[T any](
-	config ToolConfig,
-	call func(ctx context.Context, userId int64, args *T) (any, error),
-) *ToolAdapter[T] {
+func NewToolAdapter[T any](config ToolConfig, call func(ctx context.Context, userId int64, args *T) (any, error)) *ToolAdapter[T] {
 	if config.Description == "" {
 		config.Description = config.Name
 	}

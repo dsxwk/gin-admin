@@ -5,33 +5,20 @@ import (
 	"gin/database/seeds"
 )
 
-var (
-	migration []database.Migration // 注册迁移
-	seed      []database.Seeder    // 注册 seed
-)
-
-func init() {
-	// 注册迁移
-	migration = []database.Migration{
+// Migrations 迁移列表
+func Migrations() []database.Migration {
+	return []database.Migration{
 		&CreateUserTable{},
 		&CreateUserRolesTable{},
 		&CreateAgentSessionTable{},
 		&CreateAgentMessageTable{},
-		// ...
 	}
+}
 
-	// 注册 seed
-	seed = []database.Seeder{
+// Seeds 数据填充列表
+func Seeds() []database.Seeder {
+	return []database.Seeder{
 		&seeds.UserSeed{},
 		&seeds.UserRolesSeed{},
-		// ...
 	}
-}
-
-func AllMigrations() []database.Migration {
-	return migration
-}
-
-func AllSeeds() []database.Seeder {
-	return seed
 }
