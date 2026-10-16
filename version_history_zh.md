@@ -1,5 +1,14 @@
 # 版本记录
 
+## v3.4.0
+> - 重构pkg工具包,拆分convert、cryptox、ctxkey、mapx、pathx、stringx、timex和treex子包
+> - 移除pkg.Sprintf,统一使用标准库fmt.Sprintf
+> - 统一Queue、Job和MCP泛型适配器,简化消费者、生产者、任务和工具示例
+> - 新增通用ShutdownRunner,统一Provider关闭任务
+> - 重构ORM连接管理,移除全局连接状态,新增Connect错误接口并兼容原Connection调用
+> - 调整启动流程为NewApp、Boot和Run,CLI初始化重命名为SetupCLI
+> - 优化Context Key、Gin Key、启动信息输出和相关测试
+
 ## v3.3.7
 > - 更新前端效果预览图
 > - 空切片问题修复

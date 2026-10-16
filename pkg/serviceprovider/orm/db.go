@@ -2,106 +2,57 @@ package orm
 
 import (
 	"fmt"
-	"gin/pkg/ctxkey"
-	"gin/common/flag"
 	"gin/config"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
-	l "gin/pkg/serviceprovider/logger"
+	servicelogger "gin/pkg/serviceprovider/logger"
 	"log"
 	"os"
-	"strings"
-	"sync"
 	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
-var (
-	conf          *config.Config
-	dbInstances   = make(map[string]*gorm.DB)
-	dbInstancesMu sync.RWMutex
-)
-
 const (
+	startTimeKey           = "gorm_start_time"
 	defaultMaxIdleConns    = 20
 	defaultMaxOpenConns    = 200
 	defaultConnMaxLifetime = 3 * time.Minute
 	defaultConnMaxIdleTime = 1 * time.Minute
 )
 
-// Connection 连接数据库
-func Connection(driver string, cfg *config.Config) *gorm.DB {
-	conf = cfg
-	// 已存在直接返回
-	dbInstancesMu.RLock()
-	existsDB, existsOK := dbInstances[driver]
-	dbInstancesMu.RUnlock()
-	if existsOK {
-		return existsDB
+// openConnection 根据驱动创建数据库连接
+func openConnection(driver string, cfg *config.Config, gormLog gormlogger.Interface) (*gorm.DB, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("数据库配置未初始化")
 	}
 
-	var (
-		db  *gorm.DB
-		err error
-	)
-
-	// 根据驱动打开数据库
 	switch driver {
 	case "mysql":
-		db, err = openMysql()
+		return openMysql(cfg, gormLog)
 	case "pgsql":
-		db, err = openPgsql()
+		return openPgsql(cfg, gormLog)
 	case "sqlite":
-		db, err = openSqlite()
+		return openSqlite(cfg, gormLog)
 	case "sqlsrv":
-		db, err = openSqlsrv()
+		return openSqlsrv(cfg, gormLog)
 	case "oracle":
-		db, err = openOracle()
+		return openOracle(cfg, gormLog)
 	default:
-		flag.Errorf("不支持的数据库: %s", driver)
-		os.Exit(1)
+		return nil, fmt.Errorf("不支持的数据库: %s", driver)
 	}
-
-	if err != nil {
-		flag.Errorf("%s数据库连接失败: %v", driver, err)
-		os.Exit(1)
-	}
-
-	// 配置连接池
-	sqlDB, e := db.DB()
-	if e != nil {
-		flag.Errorf("%s数据库连接池配置失败: %v", driver, e)
-		os.Exit(1)
-	}
-
-	// 设置连接池参数(ConnMaxLifetime小于MySQLwait_timeout,避免僵尸连接)
-	maxIdleConns, maxOpenConns, connMaxLifetime, connMaxIdleTime := connectionPoolSettings(cfg)
-	sqlDB.SetMaxIdleConns(maxIdleConns)
-	sqlDB.SetMaxOpenConns(maxOpenConns)
-	sqlDB.SetConnMaxLifetime(connMaxLifetime)
-	sqlDB.SetConnMaxIdleTime(connMaxIdleTime)
-
-	// 测试Ping
-	if err = sqlDB.Ping(); err != nil {
-		flag.Errorf("%s数据库连接ping失败: %v", driver, err)
-		os.Exit(1)
-	}
-
-	// 注册gorm sql回调
-	SqlCallback(db)
-
-	dbInstancesMu.Lock()
-	dbInstances[driver] = db
-	dbInstancesMu.Unlock()
-	return db
 }
 
 // connectionPoolSettings 获取连接池参数,未配置时使用默认值
 func connectionPoolSettings(cfg *config.Config) (int, int, time.Duration, time.Duration) {
+	if cfg == nil {
+		return defaultMaxIdleConns, defaultMaxOpenConns, defaultConnMaxLifetime, defaultConnMaxIdleTime
+	}
+
 	pool := cfg.Databases.Pool
 	maxIdleConns := pool.MaxIdleConns
 	if maxIdleConns <= 0 {
@@ -126,142 +77,91 @@ func connectionPoolSettings(cfg *config.Config) (int, int, time.Duration, time.D
 	return maxIdleConns, maxOpenConns, connMaxLifetime, connMaxIdleTime
 }
 
-// ResetConnection 重置数据库连接,关闭旧连接并重建
-func ResetConnection(driver string) *gorm.DB {
-	dbInstancesMu.Lock()
-	if db, ok := dbInstances[driver]; ok {
-		if sqlDB, err := db.DB(); err == nil {
-			_ = sqlDB.Close()
-		}
-		delete(dbInstances, driver)
-	}
-	dbInstancesMu.Unlock()
-	return Connection(driver, conf)
-}
-
 // configNaming 全局表名策略
 func configNaming() schema.NamingStrategy {
 	return schema.NamingStrategy{
-		SingularTable: true, // 全局关闭表名复数化
+		SingularTable: true,
 	}
 }
 
-// gormLogger gorm日志配置
-func gormLogger() logger.Interface {
-	return logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // 输出到控制台
-		logger.Config{
-			SlowThreshold: conf.Databases.SlowQueryDuration, // 慢sql阈值转Duration
-			LogLevel:      logger.Info,
-			Colorful:      true, // 彩色日志
-			// IgnoreRecordNotFoundError: true, // 如果需要忽略 record not found
+// newGormLogger 创建GORM日志配置
+func newGormLogger(cfg *config.Config) gormlogger.Interface {
+	slowThreshold := 3 * time.Second
+	if cfg != nil && cfg.Databases.SlowQueryDuration > 0 {
+		slowThreshold = cfg.Databases.SlowQueryDuration
+	}
+
+	return gormlogger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		gormlogger.Config{
+			SlowThreshold: slowThreshold,
+			LogLevel:      gormlogger.Info,
+			Colorful:      true,
 		},
 	)
 }
 
-// SqlCallback sql回调
-func SqlCallback(db *gorm.DB) {
-	// 查询
+// sqlCallback 注册SQL回调
+func sqlCallback(db *gorm.DB, cfg *config.Config, log *servicelogger.Logger) {
+	afterCallback := func(db *gorm.DB) {
+		after(db, cfg, log)
+	}
+
 	_ = db.Callback().Query().Before("gorm:query").Register("log:before_query", before)
-	_ = db.Callback().Query().After("gorm:query").Register("log:after_query", after)
+	_ = db.Callback().Query().After("gorm:query").Register("log:after_query", afterCallback)
 
-	// 创建
 	_ = db.Callback().Create().Before("gorm:create").Register("log:before_create", before)
-	_ = db.Callback().Create().After("gorm:create").Register("log:after_create", after)
+	_ = db.Callback().Create().After("gorm:create").Register("log:after_create", afterCallback)
 
-	// 更新
 	_ = db.Callback().Update().Before("gorm:update").Register("log:before_update", before)
-	_ = db.Callback().Update().After("gorm:update").Register("log:after_update", after)
+	_ = db.Callback().Update().After("gorm:update").Register("log:after_update", afterCallback)
 
-	// 删除
 	_ = db.Callback().Delete().Before("gorm:delete").Register("log:before_delete", before)
-	_ = db.Callback().Delete().After("gorm:delete").Register("log:after_delete", after)
+	_ = db.Callback().Delete().After("gorm:delete").Register("log:after_delete", afterCallback)
 }
 
+// before SQL执行前记录开始时间
 func before(db *gorm.DB) {
 	db.InstanceSet(startTimeKey, time.Now())
 }
 
-func after(db *gorm.DB) {
+// after SQL执行后记录慢查询和调试事件
+func after(db *gorm.DB, cfg *config.Config, log *servicelogger.Logger) {
 	ctx := db.Statement.Context
 	if ctx == nil {
 		return
 	}
+
 	start, ok := db.InstanceGet(startTimeKey)
 	if !ok {
 		return
 	}
-
-	// sql builder是否为空
 	if db.Statement.SQL.Len() == 0 || db.Dialector == nil {
 		return
 	}
 
 	var sql string
-	// 安全处理Vars为空
 	if db.Statement.Vars == nil || len(db.Statement.Vars) == 0 {
 		sql = db.Statement.SQL.String()
 	} else {
 		sql = db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...)
 	}
 
-	// 耗时
 	cost := time.Since(start.(time.Time))
-	costMs := float64(cost.Nanoseconds()) / 1e6 // 精确到小数
+	costMs := float64(cost.Nanoseconds()) / 1e6
 
-	// 慢查询警告
-	if cost > conf.Databases.SlowQueryDuration {
-		l.NewLogger(conf).Warn(
+	if cfg != nil && log != nil && cost > cfg.Databases.SlowQueryDuration {
+		log.Warn(
 			"Slow Sql",
 			zap.Float64("costMs", costMs),
 			zap.String("sql", sql),
 		)
 	}
 
-	traceId, ok := ctx.Value(ctxkey.TraceIDKey).(string)
-	if !ok || traceId == "" {
-		traceId = "unknown"
-	}
-
 	eventbus.Default().Publish(ctx, debugger.TopicSQL, debugger.SQLEvent{
-		TraceID: traceId,
+		TraceID: ctxkey.TraceID(ctx),
 		SQL:     sql,
 		Rows:    db.Statement.RowsAffected,
 		Ms:      costMs,
 	})
-}
-
-// getSql 替换Sql中的占位符"?"为实际值
-func getSql(sql string, vars []any) string {
-	for _, v := range vars {
-		// 将参数值格式化为字符串
-		var (
-			formattedValue string
-		)
-		switch value := v.(type) {
-		case string:
-			formattedValue = fmt.Sprintf("'%s'", value)
-		case []byte:
-			formattedValue = fmt.Sprintf("'%s'", string(value))
-		case time.Time:
-			formattedValue = fmt.Sprintf("'%s'", value.Format("2006-01-02 15:04:05"))
-		case *time.Time:
-			if value != nil {
-				formattedValue = fmt.Sprintf("'%s'", value.Format("2006-01-02 15:04:05"))
-			} else {
-				formattedValue = "NULL"
-			}
-		case *gorm.DeletedAt:
-			if value == nil {
-				formattedValue = "NULL"
-			}
-		default:
-			formattedValue = fmt.Sprintf("%v", value)
-		}
-
-		// 替换第一个"?"为实际值
-		sql = strings.Replace(sql, "?", formattedValue, 1)
-	}
-
-	return sql
 }

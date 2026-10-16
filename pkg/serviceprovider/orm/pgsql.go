@@ -1,27 +1,29 @@
 package orm
 
 import (
+	"fmt"
+	"gin/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"fmt"
+	gormlogger "gorm.io/gorm/logger"
 )
 
-func openPgsql() (*gorm.DB, error) {
-	return gorm.Open(postgres.Open(getPgsqlDsn()), &gorm.Config{
+func openPgsql(cfg *config.Config, gormLog gormlogger.Interface) (*gorm.DB, error) {
+	return gorm.Open(postgres.Open(getPgsqlDsn(cfg)), &gorm.Config{
 		NamingStrategy: configNaming(),
-		Logger:         gormLogger(),
+		Logger:         gormLog,
 	})
 }
 
-func getPgsqlDsn() string {
+func getPgsqlDsn(cfg *config.Config) string {
 	return fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		conf.Databases.Pgsql.Host,
-		conf.Databases.Pgsql.Username,
-		conf.Databases.Pgsql.Password,
-		conf.Databases.Pgsql.Database,
-		conf.Databases.Pgsql.Port,
-		conf.Databases.Pgsql.SSLMode,
+		cfg.Databases.Pgsql.Host,
+		cfg.Databases.Pgsql.Username,
+		cfg.Databases.Pgsql.Password,
+		cfg.Databases.Pgsql.Database,
+		cfg.Databases.Pgsql.Port,
+		cfg.Databases.Pgsql.SSLMode,
 	)
 }

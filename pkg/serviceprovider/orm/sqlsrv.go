@@ -1,20 +1,22 @@
 package orm
 
 import (
+	"fmt"
+	"gin/config"
 
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
-	"fmt"
+	gormlogger "gorm.io/gorm/logger"
 )
 
-func openSqlsrv() (*gorm.DB, error) {
-	return gorm.Open(sqlserver.Open(getSqlsrvDsn()), &gorm.Config{
+func openSqlsrv(cfg *config.Config, gormLog gormlogger.Interface) (*gorm.DB, error) {
+	return gorm.Open(sqlserver.Open(getSqlsrvDsn(cfg)), &gorm.Config{
 		NamingStrategy: configNaming(),
-		Logger:         gormLogger(),
+		Logger:         gormLog,
 	})
 }
 
-func getSqlsrvDsn() string {
+func getSqlsrvDsn(cfg *config.Config) string {
 	/*
 	   官方推荐格式(最稳定)：
 	   sqlserver://username:password@host:port?database=dbname
@@ -25,10 +27,10 @@ func getSqlsrvDsn() string {
 
 	return fmt.Sprintf(
 		"sqlserver://%s:%s@%s:%s?database=%s",
-		conf.Databases.Sqlsrv.Username,
-		conf.Databases.Sqlsrv.Password,
-		conf.Databases.Sqlsrv.Host,
-		conf.Databases.Sqlsrv.Port,
-		conf.Databases.Sqlsrv.Database,
+		cfg.Databases.Sqlsrv.Username,
+		cfg.Databases.Sqlsrv.Password,
+		cfg.Databases.Sqlsrv.Host,
+		cfg.Databases.Sqlsrv.Port,
+		cfg.Databases.Sqlsrv.Database,
 	)
 }

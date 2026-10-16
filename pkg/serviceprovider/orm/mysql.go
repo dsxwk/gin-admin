@@ -1,14 +1,14 @@
 package orm
 
 import (
+	"fmt"
+	"gin/config"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"fmt"
+	gormlogger "gorm.io/gorm/logger"
 )
-
-const startTimeKey = "gorm_start_time"
 
 const (
 	defaultMysqlTimeout      = 5 * time.Second
@@ -16,28 +16,26 @@ const (
 	defaultMysqlWriteTimeout = 5 * time.Second
 )
 
-func openMysql() (db *gorm.DB, err error) {
-	db, err = gorm.Open(mysql.Open(getMysqlDsn()), &gorm.Config{
+func openMysql(cfg *config.Config, gormLog gormlogger.Interface) (*gorm.DB, error) {
+	return gorm.Open(mysql.Open(getMysqlDsn(cfg)), &gorm.Config{
 		NamingStrategy: configNaming(),
-		Logger:         gormLogger(),
+		Logger:         gormLog,
 	})
-
-	return db, err
 }
 
 // getMysqlDsn 获取数据库dns
-func getMysqlDsn() string {
-	timeout := conf.Databases.Mysql.Timeout
+func getMysqlDsn(cfg *config.Config) string {
+	timeout := cfg.Databases.Mysql.Timeout
 	if timeout <= 0 {
 		timeout = defaultMysqlTimeout
 	}
 
-	readTimeout := conf.Databases.Mysql.ReadTimeout
+	readTimeout := cfg.Databases.Mysql.ReadTimeout
 	if readTimeout <= 0 {
 		readTimeout = defaultMysqlReadTimeout
 	}
 
-	writeTimeout := conf.Databases.Mysql.WriteTimeout
+	writeTimeout := cfg.Databases.Mysql.WriteTimeout
 	if writeTimeout <= 0 {
 		writeTimeout = defaultMysqlWriteTimeout
 	}
@@ -49,6 +47,6 @@ func getMysqlDsn() string {
 
 	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?%s",
-		conf.Databases.Mysql.Username, conf.Databases.Mysql.Password, conf.Databases.Mysql.Host, conf.Databases.Mysql.Port, conf.Databases.Mysql.Database, options,
+		cfg.Databases.Mysql.Username, cfg.Databases.Mysql.Password, cfg.Databases.Mysql.Host, cfg.Databases.Mysql.Port, cfg.Databases.Mysql.Database, options,
 	)
 }

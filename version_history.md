@@ -1,5 +1,14 @@
 # Version History
 
+## v3.4.0
+> - Refactor the pkg toolkit and split it into convert, cryptox, ctxkey, mapx, pathx, stringx, timex, and treex packages
+> - Remove pkg.Sprintf and replace it with the standard library fmt.Sprintf
+> - Unify generic adapters for Queue, Job, and MCP to simplify consumer, producer, task, and tool examples
+> - Add a reusable ShutdownRunner to unify Provider shutdown tasks
+> - Refactor ORM connection management, remove global connection state, add a Connect error API, and keep Connection compatibility
+> - Adjust the startup flow to NewApp, Boot, and Run, and rename CLI initialization to SetupCLI
+> - Optimize Context keys, Gin keys, startup output, and related tests
+
 ## v3.3.7
 > - Update the front-end effect preview image
 > - Fixing the empty slice issue
