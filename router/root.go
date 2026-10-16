@@ -5,20 +5,20 @@ import (
 	"gin/app/middleware"
 	_ "gin/docs"
 	"gin/pkg/errcode"
+	"gin/pkg/pathx"
 	"gin/pkg/route"
 	"net/http"
 
-	"gin/pkg/pathx"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// NewRouters 加载路由
-func NewRouters(router *gin.Engine) {
+// NewRouters 加载路由并返回鉴权路由Key
+func NewRouters(router *gin.Engine) []string {
 	cfg := facade.Config()
 	if cfg == nil {
-		return
+		return nil
 	}
 
 	timeoutMiddleware := middleware.Timeout{}.Handle(cfg.App.Timeout)
@@ -50,5 +50,5 @@ func NewRouters(router *gin.Engine) {
 	})
 
 	// 业务路由
-	route.Mount(routeGroup, authMiddleware, All()...)
+	return route.Mount(router, routeGroup, authMiddleware, All()...)
 }

@@ -171,7 +171,7 @@ func TestWebSocketAgentStream(t *testing.T) {
 
 	var answer string
 	done := false
-	for index := 0; index < 10; index++ {
+	for range 10 {
 		_, data := readWsMessage(t, conn)
 		var response wsResponse
 		require.NoError(t, json.Unmarshal(data, &response))

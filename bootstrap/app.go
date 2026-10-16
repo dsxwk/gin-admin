@@ -10,7 +10,6 @@ import (
 	"gin/config"
 	"gin/pkg/convert"
 	"gin/pkg/errcode"
-	"gin/pkg/route"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/terminal"
 	"gin/router"
@@ -77,17 +76,16 @@ func setupEngine() *gin.Engine {
 	r.MaxMultipartMemory = 90 << 20
 
 	// 加载路由
-	router.NewRouters(r)
+	permissionKeys := router.NewRouters(r)
 
 	// 同步路由权限到数据库
-	syncRoutePermissions()
+	syncRoutePermissions(permissionKeys)
 
 	return r
 }
 
 // syncRoutePermissions 同步路由权限到数据库
-func syncRoutePermissions() {
-	permissionKeys := route.PermissionKeys(router.All()...)
+func syncRoutePermissions(permissionKeys []string) {
 	if len(permissionKeys) == 0 {
 		return
 	}
