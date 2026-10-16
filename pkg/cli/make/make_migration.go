@@ -2,7 +2,7 @@ package make
 
 import (
 	"fmt"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -12,28 +12,27 @@ import (
 )
 
 type MakeMigration struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (s *MakeMigration) Name() string {
-	return "make:migration"
-}
-
-func (s *MakeMigration) Description() string {
-	return "生成数据库迁移模板"
-}
-
-func (s *MakeMigration) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{Short: "t", Long: "table"},
-			"指定表名，留空生成所有表模板",
-			false,
-		},
+// NewMakeMigration 创建命令
+func NewMakeMigration() *MakeMigration {
+	return &MakeMigration{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:migration",
+			Description: "生成数据库迁移模板",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "指定表名，留空生成所有表模板",
+					Required: false,
+				},
+			},
+		}),
 	}
 }
 
-func (s *MakeMigration) Execute(values map[string]string) {
+func (s *MakeMigration) Handle(values map[string]string) error {
 	table := values["table"]
 
 	timestamp := time.Now().Format("20060102")
@@ -76,13 +75,16 @@ func (m *%s) Rollback(db *gorm.DB) error {
 	// 创建文件
 	f := s.CheckDirAndFile(filePath)
 	if f == nil {
-		return
+		return nil
+
 	}
 
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 		terminal.Errorf("写入文件失败: %v", err)
-		return
+		return nil
+
 	}
 
 	terminal.Successf("迁移文件生成成功: %s", filePath)
+	return nil
 }

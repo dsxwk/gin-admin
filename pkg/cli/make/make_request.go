@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -15,72 +15,47 @@ import (
 )
 
 type MakeRequest struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeRequest) Name() string {
-	return "make:request"
-}
-
-func (m *MakeRequest) Description() string {
-	return "验证请求创建"
-}
-
-func (m *MakeRequest) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{Short: "f", Long: "file"},
-			"文件路径, 如: user",
-			true,
-		},
-		{
-			base.Flag{Short: "t", Long: "table"},
-			"表名, 如: roles",
-			false,
-		},
-		{
-			base.Flag{Short: "d", Long: "desc", Default: "请求验证"},
-			"描述",
-			false,
-		},
-		{
-			base.Flag{Short: "c", Long: "camel", Default: "true"},
-			"字段是否使用驼峰",
-			false,
-		},
-		{
-			base.Flag{Short: "C", Long: "connection", Default: "mysql"},
-			"数据库连接",
-			false,
-		},
+// NewMakeRequest 创建命令
+func NewMakeRequest() *MakeRequest {
+	return &MakeRequest{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:request",
+			Description: "验证请求创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: user",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: roles",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "请求验证"},
+					Desc:     "描述",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "c", Long: "camel", Default: "true"},
+					Desc:     "字段是否使用驼峰",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
+			},
+		}),
 	}
 }
 
-type Field struct {
-	FormattedField string // 格式化后的完整字段行
-	Name           string
-	JSON           string
-	Type           string
-	Label          string
-	Validate       string
-	IsID           bool
-}
-
-// TableColumn 表字段结构
-type TableColumn struct {
-	Name     string // 字段名
-	DataType string // 数据库类型
-	Nullable bool   // 是否可为空
-	Comment  string // 字段注释
-}
-
-// TranslateField 翻译字段
-type TranslateField struct {
-	Name  string
-	Label string
-}
-
-func (m *MakeRequest) Execute(values map[string]string) {
+func (m *MakeRequest) Handle(values map[string]string) error {
 
 	file := m.GetMakeFile(values["file"], "request")
 	templateName := "request"
@@ -112,6 +87,31 @@ func (m *MakeRequest) Execute(values map[string]string) {
 	m.formatFields(fields)
 
 	m.generateFile(templateName, file, structName, fields, values["desc"])
+	return nil
+}
+
+type Field struct {
+	FormattedField string // 格式化后的完整字段行
+	Name           string
+	JSON           string
+	Type           string
+	Label          string
+	Validate       string
+	IsID           bool
+}
+
+// TableColumn 表字段结构
+type TableColumn struct {
+	Name     string // 字段名
+	DataType string // 数据库类型
+	Nullable bool   // 是否可为空
+	Comment  string // 字段注释
+}
+
+// TranslateField 翻译字段
+type TranslateField struct {
+	Name  string
+	Label string
 }
 
 func (m *MakeRequest) toJsonName(name string, camel bool) string {

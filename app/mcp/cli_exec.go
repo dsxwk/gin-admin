@@ -20,6 +20,9 @@ type CliExecArgs struct {
 	Args    string `json:"args"`
 }
 
+// CliExecTool CLI命令执行工具
+type CliExecTool struct{}
+
 // NewCliExecTool 创建CLI命令执行工具
 func NewCliExecTool() *mcp.ToolAdapter[CliExecArgs] {
 	return mcp.NewToolAdapter(
@@ -45,12 +48,12 @@ func NewCliExecTool() *mcp.ToolAdapter[CliExecArgs] {
 				Required: []string{"command"},
 			},
 		},
-		handleCliExec,
+		(&CliExecTool{}).Handle,
 	)
 }
 
-// handleCliExec 处理CLI命令执行工具
-func handleCliExec(_ context.Context, _ int64, args *CliExecArgs) (any, error) {
+// Handle 处理CLI命令执行工具
+func (t *CliExecTool) Handle(_ context.Context, _ int64, args *CliExecArgs) (any, error) {
 	if args.Command == "" {
 		return map[string]any{"error": "请指定命令名称,如make:controller"}, nil
 	}
@@ -78,9 +81,13 @@ func handleCliExec(_ context.Context, _ int64, args *CliExecArgs) (any, error) {
 		values["file"] = name
 	}
 
+	var handleErr error
 	output := captureCliOutput(func() {
-		cmd.Execute(values)
+		handleErr = cmd.Handle(values)
 	})
+	if handleErr != nil {
+		return nil, handleErr
+	}
 
 	resultFile := buildCliResultPath(args.Command, values)
 	result := map[string]any{

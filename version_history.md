@@ -2,12 +2,25 @@
 
 ## v3.4.0
 > - Refactor the pkg toolkit and split it into convert, cryptox, ctxkey, mapx, pathx, stringx, timex, and treex packages
+> - Move common/flag to pkg/terminal and unify terminal output package naming
+> - Move common/template to pkg/cli/template and unify CLI generation template storage
+> - Remove the unused empty BaseModel struct
 > - Remove pkg.Sprintf and replace it with the standard library fmt.Sprintf
 > - Unify generic adapters for Queue, Job, and MCP to simplify consumer, producer, task, and tool examples
 > - Add a reusable ShutdownRunner to unify Provider shutdown tasks
 > - Refactor ORM connection management, remove global connection state, add a Connect error API, and keep Connection compatibility
+> - Remove implicit init registration from migrations and MCP tools, using explicit methods and direct calls instead
+> - Optimize route permission collection to return auth route keys during mounting, removing duplicate registration and global writer switching
+> - Extract test application initialization into tests/util to support standalone subpackage tests
 > - Adjust the startup flow to NewApp, Boot, and Run, and rename CLI initialization to SetupCLI
 > - Optimize Context keys, Gin keys, startup output, and related tests
+> - Refactor application base types into Service, Controller, Middleware, and Request, and split command base types into pkg/cli/base
+> - Unify CLI commands with Config, New, and Handle, removing repeated Name, Description, Help, and Execute methods
+> - Move generic enum support to pkg/enum and add safe lookup methods
+> - Unify queue consumers, Job tasks, and MCP tools with concrete types and Handle methods
+> - Propagate search condition errors and distinguish missing records in UpdateByID
+> - Sync CLI generation templates, README examples, and tests with the unified handler conventions
+> - Upgrade the CLI version to 3.0.0
 
 ## v3.3.7
 > - Update the front-end effect preview image

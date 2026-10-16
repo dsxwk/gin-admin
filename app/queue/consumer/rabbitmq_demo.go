@@ -2,15 +2,18 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/queue"
-	"fmt"
 )
 
 // RabbitmqDemoPayload 示例消息体
 type RabbitmqDemoPayload struct {
 	Name string `json:"name"`
 }
+
+// RabbitmqDemoConsumer RabbitMQ普通消费者
+type RabbitmqDemoConsumer struct{}
 
 // NewRabbitmqDemoConsumer 创建RabbitMQ普通消费者
 func NewRabbitmqDemoConsumer() *queue.ConsumerAdapter[RabbitmqDemoPayload] {
@@ -34,12 +37,12 @@ func NewRabbitmqDemoConsumer() *queue.ConsumerAdapter[RabbitmqDemoPayload] {
 			Exchange: "rabbitmq_demo_exchange",
 			Routing:  "rabbitmq_demo",
 		},
-		handleRabbitmqDemo,
+		(&RabbitmqDemoConsumer{}).Handle,
 	)
 }
 
-// handleRabbitmqDemo 处理RabbitMQ普通消息
-func handleRabbitmqDemo(_ context.Context, data *RabbitmqDemoPayload) error {
+// Handle 处理RabbitMQ普通消息
+func (c *RabbitmqDemoConsumer) Handle(_ context.Context, data *RabbitmqDemoPayload) error {
 	facade.Log().Info(fmt.Sprintf("RabbitMq Received Msg: name=%s", data.Name))
 	return nil
 }

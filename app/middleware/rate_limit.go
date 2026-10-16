@@ -14,7 +14,7 @@ import (
 )
 
 type RateLimit struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // Handle 全局限流

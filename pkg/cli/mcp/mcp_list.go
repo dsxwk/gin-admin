@@ -3,8 +3,8 @@ package mcp
 import (
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
 	"sort"
 	"strings"
 
@@ -13,25 +13,24 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-type McpList struct{}
+type McpList struct{ base.Command }
 
-func (s *McpList) Name() string {
-	return "mcp:list"
+// NewMcpList 创建命令
+func NewMcpList() *McpList {
+	return &McpList{
+		Command: base.NewCommand(base.Config{
+			Name:        "mcp:list",
+			Description: "MCP工具列表",
+		}),
+	}
 }
 
-func (s *McpList) Description() string {
-	return "MCP工具列表"
-}
-
-func (s *McpList) Help() []base.CommandOption {
-	return []base.CommandOption{}
-}
-
-func (s *McpList) Execute(_ map[string]string) {
+func (s *McpList) Handle(_ map[string]string) error {
 	tools := facade.MCP().Tools()
 	if len(tools) == 0 {
 		color.Yellow("暂无注册的MCP工具")
-		return
+		return nil
+
 	}
 
 	sort.Slice(tools, func(i, j int) bool {
@@ -54,4 +53,5 @@ func (s *McpList) Execute(_ map[string]string) {
 
 	fmt.Println(writer.Render())
 	color.Cyan("总计 %d 个MCP工具\n", len(tools))
+	return nil
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type PermissionController struct {
-	base.BaseController
+	base.Controller
 	service service.PermissionService
 }
 

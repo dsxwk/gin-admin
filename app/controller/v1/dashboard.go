@@ -10,7 +10,7 @@ import (
 
 // DashboardController 仪表盘
 type DashboardController struct {
-	base.BaseController
+	base.Controller
 	service service.DashboardService
 }
 

@@ -1,6 +1,6 @@
 package enum
 
-import "gin/common/base"
+import enumx "gin/pkg/enum"
 
 const (
 	NotificationTypeUser       int64 = 1 // 用户
@@ -17,33 +17,33 @@ const (
 type SystemNotificationEnum struct{}
 
 // Type 通知类型
-func (s *SystemNotificationEnum) Type() *base.Enum[int64] {
-	return base.NewEnum(
-		base.Item[int64]{Value: NotificationTypeUser, Desc: "用户"},
-		base.Item[int64]{Value: NotificationTypeDepartment, Desc: "部门"},
+func (s *SystemNotificationEnum) Type() *enumx.Enum[int64] {
+	return enumx.NewEnum(
+		enumx.Item[int64]{Value: NotificationTypeUser, Desc: "用户"},
+		enumx.Item[int64]{Value: NotificationTypeDepartment, Desc: "部门"},
 	)
 }
 
 // IsToAll 是否推送所有
-func (s *SystemNotificationEnum) IsToAll() *base.Enum[int64] {
-	return base.NewEnum(
-		base.Item[int64]{Value: NotificationIsToAllYes, Desc: "是"},
-		base.Item[int64]{Value: NotificationIsToAllNo, Desc: "否"},
+func (s *SystemNotificationEnum) IsToAll() *enumx.Enum[int64] {
+	return enumx.NewEnum(
+		enumx.Item[int64]{Value: NotificationIsToAllYes, Desc: "是"},
+		enumx.Item[int64]{Value: NotificationIsToAllNo, Desc: "否"},
 	)
 }
 
 // Status 通知状态
-func (s *SystemNotificationEnum) Status() *base.Enum[int64] {
-	return base.NewEnum(
-		base.Item[int64]{Value: NotificationStatusNormal, Desc: "正常"},
-		base.Item[int64]{Value: NotificationStatusRevoked, Desc: "撤回"},
+func (s *SystemNotificationEnum) Status() *enumx.Enum[int64] {
+	return enumx.NewEnum(
+		enumx.Item[int64]{Value: NotificationStatusNormal, Desc: "正常"},
+		enumx.Item[int64]{Value: NotificationStatusRevoked, Desc: "撤回"},
 	)
 }
 
 // IsRead 是否已读
-func (s *SystemNotificationEnum) IsRead() *base.Enum[int64] {
-	return base.NewEnum(
-		base.Item[int64]{Value: NotificationIsReadYes, Desc: "已读"},
-		base.Item[int64]{Value: NotificationIsReadNo, Desc: "未读"},
+func (s *SystemNotificationEnum) IsRead() *enumx.Enum[int64] {
+	return enumx.NewEnum(
+		enumx.Item[int64]{Value: NotificationIsReadYes, Desc: "已读"},
+		enumx.Item[int64]{Value: NotificationIsReadNo, Desc: "未读"},
 	)
 }

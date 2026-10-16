@@ -15,7 +15,7 @@ import (
 )
 
 type LoginService struct {
-	base.BaseService
+	base.Service
 }
 
 // Login 登录
@@ -60,14 +60,14 @@ func (s *LoginService) Login(ctx context.Context, username, password string) (er
 }
 
 // RefreshToken 刷新token
-func (s *LoginService) RefreshToken(_ context.Context, token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
+func (s *LoginService) RefreshToken(ctx context.Context, token string) (accessToken, refreshToken string, tExp, rExp int64, err error) {
 	var (
 		conf     = facade.Config()
 		loginErr errcode.LoginErrCode
 		jwt      middleware.Jwt
 	)
 
-	claims, err := jwt.Decode(token)
+	claims, err := jwt.Decode(ctx, token)
 	if err != nil || claims["typ"] != "refresh" {
 		return accessToken, refreshToken, tExp, rExp, loginErr.InvalidToken()
 	}

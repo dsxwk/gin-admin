@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -17,53 +17,38 @@ import (
 
 // MakeGrpcProto grpc proto生成命令
 type MakeGrpcProto struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeGrpcProto) Name() string {
-	return "grpc-make:proto"
-}
-
-// Description 命令描述
-func (m *MakeGrpcProto) Description() string {
-	return "grpc proto创建"
-}
-
-// Help 命令选项
-func (m *MakeGrpcProto) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
+// NewMakeGrpcProto 创建命令
+func NewMakeGrpcProto() *MakeGrpcProto {
+	return &MakeGrpcProto{
+		Command: base.NewCommand(base.Config{
+			Name:        "grpc-make:proto",
+			Description: "grpc proto创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path", Default: "grpc/proto"},
+					Desc:     "输出目录, 默认grpc/proto",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
 			},
-			"表名, 如: user 或 user,menu",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "p",
-				Long:    "path",
-				Default: "grpc/proto",
-			},
-			"输出目录, 默认grpc/proto",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeGrpcProto) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeGrpcProto) Handle(values map[string]string) error {
 	outDir := strings.TrimPrefix(values["path"], "/")
 	if outDir == "" {
 		outDir = "grpc/proto"
@@ -79,6 +64,7 @@ func (m *MakeGrpcProto) Execute(values map[string]string) {
 		terminal.Infof("开始生成grpc proto: %s", table)
 		m.generateProto(db, table, outDir)
 	}
+	return nil
 }
 
 // generateProto 根据表结构生成grpc proto

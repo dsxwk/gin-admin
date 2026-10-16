@@ -1,4 +1,6 @@
-package base
+package enum
+
+import "slices"
 
 // Item 枚举项
 type Item[T comparable] struct {
@@ -6,7 +8,7 @@ type Item[T comparable] struct {
 	Desc  string `json:"desc"`
 }
 
-// Enum 通用枚举基类
+// Enum 通用枚举
 type Enum[T comparable] struct {
 	items []Item[T]
 }
@@ -18,48 +20,52 @@ func NewEnum[T comparable](items ...Item[T]) *Enum[T] {
 
 // Get 获取枚举列表
 func (e *Enum[T]) Get() []Item[T] {
-	return e.items
+	return slices.Clone(e.items)
 }
 
 // Value 根据描述获取值
 func (e *Enum[T]) Value(desc string) T {
+	value, _ := e.ValueOK(desc)
+	return value
+}
+
+// ValueOK 根据描述获取值和是否存在
+func (e *Enum[T]) ValueOK(desc string) (T, bool) {
 	var zero T
 	for _, item := range e.items {
 		if item.Desc == desc {
-			return item.Value
+			return item.Value, true
 		}
 	}
-	return zero
+	return zero, false
 }
 
 // Desc 根据值获取描述
 func (e *Enum[T]) Desc(value T) string {
+	desc, _ := e.DescOK(value)
+	return desc
+}
+
+// DescOK 根据值获取描述和是否存在
+func (e *Enum[T]) DescOK(value T) (string, bool) {
 	for _, item := range e.items {
 		if item.Value == value {
-			return item.Desc
+			return item.Desc, true
 		}
 	}
-	return ""
+	return "", false
 }
 
 // ContainsValue 检查值是否存在
 func (e *Enum[T]) ContainsValue(value T) bool {
-	for _, item := range e.items {
-		if item.Value == value {
-			return true
-		}
-	}
-	return false
+	_, ok := e.DescOK(value)
+	return ok
 }
 
 // ContainsDesc 检查描述是否存在
 func (e *Enum[T]) ContainsDesc(desc string) bool {
-	for _, item := range e.items {
-		if item.Desc == desc {
-			return true
-		}
-	}
-	return false
+	_, ok := e.ValueOK(desc)
+	return ok
 }
 
 // Map 转换为map映射

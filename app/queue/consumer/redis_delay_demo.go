@@ -2,15 +2,18 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/queue"
-	"fmt"
 )
 
 // RedisDelayDemoPayload 延迟消息体
 type RedisDelayDemoPayload struct {
 	Name string `json:"name"`
 }
+
+// RedisDelayDemoConsumer Redis延迟消费者
+type RedisDelayDemoConsumer struct{}
 
 // NewRedisDelayDemoConsumer 创建Redis延迟消费者
 func NewRedisDelayDemoConsumer() *queue.ConsumerAdapter[RedisDelayDemoPayload] {
@@ -27,12 +30,12 @@ func NewRedisDelayDemoConsumer() *queue.ConsumerAdapter[RedisDelayDemoPayload] {
 			GetClient: facade.RedisClient,
 			Log:       facade.Log(),
 		},
-		handleRedisDelayDemo,
+		(&RedisDelayDemoConsumer{}).Handle,
 	)
 }
 
-// handleRedisDelayDemo 处理Redis延迟消息
-func handleRedisDelayDemo(_ context.Context, data *RedisDelayDemoPayload) error {
+// Handle 处理Redis延迟消息
+func (c *RedisDelayDemoConsumer) Handle(_ context.Context, data *RedisDelayDemoPayload) error {
 	facade.Log().Info(fmt.Sprintf("Redis Delay Received Msg: name=%s", data.Name))
 	return nil
 }

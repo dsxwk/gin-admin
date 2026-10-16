@@ -2,9 +2,9 @@ package make
 
 import (
 	"fmt"
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -14,43 +14,37 @@ import (
 )
 
 type MakeListener struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeListener) Name() string {
-	return "make:listener"
-}
-
-func (m *MakeListener) Description() string {
-	return "创建监听"
-}
-
-func (m *MakeListener) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeListener 创建命令
+func NewMakeListener() *MakeListener {
+	return &MakeListener{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:listener",
+			Description: "创建监听",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: login/test",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "e", Long: "event"},
+					Desc:     "事件数据, 如: UserLogin",
+					Required: true,
+				},
 			},
-			"文件路径, 如: login/test",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "e",
-				Long:  "event",
-			},
-			"事件数据, 如: UserLogin",
-			true,
-		},
+		}),
 	}
 }
 
-func (m *MakeListener) Execute(values map[string]string) {
+func (m *MakeListener) Handle(values map[string]string) error {
 	_make := "listener"
 	file := m.GetMakeFile(values["file"], _make)
 	eventName := values["event"]
 	m.generateFile(_make, file, eventName)
+	return nil
 }
 
 func (m *MakeListener) generateFile(_make, file, eventName string) {

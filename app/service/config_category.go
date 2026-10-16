@@ -8,7 +8,7 @@ import (
 )
 
 type ConfigCategoryService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表
@@ -69,7 +69,7 @@ func (s *ConfigCategoryService) Create(ctx context.Context, req request.ConfigCa
 
 // Update 更新
 func (s *ConfigCategoryService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
-	return s.Updates(ctx, &model.ConfigCategory{}, id, data)
+	return s.UpdateByID(ctx, &model.ConfigCategory{}, id, data)
 }
 
 // Detail 详情

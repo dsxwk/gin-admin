@@ -12,6 +12,9 @@ type SystemConfigQueryArgs struct {
 	Key string `json:"key"`
 }
 
+// SystemConfigQueryTool 系统配置查询工具
+type SystemConfigQueryTool struct{}
+
 // NewSystemConfigQueryTool 创建系统配置查询工具
 func NewSystemConfigQueryTool() *mcp.ToolAdapter[SystemConfigQueryArgs] {
 	return mcp.NewToolAdapter(
@@ -25,12 +28,12 @@ func NewSystemConfigQueryTool() *mcp.ToolAdapter[SystemConfigQueryArgs] {
 				},
 			},
 		},
-		handleSystemConfigQuery,
+		(&SystemConfigQueryTool{}).Handle,
 	)
 }
 
-// handleSystemConfigQuery 处理系统配置查询工具
-func handleSystemConfigQuery(ctx context.Context, _ int64, args *SystemConfigQueryArgs) (any, error) {
+// Handle 处理系统配置查询工具
+func (t *SystemConfigQueryTool) Handle(ctx context.Context, _ int64, args *SystemConfigQueryArgs) (any, error) {
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil

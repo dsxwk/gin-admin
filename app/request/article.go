@@ -9,7 +9,7 @@ import (
 
 // Article 请求验证
 type Article struct {
-	base.BaseRequest
+	base.Request
 	ID         int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Title      string `json:"title" form:"title" validate:"required" label:"标题"`
 	Content    string `json:"content" form:"content" validate:"required" label:"内容"`

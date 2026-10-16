@@ -9,7 +9,7 @@ import (
 )
 
 type ArticleService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表
@@ -79,7 +79,7 @@ func (s *ArticleService) Update(ctx context.Context, id int64, data map[string]a
 	if mapx.HasKey(data, "tag") {
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}
-	return s.Updates(ctx, &model.Article{}, id, data)
+	return s.UpdateByID(ctx, &model.Article{}, id, data)
 }
 
 // Detail 详情

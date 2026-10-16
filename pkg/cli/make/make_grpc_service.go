@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,62 +26,43 @@ type GrpcServiceField struct {
 
 // MakeGrpcService grpc服务生成命令
 type MakeGrpcService struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeGrpcService) Name() string {
-	return "grpc-make:service"
-}
-
-// Description 命令描述
-func (m *MakeGrpcService) Description() string {
-	return "grpc服务创建"
-}
-
-// Help 命令选项
-func (m *MakeGrpcService) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
+// NewMakeGrpcService 创建命令
+func NewMakeGrpcService() *MakeGrpcService {
+	return &MakeGrpcService{
+		Command: base.NewCommand(base.Config{
+			Name:        "grpc-make:service",
+			Description: "grpc服务创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path", Default: "grpc/service"},
+					Desc:     "输出目录, 默认grpc/service",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "a", Long: "auth", Default: "true"},
+					Desc:     "是否需要鉴权, 默认true",
+					Required: false,
+				},
 			},
-			"表名, 如: user 或 user,menu",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "p",
-				Long:    "path",
-				Default: "grpc/service",
-			},
-			"输出目录, 默认grpc/service",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "a",
-				Long:    "auth",
-				Default: "true",
-			},
-			"是否需要鉴权, 默认true",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeGrpcService) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeGrpcService) Handle(values map[string]string) error {
 	outDir := strings.TrimPrefix(values["path"], "/")
 	if outDir == "" {
 		outDir = "grpc/service"
@@ -98,6 +79,7 @@ func (m *MakeGrpcService) Execute(values map[string]string) {
 		terminal.Infof("开始生成grpc服务: %s", table)
 		m.generateService(db, table, outDir, auth)
 	}
+	return nil
 }
 
 // generateService 根据表结构生成grpc服务

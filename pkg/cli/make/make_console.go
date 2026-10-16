@@ -1,9 +1,9 @@
 package make
 
 import (
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -13,50 +13,40 @@ import (
 )
 
 type MakeConsole struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeConsole) Name() string {
-	return "make:console"
-}
-
-func (m *MakeConsole) Description() string {
-	return "控制台命令创建"
-}
-
-func (m *MakeConsole) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "n",
-				Long:  "name",
+// NewMakeConsole 创建命令
+func NewMakeConsole() *MakeConsole {
+	return &MakeConsole{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:console",
+			Description: "控制台命令创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "n", Long: "name"},
+					Desc:     "命令名称, 如: demo:test",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path"},
+					Desc:     "文件目录, 如: app/console/cronjob, 默认 app/console",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "console-desc"},
+					Desc:     "描述, 如: console-desc",
+					Required: false,
+				},
 			},
-			"命令名称, 如: demo:test",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "p",
-				Long:  "path",
-			},
-			"文件目录, 如: app/console/cronjob, 默认 app/console",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "console-desc",
-			},
-			"描述, 如: console-desc",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeConsole) Execute(values map[string]string) {
+func (m *MakeConsole) Handle(values map[string]string) error {
 	file := m.resolveFile(values)
 	m.generateFile(file, values["name"], values["desc"])
+	return nil
 }
 
 func (m *MakeConsole) generateFile(file, name, desc string) {
@@ -114,8 +104,8 @@ func (m *MakeConsole) generateFile(file, name, desc string) {
 		qualifier = alias + "."
 	}
 
-	item := "&" + qualifier + lo.PascalCase(baseName) + "Command{}"
-	if err = cli.AddItem(registryFile, "return []base.Command{", item); err != nil {
+	item := qualifier + "New" + lo.PascalCase(baseName) + "Command()"
+	if err = cli.AddItem(registryFile, "return []base.Handler{", item); err != nil {
 		terminal.Errorf("自动注册控制台命令失败: %s", err.Error())
 		os.Exit(1)
 	}

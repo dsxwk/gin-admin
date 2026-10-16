@@ -9,7 +9,7 @@ import (
 
 // Roles 请求验证
 type Roles struct {
-	base.BaseRequest
+	base.Request
 	ID              int64            `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Name            string           `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
 	Desc            string           `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`

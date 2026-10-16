@@ -13,7 +13,7 @@ import (
 )
 
 type Recover struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 type ErrData struct {

@@ -6,14 +6,17 @@ import (
 	"gin/pkg/serviceprovider/queue"
 	"time"
 
-	"github.com/segmentio/kafka-go"
 	"fmt"
+	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDelayDemoPayload 延迟消息体
 type KafkaDelayDemoPayload struct {
 	Name string `json:"name"`
 }
+
+// KafkaDelayDemoConsumer Kafka延迟消费者
+type KafkaDelayDemoConsumer struct{}
 
 // NewKafkaDelayDemoConsumer 创建Kafka延迟消费者
 func NewKafkaDelayDemoConsumer() *queue.ConsumerAdapter[KafkaDelayDemoPayload] {
@@ -43,12 +46,12 @@ func NewKafkaDelayDemoConsumer() *queue.ConsumerAdapter[KafkaDelayDemoPayload] {
 			Topic: "kafka_delay_demo",
 			Group: "kafka_delay_demo_group",
 		},
-		handleKafkaDelayDemo,
+		(&KafkaDelayDemoConsumer{}).Handle,
 	)
 }
 
-// handleKafkaDelayDemo 处理Kafka延迟消息
-func handleKafkaDelayDemo(_ context.Context, data *KafkaDelayDemoPayload) error {
+// Handle 处理Kafka延迟消息
+func (c *KafkaDelayDemoConsumer) Handle(_ context.Context, data *KafkaDelayDemoPayload) error {
 	facade.Log().Info(fmt.Sprintf("Kafka Delay Received Msg: name=%s", data.Name))
 	return nil
 }

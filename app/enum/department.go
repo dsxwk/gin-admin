@@ -1,6 +1,6 @@
 package enum
 
-import "gin/common/base"
+import enumx "gin/pkg/enum"
 
 const (
 	DepartmentStatusEnabled  int64 = 1 // 启用
@@ -11,9 +11,9 @@ const (
 type DepartmentEnum struct{}
 
 // Status 状态
-func (s *DepartmentEnum) Status() *base.Enum[int64] {
-	return base.NewEnum(
-		base.Item[int64]{Value: DepartmentStatusEnabled, Desc: "启用"},
-		base.Item[int64]{Value: DepartmentStatusDisabled, Desc: "停用"},
+func (s *DepartmentEnum) Status() *enumx.Enum[int64] {
+	return enumx.NewEnum(
+		enumx.Item[int64]{Value: DepartmentStatusEnabled, Desc: "启用"},
+		enumx.Item[int64]{Value: DepartmentStatusDisabled, Desc: "停用"},
 	)
 }

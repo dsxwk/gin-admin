@@ -1,11 +1,11 @@
 package make
 
 import (
+	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
-	"os"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -16,48 +16,47 @@ import (
 )
 
 type MakeJob struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeJob) Name() string {
-	return "make:job"
-}
-
-func (m *MakeJob) Description() string {
-	return "创建任务Job"
-}
-
-func (m *MakeJob) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			Flag:     base.Flag{Short: "n", Long: "name"},
-			Desc:     "Job名称, 如 send_email",
-			Required: true,
-		},
-		{
-			Flag:     base.Flag{Short: "c", Long: "connection"},
-			Desc:     "连接类型: redis, kafka, rabbitmq, sync(默认取queue.connection配置)",
-			Required: false,
-		},
-		{
-			Flag:     base.Flag{Short: "D", Long: "desc"},
-			Desc:     "Job描述",
-			Required: false,
-		},
-		{
-			Flag:     base.Flag{Short: "R", Long: "retry", Default: "0"},
-			Desc:     "重试次数, 0表示不重试",
-			Required: false,
-		},
-		{
-			Flag:     base.Flag{Short: "d", Long: "delay", Default: "0"},
-			Desc:     "首次延迟及重试间隔(毫秒), 0表示不延迟",
-			Required: false,
-		},
+// NewMakeJob 创建命令
+func NewMakeJob() *MakeJob {
+	return &MakeJob{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:job",
+			Description: "创建任务Job",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "n", Long: "name"},
+					Desc:     "Job名称, 如 send_email",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "c", Long: "connection"},
+					Desc:     "连接类型: redis, kafka, rabbitmq, sync(默认取queue.connection配置)",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "D", Long: "desc"},
+					Desc:     "Job描述",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "R", Long: "retry", Default: "0"},
+					Desc:     "重试次数, 0表示不重试",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "delay", Default: "0"},
+					Desc:     "首次延迟及重试间隔(毫秒), 0表示不延迟",
+					Required: false,
+				},
+			},
+		}),
 	}
 }
 
-func (m *MakeJob) Execute(values map[string]string) {
+func (m *MakeJob) Handle(values map[string]string) error {
 	name := strings.ToLower(values["name"])
 	conn := values["connection"]
 	desc := values["desc"]
@@ -94,25 +93,30 @@ func (m *MakeJob) Execute(values map[string]string) {
 	tpl, err := template.ParseFiles(tplFile)
 	if err != nil {
 		terminal.Errorf("Error parsing job template: %s", err.Error())
-		os.Exit(1)
+		return fmt.Errorf("命令执行失败")
+
 	}
 
 	outFile := filepath.Join("app", "job", name+".go")
 	f := m.CheckDirAndFile(outFile)
 	if f == nil {
-		return
+		return nil
+
 	}
 
 	if err = tpl.Execute(f, data); err != nil {
 		terminal.Errorf("Error executing job template: %s", err.Error())
-		os.Exit(1)
+		return fmt.Errorf("命令执行失败")
+
 	}
 
 	jobsFile := filepath.Join("app", "job", "registry.go")
 	if err = cli.AddItem(jobsFile, "return []servicejob.Job{", "New"+camelName+"Job()"); err != nil {
 		terminal.Errorf("自动注册Job失败: %s", err.Error())
-		return
+		return nil
+
 	}
 
 	terminal.Successf("Job文件: %s 生成成功!", outFile)
+	return nil
 }

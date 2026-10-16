@@ -331,9 +331,9 @@ $ ./main
 
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo:command --args=11
+$ ./cli demo:test --args=11
 
- SUCCESS  执行命令: demo:command --args=11
+ SUCCESS  执行命令: demo:test --args=11
 ```
 
 # 目录结构
@@ -496,7 +496,7 @@ $ go run ./cmd/cli.go --version # -v
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 ```
 
 ## 命令帮助
@@ -509,7 +509,7 @@ $ go run ./cmd/cli.go -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -522,7 +522,7 @@ db:
   db:rollback      数据回滚
   db:seed          数据填充
 demo:
-  demo:command     test-demo
+  demo:test     演示控制台命令
 event:
   event:list       事件列表
 listener:
@@ -580,8 +580,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "db:seed"
     },
     {
-      "description": "test-demo",
-      "name": "demo:command"
+      "description": "演示控制台命令",
+      "name": "demo:test"
     },
     {
       "description": "事件列表",
@@ -672,7 +672,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "route:list"
     }
   ],
-  "version": "Gin Cli v2.0.0"
+  "version": "Gin Cli v3.0.0"
 }
 ```
 
@@ -686,7 +686,7 @@ $ go run ./cmd/cli.go make:console -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -709,43 +709,43 @@ $ go run ./cmd/cli.go make:console --path=app/console/cronjob --name=demo:test -
 
 ## 命令结构
 
-> 生成命令后，应为`Name()` 和 `Description()` 方法定义适当的值。当在显示命令列表时，将使用这些属性。 `Name()`方法还允许你定义命令的输入期望值。 `Execute()` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。 让我们看一个示例命令。
+> 生成命令后，应在 `base.Config` 中定义命令名称、描述和参数。显示命令列表和帮助信息时会使用这些配置；执行命令时会调用 `Handle()`，命令逻辑统一放在该方法中。
 
 ```go
 package cronjob
 
 import (
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 )
 
+// DemoCommand 演示命令
 type DemoCommand struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *DemoCommand) Name() string {
-	return "demo-test"
-}
-
-func (m *DemoCommand) Description() string {
-	return "command-desc"
-}
-
-func (m *DemoCommand) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "a",
-				Long:  "args",
+// NewDemoCommand 创建演示命令
+func NewDemoCommand() *DemoCommand {
+	return &DemoCommand{
+		Command: base.NewCommand(base.Config{
+			Name:        "demo-test",
+			Description: "command-desc",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "a", Long: "args"},
+					Desc:     "示例参数, 如: arg1",
+					Required: true,
+				},
 			},
-			"示例参数, 如: arg1",
-			true,
-		},
+		}),
 	}
 }
 
-func (m *DemoCommand) Execute(values map[string]string) {
-	// todo
+// Handle 执行命令
+func (m *DemoCommand) Handle(values map[string]string) error {
+	terminal.Successf("执行命令: %s %s", m.Name(), m.FormatArgs(values))
+	return nil
 }
 
 ```
@@ -778,20 +778,15 @@ func main() {
 
 ## 帮助选项
 
-> 命令选项参数使用 `base.CommandOption` 结构体来定义。 `base.CommandOption` 结构体包含两个属性: `Flag` 和 `Description`。`Flag` 属性用于定义命令选项的标志，可以是短标志（如 `-a`）或长标志（如 `--args`）。 `Description` 属性用于定义命令选项的描述。`base.CommandOption` 结构体还包含一个 `Required` 属性，用于指定命令选项是否为必需的。同时该方法支持控制台 `--help`参数，自动生成帮助信息。
+> 命令选项参数使用 `base.CommandOption` 结构体来定义。`base.CommandOption` 结构体包含 `Flag`、`Desc` 和 `Required` 属性。`Flag` 用于定义短标志或长标志，`Desc` 用于描述参数，`Required` 用于指定参数是否必填。`--help` 会自动生成帮助信息。
 
 ```go
-func (m *DemoCommand) Help() []base.CommandOption {
-	return []base.CommandOption{
-        {
-            base.Flag{
-                Short: "a",
-                Long:  "args",
-            },
-            "示例参数, 如: arg1",
-            true,
-        },
-    }
+Options: []base.CommandOption{
+	{
+		Flag:     base.Flag{Short: "a", Long: "args"},
+		Desc:     "示例参数, 如: arg1",
+		Required: true,
+	},
 }
 ```
 
@@ -803,7 +798,7 @@ $ go run ./cmd/cli.go demo-test -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -818,15 +813,15 @@ Options:
 ## 执行命令
 
 ```bash
-$ go run ./cmd/cli.go demo:command --args=arg1
- SUCCESS  执行命令: demo:command --args=arg1
+$ go run ./cmd/cli.go demo:test --args=arg1
+ SUCCESS  执行命令: demo:test --args=arg1
 ```
 
 ## 编译执行
 
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo:command --args=arg1
+$ ./cli demo:test --args=arg1
 ```
 
 # gRPC
@@ -948,7 +943,7 @@ $ go run ./cmd/cli.go make:model -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1068,7 +1063,7 @@ import (
 )
 
 type UserService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表
@@ -1121,7 +1116,7 @@ $ go run ./cmd/cli.go make:request -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1155,7 +1150,7 @@ import (
 
 // Roles 请求验证
 type Roles struct {
-    base.BaseRequest
+    base.Request
     ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
     Name   string `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
     Desc   string `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
@@ -1237,7 +1232,7 @@ package request
 
 // Roles 角色请求验证
 type Roles struct {
-    base.BaseRequest
+    base.Request
     ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
     Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"角色名称"`
     Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"角色描述"`
@@ -1520,7 +1515,7 @@ type User struct {
 
 ### 在控制器中使用
 
-> `BindValidate`一步完成参数绑定和验证,`Validate`只做验证。两者都会把请求ctx自动注入`BaseRequest`,翻译和验证消息可以直接使用请求上下文。
+> `BindValidate`一步完成参数绑定和验证,`Validate`只做验证。两者都会把请求ctx自动注入`Request`,翻译和验证消息可以直接使用请求上下文。
 
 ```go
 package v1
@@ -1537,7 +1532,7 @@ import (
 )
 
 type UserController struct {
-    base.BaseController
+    base.Controller
     service service.UserService
 }
 
@@ -1601,7 +1596,7 @@ $ go run ./cmd/cli.go make:service -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1635,7 +1630,7 @@ $ go run ./cmd/cli.go make:controller -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1671,7 +1666,7 @@ import (
 )
 
 type UserController struct {
-    base.BaseController
+    base.Controller
     service service.UserService
 }
 
@@ -1871,7 +1866,7 @@ $ go run ./cmd/cli.go make:router -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1966,7 +1961,7 @@ $ go run ./cmd/cli.go make:middleware -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2071,7 +2066,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2127,7 +2122,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2215,7 +2210,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2270,7 +2265,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2461,7 +2456,7 @@ $ go run ./cmd/cli.go make:event -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2514,7 +2509,7 @@ $ go run ./cmd/cli.go make:listener -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2585,7 +2580,7 @@ $ go run ./cmd/cli.go make:queue -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2650,6 +2645,9 @@ type KafkaDemoPayload struct {
 	Name string `json:"name"`
 }
 
+// KafkaDemoConsumer Kafka普通消费者
+type KafkaDemoConsumer struct{}
+
 func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
@@ -2676,12 +2674,12 @@ func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
-		handleKafkaDemo,
+		(&KafkaDemoConsumer{}).Handle,
 	)
 }
 
-// handleKafkaDemo 处理Kafka消息
-func handleKafkaDemo(_ context.Context, data *KafkaDemoPayload) error {
+// Handle 处理Kafka消息
+func (c *KafkaDemoConsumer) Handle(_ context.Context, data *KafkaDemoPayload) error {
 	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
 	// 待处理业务逻辑
 	return nil
@@ -2751,7 +2749,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(ctx context.Context) {
@@ -2846,6 +2844,9 @@ type SendEmail struct {
     Content string `json:"content"`
 }
 
+// SendEmailJob 发送邮件任务
+type SendEmailJob struct{}
+
 func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
     return servicejob.NewAdapter(
         servicejob.Config{
@@ -2855,11 +2856,11 @@ func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
             Retry:       3,
             Delay:       3000,
         },
-        handleSendEmail,
+        (&SendEmailJob{}).Handle,
     )
 }
 
-func handleSendEmail(_ context.Context, data *SendEmail) error {
+func (j *SendEmailJob) Handle(_ context.Context, data *SendEmail) error {
     facade.Log().Info(pkg.Sprintf("发送邮件至: %s, 主题: %s", data.To, data.Subject))
     return nil
 }
@@ -2997,6 +2998,9 @@ type UserSearchArgs struct {
     Keyword string `json:"keyword"`
 }
 
+// UserSearchTool 用户搜索工具
+type UserSearchTool struct{}
+
 func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
     return mcp.NewToolAdapter(
         mcp.ToolConfig{
@@ -3004,11 +3008,11 @@ func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
             Description: "搜索用户",
             InputSchema: mcp.InputSchema{},
         },
-        handleUserSearch,
+        (&UserSearchTool{}).Handle,
     )
 }
 
-func handleUserSearch(_ context.Context, _ int64, args *UserSearchArgs) (any, error) {
+func (t *UserSearchTool) Handle(_ context.Context, _ int64, args *UserSearchArgs) (any, error) {
     return map[string]any{"keyword": args.Keyword}, nil
 }
 ```
@@ -3514,7 +3518,7 @@ import (
 )
 
 type LoginController struct {
-	base.BaseController
+	base.Controller
     service service.LoginService
 }
 
@@ -3646,7 +3650,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3672,7 +3676,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3698,7 +3702,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3724,7 +3728,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3750,7 +3754,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3776,7 +3780,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3802,7 +3806,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3829,7 +3833,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3856,7 +3860,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3923,7 +3927,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3946,7 +3950,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -4021,7 +4025,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context)  {
@@ -4055,7 +4059,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context)  {
@@ -4108,7 +4112,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context)  {
@@ -4135,7 +4139,7 @@ func (s *TestController) Test(c *gin.Context)  {
 package enum
 
 import (
-	"gin/common/base"
+	enumx "gin/pkg/enum"
 )
 
 const (
@@ -4153,19 +4157,19 @@ const (
 type UserEnum struct{}
 
 // Gender 性别
-func (s *UserEnum) Gender() *base.Enum[int] {
-	return base.NewEnum(
-		base.Item[int]{Value: UserGenderSecret, Desc: "保密"},
-		base.Item[int]{Value: UserGenderMale, Desc: "男"},
-		base.Item[int]{Value: UserGenderFemale, Desc: "女"},
+func (s *UserEnum) Gender() *enumx.Enum[int] {
+	return enumx.NewEnum(
+		enumx.Item[int]{Value: UserGenderSecret, Desc: "保密"},
+		enumx.Item[int]{Value: UserGenderMale, Desc: "男"},
+		enumx.Item[int]{Value: UserGenderFemale, Desc: "女"},
 	)
 }
 
 // Status 状态
-func (s *UserEnum) Status() *base.Enum[string] {
-	return base.NewEnum(
-		base.Item[string]{Value: UserStatusEnabled, Desc: "启用"},
-		base.Item[string]{Value: UserStatusDisabled, Desc: "停用"},
+func (s *UserEnum) Status() *enumx.Enum[string] {
+	return enumx.NewEnum(
+		enumx.Item[string]{Value: UserStatusEnabled, Desc: "启用"},
+		enumx.Item[string]{Value: UserStatusDisabled, Desc: "停用"},
 	)
 }
 
@@ -4185,7 +4189,7 @@ import (
 )
 
 type LoginController struct {
-    base.BaseController
+    base.Controller
     service service.LoginService
 }
 
@@ -4341,7 +4345,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context)  {
@@ -4376,7 +4380,7 @@ import (
 )
 
 type UserController struct {
-    base.BaseController
+    base.Controller
     service service.UserService
 }
 
@@ -4415,7 +4419,7 @@ import (
 )
 
 type UserService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表

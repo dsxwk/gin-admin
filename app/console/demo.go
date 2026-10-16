@@ -1,34 +1,34 @@
 package console
 
 import (
-	"gin/common/base"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 )
 
+// DemoCommand 演示命令
 type DemoCommand struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *DemoCommand) Name() string {
-	return "demo:command"
-}
-
-func (m *DemoCommand) Description() string {
-	return "test-demo"
-}
-
-func (m *DemoCommand) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "a",
-				Long:  "args",
+// NewDemoCommand 创建演示命令
+func NewDemoCommand() *DemoCommand {
+	return &DemoCommand{
+		Command: base.NewCommand(base.Config{
+			Name:        "demo:test",
+			Description: "演示控制台命令",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "a", Long: "args"},
+					Desc:     "演示参数, 如: arg1",
+					Required: true,
+				},
 			},
-			"示例参数, 如: arg1",
-			true,
-		},
+		}),
 	}
 }
 
-func (m *DemoCommand) Execute(_ map[string]string) {
-	// todo
+// Handle 执行命令
+func (m *DemoCommand) Handle(values map[string]string) error {
+	terminal.Successf("演示参数:%s", values["args"])
+	return nil
 }

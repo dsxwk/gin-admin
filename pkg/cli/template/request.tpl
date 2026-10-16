@@ -9,7 +9,7 @@ import (
 
 // {{.StructName}} {{.Description}}
 type {{.StructName}} struct {
-    base.BaseRequest
+    base.Request
 {{- range .Fields}}
 {{.FormattedField}}
 {{- end}}

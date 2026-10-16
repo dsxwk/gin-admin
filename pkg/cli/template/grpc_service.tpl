@@ -20,7 +20,7 @@ import (
 
 // {{.Name}}Service {{.Description}}grpc服务
 type {{.Name}}Service struct {
-    base.BaseService
+    base.Service
     proto.Unimplemented{{.Name}}ServiceServer
 }
 

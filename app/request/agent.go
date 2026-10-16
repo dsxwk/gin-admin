@@ -9,7 +9,7 @@ import (
 
 // AgentAsk AI对话请求验证
 type AgentAsk struct {
-	base.BaseRequest
+	base.Request
 	Question  string `json:"question" form:"question" validate:"required" label:"问题"`
 	Provider  string `json:"provider" form:"provider" validate:"" label:"模型提供商"`
 	SessionId int64  `json:"sessionId" form:"sessionId" validate:"int|min:0" label:"会话ID"`
@@ -54,7 +54,7 @@ func (s AgentAsk) Translates() map[string]string {
 
 // AgentDelete 删除AI会话请求验证
 type AgentDelete struct {
-	base.BaseRequest
+	base.Request
 	ID int64 `json:"id" form:"id" validate:"required|int|gt:0" label:"会话ID"`
 }
 

@@ -13,7 +13,7 @@ import (
 )
 
 type {{.Name}}Controller struct {
-    base.BaseController
+    base.Controller
     service service.{{.Name}}Service
 }
 

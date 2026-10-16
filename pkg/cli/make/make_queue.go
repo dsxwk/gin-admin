@@ -3,9 +3,9 @@ package make
 import (
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,47 +15,43 @@ import (
 )
 
 type MakeQueue struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeQueue) Name() string {
-	return "make:queue"
-}
-
-// Description 命令描述
-func (m *MakeQueue) Description() string {
-	return "创建消息队列(Kafka/RabbitMQ/Redis)"
-}
-
-// Help 命令参数
-func (m *MakeQueue) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			Flag:     base.Flag{Short: "n", Long: "name"},
-			Desc:     "队列名称, 如: order",
-			Required: true,
-		},
-		{
-			Flag:     base.Flag{Short: "c", Long: "connection"},
-			Desc:     "连接类型: kafka, rabbitmq, redis(默认取queue.connection配置)",
-			Required: false,
-		},
-		{
-			Flag:     base.Flag{Short: "d", Long: "delay"},
-			Desc:     "是否延迟队列: true/false",
-			Required: false,
-		},
-		{
-			Flag:     base.Flag{Short: "D", Long: "desc"},
-			Desc:     "队列描述",
-			Required: false,
-		},
+// NewMakeQueue 创建命令
+func NewMakeQueue() *MakeQueue {
+	return &MakeQueue{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:queue",
+			Description: "创建消息队列(Kafka/RabbitMQ/Redis)",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "n", Long: "name"},
+					Desc:     "队列名称, 如: order",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "c", Long: "connection"},
+					Desc:     "连接类型: kafka, rabbitmq, redis(默认取queue.connection配置)",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "delay"},
+					Desc:     "是否延迟队列: true/false",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "D", Long: "desc"},
+					Desc:     "队列描述",
+					Required: false,
+				},
+			},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeQueue) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeQueue) Handle(values map[string]string) error {
 	name := values["name"]
 	conn := values["connection"]
 	isDelay := m.StringToBool(values["delay"])
@@ -72,10 +68,12 @@ func (m *MakeQueue) Execute(values map[string]string) {
 
 	if conn != "kafka" && conn != "rabbitmq" && conn != "redis" {
 		terminal.Errorf("不支持的连接类型: %s, 仅支持 kafka, rabbitmq, redis", conn)
-		os.Exit(1)
+		return fmt.Errorf("命令执行失败")
+
 	}
 
 	m.generateQueue(conn, name, isDelay, values)
+	return nil
 }
 
 // generateQueue 生成队列文件

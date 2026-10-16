@@ -12,6 +12,9 @@ type OperatorStatsArgs struct {
 	Date string `json:"date"`
 }
 
+// OperatorStatsTool 操作日志统计工具
+type OperatorStatsTool struct{}
+
 // NewOperatorStatsTool 创建操作日志统计工具
 func NewOperatorStatsTool() *mcp.ToolAdapter[OperatorStatsArgs] {
 	return mcp.NewToolAdapter(
@@ -25,12 +28,12 @@ func NewOperatorStatsTool() *mcp.ToolAdapter[OperatorStatsArgs] {
 				},
 			},
 		},
-		handleOperatorStats,
+		(&OperatorStatsTool{}).Handle,
 	)
 }
 
-// handleOperatorStats 处理操作日志统计工具
-func handleOperatorStats(ctx context.Context, _ int64, args *OperatorStatsArgs) (any, error) {
+// Handle 处理操作日志统计工具
+func (t *OperatorStatsTool) Handle(ctx context.Context, _ int64, args *OperatorStatsArgs) (any, error) {
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil

@@ -3,8 +3,8 @@ package event
 import (
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
 	"gin/pkg/serviceprovider/eventbus"
 	"sort"
 	"strings"
@@ -14,22 +14,21 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-type EventList struct{}
+type EventList struct{ base.Command }
 
-func (s *EventList) Name() string {
-	return "event:list"
+// NewEventList 创建命令
+func NewEventList() *EventList {
+	return &EventList{
+		Command: base.NewCommand(base.Config{
+			Name:        "event:list",
+			Description: "事件列表",
+		}),
+	}
 }
 
-func (s *EventList) Description() string {
-	return "事件列表"
-}
-
-func (s *EventList) Help() []base.CommandOption {
-	return []base.CommandOption{}
-}
-
-func (s *EventList) Execute(_ map[string]string) {
+func (s *EventList) Handle(_ map[string]string) error {
 	printEventTable(facade.Event().List(), false)
+	return nil
 }
 
 // printEventTable 打印事件表格

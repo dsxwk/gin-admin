@@ -1,7 +1,7 @@
 package {{.Package}}
 
 import (
-	"gin/common/base"
+	enumx "gin/pkg/enum"
 )
 
 // {{.Name}}Enum {{.Description}}
@@ -19,18 +19,18 @@ const (
 )
 
 // Gender 性别
-func (s *{{.Name}}Enum) Gender() *base.Enum[int] {
-	return base.NewEnum(
-		base.Item[int]{Value: UserGenderSecret, Desc: "保密"},
-		base.Item[int]{Value: UserGenderMale, Desc: "男"},
-		base.Item[int]{Value: UserGenderFemale, Desc: "女"},
+func (s *{{.Name}}Enum) Gender() *enumx.Enum[int] {
+	return enumx.NewEnum(
+		enumx.Item[int]{Value: UserGenderSecret, Desc: "保密"},
+		enumx.Item[int]{Value: UserGenderMale, Desc: "男"},
+		enumx.Item[int]{Value: UserGenderFemale, Desc: "女"},
 	)
 }
 
 // Status 状态
-func (s *{{.Name}}Enum) Status() *base.Enum[string] {
-	return base.NewEnum(
-		base.Item[string]{Value: UserStatusEnabled, Desc: "启用"},
-		base.Item[string]{Value: UserStatusDisabled, Desc: "停用"},
+func (s *{{.Name}}Enum) Status() *enumx.Enum[string] {
+	return enumx.NewEnum(
+		enumx.Item[string]{Value: UserStatusEnabled, Desc: "启用"},
+		enumx.Item[string]{Value: UserStatusDisabled, Desc: "停用"},
 	)
 }

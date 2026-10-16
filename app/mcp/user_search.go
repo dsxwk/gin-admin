@@ -13,6 +13,9 @@ type UserSearchArgs struct {
 	Limit   int    `json:"limit"`
 }
 
+// UserSearchTool 用户搜索工具
+type UserSearchTool struct{}
+
 // NewUserSearchTool 创建用户搜索工具
 func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
 	return mcp.NewToolAdapter(
@@ -28,12 +31,12 @@ func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
 				Required: []string{"keyword"},
 			},
 		},
-		handleUserSearch,
+		(&UserSearchTool{}).Handle,
 	)
 }
 
-// handleUserSearch 处理用户搜索工具
-func handleUserSearch(ctx context.Context, _ int64, args *UserSearchArgs) (any, error) {
+// Handle 处理用户搜索工具
+func (t *UserSearchTool) Handle(ctx context.Context, _ int64, args *UserSearchArgs) (any, error) {
 	if args.Keyword == "" {
 		return nil, nil
 	}

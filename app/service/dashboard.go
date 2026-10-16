@@ -77,7 +77,7 @@ type DashboardCard struct {
 
 // DashboardService 仪表盘服务
 type DashboardService struct {
-	base.BaseService
+	base.Service
 }
 
 // Cards 仪表盘卡片统计

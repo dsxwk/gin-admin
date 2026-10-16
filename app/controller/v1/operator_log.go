@@ -11,7 +11,7 @@ import (
 )
 
 type OperatorLogController struct {
-	base.BaseController
+	base.Controller
 	service service.OperatorLogService
 }
 

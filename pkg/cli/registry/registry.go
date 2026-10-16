@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/cli/db"
 	"gin/pkg/cli/event"
 	"gin/pkg/cli/grpc"
@@ -15,57 +15,57 @@ import (
 )
 
 // All 获取全部内置CLI命令
-func All() []base.Command {
-	return []base.Command{
+func All() []base.Handler {
+	return []base.Handler{
 		// 数据库
-		&db.Migrate{},
-		&db.Rollback{},
-		&db.Seed{},
+		db.NewMigrate(),
+		db.NewRollback(),
+		db.NewSeed(),
 		// 事件
-		&event.EventList{},
-		&event.EventListenerList{},
+		event.NewEventList(),
+		event.NewEventListenerList(),
 		// gRPC
-		&grpc.GrpcGen{},
+		grpc.NewGrpcGen(),
 		// 任务调度
-		&job.JobList{},
-		&job.JobClear{},
+		job.NewJobList(),
+		job.NewJobClear(),
 		// JWT
-		&jwt.Jwt{},
+		jwt.NewJwt(),
 		// 命令行生成
-		&mk.MakeConsole{},
-		&mk.MakeController{},
-		&mk.MakeDocs{},
-		&mk.MakeEnum{},
-		&mk.MakeErrCode{},
-		&mk.MakeEs{},
-		&mk.MakeEvent{},
-		&mk.MakeFacade{},
-		&mk.MakeGrpcModel{},
-		&mk.MakeGrpcProto{},
-		&mk.MakeGrpcRequest{},
-		&mk.MakeGrpcService{},
-		&mk.MakeJob{},
-		&mk.MakeListener{},
-		&mk.MakeMcp{},
-		&mk.MakeMiddleware{},
-		&mk.MakeMigration{},
-		&mk.MakeModel{},
-		&mk.MakeModelOld{},
-		&mk.MakeProvider{},
-		&mk.MakeQueue{},
-		&mk.MakeRequest{},
-		&mk.MakeRouter{},
-		&mk.MakeSeed{},
-		&mk.MakeService{},
-		&mk.MakeWs{},
+		mk.NewMakeConsole(),
+		mk.NewMakeController(),
+		mk.NewMakeDocs(),
+		mk.NewMakeEnum(),
+		mk.NewMakeErrCode(),
+		mk.NewMakeEs(),
+		mk.NewMakeEvent(),
+		mk.NewMakeFacade(),
+		mk.NewMakeGrpcModel(),
+		mk.NewMakeGrpcProto(),
+		mk.NewMakeGrpcRequest(),
+		mk.NewMakeGrpcService(),
+		mk.NewMakeJob(),
+		mk.NewMakeListener(),
+		mk.NewMakeMcp(),
+		mk.NewMakeMiddleware(),
+		mk.NewMakeMigration(),
+		mk.NewMakeModel(),
+		mk.NewMakeModelOld(),
+		mk.NewMakeProvider(),
+		mk.NewMakeQueue(),
+		mk.NewMakeRequest(),
+		mk.NewMakeRouter(),
+		mk.NewMakeSeed(),
+		mk.NewMakeService(),
+		mk.NewMakeWs(),
 		// MCP
-		&mcp.McpList{},
+		mcp.NewMcpList(),
 		// 权限
-		&permission.PermissionSync{},
+		permission.NewPermissionSync(),
 		// 队列
-		&queue.ConsumerList{},
-		&queue.ProducerList{},
+		queue.NewConsumerList(),
+		queue.NewProducerList(),
 		// 路由
-		&route.RouteList{},
+		route.NewRouteList(),
 	}
 }

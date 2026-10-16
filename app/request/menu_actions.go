@@ -9,7 +9,7 @@ import (
 
 // MenuActions Validator
 type MenuActions struct {
-	base.BaseRequest
+	base.Request
 	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
 	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
 	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`

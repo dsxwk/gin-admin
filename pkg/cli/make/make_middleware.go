@@ -1,7 +1,7 @@
 package make
 
 import (
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"html/template"
 	"os"
@@ -12,43 +12,36 @@ import (
 )
 
 type MakeMiddleware struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeMiddleware) Name() string {
-	return "make:middleware"
-}
-
-func (m *MakeMiddleware) Description() string {
-	return "中间件创建"
-}
-
-func (m *MakeMiddleware) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeMiddleware 创建命令
+func NewMakeMiddleware() *MakeMiddleware {
+	return &MakeMiddleware{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:middleware",
+			Description: "中间件创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: auth",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "middleware-desc"},
+					Desc:     "描述, 如: 权限中间件",
+					Required: false,
+				},
 			},
-			"文件路径, 如: auth",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "middleware-desc",
-			},
-			"描述, 如: 权限中间件",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeMiddleware) Execute(values map[string]string) {
+func (m *MakeMiddleware) Handle(values map[string]string) error {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, f, values["desc"])
+	return nil
 }
 
 func (m *MakeMiddleware) generateFile(_make, file, desc string) {

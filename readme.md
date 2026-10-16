@@ -345,9 +345,9 @@ $ ./main
 
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo:command --args=11
+$ ./cli demo:test --args=11
 
- SUCCESS  Excute Command: demo:command, Argument: 11
+ SUCCESS  Execute Command: demo:test, Argument: 11
 ```
 
 # Directory Structure
@@ -511,7 +511,7 @@ $ go run ./cmd/cli.go --version # -v
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 ```
 
 ## Command Help
@@ -524,7 +524,7 @@ $ go run ./cmd/cli.go -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -537,7 +537,7 @@ db:
   db:rollback      Database Rollback
   db:seed          Database Seed
 demo:
-  demo:command     test-demo
+  demo:test     Demo Console Command
 event:
   event:list       Event List
 listener:
@@ -596,7 +596,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
     },
     {
       "description": "Demo test",
-      "name": "demo:command"
+      "name": "demo:test"
     },
     {
       "description": "Event List",
@@ -687,7 +687,7 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "route:list"
     }
   ],
-  "version": "Gin Cli v2.0.0"
+  "version": "Gin Cli v3.0.0"
 }
 ```
 
@@ -701,7 +701,7 @@ $ go run ./cmd/cli.go make:console -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -724,43 +724,43 @@ $ go run ./cmd/cli.go make:console --path=app/console/cronjob --name=demo:test -
 
 ## Command Structure
 
-> After generating the command, appropriate values should be defined for the ` Name() ` and ` Descript() ` functions. These properties will be used when displaying the command list. The `Name()` function also allows you to define the expected input value for the command. It will call the `Execute()` function when executing the command. You can put the command logic in this method. Let's take a look at an example command.
+> After generating the command, define its name, description, and options in `base.Config`. These values are used for the command list and help output. Command logic is placed in `Handle()`, which is called when the command executes.
 
 ```go
 package cronjob
 
 import (
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 )
 
+// DemoCommand demo command
 type DemoCommand struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *DemoCommand) Name() string {
-	return "demo-test"
-}
-
-func (m *DemoCommand) Description() string {
-	return "command-desc"
-}
-
-func (m *DemoCommand) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "a",
-				Long:  "args",
+// NewDemoCommand create demo command
+func NewDemoCommand() *DemoCommand {
+	return &DemoCommand{
+		Command: base.NewCommand(base.Config{
+			Name:        "demo-test",
+			Description: "command-desc",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "a", Long: "args"},
+					Desc:     "Example Argument, Example: arg1",
+					Required: true,
+				},
 			},
-			"Example Argument, Example: arg1",
-			true,
-		},
+		}),
 	}
 }
 
-func (m *DemoCommand) Execute(values map[string]string) {
-	// todo
+// Handle execute command
+func (m *DemoCommand) Handle(values map[string]string) error {
+	terminal.Successf("执行命令: %s %s", m.Name(), m.FormatArgs(values))
+	return nil
 }
 
 ```
@@ -793,20 +793,15 @@ func main() {
 
 ## Help Options
 
-> Command option parameters are defined using the `base. CommandOption` structure. The `base. CommandOption` struct contains two attributes: `Flag` and `Description`. The `Flag` attribute is used to define the flag of command options, which can be a short flag (such as `- a `) or a long flag (such as `--args`). The `Description` attribute is used to define the description of command options. The `base. CommandOption` struct also contains a `Required` attribute that specifies whether a command option is required. At the same time, this method supports the console `--help` parameter and automatically generates help information.
+> Command options are defined with `base.CommandOption`. It contains the `Flag`, `Desc`, and `Required` fields. `Flag` defines the short or long flag, `Desc` describes the option, and `Required` controls whether the option is mandatory. `--help` prints the generated help automatically.
 
 ```go
-func (m *DemoCommand) Help() []base.CommandOption {
-	return []base.CommandOption{
-        {
-            base.Flag{
-                Short: "a",
-                Long:  "args",
-            },
-            "Example Argument, Example: arg1",
-            true,
-        },
-    }
+Options: []base.CommandOption{
+	{
+		Flag:     base.Flag{Short: "a", Long: "args"},
+		Desc:     "Example Argument, Example: arg1",
+		Required: true,
+	},
 }
 
 ```
@@ -819,7 +814,7 @@ $ go run ./cmd/cli.go demo-test -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -834,15 +829,15 @@ Options:
 ## Execute Command
 
 ```bash
-$ go run ./cmd/cli.go demo:command --args=arg1
- SUCCESS  Excute Command: demo:command --args=arg1
+$ go run ./cmd/cli.go demo:test --args=arg1
+ SUCCESS  Execute Command: demo:test --args=arg1
 ```
 
 ## Compile And Execute Commands
 
 ```bash
 $ go build ./cmd/cli.go
-$ ./cli demo:command --args=arg1
+$ ./cli demo:test --args=arg1
 ```
 
 # gRPC
@@ -965,7 +960,7 @@ $ go run ./cmd/cli.go make:model -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1097,7 +1092,7 @@ import (
 )
 
 type UserService struct {
-	base.BaseService
+	base.Service
 }
 
 // List user-list
@@ -1150,7 +1145,7 @@ $ go run ./cmd/cli.go make:request -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1184,7 +1179,7 @@ import (
 
 // Roles role-request-validation
 type Roles struct {
-	base.BaseRequest
+	base.Request
 	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
 	Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
@@ -1246,7 +1241,7 @@ package request
 
 // Roles role-request-validation
 type Roles struct {
-	base.BaseRequest
+	base.Request
 	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"Role Name"`
 	Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"Role Description"`
@@ -1530,7 +1525,7 @@ type User struct {
 
 ### Used In The Controller
 
-> `BindValidate` binds query/body and validates in one step. `Validate` only validates. Both accept the request context and automatically inject it into `BaseRequest`, so translation and validation messages can use the request context.
+> `BindValidate` binds query/body and validates in one step. `Validate` only validates. Both accept the request context and automatically inject it into `Request`, so translation and validation messages can use the request context.
 
 ```go
 package v1
@@ -1547,7 +1542,7 @@ import (
 )
 
 type UserController struct {
-	base.BaseController
+	base.Controller
 	service service.UserService
 }
 
@@ -1611,7 +1606,7 @@ $ go run ./cmd/cli.go make:service -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1645,7 +1640,7 @@ $ go run ./cmd/cli.go make:controller -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1681,7 +1676,7 @@ import (
 )
 
 type UserController struct {
-	base.BaseController
+	base.Controller
 	service service.UserService
 }
 
@@ -1881,7 +1876,7 @@ $ go run ./cmd/cli.go make:router -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -1973,7 +1968,7 @@ $ go run ./cmd/cli.go make:middleware -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2081,7 +2076,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2137,7 +2132,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2225,7 +2220,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2280,7 +2275,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test() {
@@ -2471,7 +2466,7 @@ $ go run ./cmd/cli.go make:event -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2524,7 +2519,7 @@ $ go run ./cmd/cli.go make:listener -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2599,7 +2594,7 @@ $ go run ./cmd/cli.go make:queue -h # --help
   ██   ██     ██  ██ ██
   ██████  ██████ ██   ██
 
-Gin Cli v2.0.0, built with Go go1.25.2
+Gin Cli v3.0.0, built with Go go1.25.2
 
 Usage:
   cli [command] [options]
@@ -2665,6 +2660,9 @@ type KafkaDemoPayload struct {
 	Name string `json:"name"`
 }
 
+// KafkaDemoConsumer Kafka consumer
+type KafkaDemoConsumer struct{}
+
 func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
@@ -2691,12 +2689,12 @@ func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
-		handleKafkaDemo,
+		(&KafkaDemoConsumer{}).Handle,
 	)
 }
 
-// handleKafkaDemo 处理Kafka消息
-func handleKafkaDemo(_ context.Context, data *KafkaDemoPayload) error {
+// Handle 处理Kafka消息
+func (c *KafkaDemoConsumer) Handle(_ context.Context, data *KafkaDemoPayload) error {
 	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
 	// 待处理业务逻辑
 	return nil
@@ -2766,7 +2764,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(ctx context.Context) {
@@ -2871,6 +2869,9 @@ type SendEmail struct {
 	Content string `json:"content"`
 }
 
+// SendEmailJob send email job
+type SendEmailJob struct{}
+
 func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
 	return servicejob.NewAdapter(
 		servicejob.Config{
@@ -2880,11 +2881,11 @@ func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
 			Retry:       3,
 			Delay:       3000,
 		},
-		handleSendEmail,
+		(&SendEmailJob{}).Handle,
 	)
 }
 
-func handleSendEmail(_ context.Context, data *SendEmail) error {
+func (j *SendEmailJob) Handle(_ context.Context, data *SendEmail) error {
 	facade.Log().Info(pkg.Sprintf("Sending email to: %s, subject: %s", data.To, data.Subject))
 	return nil
 }
@@ -3023,6 +3024,9 @@ type UserSearchArgs struct {
 	Keyword string `json:"keyword"`
 }
 
+// UserSearchTool search users tool
+type UserSearchTool struct{}
+
 func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
 	return mcp.NewToolAdapter(
 		mcp.ToolConfig{
@@ -3030,11 +3034,11 @@ func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
 			Description: "Search users",
 			InputSchema: mcp.InputSchema{},
 		},
-		handleUserSearch,
+		(&UserSearchTool{}).Handle,
 	)
 }
 
-func handleUserSearch(_ context.Context, _ int64, args *UserSearchArgs) (any, error) {
+func (t *UserSearchTool) Handle(_ context.Context, _ int64, args *UserSearchArgs) (any, error) {
 	return map[string]any{"keyword": args.Keyword}, nil
 }
 ```
@@ -3540,7 +3544,7 @@ import (
 )
 
 type LoginController struct {
-	base.BaseController
+	base.Controller
 	service service.LoginService
 }
 
@@ -3672,7 +3676,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3698,7 +3702,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3724,7 +3728,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3750,7 +3754,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3776,7 +3780,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3802,7 +3806,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3828,7 +3832,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3854,7 +3858,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3877,7 +3881,7 @@ import (
 )
 
 type TestController struct {
-    base.BaseController
+    base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3947,7 +3951,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -3971,7 +3975,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -4050,7 +4054,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -4085,7 +4089,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -4141,7 +4145,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -4168,7 +4172,7 @@ func (s *TestController) Test(c *gin.Context) {
 package enum
 
 import (
-	"gin/common/base"
+	enumx "gin/pkg/enum"
 )
 
 const (
@@ -4186,19 +4190,19 @@ const (
 type UserEnum struct{}
 
 // Gender gender
-func (s *UserEnum) Gender() *base.Enum[int] {
-	return base.NewEnum(
-		base.Item[int]{Value: UserGenderSecret, Desc: "secrecy"},
-		base.Item[int]{Value: UserGenderMale, Desc: "male"},
-		base.Item[int]{Value: UserGenderFemale, Desc: "female"},
+func (s *UserEnum) Gender() *enumx.Enum[int] {
+	return enumx.NewEnum(
+		enumx.Item[int]{Value: UserGenderSecret, Desc: "secrecy"},
+		enumx.Item[int]{Value: UserGenderMale, Desc: "male"},
+		enumx.Item[int]{Value: UserGenderFemale, Desc: "female"},
 	)
 }
 
 // Status status
-func (s *UserEnum) Status() *base.Enum[string] {
-	return base.NewEnum(
-		base.Item[string]{Value: UserStatusEnabled, Desc: "enable"},
-		base.Item[string]{Value: UserStatusDisabled, Desc: "disable"},
+func (s *UserEnum) Status() *enumx.Enum[string] {
+	return enumx.NewEnum(
+		enumx.Item[string]{Value: UserStatusEnabled, Desc: "enable"},
+		enumx.Item[string]{Value: UserStatusDisabled, Desc: "disable"},
 	)
 }
 
@@ -4218,7 +4222,7 @@ import (
 )
 
 type LoginController struct {
-	base.BaseController
+	base.Controller
 	service service.LoginService
 }
 
@@ -4379,7 +4383,7 @@ import (
 )
 
 type TestController struct {
-	base.BaseController
+	base.Controller
 }
 
 func (s *TestController) Test(c *gin.Context) {
@@ -4414,7 +4418,7 @@ import (
 )
 
 type UserController struct {
-	base.BaseController
+	base.Controller
 	service service.UserService
 }
 
@@ -4453,7 +4457,7 @@ import (
 )
 
 type UserService struct {
-	base.BaseService
+	base.Service
 }
 
 // List

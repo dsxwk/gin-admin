@@ -13,7 +13,7 @@ import (
 )
 
 type UserController struct {
-	base.BaseController
+	base.Controller
 	service service.UserService
 }
 
@@ -219,7 +219,7 @@ func (s *UserController) Import(c *gin.Context) {
 		return
 	}
 
-	result, err := s.service.Import(ctx, s.GetUserId(c), req)
+	result, err := s.service.Import(ctx, s.GetUserID(c), req)
 	if err != nil {
 		s.Response.Error(c, err)
 		return

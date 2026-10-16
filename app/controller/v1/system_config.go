@@ -13,7 +13,7 @@ import (
 )
 
 type SystemConfigController struct {
-	base.BaseController
+	base.Controller
 	service service.SystemConfigService
 }
 

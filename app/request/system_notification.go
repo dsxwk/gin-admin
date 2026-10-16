@@ -11,7 +11,7 @@ import (
 
 // SystemNotificationPush 推送通知请求
 type SystemNotificationPush struct {
-	base.BaseRequest
+	base.Request
 	Title         string  `json:"title" validate:"required|minLen:1|maxLen:50" label:"通知标题"`    // 标题
 	Content       string  `json:"content" validate:"required|minLen:1|maxLen:500" label:"通知内容"` // 内容
 	Type          int64   `json:"type" validate:"int|in:1,2" label:"通知类型 1=用户 2=部门"`            // 通知类型 1=用户 2=部门
@@ -22,7 +22,7 @@ type SystemNotificationPush struct {
 
 // SystemNotificationList 通知列表请求
 type SystemNotificationList struct {
-	base.BaseRequest
+	base.Request
 	Page     int  `json:"page" validate:"int|gte:1" label:"页码"`       // 页码
 	PageSize int  `json:"pageSize" validate:"int|gte:1" label:"每页数量"` // 每页数量
 	Sent     bool `json:"sent" label:"已发送列表"`                         // 是否查询已发送列表
@@ -30,13 +30,13 @@ type SystemNotificationList struct {
 
 // SystemNotificationRead 通知已读请求
 type SystemNotificationRead struct {
-	base.BaseRequest
+	base.Request
 	IDs []int64 `json:"ids" validate:"" label:"通知ID列表"` // 通知ID列表,为空表示全部已读
 }
 
 // SystemNotificationRevoke 通知撤回请求
 type SystemNotificationRevoke struct {
-	base.BaseRequest
+	base.Request
 	ID int64 `json:"id" validate:"required|int|gt:0" label:"通知ID"` // 通知ID
 }
 

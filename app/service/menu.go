@@ -13,7 +13,7 @@ import (
 )
 
 type MenuService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表

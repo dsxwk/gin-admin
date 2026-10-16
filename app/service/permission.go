@@ -10,7 +10,7 @@ import (
 )
 
 type PermissionService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 权限列表

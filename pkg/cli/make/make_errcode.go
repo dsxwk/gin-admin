@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 
 	"github.com/samber/lo"
@@ -15,43 +15,33 @@ import (
 
 // MakeErrCode 错误码创建命令
 type MakeErrCode struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeErrCode) Name() string {
-	return "make:errcode"
-}
-
-// Description 命令描述
-func (m *MakeErrCode) Description() string {
-	return "错误码创建"
-}
-
-// Help 命令选项
-func (m *MakeErrCode) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeErrCode 创建命令
+func NewMakeErrCode() *MakeErrCode {
+	return &MakeErrCode{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:errcode",
+			Description: "错误码创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "模块名称, 如: login",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "prefix"},
+					Desc:     "错误码前缀",
+					Required: false,
+				},
 			},
-			"模块名称, 如: login",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "p",
-				Long:  "prefix",
-			},
-			"错误码前缀",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeErrCode) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeErrCode) Handle(values map[string]string) error {
 	name := strings.TrimSuffix(strings.TrimSpace(values["file"]), ".go")
 	if name == "" {
 		m.ExitError("模块名称不能为空")
@@ -74,6 +64,7 @@ func (m *MakeErrCode) Execute(values map[string]string) {
 	snakeName := lo.SnakeCase(baseName)
 	file := filepath.Join("app", "errcode", name+"_errcode.go")
 	m.generateFile(file, structName, snakeName, prefix)
+	return nil
 }
 
 // generateFile 生成错误码文件

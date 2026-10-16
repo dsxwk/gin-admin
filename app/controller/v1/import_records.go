@@ -11,7 +11,7 @@ import (
 )
 
 type ImportRecordsController struct {
-	base.BaseController
+	base.Controller
 	service service.ImportRecordsService
 }
 

@@ -22,7 +22,7 @@ import (
 )
 
 type LoginController struct {
-	base.BaseController
+	base.Controller
 	service service.LoginService
 }
 

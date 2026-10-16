@@ -11,7 +11,7 @@ import (
 )
 
 type DepartmentService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表

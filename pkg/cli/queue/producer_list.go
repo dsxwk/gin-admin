@@ -3,8 +3,8 @@ package queue
 import (
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
 	"sort"
 
 	"github.com/fatih/color"
@@ -12,17 +12,24 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-type ProducerList struct{}
+type ProducerList struct{ base.Command }
 
-func (s *ProducerList) Name() string               { return "producer:list" }
-func (s *ProducerList) Description() string        { return "生产者列表" }
-func (s *ProducerList) Help() []base.CommandOption { return []base.CommandOption{} }
+// NewProducerList 创建命令
+func NewProducerList() *ProducerList {
+	return &ProducerList{
+		Command: base.NewCommand(base.Config{
+			Name:        "producer:list",
+			Description: "生产者列表",
+		}),
+	}
+}
 
-func (s *ProducerList) Execute(_ map[string]string) {
+func (s *ProducerList) Handle(_ map[string]string) error {
 	producers := facade.Queue().Producers()
 	if len(producers) == 0 {
 		color.Yellow("no registered producers")
-		return
+		return nil
+
 	}
 
 	sort.Slice(producers, func(i, j int) bool { return producers[i].Name() < producers[j].Name() })
@@ -45,4 +52,5 @@ func (s *ProducerList) Execute(_ map[string]string) {
 
 	fmt.Println(writer.Render())
 	color.Cyan(fmt.Sprintf("总计 %d 生产者", len(producers)))
+	return nil
 }

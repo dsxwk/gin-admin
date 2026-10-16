@@ -2,40 +2,36 @@ package db
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/database"
 	"gin/database/migrations"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 
 	"github.com/fatih/color"
 )
 
 type Rollback struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (s *Rollback) Name() string {
-	return "db:rollback"
-}
-
-func (s *Rollback) Description() string {
-	return "数据回滚"
-}
-
-func (s *Rollback) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "i",
-				Long:  "id",
+// NewRollback 创建命令
+func NewRollback() *Rollback {
+	return &Rollback{
+		Command: base.NewCommand(base.Config{
+			Name:        "db:rollback",
+			Description: "数据回滚",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "i", Long: "id"},
+					Desc:     "回滚指定迁移ID, 如: create_user_table_20251212",
+					Required: false,
+				},
 			},
-			"回滚指定迁移ID, 如: create_user_table_20251212",
-			false,
-		},
+		}),
 	}
 }
 
-func (s *Rollback) Execute(values map[string]string) {
+func (s *Rollback) Handle(values map[string]string) error {
 	terminal.Infof("开始执行数据回滚...")
 
 	db := facade.DB()
@@ -54,10 +50,12 @@ func (s *Rollback) Execute(values map[string]string) {
 
 		if err := m.Rollback(db); err != nil {
 			terminal.Errorf("Migration %s 回滚失败: %v", m.ID(), err)
-			return
+			return nil
+
 		}
 
 		db.Where("migration = ?", m.ID()).Delete(&database.Migrations{})
 		terminal.Successf("Migration %s 回滚成功", m.ID())
 	}
+	return nil
 }

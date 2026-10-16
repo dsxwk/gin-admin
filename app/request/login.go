@@ -4,8 +4,8 @@ import (
 	"gin/app/errcode"
 	"gin/common/base"
 
-	"github.com/gookit/validate"
 	"fmt"
+	"github.com/gookit/validate"
 )
 
 // UserLogin 用户登录
@@ -32,7 +32,7 @@ type Register struct {
 
 // Login Validator
 type Login struct {
-	base.BaseRequest
+	base.Request
 	UserLogin
 	RefreshToken RefreshToken
 }

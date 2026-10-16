@@ -1,40 +1,34 @@
 package {{.Package}}
 
 import (
-	"gin/common/base"
-	"github.com/fatih/color"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 )
 
+// {{.Name}}Command {{.Description}}
 type {{.Name}}Command struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *{{.Name}}Command) Name() string {
-    {{- if eq .Command "" }}
-    return "{{.Name}}-command"
-    {{- else }}
-    return "{{.Command}}"
-    {{- end }}
+// New{{.Name}}Command 创建{{.Description}}命令
+func New{{.Name}}Command() *{{.Name}}Command {
+	return &{{.Name}}Command{
+		Command: base.NewCommand(base.Config{
+			Name: {{if eq .Command ""}}"{{.Name}}-command"{{else}}"{{.Command}}"{{end}},
+			Description: "{{.Description}}",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "a", Long: "args"},
+					Desc:     "示例参数, 如: arg1",
+					Required: true,
+				},
+			},
+		}),
+	}
 }
 
-func (m *{{.Name}}Command) Description() string {
-	return "{{.Description}}"
-}
-
-func (m *{{.Name}}Command) Help() []base.CommandOption {
-	return []base.CommandOption{
-        {
-            base.Flag{
-                Short: "a",
-                Long:  "args",
-            },
-            "示例参数, 如: arg1",
-            true,
-        },
-    }
-}
-
-func (m *{{.Name}}Command) Execute(values map[string]string) {
-    _ = values
-    color.Green("执行命令: %s %s", m.Name(), m.FormatArgs(values))
+// Handle 执行命令
+func (m *{{.Name}}Command) Handle(values map[string]string) error {
+	terminal.Successf("执行命令: %s %s", m.Name(), m.FormatArgs(values))
+	return nil
 }

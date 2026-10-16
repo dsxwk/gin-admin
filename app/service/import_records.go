@@ -8,7 +8,7 @@ import (
 )
 
 type ImportRecordsService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表

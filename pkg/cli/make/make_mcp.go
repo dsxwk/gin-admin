@@ -1,9 +1,9 @@
 package make
 
 import (
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"html/template"
 	"os"
 	"path"
@@ -15,51 +15,41 @@ import (
 
 // MakeMcp MCP工具创建命令
 type MakeMcp struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeMcp) Name() string {
-	return "make:mcp"
-}
-
-func (m *MakeMcp) Description() string {
-	return "MCP工具创建"
-}
-
-func (m *MakeMcp) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeMcp 创建命令
+func NewMakeMcp() *MakeMcp {
+	return &MakeMcp{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:mcp",
+			Description: "MCP工具创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: article_search",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "n", Long: "name"},
+					Desc:     "工具名称, 如: search_articles, 默认取文件名的蛇形命名",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "工具描述"},
+					Desc:     "工具描述, 如: 根据关键词搜索文章",
+					Required: false,
+				},
 			},
-			"文件路径, 如: article_search",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "n",
-				Long:  "name",
-			},
-			"工具名称, 如: search_articles, 默认取文件名的蛇形命名",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "工具描述",
-			},
-			"工具描述, 如: 根据关键词搜索文章",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeMcp) Execute(values map[string]string) {
+func (m *MakeMcp) Handle(values map[string]string) error {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	file := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, file, values["file"], values["name"], values["desc"])
+	return nil
 }
 
 func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {

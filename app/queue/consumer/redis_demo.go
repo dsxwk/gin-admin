@@ -2,15 +2,18 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/queue"
-	"fmt"
 )
 
 // RedisDemoPayload 消息体
 type RedisDemoPayload struct {
 	Name string `json:"name"`
 }
+
+// RedisDemoConsumer Redis普通消费者
+type RedisDemoConsumer struct{}
 
 // NewRedisDemoConsumer 创建Redis普通消费者
 func NewRedisDemoConsumer() *queue.ConsumerAdapter[RedisDemoPayload] {
@@ -26,12 +29,12 @@ func NewRedisDemoConsumer() *queue.ConsumerAdapter[RedisDemoPayload] {
 			GetClient: facade.RedisClient,
 			Log:       facade.Log(),
 		},
-		handleRedisDemo,
+		(&RedisDemoConsumer{}).Handle,
 	)
 }
 
-// handleRedisDemo 处理Redis普通消息
-func handleRedisDemo(_ context.Context, data *RedisDemoPayload) error {
+// Handle 处理Redis普通消息
+func (c *RedisDemoConsumer) Handle(_ context.Context, data *RedisDemoPayload) error {
 	facade.Log().Info(fmt.Sprintf("Redis Received Msg: name=%s", data.Name))
 	return nil
 }

@@ -1,9 +1,9 @@
 package make
 
 import (
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,45 +14,42 @@ import (
 
 // MakeWs WebSocket消息处理器创建命令
 type MakeWs struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeWs) Name() string {
-	return "make:ws"
-}
-
-// Description 命令描述
-func (m *MakeWs) Description() string {
-	return "创建ws消息处理器"
-}
-
-// Help 命令选项
-func (m *MakeWs) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			Flag:     base.Flag{Short: "f", Long: "file"},
-			Desc:     "文件路径, 如: notice",
-			Required: true,
-		},
-		{
-			Flag:     base.Flag{Short: "t", Long: "type"},
-			Desc:     "消息类型, 默认取文件名的蛇形命名",
-			Required: false,
-		},
-		{
-			Flag:     base.Flag{Short: "d", Long: "desc", Default: "消息处理"},
-			Desc:     "处理器描述, 如: 通知消息",
-			Required: false,
-		},
+// NewMakeWs 创建命令
+func NewMakeWs() *MakeWs {
+	return &MakeWs{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:ws",
+			Description: "创建ws消息处理器",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: notice",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "t", Long: "type"},
+					Desc:     "消息类型, 默认取文件名的蛇形命名",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "消息处理"},
+					Desc:     "处理器描述, 如: 通知消息",
+					Required: false,
+				},
+			},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeWs) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeWs) Handle(values map[string]string) error {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	file := m.GetMakeFile(values["file"], _make)
 	m.generateFile(file, values["file"], values["type"], values["desc"])
+	return nil
 }
 
 // generateFile 生成WebSocket消息处理器

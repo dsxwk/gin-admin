@@ -1,7 +1,7 @@
 package enum
 
 import (
-	"gin/common/base"
+	enumx "gin/pkg/enum"
 )
 
 const (
@@ -12,8 +12,8 @@ const (
 type ImportRecordsEnum struct{}
 
 // Type 导入类型
-func (s *ImportRecordsEnum) Type() *base.Enum[int] {
-	return base.NewEnum(
-		base.Item[int]{Value: ImportRecordsTypeUser, Desc: "用户导入"},
+func (s *ImportRecordsEnum) Type() *enumx.Enum[int] {
+	return enumx.NewEnum(
+		enumx.Item[int]{Value: ImportRecordsTypeUser, Desc: "用户导入"},
 	)
 }

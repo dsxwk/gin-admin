@@ -9,7 +9,7 @@ import (
 
 // ImportRecords 请求验证
 type ImportRecords struct {
-	base.BaseRequest
+	base.Request
 	ID   int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Type int64  `json:"type" form:"type" validate:"required|int" label:"导入类型"`
 	Name string `json:"name" form:"name" validate:"required" label:"类型名称"`

@@ -13,7 +13,7 @@ import (
 )
 
 type Logger struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // Handle 日志中间件

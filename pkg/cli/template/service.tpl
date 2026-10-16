@@ -8,7 +8,7 @@ import (
 )
 
 type {{.Name}}Service struct {
-    base.BaseService
+    base.Service
 }
 
 // List 列表
@@ -71,7 +71,7 @@ func (s *{{.Name}}Service) Create(ctx context.Context, req request.{{.Name}}) (m
 
 // Update 更新
 func (s *{{.Name}}Service) Update(ctx context.Context, id int64, data map[string]any) (err error) {
-    return s.Updates(ctx, &model.{{.Name}}{}, id, data)
+    return s.UpdateByID(ctx, &model.{{.Name}}{}, id, data)
 }
 
 // Detail 详情

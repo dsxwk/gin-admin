@@ -13,6 +13,9 @@ type DictQueryArgs struct {
 	Label string `json:"label"`
 }
 
+// DictQueryTool 字典查询工具
+type DictQueryTool struct{}
+
 // NewDictQueryTool 创建字典查询工具
 func NewDictQueryTool() *mcp.ToolAdapter[DictQueryArgs] {
 	return mcp.NewToolAdapter(
@@ -28,12 +31,12 @@ func NewDictQueryTool() *mcp.ToolAdapter[DictQueryArgs] {
 				Required: []string{"type"},
 			},
 		},
-		handleDictQuery,
+		(&DictQueryTool{}).Handle,
 	)
 }
 
-// handleDictQuery 处理字典查询工具
-func handleDictQuery(ctx context.Context, _ int64, args *DictQueryArgs) (any, error) {
+// Handle 处理字典查询工具
+func (t *DictQueryTool) Handle(ctx context.Context, _ int64, args *DictQueryArgs) (any, error) {
 	if args.Type == "" {
 		return nil, nil
 	}

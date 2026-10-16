@@ -9,7 +9,7 @@ import (
 )
 
 type SystemConfigService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表
@@ -115,7 +115,7 @@ func (s *SystemConfigService) Create(ctx context.Context, req request.SystemConf
 
 // Update 更新
 func (s *SystemConfigService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
-	return s.Updates(ctx, &model.SystemConfig{}, id, data)
+	return s.UpdateByID(ctx, &model.SystemConfig{}, id, data)
 }
 
 // Detail 详情

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -15,48 +15,37 @@ import (
 )
 
 type MakeService struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeService) Name() string {
-	return "make:service"
-}
-
-func (m *MakeService) Description() string {
-	return "服务创建"
-}
-
-func (m *MakeService) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeService 创建命令
+func NewMakeService() *MakeService {
+	return &MakeService{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:service",
+			Description: "服务创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: v1/user",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 用于生成模型字段",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "c", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
 			},
-			"文件路径, 如: v1/user",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
-			},
-			"表名, 用于生成模型字段",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "c",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeService) Execute(values map[string]string) {
+func (m *MakeService) Handle(values map[string]string) error {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 
@@ -89,6 +78,7 @@ func (m *MakeService) Execute(values map[string]string) {
 	}
 
 	m.generateFile(_make, f, fields)
+	return nil
 }
 
 // Fields 字段信息

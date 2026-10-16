@@ -6,14 +6,17 @@ import (
 	"gin/pkg/serviceprovider/queue"
 	"time"
 
-	"github.com/segmentio/kafka-go"
 	"fmt"
+	"github.com/segmentio/kafka-go"
 )
 
 // KafkaDemoPayload 消息体
 type KafkaDemoPayload struct {
 	Name string `json:"name"`
 }
+
+// KafkaDemoConsumer Kafka普通消费者
+type KafkaDemoConsumer struct{}
 
 // NewKafkaDemoConsumer 创建Kafka普通消费者
 func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
@@ -42,12 +45,12 @@ func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
-		handleKafkaDemo,
+		(&KafkaDemoConsumer{}).Handle,
 	)
 }
 
-// handleKafkaDemo 处理Kafka普通消息
-func handleKafkaDemo(_ context.Context, data *KafkaDemoPayload) error {
+// Handle 处理Kafka普通消息
+func (c *KafkaDemoConsumer) Handle(_ context.Context, data *KafkaDemoPayload) error {
 	facade.Log().Info(fmt.Sprintf("Kafka Received Msg: name=%s", data.Name))
 	return nil
 }

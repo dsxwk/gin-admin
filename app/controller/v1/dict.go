@@ -13,7 +13,7 @@ import (
 )
 
 type DictController struct {
-	base.BaseController
+	base.Controller
 	service service.DictService
 }
 

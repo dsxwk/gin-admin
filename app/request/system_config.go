@@ -10,7 +10,7 @@ import (
 
 // SystemConfig 请求验证
 type SystemConfig struct {
-	base.BaseRequest
+	base.Request
 	ID               int64                     `json:"id" form:"id" validate:"required|int|gt:0" label:"id"`
 	Key              string                    `json:"key" form:"key" validate:"required" label:"标识"`
 	Name             string                    `json:"name" form:"name" validate:"required" label:"名称"`
@@ -51,7 +51,7 @@ type SystemConfigValueUpdate struct {
 
 // SystemConfigUpdates 系统配置批量更新验证
 type SystemConfigUpdates struct {
-	base.BaseRequest
+	base.Request
 	List []SystemConfigValueUpdate `json:"list" validate:"required" label:"配置列表"`
 }
 

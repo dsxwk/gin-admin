@@ -3,7 +3,7 @@ package enum
 import (
 	"fmt"
 	"gin/app/enum"
-	"gin/common/base"
+	enumx "gin/pkg/enum"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,10 +20,10 @@ func TestUserEnum(t *testing.T) {
 		// 测试Get方法
 		list := gender.Get()
 		assert.Len(t, list, 3)
-		assert.Equal(t, []base.Item[int]{
-			{0, "保密"},
-			{1, "男"},
-			{2, "女"},
+		assert.Equal(t, []enumx.Item[int]{
+			{Value: 0, Desc: "保密"},
+			{Value: 1, Desc: "男"},
+			{Value: 2, Desc: "女"},
 		}, list)
 
 		// 测试Desc方法
@@ -69,9 +69,9 @@ func TestUserEnum(t *testing.T) {
 		// 测试Get方法
 		list := status.Get()
 		assert.Len(t, list, 2)
-		assert.Equal(t, []base.Item[int64]{
-			{1, "启用"},
-			{2, "停用"},
+		assert.Equal(t, []enumx.Item[int64]{
+			{Value: 1, Desc: "启用"},
+			{Value: 2, Desc: "停用"},
 		}, list)
 
 		// 测试Desc方法
@@ -120,10 +120,10 @@ func TestUserEnum(t *testing.T) {
 // TestBaseEnum 测试基础枚举功能
 func TestBaseEnum(t *testing.T) {
 	// 创建测试枚举
-	testEnum := base.NewEnum(
-		base.Item[int]{Value: 1, Desc: "一"},
-		base.Item[int]{Value: 2, Desc: "二"},
-		base.Item[int]{Value: 3, Desc: "三"},
+	testEnum := enumx.NewEnum(
+		enumx.Item[int]{Value: 1, Desc: "一"},
+		enumx.Item[int]{Value: 2, Desc: "二"},
+		enumx.Item[int]{Value: 3, Desc: "三"},
 	)
 
 	t.Run("Get", func(t *testing.T) {
@@ -219,4 +219,43 @@ func ExampleUserEnum() {
 	// 状态列表: [{Value:1 Desc:启用} {Value:2 Desc:停用}]
 	// 1的描述: 启用
 	// 启用的值: 1
+}
+
+// TestBaseEnumGetReturnsClone 测试获取枚举列表返回副本
+func TestBaseEnumGetReturnsClone(t *testing.T) {
+	enum := enumx.NewEnum(
+		enumx.Item[int]{Value: 1, Desc: "一"},
+		enumx.Item[int]{Value: 2, Desc: "二"},
+	)
+
+	items := enum.Get()
+	items[0].Desc = "已修改"
+
+	if enum.Get()[0].Desc != "一" {
+		t.Fatal("枚举列表不应被调用方修改")
+	}
+}
+
+// TestBaseEnumLookup 测试枚举值存在性
+func TestBaseEnumLookup(t *testing.T) {
+	enum := enumx.NewEnum(
+		enumx.Item[int]{Value: 0, Desc: "未知"},
+		enumx.Item[int]{Value: 1, Desc: "有效"},
+	)
+
+	value, ok := enum.ValueOK("未知")
+	if !ok || value != 0 {
+		t.Fatalf("描述查询失败,value=%d,ok=%v", value, ok)
+	}
+	if _, ok = enum.ValueOK("不存在"); ok {
+		t.Fatal("不存在的描述不应返回有效标记")
+	}
+
+	desc, ok := enum.DescOK(0)
+	if !ok || desc != "未知" {
+		t.Fatalf("值查询失败,desc=%s,ok=%v", desc, ok)
+	}
+	if _, ok = enum.DescOK(99); ok {
+		t.Fatal("不存在的值不应返回有效标记")
+	}
 }

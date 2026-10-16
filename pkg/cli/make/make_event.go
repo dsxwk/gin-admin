@@ -1,7 +1,7 @@
 package make
 
 import (
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"html/template"
 	"os"
@@ -12,52 +12,43 @@ import (
 )
 
 type MakeEvent struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeEvent) Name() string {
-	return "make:event"
-}
-
-func (m *MakeEvent) Description() string {
-	return "创建事件"
-}
-
-func (m *MakeEvent) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeEvent 创建命令
+func NewMakeEvent() *MakeEvent {
+	return &MakeEvent{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:event",
+			Description: "创建事件",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: login/test",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "n", Long: "name"},
+					Desc:     "事件名称, 如: test-event",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc"},
+					Desc:     "事件描述, 如: 测试事件",
+					Required: false,
+				},
 			},
-			"文件路径, 如: login/test",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "n",
-				Long:  "name",
-			},
-			"事件名称, 如: test-event",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "d",
-				Long:  "desc",
-			},
-			"事件描述, 如: 测试事件",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeEvent) Execute(values map[string]string) {
+func (m *MakeEvent) Handle(values map[string]string) error {
 	_make := "event"
 	file := m.GetMakeFile(values["file"], _make)
 	name := values["name"]
 	desc := values["desc"]
 	m.generateFile(_make, file, name, desc)
+	return nil
 }
 
 func (m *MakeEvent) generateFile(_make, file, name, desc string) {

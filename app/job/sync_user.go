@@ -2,9 +2,9 @@ package job
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	servicejob "gin/pkg/serviceprovider/job"
-	"fmt"
 )
 
 // SyncUser 同步用户参数
@@ -12,6 +12,9 @@ type SyncUser struct {
 	UserID int64  `json:"userId"`
 	Action string `json:"action"`
 }
+
+// SyncUserJob 同步用户任务
+type SyncUserJob struct{}
 
 // NewSyncUserJob 创建同步用户任务
 func NewSyncUserJob() *servicejob.Adapter[SyncUser] {
@@ -23,12 +26,12 @@ func NewSyncUserJob() *servicejob.Adapter[SyncUser] {
 			Retry:       1,
 			Delay:       0,
 		},
-		handleSyncUser,
+		(&SyncUserJob{}).Handle,
 	)
 }
 
-// handleSyncUser 处理同步用户任务
-func handleSyncUser(_ context.Context, data *SyncUser) error {
+// Handle 处理同步用户任务
+func (j *SyncUserJob) Handle(_ context.Context, data *SyncUser) error {
 	facade.Log().Info(fmt.Sprintf("Job [sync_user] 同步用户: user=%d action=%s", data.UserID, data.Action))
 	return nil
 }

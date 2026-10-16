@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/database/migrations"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 
 	"gin/pkg/pathx"
@@ -19,44 +19,45 @@ import (
 )
 
 type Seed struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (s *Seed) Name() string {
-	return "db:seed"
-}
-
-func (s *Seed) Description() string {
-	return "数据填充"
-}
-
-func (s *Seed) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{Short: "i", Long: "id"},
-			"执行指定Seed ID, 如: 20251212_user_seed",
-			false,
-		},
-		{
-			base.Flag{Short: "I", Long: "init", Default: "false"},
-			"初始化数据",
-			false,
-		},
+// NewSeed 创建命令
+func NewSeed() *Seed {
+	return &Seed{
+		Command: base.NewCommand(base.Config{
+			Name:        "db:seed",
+			Description: "数据填充",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "i", Long: "id"},
+					Desc:     "执行指定Seed ID, 如: 20251212_user_seed",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "I", Long: "init", Default: "false"},
+					Desc:     "初始化数据",
+					Required: false,
+				},
+			},
+		}),
 	}
 }
 
-func (s *Seed) Execute(values map[string]string) {
+func (s *Seed) Handle(values map[string]string) error {
 	terminal.Infof("开始执行数据填充...")
 
 	if s.StringToBool(values["init"]) {
 		s.initDatabase()
-		return
+		return nil
+
 	}
 
 	db := facade.DB()
 	if db == nil {
 		terminal.Errorf("数据库未初始化")
-		return
+		return nil
+
 	}
 	db = withoutSQLLog(db)
 
@@ -71,7 +72,8 @@ func (s *Seed) Execute(values map[string]string) {
 
 	if id != "" && total == 0 {
 		terminal.Errorf("Seed ID: %s 不存在", id)
-		return
+		return nil
+
 	}
 
 	tracker, progressDone := cli.StartProgress("执行数据填充", total)
@@ -82,12 +84,14 @@ func (s *Seed) Execute(values map[string]string) {
 		if err := seed.Run(db); err != nil {
 			cli.StopProgress(tracker, progressDone, false)
 			terminal.Errorf("Seed %s 执行失败: %v", seed.ID(), err)
-			return
+			return nil
+
 		}
 		tracker.Increment(1)
 		terminal.Successf("Seed %s 执行成功", seed.ID())
 	}
 	cli.StopProgress(tracker, progressDone, true)
+	return nil
 }
 
 // initDatabase 逐条执行数据库初始化语句

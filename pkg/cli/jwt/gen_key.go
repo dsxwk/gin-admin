@@ -4,44 +4,40 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"strconv"
 )
 
 type Jwt struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (s *Jwt) Name() string {
-	return "jwt-gen:key"
-}
-
-func (s *Jwt) Description() string {
-	return "生成jwt秘钥"
-}
-
-func (s *Jwt) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short:   "l",
-				Long:    "length",
-				Default: "32",
+// NewJwt 创建命令
+func NewJwt() *Jwt {
+	return &Jwt{
+		Command: base.NewCommand(base.Config{
+			Name:        "jwt-gen:key",
+			Description: "生成jwt秘钥",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "l", Long: "length", Default: "32"},
+					Desc:     "秘钥长度, 如: 32",
+					Required: false,
+				},
 			},
-			"秘钥长度, 如: 32",
-			false,
-		},
+		}),
 	}
 }
 
-func (s *Jwt) Execute(values map[string]string) {
+func (s *Jwt) Handle(values map[string]string) error {
 	length := values["length"]
 	// 字符串转int
 	l, err := strconv.Atoi(length)
 	if err != nil {
 		terminal.Errorf("jwt secret key length must be a number")
-		return
+		return nil
+
 	}
 
 	err = facade.Config().Set("jwt.key", s.generateJWTKey(l))
@@ -50,6 +46,7 @@ func (s *Jwt) Execute(values map[string]string) {
 	} else {
 		terminal.Infof("jwt secret key has been reset")
 	}
+	return nil
 }
 
 func (s *Jwt) generateJWTKey(length int) string {

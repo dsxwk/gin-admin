@@ -3,8 +3,8 @@ package job
 import (
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
 	"sort"
 
 	"github.com/fatih/color"
@@ -12,25 +12,24 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-type JobList struct{}
+type JobList struct{ base.Command }
 
-func (s *JobList) Name() string {
-	return "job:list"
+// NewJobList 创建命令
+func NewJobList() *JobList {
+	return &JobList{
+		Command: base.NewCommand(base.Config{
+			Name:        "job:list",
+			Description: "Job列表",
+		}),
+	}
 }
 
-func (s *JobList) Description() string {
-	return "Job列表"
-}
-
-func (s *JobList) Help() []base.CommandOption {
-	return []base.CommandOption{}
-}
-
-func (s *JobList) Execute(_ map[string]string) {
+func (s *JobList) Handle(_ map[string]string) error {
 	jobs := facade.Job().List()
 	if len(jobs) == 0 {
 		color.Yellow("暂无注册的Job")
-		return
+		return nil
+
 	}
 
 	sort.Slice(jobs, func(i, j int) bool {
@@ -67,4 +66,5 @@ func (s *JobList) Execute(_ map[string]string) {
 
 	fmt.Println(writer.Render())
 	color.Cyan(fmt.Sprintf("总计 %d 个Job\n", len(jobs)))
+	return nil
 }

@@ -12,6 +12,9 @@ type RolePermissionArgs struct {
 	Permissions []string `json:"permissions"`
 }
 
+// RolePermissionTool 角色权限设置工具
+type RolePermissionTool struct{}
+
 // NewRolePermissionTool 创建角色权限设置工具
 func NewRolePermissionTool() *mcp.ToolAdapter[RolePermissionArgs] {
 	return mcp.NewToolAdapter(
@@ -28,12 +31,12 @@ func NewRolePermissionTool() *mcp.ToolAdapter[RolePermissionArgs] {
 				Required: []string{"role"},
 			},
 		},
-		handleRolePermission,
+		(&RolePermissionTool{}).Handle,
 	)
 }
 
-// handleRolePermission 处理角色权限设置工具
-func handleRolePermission(ctx context.Context, userId int64, args *RolePermissionArgs) (any, error) {
+// Handle 处理角色权限设置工具
+func (t *RolePermissionTool) Handle(ctx context.Context, userId int64, args *RolePermissionArgs) (any, error) {
 	if args.Role == "" {
 		return map[string]any{"error": "请指定角色名称"}, nil
 	}

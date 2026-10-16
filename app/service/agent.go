@@ -14,7 +14,7 @@ import (
 
 // AgentService AI会话服务
 type AgentService struct {
-	base.BaseService
+	base.Service
 }
 
 // CreateSession 创建会话

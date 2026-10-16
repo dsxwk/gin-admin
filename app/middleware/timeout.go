@@ -14,7 +14,7 @@ import (
 const SkipTimeoutKey = "_skip_timeout"
 
 type Timeout struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // timeoutWriter 超时感知的ResponseWriter

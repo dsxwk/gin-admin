@@ -1,9 +1,9 @@
 package make
 
 import (
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -13,43 +13,36 @@ import (
 )
 
 type MakeRouter struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeRouter) Name() string {
-	return "make:router"
-}
-
-func (m *MakeRouter) Description() string {
-	return "路由创建"
-}
-
-func (m *MakeRouter) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeRouter 创建命令
+func NewMakeRouter() *MakeRouter {
+	return &MakeRouter{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:router",
+			Description: "路由创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: user",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: ""},
+					Desc:     "路由描述, 如: 用户路由",
+					Required: false,
+				},
 			},
-			"文件路径, 如: user",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "",
-			},
-			"路由描述, 如: 用户路由",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeRouter) Execute(values map[string]string) {
+func (m *MakeRouter) Handle(values map[string]string) error {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, f, values["desc"])
+	return nil
 }
 
 func (m *MakeRouter) generateFile(_make, file, desc string) {

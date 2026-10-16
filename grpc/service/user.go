@@ -21,7 +21,7 @@ import (
 
 // UserService 用户grpc服务
 type UserService struct {
-	base.BaseService
+	base.Service
 	proto.UnimplementedUserServiceServer
 }
 

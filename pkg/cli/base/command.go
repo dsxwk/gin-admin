@@ -8,6 +8,7 @@ import (
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/fatih/color"
@@ -15,7 +16,35 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type BaseCommand struct{}
+// Config 命令配置
+type Config struct {
+	Name        string
+	Description string
+	Options     []CommandOption
+}
+
+// Command 基础命令
+type Command struct {
+	config Config
+}
+
+// NewCommand 创建基础命令
+func NewCommand(config Config) Command {
+	if config.Description == "" {
+		config.Description = config.Name
+	}
+	return Command{config: config}
+}
+
+// Name 获取命令名称
+func (b *Command) Name() string {
+	return b.config.Name
+}
+
+// Description 获取命令描述
+func (b *Command) Description() string {
+	return b.config.Description
+}
 
 // Flag 定义短长参数名
 type Flag struct {
@@ -31,61 +60,46 @@ type CommandOption struct {
 	Required bool   // 是否必填
 }
 
-type Command interface {
+// Handler 命令处理器
+type Handler interface {
 	Name() string                     // 命令名称，如 "make:controller"
 	Description() string              // 命令描述
-	Execute(values map[string]string) // 执行逻辑
+	Handle(values map[string]string) error // 执行逻辑
 	Help() []CommandOption            // 获取命令帮助信息
 }
 
-// Help 默认返回nil
-func (b *BaseCommand) Help() []CommandOption {
-	return nil
+// Help 获取命令帮助
+func (b *Command) Help() []CommandOption {
+	return b.config.Options
 }
 
 // ParseFlags flag解析
-func (b *BaseCommand) ParseFlags(name string, args []string, opts []CommandOption) map[string]string {
-	// fs := pflag.NewFlagSet(name, pflag.ExitOnError)
-	// ContinueOnError 防止自动退出
+func (b *Command) ParseFlags(name string, args []string, opts []CommandOption) (map[string]string, error) {
 	fs := pflag.NewFlagSet(name, pflag.ContinueOnError)
-	fs.SetOutput(nil) // 禁止默认输出Usage信息
+	fs.SetOutput(nil)
 
-	// 暂存flag引用
 	flagRefs := make(map[string]*string)
-
 	for _, opt := range opts {
-		defVal := opt.Flag.Default
-		flagRefs[opt.Flag.Long] = fs.StringP(opt.Flag.Long, opt.Flag.Short, defVal, opt.Desc)
+		flagRefs[opt.Flag.Long] = fs.StringP(opt.Flag.Long, opt.Flag.Short, opt.Flag.Default, opt.Desc)
 	}
 
-	// 解析命令参数
-	err := fs.Parse(normalizeArgs(args, opts))
-	if err != nil {
-		terminal.Errorf("argument error, %s is not defined.", err.Error())
-		color.Yellow("Usage: ")
-		fmt.Printf("  cli %s [args]\n", name)
-		color.Yellow("\nAvailable args:")
-		PrintArgs(opts)
-		os.Exit(1)
+	if err := fs.Parse(normalizeArgs(args, opts)); err != nil {
+		return nil, fmt.Errorf("参数解析失败:%w", err)
 	}
 
-	// 构建结果map
 	values := make(map[string]string)
 	for key, ref := range flagRefs {
 		values[key] = strings.TrimPrefix(*ref, "=")
 	}
 
-	// 检查必填参数
 	for _, opt := range opts {
-		val := values[opt.Flag.Long]
-		if opt.Required && val == "" {
-			b.ExitError(fmt.Sprintf("参数 -%s 或 --%s 不能为空", opt.Flag.Short, opt.Flag.Long))
+		if opt.Required && values[opt.Flag.Long] == "" {
+			return nil, fmt.Errorf("参数 -%s 或 --%s 不能为空", opt.Flag.Short, opt.Flag.Long)
 		}
 	}
 
 	terminal.Successf("执行命令: %s %s", name, b.FormatArgs(values))
-
-	return values
+	return values, nil
 }
 
 // normalizeArgs 规范化单横线长参数
@@ -122,7 +136,6 @@ func normalizeArgs(args []string, opts []CommandOption) []string {
 
 // PrintArgs 打印参数
 func PrintArgs(opts []CommandOption) {
-	// 计算最大显示宽度(基于未上色的原始字符串)
 	maxFlagWidth := 0
 	maxDescWidth := 0
 	for _, opt := range opts {
@@ -135,17 +148,12 @@ func PrintArgs(opts []CommandOption) {
 		}
 	}
 
-	// 打印，每列手动追加空格(基于显示宽度)
 	for _, opt := range opts {
 		flagStr := fmt.Sprintf("-%s, --%s", opt.Flag.Short, opt.Flag.Long)
 		descStr := opt.Desc
-
-		// 颜色化显示内容(不要用于计算宽度)
 		colFlag := color.GreenString(flagStr)
-		colDesc := descStr // 不上色描述也行,若想上色可以color.YellowString(descStr)
-
-		// 计算需要的空格数(基于显示宽度)
-		flagPad := maxFlagWidth - runewidth.StringWidth(flagStr) + 2 // +2 列间距
+		colDesc := descStr
+		flagPad := maxFlagWidth - runewidth.StringWidth(flagStr) + 2
 		descPad := maxDescWidth - runewidth.StringWidth(descStr) + 2
 
 		required := color.GreenString("required:false")
@@ -153,7 +161,6 @@ func PrintArgs(opts []CommandOption) {
 			required = color.RedString("required:true")
 		}
 
-		// 输出：带颜色的 flag + 空格 + 描述 + 空格 + required
 		fmt.Printf("  %s%s%s%s%s\n",
 			colFlag,
 			stringx.Spaces(flagPad),
@@ -165,100 +172,87 @@ func PrintArgs(opts []CommandOption) {
 }
 
 // FormatArgs 格式化参数
-func (b *BaseCommand) FormatArgs(args map[string]string) string {
-	str := ""
-	for arg, value := range args {
+func (b *Command) FormatArgs(args map[string]string) string {
+	keys := make([]string, 0, len(args))
+	for key := range args {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	var builder strings.Builder
+	for _, key := range keys {
+		value := args[key]
 		if value != "" {
-			str += fmt.Sprintf("--%s=%s ", arg, value)
+			builder.WriteString(fmt.Sprintf("--%s=%s ", key, value))
 		}
 	}
-
-	return str
+	return builder.String()
 }
 
 // StringToBool 将字符串安全地转换为布尔值
-func (b *BaseCommand) StringToBool(s string) bool {
+func (b *Command) StringToBool(s string) bool {
 	switch strings.ToLower(strings.TrimSpace(s)) {
 	case "1", "true", "yes", "y", "on":
 		return true
-	case "0", "false", "no", "n", "off":
+	case "0", "false", "no", "n", "off", "":
 		return false
 	default:
-		return false // 默认返回false,防止解析异常
+		return false
 	}
 }
 
-func (b *BaseCommand) ExitError(msg string) {
+// ExitError 输出错误并退出
+func (b *Command) ExitError(msg string) {
 	terminal.Errorf("%s", msg)
 	os.Exit(1)
 }
 
 // GetMakeFile 获取make文件
-func (b *BaseCommand) GetMakeFile(file string, _make string) string {
-	// 去除前斜杠
-	file = strings.TrimPrefix(file, "/")
+func (b *Command) GetMakeFile(file, kind string) string {
+	file, err := cleanRelativePath(file)
+	if err != nil {
+		b.ExitError(err.Error())
+		return ""
+	}
 
-	switch _make {
+	switch kind {
 	case "router":
 		file = filepath.Join("router", file)
 	case "ws":
 		file = filepath.Join("websocket", file)
 	default:
-		file = filepath.Join("app", _make, file)
+		file = filepath.Join("app", kind, file)
 	}
 
 	return file + ".go"
 }
 
-// GetMakeQueueFile 获取make文件
-func (b *BaseCommand) GetMakeQueueFile(name, _type string, isDelay bool) map[string]string {
-	if isDelay {
-		name = name + "_delay"
-	}
-	consumerFile := filepath.Join("app/queue/"+_type+"/consumer/", name) + ".go"
-	producerFile := filepath.Join("app/queue/"+_type+"/producer/", name) + ".go"
-
-	return map[string]string{
-		"consumer": consumerFile,
-		"producer": producerFile,
-	}
-}
-
 // GetTemplate 获取模版文件
-func (b *BaseCommand) GetTemplate(_make string) string {
-	var (
-		templateFile string
-	)
-
-	switch _make {
-	case "model-old":
+func (b *Command) GetTemplate(kind string) string {
+	switch kind {
 	case "model", "console", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "ws", "grpc_request", "grpc_service", "grpc_proto":
-		templateFile = filepath.Join(pathx.RootPath(), "pkg", "cli", "template", _make+".tpl")
+		return filepath.Join(pathx.RootPath(), "pkg", "cli", "template", kind+".tpl")
 	default:
-		b.ExitError("未找到 " + _make + " 模版文件")
-	}
-
-	return templateFile
-}
-
-// GetQueueTemplates 获取队列模版文件
-func (b *BaseCommand) GetQueueTemplates() map[string]string {
-	return map[string]string{
-		"consumer": filepath.Join(pathx.RootPath(), "pkg", "cli", "template", "consumer.tpl"),
-		"producer": filepath.Join(pathx.RootPath(), "pkg", "cli", "template", "producer.tpl"),
+		b.ExitError("未找到 " + kind + " 模版文件")
+		return ""
 	}
 }
 
 // CheckDirAndFile 检查目录和文件
-func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
-	// 如果目录不存在则创建
+func (b *Command) CheckDirAndFile(file string) *os.File {
+	file, err := cleanRelativePath(file)
+	if err != nil {
+		terminal.Errorf("%s", err.Error())
+		return nil
+	}
+
 	dir := filepath.Dir(file)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err = os.MkdirAll(dir, 0755); err != nil {
 		terminal.Errorf("Failed to create directory: %s", err)
 		return nil
 	}
 
-	if _, err := os.Stat(file); !os.IsNotExist(err) {
+	if _, statErr := os.Stat(file); statErr == nil {
 		fmt.Printf("%s文件 %s 已存在,是否覆盖?(%s/%s): ",
 			color.YellowString(terminal.Warning()),
 			color.CyanString(file),
@@ -268,12 +262,13 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 
 		reader := bufio.NewReader(os.Stdin)
 		input, _ := reader.ReadString('\n')
-		input = strings.TrimSpace(input)
-
-		if !b.StringToBool(input) {
+		if !b.StringToBool(strings.TrimSpace(input)) {
 			fmt.Println("操作已取消")
 			return nil
 		}
+	} else if !os.IsNotExist(statErr) {
+		terminal.Errorf("Failed to check file: %s", statErr.Error())
+		return nil
 	}
 
 	terminal.Successf(terminal.FileIco+" 创建文件: %s", color.CyanString(file))
@@ -283,4 +278,23 @@ func (b *BaseCommand) CheckDirAndFile(file string) *os.File {
 		return nil
 	}
 	return f
+}
+
+// cleanRelativePath 校验并清理相对路径
+func cleanRelativePath(file string) (string, error) {
+	file = strings.TrimSpace(file)
+	if file == "" {
+		return "", fmt.Errorf("文件路径不能为空")
+	}
+
+	file = filepath.ToSlash(file)
+	if filepath.IsAbs(file) || filepath.VolumeName(file) != "" || strings.HasPrefix(file, "/") {
+		return "", fmt.Errorf("文件路径必须为相对路径:%s", file)
+	}
+
+	clean := filepath.Clean(filepath.FromSlash(file))
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(os.PathSeparator)) {
+		return "", fmt.Errorf("文件路径不能超出项目目录:%s", file)
+	}
+	return clean, nil
 }

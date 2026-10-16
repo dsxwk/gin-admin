@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"go/format"
 	"os"
@@ -19,62 +19,43 @@ import (
 
 // MakeEs ES搜索生成命令
 type MakeEs struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeEs) Name() string {
-	return "make:es"
-}
-
-// Description 命令描述
-func (m *MakeEs) Description() string {
-	return "ES搜索创建"
-}
-
-// Help 命令选项
-func (m *MakeEs) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
+// NewMakeEs 创建命令
+func NewMakeEs() *MakeEs {
+	return &MakeEs{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:es",
+			Description: "ES搜索创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path", Default: "app/es"},
+					Desc:     "输出目录, 默认app/es",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "e", Long: "exclude", Default: "password"},
+					Desc:     "排除字段,多个用逗号分隔,如: password,token",
+					Required: false,
+				},
 			},
-			"表名, 如: user 或 user,menu",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "p",
-				Long:    "path",
-				Default: "app/es",
-			},
-			"输出目录, 默认app/es",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "e",
-				Long:    "exclude",
-				Default: "password",
-			},
-			"排除字段,多个用逗号分隔,如: password,token",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeEs) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeEs) Handle(values map[string]string) error {
 	outDir := strings.TrimPrefix(strings.TrimSpace(values["path"]), "/")
 	if outDir == "" {
 		outDir = "app/es"
@@ -99,6 +80,7 @@ func (m *MakeEs) Execute(values map[string]string) {
 		terminal.Infof("开始生成ES搜索: %s", table)
 		m.generateEs(db, table, outDir, exclude)
 	}
+	return nil
 }
 
 // generateEs 根据表结构生成ES搜索

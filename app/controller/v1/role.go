@@ -13,7 +13,7 @@ import (
 )
 
 type RoleController struct {
-	base.BaseController
+	base.Controller
 	service service.RoleService
 }
 

@@ -9,7 +9,7 @@ import (
 )
 
 type Cors struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // Handle 跨域中间件

@@ -9,7 +9,7 @@ import (
 
 // OperatorLog 操作日志请求验证
 type OperatorLog struct {
-	base.BaseRequest
+	base.Request
 	ID  int64   `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	IDs []int64 `json:"ids" validate:"required" label:"ID列表"`
 	Ip  string  `json:"ip" form:"ip" validate:"" label:"ip地址"`

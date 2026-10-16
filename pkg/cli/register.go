@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path"
@@ -21,13 +21,13 @@ import (
 
 // Registry 命令注册表
 type Registry struct {
-	commands map[string]base.Command
+	commands map[string]base.Handler
 }
 
 // NewRegistry 创建命令注册表
-func NewRegistry(items ...base.Command) *Registry {
+func NewRegistry(items ...base.Handler) *Registry {
 	registry := &Registry{
-		commands: make(map[string]base.Command, len(items)),
+		commands: make(map[string]base.Handler, len(items)),
 	}
 	for _, item := range items {
 		registry.Register(item)
@@ -37,11 +37,11 @@ func NewRegistry(items ...base.Command) *Registry {
 
 // flagParser flag解析器
 type flagParser interface {
-	ParseFlags(name string, args []string, opts []base.CommandOption) map[string]string
+	ParseFlags(name string, args []string, opts []base.CommandOption) (map[string]string, error)
 }
 
 // Register 注册命令
-func (r *Registry) Register(cmd base.Command) {
+func (r *Registry) Register(cmd base.Handler) {
 	if r == nil || cmd == nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (r *Registry) Register(cmd base.Command) {
 }
 
 // Get 获取命令
-func (r *Registry) Get(name string) (base.Command, bool) {
+func (r *Registry) Get(name string) (base.Handler, bool) {
 	if r == nil {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (r *Registry) Get(name string) (base.Command, bool) {
 }
 
 // Execute 创建注册表并执行命令
-func Execute(items ...base.Command) {
+func Execute(items ...base.Handler) {
 	NewRegistry(items...).Execute(os.Args[1:])
 }
 
@@ -125,10 +125,21 @@ func (r *Registry) Execute(args []string) {
 
 	// 统一解析flag后执行命令
 	if fp, ok := cmd.(flagParser); ok {
-		values := fp.ParseFlags(cmd.Name(), cmdArgs, cmd.Help())
-		cmd.Execute(values)
+		values, err := fp.ParseFlags(cmd.Name(), cmdArgs, cmd.Help())
+		if err != nil {
+			terminal.Errorf("%s", err.Error())
+			base.PrintArgs(cmd.Help())
+			os.Exit(1)
+		}
+		if err = cmd.Handle(values); err != nil {
+			terminal.Errorf("%s", err.Error())
+			os.Exit(1)
+		}
 	} else {
-		cmd.Execute(nil)
+		if err := cmd.Handle(nil); err != nil {
+			terminal.Errorf("%s", err.Error())
+			os.Exit(1)
+		}
 	}
 }
 
@@ -246,7 +257,7 @@ func (r *Registry) printText() {
 }
 
 // 打印单个命令帮助
-func printCommandHelp(cmd base.Command) {
+func printCommandHelp(cmd base.Handler) {
 	printVersion()
 	color.Yellow("\nUsage:")
 	fmt.Println("  cli [command] [options]")

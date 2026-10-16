@@ -16,6 +16,9 @@ import (
 type {{.TypeTitle}}{{.Name}}Payload struct {
 }
 
+// {{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer {{.TypeTitle}}消费者
+type {{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer struct{}
+
 // New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer 创建消费者实例
 func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *queue.ConsumerAdapter[{{.TypeTitle}}{{.Name}}Payload] {
 	{{- if eq .Type "kafka"}}
@@ -71,12 +74,12 @@ func New{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer() *queue.ConsumerAdapter[{{
 			IsDelay:     {{.IsDelay}},
 		},
 		driver,
-		handle{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}},
+		(&{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer{}).Handle,
 	)
 }
 
-// handle{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}} 处理{{.TypeTitle}}消息
-func handle{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}}(_ context.Context, data *{{.TypeTitle}}{{.Name}}Payload) error {
+// Handle 处理{{.TypeTitle}}消息
+func (c *{{.TypeTitle}}{{.Name}}{{if .IsDelay}}Delay{{end}}Consumer) Handle(_ context.Context, data *{{.TypeTitle}}{{.Name}}Payload) error {
 	facade.Log().Info(fmt.Sprintf("{{.TypeTitle}} Received Msg: %v", data))
 	// 待处理业务逻辑
 	return nil

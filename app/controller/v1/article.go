@@ -13,7 +13,7 @@ import (
 )
 
 type ArticleController struct {
-	base.BaseController
+	base.Controller
 	service service.ArticleService
 }
 
@@ -108,7 +108,7 @@ func (s *ArticleController) Create(c *gin.Context) {
 		return
 	}
 
-	m, err := s.service.Create(ctx, s.GetUserId(c), req)
+	m, err := s.service.Create(ctx, s.GetUserID(c), req)
 	if err != nil {
 		s.Response.Error(c, err)
 		return

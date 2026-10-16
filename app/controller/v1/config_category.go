@@ -13,7 +13,7 @@ import (
 )
 
 type ConfigCategoryController struct {
-	base.BaseController
+	base.Controller
 	service service.ConfigCategoryService
 }
 

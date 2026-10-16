@@ -12,7 +12,7 @@ import (
 )
 
 type Permission struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // Handle 权限中间件

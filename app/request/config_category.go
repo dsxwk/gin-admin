@@ -9,7 +9,7 @@ import (
 
 // ConfigCategory 请求验证
 type ConfigCategory struct {
-	base.BaseRequest
+	base.Request
 	ID   int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Name string `json:"name" form:"name" validate:"required" label:"分类名称"`
 	PageListValidate

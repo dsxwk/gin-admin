@@ -8,7 +8,7 @@ import (
 )
 
 type OperatorLogService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表

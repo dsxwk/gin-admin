@@ -2,12 +2,25 @@
 
 ## v3.4.0
 > - 重构pkg工具包,拆分convert、cryptox、ctxkey、mapx、pathx、stringx、timex和treex子包
+> - 将common/flag迁移为pkg/terminal,统一终端输出包命名
+> - 将common/template迁移为pkg/cli/template,统一命令行生成模版目录
+> - 删除未使用的BaseModel空结构体
 > - 移除pkg.Sprintf,统一使用标准库fmt.Sprintf
 > - 统一Queue、Job和MCP泛型适配器,简化消费者、生产者、任务和工具示例
 > - 新增通用ShutdownRunner,统一Provider关闭任务
 > - 重构ORM连接管理,移除全局连接状态,新增Connect错误接口并兼容原Connection调用
+> - 移除迁移和MCP工具中的隐式init注册,改为显式方法返回和直接调用
+> - 优化路由权限收集,挂载时直接返回鉴权路由Key,移除二次注册和全局Writer切换
+> - 抽取测试应用初始化到tests/util,修复子测试包单独执行时的初始化问题
 > - 调整启动流程为NewApp、Boot和Run,CLI初始化重命名为SetupCLI
 > - 优化Context Key、Gin Key、启动信息输出和相关测试
+> - 重构应用基础类型为Service、Controller、Middleware和Request,命令行基础类型迁移到pkg/cli/base
+> - 统一命令行命令为Config、New和Handle结构,移除重复的Name、Description、Help和Execute方法
+> - 通用枚举迁移到pkg/enum,并新增安全查询方法
+> - 统一队列消费者、Job任务和MCP工具为具体类型加Handle方法
+> - 搜索条件错误向上返回,UpdateByID区分记录不存在场景
+> - 同步命令行生成模版、README示例和测试到统一处理器规范
+> - 命令行版本升级为3.0.0
 
 ## v3.3.7
 > - 更新前端效果预览图

@@ -19,7 +19,7 @@ const (
 
 // SystemNotificationService 系统通知服务
 type SystemNotificationService struct {
-	base.BaseService
+	base.Service
 }
 
 // NotificationItem 通知列表项

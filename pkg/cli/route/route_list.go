@@ -2,8 +2,8 @@ package route
 
 import (
 	"fmt"
-	"gin/common/base"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
 	"gin/router"
 	"sort"
 	"strings"
@@ -13,21 +13,19 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
-type RouteList struct{}
+type RouteList struct{ base.Command }
 
-func (s *RouteList) Name() string {
-	return "route:list"
+// NewRouteList 创建命令
+func NewRouteList() *RouteList {
+	return &RouteList{
+		Command: base.NewCommand(base.Config{
+			Name:        "route:list",
+			Description: "路由列表",
+		}),
+	}
 }
 
-func (s *RouteList) Description() string {
-	return "路由列表"
-}
-
-func (s *RouteList) Help() []base.CommandOption {
-	return []base.CommandOption{}
-}
-
-func (s *RouteList) Execute(_ map[string]string) {
+func (s *RouteList) Handle(_ map[string]string) error {
 	// 初始化Gin引擎(不要Run)
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
@@ -39,7 +37,8 @@ func (s *RouteList) Execute(_ map[string]string) {
 	routes := engine.Routes()
 	if len(routes) == 0 {
 		color.Yellow("暂无注册的路由")
-		return
+		return nil
+
 	}
 
 	// 按Path排序
@@ -82,6 +81,7 @@ func (s *RouteList) Execute(_ map[string]string) {
 
 	fmt.Println(writer.Render())
 	color.Cyan("总计 %d 条路由\n", len(routes))
+	return nil
 }
 
 func (s *RouteList) formatHandlerName(handler string) string {

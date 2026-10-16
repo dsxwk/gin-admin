@@ -1,9 +1,9 @@
 package make
 
 import (
-	"gin/common/base"
-	"gin/pkg/terminal"
 	"gin/pkg/cli"
+	"gin/pkg/cli/base"
+	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,63 +13,49 @@ import (
 )
 
 type MakeProvider struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeProvider) Name() string {
-	return "make:provider"
-}
-
-func (m *MakeProvider) Description() string {
-	return "创建服务提供者"
-}
-
-func (m *MakeProvider) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeProvider 创建命令
+func NewMakeProvider() *MakeProvider {
+	return &MakeProvider{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:provider",
+			Description: "创建服务提供者",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: rate_limit",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "provider"},
+					Desc:     "服务提供者描述, 如: 限流",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "D", Long: "deps", Default: "config,log"},
+					Desc:     "依赖的服务, 多个用逗号分隔, 如: config,log,cache",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "r", Long: "runner"},
+					Desc:     "是否包含后台任务, true/false",
+					Required: false,
+				},
 			},
-			"文件路径, 如: rate_limit",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "provider",
-			},
-			"服务提供者描述, 如: 限流",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "D",
-				Long:    "deps",
-				Default: "config,log",
-			},
-			"依赖的服务, 多个用逗号分隔, 如: config,log,cache",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "r",
-				Long:  "runner",
-			},
-			"是否包含后台任务, true/false",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeProvider) Execute(values map[string]string) {
+func (m *MakeProvider) Handle(values map[string]string) error {
 
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	fileName := values["file"]
 
 	file := m.GetMakeFile(fileName, _make)
 	m.generateProvider(_make, file, values["desc"], values["deps"], values["runner"])
+	return nil
 }
 
 func (m *MakeProvider) generateProvider(_make, file, providerDesc, deps, hasRunner string) {

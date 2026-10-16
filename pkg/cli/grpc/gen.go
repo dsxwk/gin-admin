@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"os/exec"
@@ -27,67 +27,56 @@ const (
 
 // GrpcGen 生成grpc代码命令
 type GrpcGen struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (g *GrpcGen) Name() string {
-	return "grpc:gen"
-}
-
-// Description 命令描述
-func (g *GrpcGen) Description() string {
-	return "生成grpc代码"
-}
-
-// Help 命令选项
-func (g *GrpcGen) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short:   "t",
-				Long:    "type",
-				Default: "all",
+// NewGrpcGen 创建命令
+func NewGrpcGen() *GrpcGen {
+	return &GrpcGen{
+		Command: base.NewCommand(base.Config{
+			Name:        "grpc:gen",
+			Description: "生成grpc代码",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "type", Default: "all"},
+					Desc:     "生成类型,all/pb/grpc,默认all",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "proto文件路径,默认grpc/proto目录全部",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "tool-dir"},
+					Desc:     "生成插件目录,默认.tools/bin",
+					Required: false,
+				},
 			},
-			"生成类型,all/pb/grpc,默认all",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
-			},
-			"proto文件路径,默认grpc/proto目录全部",
-			false,
-		},
-		{
-			base.Flag{
-				Short: "d",
-				Long:  "tool-dir",
-			},
-			"生成插件目录,默认.tools/bin",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (g *GrpcGen) Execute(values map[string]string) {
+// Handle 执行命令
+func (g *GrpcGen) Handle(values map[string]string) error {
 	root := pathx.RootPath()
 	genType := values["type"]
 	if genType != "all" && genType != "pb" && genType != "grpc" {
 		terminal.Errorf("参数 --type 只能是 all/pb/grpc")
-		return
+		return nil
+
 	}
 
 	files, err := g.protoFiles(root, values["file"])
 	if err != nil {
 		terminal.Errorf("查找proto文件失败: %s", err.Error())
-		return
+		return nil
+
 	}
 	if len(files) == 0 {
 		terminal.Errorf("未找到proto文件")
-		return
+		return nil
+
 	}
 
 	toolDir := filepath.Join(root, ".tools", "bin")
@@ -96,19 +85,22 @@ func (g *GrpcGen) Execute(values map[string]string) {
 	}
 	if err = os.MkdirAll(toolDir, 0755); err != nil {
 		terminal.Errorf("创建插件目录失败: %s", err.Error())
-		return
+		return nil
+
 	}
 
 	if genType == "all" || genType == "pb" {
 		if err = g.ensureTool(toolDir, "protoc-gen-go", "google.golang.org/protobuf/cmd/protoc-gen-go", protocGenGoVersion); err != nil {
 			terminal.Errorf("安装protoc-gen-go失败: %s", err.Error())
-			return
+			return nil
+
 		}
 	}
 	if genType == "all" || genType == "grpc" {
 		if err = g.ensureTool(toolDir, "protoc-gen-go-grpc", "google.golang.org/grpc/cmd/protoc-gen-go-grpc", protocGenGoGrpcVersion); err != nil {
 			terminal.Errorf("安装protoc-gen-go-grpc失败: %s", err.Error())
-			return
+			return nil
+
 		}
 	}
 
@@ -117,7 +109,8 @@ func (g *GrpcGen) Execute(values map[string]string) {
 		rel, relErr := filepath.Rel(root, file)
 		if relErr != nil {
 			terminal.Errorf("计算proto文件路径失败: %s", relErr.Error())
-			return
+			return nil
+
 		}
 		relNames[i] = filepath.ToSlash(rel)
 	}
@@ -125,23 +118,27 @@ func (g *GrpcGen) Execute(values map[string]string) {
 	req, err := g.buildRequest(root, relNames)
 	if err != nil {
 		terminal.Errorf("解析proto文件失败: %s", err.Error())
-		return
+		return nil
+
 	}
 
 	if genType == "all" || genType == "pb" {
 		if err = g.runPlugin(filepath.Join(toolDir, g.toolName("protoc-gen-go")), req, root); err != nil {
 			terminal.Errorf("生成pb代码失败: %s", err.Error())
-			return
+			return nil
+
 		}
 	}
 	if genType == "all" || genType == "grpc" {
 		if err = g.runPlugin(filepath.Join(toolDir, g.toolName("protoc-gen-go-grpc")), req, root); err != nil {
 			terminal.Errorf("生成grpc代码失败: %s", err.Error())
-			return
+			return nil
+
 		}
 	}
 
 	terminal.Successf("grpc代码生成完成")
+	return nil
 }
 
 // protoFiles 获取proto文件列表

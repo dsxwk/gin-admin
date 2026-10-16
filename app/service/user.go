@@ -18,7 +18,7 @@ import (
 )
 
 type UserService struct {
-	base.BaseService
+	base.Service
 }
 
 // syncEsDocument 同步用户ES文档

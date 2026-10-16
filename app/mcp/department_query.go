@@ -15,6 +15,9 @@ type DepartmentQueryArgs struct {
 	WithUsers bool   `json:"with_users"`
 }
 
+// DepartmentQueryTool 部门查询工具
+type DepartmentQueryTool struct{}
+
 // NewDepartmentQueryTool 创建部门查询工具
 func NewDepartmentQueryTool() *mcp.ToolAdapter[DepartmentQueryArgs] {
 	return mcp.NewToolAdapter(
@@ -30,12 +33,12 @@ func NewDepartmentQueryTool() *mcp.ToolAdapter[DepartmentQueryArgs] {
 				},
 			},
 		},
-		handleDepartmentQuery,
+		(&DepartmentQueryTool{}).Handle,
 	)
 }
 
-// handleDepartmentQuery 处理部门查询工具
-func handleDepartmentQuery(ctx context.Context, _ int64, args *DepartmentQueryArgs) (any, error) {
+// Handle 处理部门查询工具
+func (t *DepartmentQueryTool) Handle(ctx context.Context, _ int64, args *DepartmentQueryArgs) (any, error) {
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil

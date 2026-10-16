@@ -1,7 +1,7 @@
 package make
 
 import (
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -12,46 +12,39 @@ import (
 )
 
 type MakeFacade struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeFacade) Name() string {
-	return "make:facade"
-}
-
-func (m *MakeFacade) Description() string {
-	return "创建门面"
-}
-
-func (m *MakeFacade) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeFacade 创建命令
+func NewMakeFacade() *MakeFacade {
+	return &MakeFacade{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:facade",
+			Description: "创建门面",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: cache",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "facade-desc"},
+					Desc:     "门面描述, 如: 缓存门面",
+					Required: false,
+				},
 			},
-			"文件路径, 如: cache",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "facade-desc",
-			},
-			"门面描述, 如: 缓存门面",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeFacade) Execute(values map[string]string) {
+func (m *MakeFacade) Handle(values map[string]string) error {
 
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	fileName := values["file"]
 
 	file := m.GetMakeFile(fileName, _make)
 	m.generateFacade(_make, file, values["desc"])
+	return nil
 }
 
 func (m *MakeFacade) generateFacade(_make, file, facadeDesc string) {

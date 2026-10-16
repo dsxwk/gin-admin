@@ -11,6 +11,9 @@ import (
 type {{.CamelName}} struct {
 }
 
+// {{.CamelName}}Job {{.Description}}任务
+type {{.CamelName}}Job struct{}
+
 // New{{.CamelName}}Job 创建{{.Description}}
 func New{{.CamelName}}Job() *servicejob.Adapter[{{.CamelName}}] {
 	return servicejob.NewAdapter(
@@ -21,12 +24,12 @@ func New{{.CamelName}}Job() *servicejob.Adapter[{{.CamelName}}] {
 			Retry:       {{.Retry}},
 			Delay:       {{.Delay}},
 		},
-		handle{{.CamelName}},
+		(&{{.CamelName}}Job{}).Handle,
 	)
 }
 
-// handle{{.CamelName}} 处理{{.Description}}
-func handle{{.CamelName}}(_ context.Context, data *{{.CamelName}}) error {
+// Handle 处理{{.Description}}
+func (j *{{.CamelName}}Job) Handle(_ context.Context, data *{{.CamelName}}) error {
 	facade.Log().Info(fmt.Sprintf("Job [{{.Name}}] 处理: %v", data))
 	// 待处理业务逻辑
 	return nil

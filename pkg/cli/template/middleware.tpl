@@ -6,7 +6,7 @@ import (
 )
 
 type {{.Name}} struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // Handle {{.Description}}

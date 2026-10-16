@@ -60,7 +60,7 @@ func websocketUserID(c *gin.Context) (int64, bool) {
 		return 0, true
 	}
 
-	claims, err := (middleware.Jwt{}).Decode(token)
+	claims, err := (middleware.Jwt{}).Decode(c.Request.Context(), token)
 	if err != nil {
 		facade.Response().Error(c, errcode.Unauthorized().WithMsg(err.Error()))
 		return 0, false

@@ -1,7 +1,7 @@
 package make
 
 import (
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"html/template"
 	"os"
@@ -13,43 +13,36 @@ import (
 )
 
 type MakeController struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeController) Name() string {
-	return "make:controller"
-}
-
-func (m *MakeController) Description() string {
-	return "控制器创建"
-}
-
-func (m *MakeController) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "f",
-				Long:  "file",
+// NewMakeController 创建命令
+func NewMakeController() *MakeController {
+	return &MakeController{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:controller",
+			Description: "控制器创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "f", Long: "file"},
+					Desc:     "文件路径, 如: v1/user",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "d", Long: "desc", Default: "用户"},
+					Desc:     "描述, 如: 用户",
+					Required: false,
+				},
 			},
-			"文件路径, 如: v1/user",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "d",
-				Long:    "desc",
-				Default: "用户",
-			},
-			"描述, 如: 用户",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeController) Execute(values map[string]string) {
+func (m *MakeController) Handle(values map[string]string) error {
 	_make := strings.TrimPrefix(m.Name(), "make:")
 	f := m.GetMakeFile(values["file"], _make)
 	m.generateFile(_make, f, values["desc"])
+	return nil
 }
 
 func (m *MakeController) generateFile(_make, file, desc string) {

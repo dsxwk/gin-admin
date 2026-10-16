@@ -2,15 +2,18 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/queue"
-	"fmt"
 )
 
 // RabbitmqDelayDemoPayload 延迟消息体
 type RabbitmqDelayDemoPayload struct {
 	Name string `json:"name"`
 }
+
+// RabbitmqDelayDemoConsumer RabbitMQ延迟消费者
+type RabbitmqDelayDemoConsumer struct{}
 
 // NewRabbitmqDelayDemoConsumer 创建RabbitMQ延迟消费者
 func NewRabbitmqDelayDemoConsumer() *queue.ConsumerAdapter[RabbitmqDelayDemoPayload] {
@@ -35,12 +38,12 @@ func NewRabbitmqDelayDemoConsumer() *queue.ConsumerAdapter[RabbitmqDelayDemoPayl
 			Exchange: "rabbitmq_delay_demo_exchange",
 			Routing:  "rabbitmq_delay_demo",
 		},
-		handleRabbitmqDelayDemo,
+		(&RabbitmqDelayDemoConsumer{}).Handle,
 	)
 }
 
-// handleRabbitmqDelayDemo 处理RabbitMQ延迟消息
-func handleRabbitmqDelayDemo(_ context.Context, data *RabbitmqDelayDemoPayload) error {
+// Handle 处理RabbitMQ延迟消息
+func (c *RabbitmqDelayDemoConsumer) Handle(_ context.Context, data *RabbitmqDelayDemoPayload) error {
 	facade.Log().Info(fmt.Sprintf("RabbitMq Delay Received Msg: name=%s", data.Name))
 	return nil
 }

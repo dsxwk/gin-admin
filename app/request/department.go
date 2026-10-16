@@ -9,7 +9,7 @@ import (
 
 // Department 请求验证
 type Department struct {
-	base.BaseRequest
+	base.Request
 	ID          int64        `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Pid         int64        `json:"pid" form:"pid" validate:"int" label:"父级id"`
 	Name        string       `json:"name" form:"name" validate:"required" label:"部门名称"`

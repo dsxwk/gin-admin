@@ -9,7 +9,7 @@ import (
 
 // Permission 请求验证
 type Permission struct {
-	base.BaseRequest
+	base.Request
 	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
 	Key    string `json:"key" form:"key" validate:"required" label:"权限标识"`
 	Method string `json:"method" form:"method" validate:"required" label:"请求方式"`

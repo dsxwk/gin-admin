@@ -3,7 +3,7 @@ package make
 import (
 	"fmt"
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -16,53 +16,38 @@ import (
 
 // MakeGrpcModel grpc模型生成命令
 type MakeGrpcModel struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeGrpcModel) Name() string {
-	return "grpc-make:model"
-}
-
-// Description 命令描述
-func (m *MakeGrpcModel) Description() string {
-	return "grpc模型创建"
-}
-
-// Help 命令选项
-func (m *MakeGrpcModel) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
+// NewMakeGrpcModel 创建命令
+func NewMakeGrpcModel() *MakeGrpcModel {
+	return &MakeGrpcModel{
+		Command: base.NewCommand(base.Config{
+			Name:        "grpc-make:model",
+			Description: "grpc模型创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path", Default: "grpc/model"},
+					Desc:     "输出目录, 默认grpc/model",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
 			},
-			"表名, 如: user 或 user,menu",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "p",
-				Long:    "path",
-				Default: "grpc/model",
-			},
-			"输出目录, 默认grpc/model",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeGrpcModel) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeGrpcModel) Handle(values map[string]string) error {
 	outDir := strings.TrimPrefix(values["path"], "/")
 	if outDir == "" {
 		outDir = "grpc/model"
@@ -78,6 +63,7 @@ func (m *MakeGrpcModel) Execute(values map[string]string) {
 		terminal.Infof("开始生成grpc模型: %s", table)
 		m.generateModel(db, table, outDir)
 	}
+	return nil
 }
 
 // generateModel 根据表结构生成Go模型

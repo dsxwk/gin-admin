@@ -2,23 +2,22 @@ package event
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 )
 
-type EventListenerList struct{}
+type EventListenerList struct{ base.Command }
 
-func (s *EventListenerList) Name() string {
-	return "listener:list"
+// NewEventListenerList 创建命令
+func NewEventListenerList() *EventListenerList {
+	return &EventListenerList{
+		Command: base.NewCommand(base.Config{
+			Name:        "listener:list",
+			Description: "事件监听列表",
+		}),
+	}
 }
 
-func (s *EventListenerList) Description() string {
-	return "事件监听列表"
-}
-
-func (s *EventListenerList) Help() []base.CommandOption {
-	return []base.CommandOption{}
-}
-
-func (s *EventListenerList) Execute(_ map[string]string) {
+func (s *EventListenerList) Handle(_ map[string]string) error {
 	printEventTable(facade.Event().List(), true)
+	return nil
 }

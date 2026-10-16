@@ -12,7 +12,7 @@ import (
 )
 
 type OperatorLog struct {
-	base.BaseMiddleware
+	base.Middleware
 }
 
 // Handle 操作日志中间件

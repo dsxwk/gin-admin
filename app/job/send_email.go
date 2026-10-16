@@ -2,9 +2,9 @@ package job
 
 import (
 	"context"
+	"fmt"
 	"gin/app/facade"
 	servicejob "gin/pkg/serviceprovider/job"
-	"fmt"
 )
 
 // SendEmail 邮件参数
@@ -13,6 +13,9 @@ type SendEmail struct {
 	Subject string `json:"subject"`
 	Content string `json:"content"`
 }
+
+// SendEmailJob 发送邮件任务
+type SendEmailJob struct{}
 
 // NewSendEmailJob 创建发送邮件任务
 func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
@@ -24,12 +27,12 @@ func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
 			Retry:       3,
 			Delay:       3000,
 		},
-		handleSendEmail,
+		(&SendEmailJob{}).Handle,
 	)
 }
 
-// handleSendEmail 处理发送邮件任务
-func handleSendEmail(_ context.Context, data *SendEmail) error {
+// Handle 处理发送邮件任务
+func (j *SendEmailJob) Handle(_ context.Context, data *SendEmail) error {
 	facade.Log().Info(fmt.Sprintf("Job [send_email] 发送邮件: to=%s subject=%s", data.To, data.Subject))
 	return nil
 }

@@ -4,13 +4,13 @@ import (
 	"gin/app/errcode"
 	"gin/common/base"
 
-	"github.com/gookit/validate"
 	"fmt"
+	"github.com/gookit/validate"
 )
 
 // User 用户请求验证
 type User struct {
-	base.BaseRequest
+	base.Request
 	ID        int64      `uri:"id" validate:"required|int|gt:0" label:"ID"`
 	Username  string     `json:"username" form:"username" validate:"required" label:"用户名"`
 	FullName  string     `json:"fullName" validate:"required" label:"姓名"`

@@ -9,6 +9,9 @@ import (
 type {{.Name}}Args struct {
 }
 
+// {{.Name}}Tool {{.Description}}工具
+type {{.Name}}Tool struct{}
+
 // New{{.Name}}Tool 创建{{.Description}}
 func New{{.Name}}Tool() *mcp.ToolAdapter[{{.Name}}Args] {
 	return mcp.NewToolAdapter(
@@ -23,12 +26,12 @@ func New{{.Name}}Tool() *mcp.ToolAdapter[{{.Name}}Args] {
 				Required: []string{},
 			},
 		},
-		handle{{.Name}},
+		(&{{.Name}}Tool{}).Handle,
 	)
 }
 
-// handle{{.Name}} 处理{{.Description}}
-func handle{{.Name}}(_ context.Context, _ int64, args *{{.Name}}Args) (any, error) {
+// Handle 处理{{.Description}}
+func (t *{{.Name}}Tool) Handle(_ context.Context, _ int64, args *{{.Name}}Args) (any, error) {
 	// 待处理业务逻辑
 	return map[string]any{}, nil
 }

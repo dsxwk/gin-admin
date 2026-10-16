@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	appmodel "gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -19,7 +19,60 @@ import (
 
 // MakeModel 模型生成命令
 type MakeModel struct {
-	base.BaseCommand
+	base.Command
+}
+
+// NewMakeModel 创建命令
+func NewMakeModel() *MakeModel {
+	return &MakeModel{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:model",
+			Description: "模型创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path"},
+					Desc:     "输出目录, 如: api/user",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "c", Long: "camel", Default: "true"},
+					Desc:     "json字段是否使用驼峰",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
+			},
+		}),
+	}
+}
+
+// Handle 执行命令
+func (m *MakeModel) Handle(values map[string]string) error {
+	// 输出目录
+	path := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
+	// 表名支持多个
+	tables := strings.Split(values["table"], ",")
+	for i := range tables {
+		tables[i] = strings.TrimSpace(tables[i])
+	}
+
+	camel := m.StringToBool(values["camel"])
+	conn := values["connection"]
+	_make := strings.TrimPrefix(m.Name(), "make:")
+	db := facade.DB(conn)
+	for _, table := range tables {
+		terminal.Infof("开始生成模型: %s", table)
+		m.generateModel(_make, db, table, path, conn, camel)
+	}
+	return nil
 }
 
 // Column 表字段结构
@@ -68,76 +121,6 @@ func (m *Import) Render() string {
 	sort.Strings(list)
 
 	return "import (\n" + strings.Join(list, "\n") + "\n)\n"
-}
-
-// Name 返回cli命令名称
-func (m *MakeModel) Name() string {
-	return "make:model"
-}
-
-// Description 命令描述
-func (m *MakeModel) Description() string {
-	return "模型创建"
-}
-
-// Help 返回命令参数说明
-func (m *MakeModel) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			Flag: base.Flag{
-				Short: "t",
-				Long:  "table",
-			},
-			Desc:     "表名, 如: user 或 user,menu",
-			Required: true,
-		},
-		{
-			Flag: base.Flag{
-				Short: "p",
-				Long:  "path",
-			},
-			Desc:     "输出目录, 如: api/user",
-			Required: false,
-		},
-		{
-			Flag: base.Flag{
-				Short:   "c",
-				Long:    "camel",
-				Default: "true",
-			},
-			Desc:     "json字段是否使用驼峰",
-			Required: false,
-		},
-		{
-			Flag: base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			Desc:     "数据库连接",
-			Required: false,
-		},
-	}
-}
-
-// Execute cli命令执行入口
-func (m *MakeModel) Execute(values map[string]string) {
-	// 输出目录
-	path := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
-	// 表名支持多个
-	tables := strings.Split(values["table"], ",")
-	for i := range tables {
-		tables[i] = strings.TrimSpace(tables[i])
-	}
-
-	camel := m.StringToBool(values["camel"])
-	conn := values["connection"]
-	_make := strings.TrimPrefix(m.Name(), "make:")
-	db := facade.DB(conn)
-	for _, table := range tables {
-		terminal.Infof("开始生成模型: %s", table)
-		m.generateModel(_make, db, table, path, conn, camel)
-	}
 }
 
 // GetColumnInfo 获取完整字段信息

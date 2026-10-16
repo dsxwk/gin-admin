@@ -9,7 +9,7 @@ import (
 
 // Menu 菜单验证
 type Menu struct {
-	base.BaseRequest
+	base.Request
 	PageListValidate
 	ID         int64        `json:"id" validate:"required|int|gt:0" label:"ID"`
 	RoleId     string       `json:"roleId" form:"roleId" validate:"required" label:"角色id"`

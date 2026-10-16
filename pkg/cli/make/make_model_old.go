@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	appmodel "gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -18,57 +18,42 @@ import (
 )
 
 type MakeModelOld struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeModelOld) Name() string {
-	return "make:model-old"
-}
-
-func (m *MakeModelOld) Description() string {
-	return "模型创建old"
-}
-
-func (m *MakeModelOld) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
+// NewMakeModelOld 创建命令
+func NewMakeModelOld() *MakeModelOld {
+	return &MakeModelOld{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:model-old",
+			Description: "模型创建old",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path"},
+					Desc:     "输出目录, 如: api/user",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "c", Long: "camel", Default: "true"},
+					Desc:     "是否驼峰字段, 如: true",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
 			},
-			"表名, 如: user 或 user,menu",
-			true,
-		},
-		{
-			base.Flag{
-				Short: "p",
-				Long:  "path",
-			},
-			"输出目录, 如: api/user",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "c",
-				Long:    "camel",
-				Default: "true",
-			},
-			"是否驼峰字段, 如: true",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
+		}),
 	}
 }
 
-func (m *MakeModelOld) Execute(values map[string]string) {
+func (m *MakeModelOld) Handle(values map[string]string) error {
 	// 去除前斜杠
 	p := filepath.Join("app/model/", strings.TrimPrefix(values["path"], "/"))
 	tables := strings.Split(values["table"], ",")
@@ -78,6 +63,7 @@ func (m *MakeModelOld) Execute(values map[string]string) {
 	}
 
 	m.generateFiles(p, values["connection"], tables, m.StringToBool(values["camel"]))
+	return nil
 }
 
 // generateFiles 生成模型文件

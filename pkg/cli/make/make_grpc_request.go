@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
@@ -30,53 +30,38 @@ type GrpcRequestField struct {
 
 // MakeGrpcRequest grpc请求生成命令
 type MakeGrpcRequest struct {
-	base.BaseCommand
+	base.Command
 }
 
-// Name 命令名称
-func (m *MakeGrpcRequest) Name() string {
-	return "grpc-make:request"
-}
-
-// Description 命令描述
-func (m *MakeGrpcRequest) Description() string {
-	return "grpc请求创建"
-}
-
-// Help 命令选项
-func (m *MakeGrpcRequest) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "t",
-				Long:  "table",
+// NewMakeGrpcRequest 创建命令
+func NewMakeGrpcRequest() *MakeGrpcRequest {
+	return &MakeGrpcRequest{
+		Command: base.NewCommand(base.Config{
+			Name:        "grpc-make:request",
+			Description: "grpc请求创建",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "t", Long: "table"},
+					Desc:     "表名, 如: user 或 user,menu",
+					Required: true,
+				},
+				{
+					Flag:     base.Flag{Short: "p", Long: "path", Default: "grpc/request"},
+					Desc:     "输出目录, 默认grpc/request",
+					Required: false,
+				},
+				{
+					Flag:     base.Flag{Short: "C", Long: "connection", Default: "mysql"},
+					Desc:     "数据库连接",
+					Required: false,
+				},
 			},
-			"表名, 如: user 或 user,menu",
-			true,
-		},
-		{
-			base.Flag{
-				Short:   "p",
-				Long:    "path",
-				Default: "grpc/request",
-			},
-			"输出目录, 默认grpc/request",
-			false,
-		},
-		{
-			base.Flag{
-				Short:   "C",
-				Long:    "connection",
-				Default: "mysql",
-			},
-			"数据库连接",
-			false,
-		},
+		}),
 	}
 }
 
-// Execute 执行命令
-func (m *MakeGrpcRequest) Execute(values map[string]string) {
+// Handle 执行命令
+func (m *MakeGrpcRequest) Handle(values map[string]string) error {
 	outDir := strings.TrimPrefix(values["path"], "/")
 	if outDir == "" {
 		outDir = "grpc/request"
@@ -92,6 +77,7 @@ func (m *MakeGrpcRequest) Execute(values map[string]string) {
 		terminal.Infof("开始生成grpc请求: %s", table)
 		m.generateRequest(db, table, outDir)
 	}
+	return nil
 }
 
 // generateRequest 根据表结构生成grpc请求

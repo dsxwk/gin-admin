@@ -9,7 +9,7 @@ import (
 )
 
 type DictService struct {
-	base.BaseService
+	base.Service
 }
 
 // List 列表
@@ -80,7 +80,7 @@ func (s *DictService) Update(ctx context.Context, id int64, data map[string]any)
 	if mapx.HasKey(data, "extend") {
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}
-	return s.Updates(ctx, &model.Dict{}, id, data)
+	return s.UpdateByID(ctx, &model.Dict{}, id, data)
 }
 
 // Detail 详情

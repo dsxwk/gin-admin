@@ -2,24 +2,26 @@ package make
 
 import (
 	"fmt"
-	"gin/common/base"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 	"os/exec"
 )
 
 type MakeDocs struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (m *MakeDocs) Name() string {
-	return "make:docs"
+// NewMakeDocs 创建命令
+func NewMakeDocs() *MakeDocs {
+	return &MakeDocs{
+		Command: base.NewCommand(base.Config{
+			Name:        "make:docs",
+			Description: "生成Swagger文档",
+		}),
+	}
 }
 
-func (m *MakeDocs) Description() string {
-	return "生成Swagger文档"
-}
-
-func (m *MakeDocs) Execute(_ map[string]string) {
+func (m *MakeDocs) Handle(_ map[string]string) error {
 	terminal.Infof("开始生成Swagger文档...")
 
 	// 排除远程调用服务目录,避免同名模型导致文档解析失败
@@ -27,9 +29,11 @@ func (m *MakeDocs) Execute(_ map[string]string) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		terminal.Errorf("Swagger文档生成失败: %v\n%s", err, string(output))
-		return
+		return nil
+
 	}
 
 	fmt.Println(string(output))
 	terminal.Successf("Swagger文档生成成功")
+	return nil
 }

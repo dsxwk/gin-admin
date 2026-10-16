@@ -20,7 +20,7 @@ import (
 )
 
 type AgentController struct {
-	base.BaseController
+	base.Controller
 	service service.AgentService
 }
 
@@ -51,7 +51,7 @@ func (s *AgentController) Ask(c *gin.Context) {
 	}
 
 	// 获取用户ID和追踪ID
-	userId := s.GetUserId(c)
+	userId := s.GetUserID(c)
 	traceId, _ := ctx.Value(ctxkey.TraceIDKey).(string)
 
 	// 创建或加载会话
@@ -133,7 +133,7 @@ func (s *AgentController) Stream(c *gin.Context) {
 		return
 	}
 
-	userId := s.GetUserId(c)
+	userId := s.GetUserID(c)
 	traceId, _ := ctx.Value(ctxkey.TraceIDKey).(string)
 	sessionId := req.SessionId
 	if sessionId == 0 {
@@ -279,7 +279,7 @@ func writeAgentSSE(c *gin.Context, event string, data any) error {
 func (s *AgentController) Sessions(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	userId := s.GetUserId(c)
+	userId := s.GetUserID(c)
 	sessions, err := s.service.ListSessions(ctx, userId)
 	if err != nil {
 		s.Response.Error(c, err)
@@ -341,7 +341,7 @@ func (s *AgentController) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := s.service.DeleteSession(ctx, s.GetUserId(c), req.ID); err != nil {
+	if err := s.service.DeleteSession(ctx, s.GetUserID(c), req.ID); err != nil {
 		s.Response.Error(c, err)
 		return
 	}

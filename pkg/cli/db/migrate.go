@@ -2,40 +2,36 @@ package db
 
 import (
 	"gin/app/facade"
-	"gin/common/base"
 	"gin/database"
 	"gin/database/migrations"
+	"gin/pkg/cli/base"
 	"gin/pkg/terminal"
 
 	"github.com/fatih/color"
 )
 
 type Migrate struct {
-	base.BaseCommand
+	base.Command
 }
 
-func (s *Migrate) Name() string {
-	return "db:migrate"
-}
-
-func (s *Migrate) Description() string {
-	return "数据迁移"
-}
-
-func (s *Migrate) Help() []base.CommandOption {
-	return []base.CommandOption{
-		{
-			base.Flag{
-				Short: "i",
-				Long:  "id",
+// NewMigrate 创建命令
+func NewMigrate() *Migrate {
+	return &Migrate{
+		Command: base.NewCommand(base.Config{
+			Name:        "db:migrate",
+			Description: "数据迁移",
+			Options: []base.CommandOption{
+				{
+					Flag:     base.Flag{Short: "i", Long: "id"},
+					Desc:     "执行指定迁移ID, 如: create_user_table_20251212",
+					Required: false,
+				},
 			},
-			"执行指定迁移ID, 如: create_user_table_20251212",
-			false,
-		},
+		}),
 	}
 }
 
-func (s *Migrate) Execute(values map[string]string) {
+func (s *Migrate) Handle(values map[string]string) error {
 	terminal.Infof("开始执行数据迁移...")
 
 	db := facade.DB()
@@ -62,10 +58,12 @@ CREATE TABLE IF NOT EXISTS migrations (
 
 		if err := m.Migrate(db); err != nil {
 			terminal.Errorf("Migration %s 执行失败: %v", m.ID(), err)
-			return
+			return nil
+
 		}
 
 		db.Create(&database.Migrations{Migration: m.ID()})
 		terminal.Successf("Migration %s 执行成功", m.ID())
 	}
+	return nil
 }
