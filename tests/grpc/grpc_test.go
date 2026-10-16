@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"gin/app/facade"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
 	client "gin/pkg/serviceprovider/grpcclient"

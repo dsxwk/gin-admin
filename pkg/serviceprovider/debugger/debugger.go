@@ -2,7 +2,7 @@ package debugger
 
 import (
 	"context"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/eventbus"
 	"sync"
 	"time"

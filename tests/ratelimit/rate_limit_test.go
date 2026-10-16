@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"gin/app/facade"
 	"gin/app/middleware"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/ratelimit"
 	"net/http"
@@ -142,7 +142,7 @@ func TestRateLimitUserMiddleware(t *testing.T) {
 
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) {
-		c.Set(ctxkey.UserIdKey, int64(1))
+		c.Set(ctxkey.GinUserIDKey, int64(1))
 		c.Next()
 	})
 	var rateLimit middleware.RateLimit

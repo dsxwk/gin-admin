@@ -11,12 +11,12 @@ import (
 	"gin/app/service"
 	"gin/common/base"
 	"gin/grpc/proto"
-	"gin/pkg"
 	"image/color"
 	"path"
 	"strings"
 	"uuid"
 
+	"gin/pkg/convert"
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
 )
@@ -170,11 +170,11 @@ func (s *LoginController) Test(c *gin.Context) {
 	containsDesc2 := userEnum.Gender().ContainsDesc("男")
 	length2 := userEnum.Gender().Len()
 
-	resp := facade.Http().Get(ctx, "http://127.0.0.1:"+pkg.IntToString[int64](facade.Config().App.Port)+"/ping")
+	resp := facade.Http().Get(ctx, "http://127.0.0.1:"+convert.IntToString[int64](facade.Config().App.Port)+"/ping")
 	httpRes, _ := facade.Http().SendAsJson[map[string]any](
 		ctx,
 		"GET",
-		"http://127.0.0.1:"+pkg.IntToString[int64](facade.Config().App.Port)+"/ping",
+		"http://127.0.0.1:"+convert.IntToString[int64](facade.Config().App.Port)+"/ping",
 	)
 
 	_ = facade.Queue().Producer("kafka_demo").Publish(ctx, consumer.KafkaDemoPayload{Name: "kafka_test111"})

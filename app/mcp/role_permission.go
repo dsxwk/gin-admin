@@ -6,61 +6,48 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-// RolePermission 角色权限设置工具
-type RolePermission struct{}
-
-func (t *RolePermission) Name() string { return "set_role_permissions" }
-func (t *RolePermission) Description() string {
-	return "为指定角色设置权限,permissions为空时授予全部权限"
+// RolePermissionArgs 角色权限设置参数
+type RolePermissionArgs struct {
+	Role        string   `json:"role"`
+	Permissions []string `json:"permissions"`
 }
 
-func (t *RolePermission) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"role":        {Type: "string", Description: "角色名称,如admin"},
-			"permissions": {Type: "array", Description: "权限标识列表,如GET:/api/v1/user,为空授予全部权限"},
+// NewRolePermissionTool 创建角色权限设置工具
+func NewRolePermissionTool() *mcp.ToolAdapter[RolePermissionArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "set_role_permissions",
+			Description: "为指定角色设置权限,permissions为空时授予全部权限",
+			Auth:        true,
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"role":        {Type: "string", Description: "角色名称,如admin"},
+					"permissions": {Type: "array", Description: "权限标识列表,如GET:/api/v1/user,为空授予全部权限"},
+				},
+				Required: []string{"role"},
+			},
 		},
-		Required: []string{"role"},
-	}
+		handleRolePermission,
+	)
 }
 
-func (t *RolePermission) Call(ctx context.Context, args map[string]any) (any, error) {
-	return t.CallWithUser(ctx, 0, args)
-}
-
-// CallWithUser 带用户上下文执行(实现mcp.UserContextCall接口)
-func (t *RolePermission) CallWithUser(ctx context.Context, userId int64, args map[string]any) (any, error) {
-	role, _ := args["role"].(string)
-	if role == "" {
+// handleRolePermission 处理角色权限设置工具
+func handleRolePermission(ctx context.Context, userId int64, args *RolePermissionArgs) (any, error) {
+	if args.Role == "" {
 		return map[string]any{"error": "请指定角色名称"}, nil
 	}
 
-	// 解析权限列表
-	var permissions []string
-	if p, ok := args["permissions"].([]any); ok {
-		for _, v := range p {
-			if s, ok := v.(string); ok {
-				permissions = append(permissions, s)
-			}
-		}
-	}
-
 	svc := service.PermissionService{}
-	count, err := svc.SetRolePermissions(ctx, userId, role, permissions)
+	count, err := svc.SetRolePermissions(ctx, userId, args.Role, args.Permissions)
 	if err != nil {
 		return map[string]any{"error": err.Error()}, nil
 	}
 
 	return map[string]any{
-		"role":        role,
+		"role":        args.Role,
 		"granted":     count,
-		"permissions": permissions,
+		"permissions": args.Permissions,
 		"message":     "权限设置完成",
 	}, nil
-}
-
-// IsAuth 需要鉴权
-func (t *RolePermission) IsAuth() bool {
-	return true
 }

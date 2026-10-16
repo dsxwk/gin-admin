@@ -9,8 +9,8 @@ import (
 	"gin/app/middleware"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/pkg"
 
+	"gin/pkg/cryptox"
 	"gorm.io/gorm"
 )
 
@@ -36,7 +36,7 @@ func (s *LoginService) Login(ctx context.Context, username, password string) (er
 		}
 	}
 
-	check := pkg.BcryptCheck(password, m.Password)
+	check := cryptox.BcryptCheck(password, m.Password)
 	if !check {
 		return loginErr.PwdError(), m, accessToken, refreshToken, tokenExpire, refreshTokenExpire
 	}

@@ -16,8 +16,7 @@ func (p *ConfigProvider) Name() string {
 
 // Register 注册服务到容器
 func (p *ConfigProvider) Register(app *container.Container) {
-	cfg := config.NewConfig()
-	app.SetConfig(cfg)
+	app.SetConfig(config.NewConfig())
 
 	config.SetOnConfigUpdated(func(updated *config.Config) {
 		app.SetConfig(updated)

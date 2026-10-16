@@ -5,7 +5,7 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg"
+	"gin/pkg/mapx"
 )
 
 type DictService struct {
@@ -77,7 +77,7 @@ func (s *DictService) Create(ctx context.Context, req request.Dict) (model.Dict,
 
 // Update 更新
 func (s *DictService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
-	if pkg.HasKey(data, "extend") {
+	if mapx.HasKey(data, "extend") {
 		data["extend"] = &model.JsonValue{Data: data["extend"]}
 	}
 	return s.Updates(ctx, &model.Dict{}, id, data)

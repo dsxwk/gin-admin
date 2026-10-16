@@ -25,9 +25,8 @@ func (p *DbProvider) Register(app *container.Container) {
 
 // Boot 启动服务-测试数据库连接
 func (p *DbProvider) Boot(app *container.Container) {
-	cfg := app.Config()
-	p.manager.Connection(cfg.Databases.Driver)
-	flag.Infof("%s数据库连接成功", cfg.Databases.Driver)
+	p.manager.Connection(app.Config().Databases.Driver)
+	flag.Infof("%s数据库连接成功", app.Config().Databases.Driver)
 }
 
 // Dependencies 依赖配置和日志服务

@@ -1,10 +1,10 @@
 package orm
 
 import (
-	"gin/pkg"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 func openPgsql() (*gorm.DB, error) {
@@ -15,7 +15,7 @@ func openPgsql() (*gorm.DB, error) {
 }
 
 func getPgsqlDsn() string {
-	return pkg.Sprintf(
+	return fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		conf.Databases.Pgsql.Host,
 		conf.Databases.Pgsql.Username,

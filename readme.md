@@ -377,7 +377,6 @@ $ ./cli demo:command --args=11
 │   └── cli.go                  # Entry File
 ├── common                      # Common Module
 │   ├── base                    # Base
-│   ├── ctxkey                  # Context Key
 │   ├── flag                    # Flag
 │   └── template                # Template
 ├── config                      # Config File
@@ -393,7 +392,12 @@ $ ./cli demo:command --args=11
 │   │   ├── grpcgen             # gRPC Code Generator
 │   │   └── make                # Make Command
 │   ├── container               # Container
+│   ├── convert                 # Type Conversion
+│   ├── cryptox                 # Crypto Utilities
+│   ├── ctxkey                  # Context Key
 │   ├── errcode                 # Errcode
+│   ├── mapx                    # Map Utilities
+│   ├── pathx                   # Path Utilities
 │   ├── serviceprovider         # Service Providers Package
 │   │   ├── agent               # Agent Provider
 │   │   ├── cache               # Cache
@@ -411,7 +415,9 @@ $ ./cli demo:command --args=11
 │   │   ├── ratelimit           # Rate Limit
 │   │   ├── request             # Request
 │   │   └── ws                  # WebSocket
-│   └── time                    # Time Processing
+│   ├── stringx                 # String Utilities
+│   ├── timex                   # Time Processing
+│   └── treex                   # Tree Utilities
 ├── public                      # Static Resources
 │   └── ws-test.html            # WebSocket Test Page
 ├── router                      # Router
@@ -777,7 +783,7 @@ import (
 )
 
 func main() {
-	_ = bootstrap.InitCLI()
+	_ = bootstrap.SetupCLI()
 
 	commands := slices.Concat(console.All(), registry.All())
 	cli.Execute(commands...)
@@ -2645,9 +2651,8 @@ $ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=t
 package consumer
 
 import (
+	"context"
 	"gin/app/facade"
-	"gin/common/flag"
-	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
 	"time"
@@ -2655,17 +2660,12 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// KafkaDemoConsumer Kafka consumer
-type KafkaDemoConsumer struct {
-	*queue.KafkaConsumer
-}
-
 // KafkaDemoPayload message payload
 type KafkaDemoPayload struct {
 	Name string `json:"name"`
 }
 
-func NewKafkaDemoConsumer() *KafkaDemoConsumer {
+func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
@@ -2678,57 +2678,27 @@ func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 		CommitInterval: 0,
 		MaxWait:        5 * time.Second,
 	})
-	return &KafkaDemoConsumer{
-		KafkaConsumer: &queue.KafkaConsumer{
+
+	return queue.NewConsumerAdapter(
+		queue.ConsumerConfig{
+			Name:        "kafka_demo",
+			Description: "kafka demo",
+			Connection:  "kafka",
+			Retry:       3,
+		},
+		&queue.KafkaConsumer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
-	}
+		handleKafkaDemo,
+	)
 }
 
-func (c *KafkaDemoConsumer) Name() string {
-	return "kafka_demo"
-}
-
-func (c *KafkaDemoConsumer) Description() string {
-	return "kafka demo"
-}
-
-func (c *KafkaDemoConsumer) Connection() string {
-	return "kafka"
-}
-
-func (c *KafkaDemoConsumer) Retry() int {
-	return 3
-}
-
-func (c *KafkaDemoConsumer) IsDelay() bool {
-	return false
-}
-
-func (c *KafkaDemoConsumer) Start() error {
-	c.KafkaConsumer.Start(c)
-	flag.Infof("Kafka consumer started: %s", c.Name())
-	return nil
-}
-
-func (c *KafkaDemoConsumer) Stop() error {
-	return c.KafkaConsumer.Stop()
-}
-
-func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
-	return cfg.Queue.Kafka.Enabled
-}
-
-func (c *KafkaDemoConsumer) NewPayload() any {
-	return &KafkaDemoPayload{}
-}
-
-func (c *KafkaDemoConsumer) Handle(payload any) error {
-	data := payload.(*KafkaDemoPayload)
+// handleKafkaDemo 处理Kafka消息
+func handleKafkaDemo(_ context.Context, data *KafkaDemoPayload) error {
 	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
-	// todo business logic
+	// 待处理业务逻辑
 	return nil
 }
 ```
@@ -2745,18 +2715,13 @@ sq.NewConsumerFactory("kafka", consumer.NewKafkaDemoConsumer)
 package producer
 
 import (
-	"context"
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/queue"
 
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaDemoProducer struct {
-	*queue.KafkaProducer
-}
-
-func NewKafkaDemoProducer() *KafkaDemoProducer {
+func NewKafkaDemoProducer() *queue.ProducerAdapter {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
@@ -2765,43 +2730,19 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: kafka.RequireAll,
 	}
-	p := &KafkaDemoProducer{
-		KafkaProducer: &queue.KafkaProducer{
+
+	return queue.NewProducerAdapter(
+		queue.ProducerConfig{
+			Name:        "kafka_demo",
+			Description: "kafka demo",
+			Connection:  "kafka",
+		},
+		&queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Key:   "kafka_demo_key",
 		},
-	}
-	p.KafkaProducer.Owner = p
-	return p
-}
-
-func (p *KafkaDemoProducer) Name() string {
-	return "kafka_demo"
-}
-
-func (p *KafkaDemoProducer) Description() string {
-	return "kafka demo"
-}
-
-func (p *KafkaDemoProducer) Connection() string {
-	return "kafka"
-}
-
-func (p *KafkaDemoProducer) IsDelay() bool {
-	return false
-}
-
-func (p *KafkaDemoProducer) DelayMs() int64 {
-	return 0
-}
-
-func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
-	return p.KafkaProducer.Publish(ctx, msg)
-}
-
-func (p *KafkaDemoProducer) Close() error {
-	return p.KafkaProducer.Close()
+	)
 }
 ```
 
@@ -2910,7 +2851,7 @@ Total 6 producers
 | `--connection` | `-c`  | No       | `queue.connection` config | Driver: `sync`, `redis`, `kafka`, `rabbitmq` |
 | `--desc`       | `-D`  | No       | Same as `--name`          | Job description                              |
 | `--retry`      | `-R`  | No       | `0`                       | Retry count                                  |
-| `--delay`      | `-d`  | No       | `0`                       | Retry delay (ms)                             |
+| `--delay`      | `-d`  | No       | `0`                       | Initial and retry delay (ms)                 |
 
 ### Job Structure
 
@@ -2918,11 +2859,11 @@ Total 6 producers
 package job
 
 import (
+	"context"
 	"gin/app/facade"
 	"gin/pkg"
+	servicejob "gin/pkg/serviceprovider/job"
 )
-
-type SendEmailJob struct{}
 
 type SendEmail struct {
 	To      string `json:"to"`
@@ -2930,16 +2871,20 @@ type SendEmail struct {
 	Content string `json:"content"`
 }
 
-func (j *SendEmailJob) Name() string        { return "send_email" }
-func (j *SendEmailJob) Description() string { return "Send email task" }
-func (j *SendEmailJob) Connection() string  { return "redis" }
-func (j *SendEmailJob) Retry() int          { return 3 }
-func (j *SendEmailJob) Delay() int64        { return 3000 }
-func (j *SendEmailJob) NewPayload() any     { return &SendEmail{} }
+func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
+	return servicejob.NewAdapter(
+		servicejob.Config{
+			Name:        "send_email",
+			Description: "Send email task",
+			Connection:  "redis",
+			Retry:       3,
+			Delay:       3000,
+		},
+		handleSendEmail,
+	)
+}
 
-func (j *SendEmailJob) Handle(payload any) error {
-	data := payload.(*SendEmail)
-	// todo: implement business logic
+func handleSendEmail(_ context.Context, data *SendEmail) error {
 	facade.Log().Info(pkg.Sprintf("Sending email to: %s, subject: %s", data.To, data.Subject))
 	return nil
 }
@@ -2949,7 +2894,7 @@ func (j *SendEmailJob) Handle(payload any) error {
 
 ```go
 return []servicejob.Job{
-	&SendEmailJob{},
+	NewSendEmailJob(),
 }
 ```
 
@@ -2998,9 +2943,10 @@ count, err := facade.Job().Count(ctx)
 | `Description() string`      | Job description                                                      |
 | `Connection() string`       | Driver: `"sync"`, `"redis"`, `"kafka"`, `"rabbitmq"` (empty = redis) |
 | `Retry() int`               | Retry count (`0` = execute once)                                     |
-| `Delay() int64`             | Retry delay in milliseconds                                          |
+| `Delay() int64`             | Initial delay and retry delay in milliseconds, `0` = no delay        |
 | `NewPayload() any`          | Returns pointer to payload struct for unmarshaling                   |
 | `Handle(payload any) error` | Business logic, `payload` is already deserialized                    |
+| `HandleContext(...)`        | Optional method with context cancellation support, implemented by `Adapter` |
 
 ### Job List
 
@@ -3069,6 +3015,32 @@ mcp:
 $ go run ./cmd/cli.go mcp:list
 $ go run ./cmd/cli.go make:mcp --file=user_search --name=user_search --desc="Search users"
 ```
+
+Generated tools use the generic adapter by default:
+
+```go
+type UserSearchArgs struct {
+	Keyword string `json:"keyword"`
+}
+
+func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "user_search",
+			Description: "Search users",
+			InputSchema: mcp.InputSchema{},
+		},
+		handleUserSearch,
+	)
+}
+
+func handleUserSearch(_ context.Context, _ int64, args *UserSearchArgs) (any, error) {
+	return map[string]any{"keyword": args.Keyword}, nil
+}
+```
+
+> `ToolAdapter` is the standard approach. Tools that need a fully custom call flow can still implement the `Tool`
+> interface directly.
 
 ## MCP Calls
 

@@ -7,13 +7,8 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// KafkaDelayDemoProducer Kafka延迟生产者
-type KafkaDelayDemoProducer struct {
-	*queue.KafkaProducer
-}
-
-// NewKafkaDelayDemoProducer 创建延迟生产者实例
-func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
+// NewKafkaDelayDemoProducer 创建Kafka延迟生产者
+func NewKafkaDelayDemoProducer() *queue.ProducerAdapter {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
@@ -23,28 +18,18 @@ func NewKafkaDelayDemoProducer() *KafkaDelayDemoProducer {
 		RequiredAcks: kafka.RequireAll,
 	}
 
-	p := &KafkaDelayDemoProducer{
-		KafkaProducer: &queue.KafkaProducer{
+	return queue.NewProducerAdapter(
+		queue.ProducerConfig{
+			Name:        "kafka_delay_demo",
+			Description: "kafka延迟队列生产者",
+			Connection:  "kafka",
+			IsDelay:     true,
+			DelayMs:     10000,
+		},
+		&queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_delay_demo",
 			Key:   "kafka_delay_demo_key",
 		},
-	}
-
-	p.KafkaProducer.Owner = p
-	return p
-}
-
-func (p *KafkaDelayDemoProducer) Name() string {
-	return "kafka_delay_demo"
-}
-
-func (p *KafkaDelayDemoProducer) Connection() string { return "kafka" }
-
-func (p *KafkaDelayDemoProducer) IsDelay() bool { return true }
-
-func (p *KafkaDelayDemoProducer) DelayMs() int64 { return 10000 }
-
-func (p *KafkaDelayDemoProducer) Description() string {
-	return "kafka延迟队列生产者"
+	)
 }

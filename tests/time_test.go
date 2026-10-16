@@ -1,7 +1,7 @@
 package tests
 
 import (
-	_t "gin/pkg/time"
+	_t "gin/pkg/timex"
 	"testing"
 	"time"
 )

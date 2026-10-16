@@ -10,7 +10,7 @@ import (
 	"gin/app/request"
 	"gin/app/service"
 	"gin/common/base"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/agent"
 	"gin/pkg/serviceprovider/mcp"
 	"net/http"

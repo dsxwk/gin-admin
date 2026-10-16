@@ -1,11 +1,11 @@
 package orm
 
 import (
-	"gin/pkg"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 const startTimeKey = "gorm_start_time"
@@ -42,12 +42,12 @@ func getMysqlDsn() string {
 		writeTimeout = defaultMysqlWriteTimeout
 	}
 
-	options := pkg.Sprintf(
+	options := fmt.Sprintf(
 		"charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai&timeout=%s&readTimeout=%s&writeTimeout=%s&multiStatements=true",
 		timeout, readTimeout, writeTimeout,
 	)
 
-	return pkg.Sprintf(
+	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?%s",
 		conf.Databases.Mysql.Username, conf.Databases.Mysql.Password, conf.Databases.Mysql.Host, conf.Databases.Mysql.Port, conf.Databases.Mysql.Database, options,
 	)

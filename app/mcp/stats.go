@@ -7,41 +7,45 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-// OperatorStats 操作日志统计工具
-type OperatorStats struct{}
-
-func (t *OperatorStats) Name() string { return "query_operator_stats" }
-func (t *OperatorStats) Description() string {
-	return "查询操作日志统计,如今日PV/UV、请求方法分布、状态码统计等"
+// OperatorStatsArgs 操作日志统计参数
+type OperatorStatsArgs struct {
+	Date string `json:"date"`
 }
 
-func (t *OperatorStats) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"date": {Type: "string", Description: "统计日期,格式2026-08-12,默认今天"},
+// NewOperatorStatsTool 创建操作日志统计工具
+func NewOperatorStatsTool() *mcp.ToolAdapter[OperatorStatsArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "query_operator_stats",
+			Description: "查询操作日志统计,如今日PV/UV、请求方法分布、状态码统计等",
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"date": {Type: "string", Description: "统计日期,格式2026-08-12,默认今天"},
+				},
+			},
 		},
-	}
+		handleOperatorStats,
+	)
 }
 
-func (t *OperatorStats) Call(ctx context.Context, args map[string]any) (any, error) {
+// handleOperatorStats 处理操作日志统计工具
+func handleOperatorStats(ctx context.Context, _ int64, args *OperatorStatsArgs) (any, error) {
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil
 	}
-
-	date, _ := args["date"].(string)
-	if date == "" {
+	if args.Date == "" {
 		return nil, nil
 	}
 
 	// 统计PV
 	var pv int64
-	db.Model(&model.OperatorLog{}).Where("DATE(created_at) = ?", date).Count(&pv)
+	db.Model(&model.OperatorLog{}).Where("DATE(created_at) = ?", args.Date).Count(&pv)
 
 	// 统计UV(按IP去重)
 	var uv int64
-	db.Model(&model.OperatorLog{}).Where("DATE(created_at) = ?", date).Distinct("ip").Count(&uv)
+	db.Model(&model.OperatorLog{}).Where("DATE(created_at) = ?", args.Date).Distinct("ip").Count(&uv)
 
 	// 统计请求方法分布
 	type MethodCount struct {
@@ -50,7 +54,7 @@ func (t *OperatorStats) Call(ctx context.Context, args map[string]any) (any, err
 	}
 	var methods []MethodCount
 	db.Model(&model.OperatorLog{}).Select("method, COUNT(*) as count").
-		Where("DATE(created_at) = ?", date).Group("method").Order("count DESC").Scan(&methods)
+		Where("DATE(created_at) = ?", args.Date).Group("method").Order("count DESC").Scan(&methods)
 
 	// 统计状态码分布
 	type StatusCount struct {
@@ -59,10 +63,10 @@ func (t *OperatorStats) Call(ctx context.Context, args map[string]any) (any, err
 	}
 	var statuses []StatusCount
 	db.Model(&model.OperatorLog{}).Select("status_code, COUNT(*) as count").
-		Where("DATE(created_at) = ?", date).Group("status_code").Order("count DESC").Scan(&statuses)
+		Where("DATE(created_at) = ?", args.Date).Group("status_code").Order("count DESC").Scan(&statuses)
 
 	return map[string]any{
-		"date":     date,
+		"date":     args.Date,
 		"pv":       pv,
 		"uv":       uv,
 		"methods":  methods,

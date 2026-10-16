@@ -14,12 +14,20 @@ type QueueFacade struct {
 	manager *queue.Manager
 }
 
-// Register 注册队列消费者或生产者
-func (q *QueueFacade) Register[T queue.Named](item T) {
+// RegisterConsumer 注册队列消费者
+func (q *QueueFacade) RegisterConsumer(consumer queue.Consumer) {
 	if q == nil {
 		return
 	}
-	q.manager.Register(item)
+	q.manager.RegisterConsumer(consumer)
+}
+
+// RegisterProducer 注册队列生产者
+func (q *QueueFacade) RegisterProducer(producer queue.Producer) {
+	if q == nil {
+		return
+	}
+	q.manager.RegisterProducer(producer)
 }
 
 func (q *QueueFacade) Producer(name string) queue.Producer {

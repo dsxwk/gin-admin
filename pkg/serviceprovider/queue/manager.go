@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"gin/common/flag"
 	"gin/config"
@@ -15,11 +16,7 @@ type Manager struct {
 }
 
 // NewManager 创建队列管理器
-func NewManager(
-	config func() *config.Config,
-	consumerFactories []ConsumerFactory,
-	producerFactories []ProducerFactory,
-) (*Manager, error) {
+func NewManager(config func() *config.Config, consumerFactories []ConsumerFactory, producerFactories []ProducerFactory) (*Manager, error) {
 	manager := &Manager{
 		config:    config,
 		consumers: NewRegistry[Consumer](),
@@ -27,21 +24,31 @@ func NewManager(
 	}
 
 	cfg := manager.Config()
+	var consumerErrs []error
 	for _, factory := range consumerFactories {
-		manager.consumers.Factory(func() Consumer {
-			return factory.Create(cfg)
-		})
+		item := factory.Create(cfg)
+		if any(item) == nil {
+			continue
+		}
+		if err := manager.consumers.Register(item); err != nil {
+			consumerErrs = append(consumerErrs, err)
+		}
 	}
-	for _, factory := range producerFactories {
-		manager.producers.Factory(func() Producer {
-			return factory.Create(cfg)
-		})
-	}
-
-	if err := manager.consumers.RegisterFactories(); err != nil {
+	if err := errors.Join(consumerErrs...); err != nil {
 		return nil, fmt.Errorf("消费者注册失败: %w", err)
 	}
-	if err := manager.producers.RegisterFactories(); err != nil {
+
+	var producerErrs []error
+	for _, factory := range producerFactories {
+		item := factory.Create(cfg)
+		if any(item) == nil {
+			continue
+		}
+		if err := manager.producers.Register(item); err != nil {
+			producerErrs = append(producerErrs, err)
+		}
+	}
+	if err := errors.Join(producerErrs...); err != nil {
 		return nil, fmt.Errorf("生产者注册失败: %w", err)
 	}
 
@@ -56,23 +63,73 @@ func (m *Manager) Config() *config.Config {
 	return m.config()
 }
 
-// Register 注册队列消费者或生产者
-func (m *Manager) Register(item any) {
+// Start 启动全部消费者
+func (m *Manager) Start() error {
 	if m == nil {
-		return
+		return fmt.Errorf("queue manager not initialized")
 	}
 
-	switch value := item.(type) {
-	case Consumer:
-		if err := m.consumers.Register(value); err != nil {
-			flag.Errorf("%v", err)
+	cfg := m.Config()
+	var errs []error
+	for _, consumer := range m.Consumers() {
+		if consumer == nil || !connectionEnabled(cfg, consumer.Connection()) {
+			continue
 		}
-	case Producer:
-		if err := m.producers.Register(value); err != nil {
-			flag.Errorf("%v", err)
+		flag.Infof("启动消费者: %s", consumer.Name())
+		if err := consumer.Start(); err != nil {
+			errs = append(errs, fmt.Errorf("启动消费者 %s 失败: %w", consumer.Name(), err))
 		}
-	default:
-		flag.Errorf("queue register unsupported type: %T", item)
+	}
+	return errors.Join(errs...)
+}
+
+// Stop 停止消费者并关闭生产者
+func (m *Manager) Stop() error {
+	if m == nil {
+		return nil
+	}
+
+	var errs []error
+	for _, consumer := range m.Consumers() {
+		if consumer == nil {
+			continue
+		}
+		if err := consumer.Stop(); err != nil {
+			errs = append(errs, fmt.Errorf("停止消费者 %s 失败: %w", consumer.Name(), err))
+		}
+	}
+	for _, producer := range m.Producers() {
+		if producer == nil {
+			continue
+		}
+		if err := producer.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("关闭生产者 %s 失败: %w", producer.Name(), err))
+		}
+	}
+	if err := errors.Join(errs...); err != nil {
+		return err
+	}
+	flag.Infof("所有队列服务已关闭")
+	return nil
+}
+
+// RegisterConsumer 注册消费者
+func (m *Manager) RegisterConsumer(consumer Consumer) {
+	if m == nil || consumer == nil {
+		return
+	}
+	if err := m.consumers.Register(consumer); err != nil {
+		flag.Errorf("%v", err)
+	}
+}
+
+// RegisterProducer 注册生产者
+func (m *Manager) RegisterProducer(producer Producer) {
+	if m == nil || producer == nil {
+		return
+	}
+	if err := m.producers.Register(producer); err != nil {
+		flag.Errorf("%v", err)
 	}
 }
 
@@ -164,7 +221,7 @@ func (m *Manager) ConsumerStatus() []ConsumerStatus {
 		stats = append(stats, ConsumerStatus{
 			Name:    consumer.Name(),
 			Status:  consumer.Status(),
-			Enabled: consumer.Enabled(m.Config()),
+			Enabled: connectionEnabled(m.Config(), consumer.Connection()),
 		})
 	}
 	return stats

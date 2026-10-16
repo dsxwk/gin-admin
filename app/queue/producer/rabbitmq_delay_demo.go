@@ -2,47 +2,32 @@ package producer
 
 import (
 	"gin/app/facade"
-	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
+	"fmt"
 )
 
-// RabbitmqDelayDemoProducer RabbitMQ延迟生产者
-type RabbitmqDelayDemoProducer struct {
-	*queue.RabbitmqProducer
-}
-
-// NewRabbitmqDelayDemoProducer 创建延迟生产者实例
-func NewRabbitmqDelayDemoProducer() *RabbitmqDelayDemoProducer {
+// NewRabbitmqDelayDemoProducer 创建RabbitMQ延迟生产者
+func NewRabbitmqDelayDemoProducer() *queue.ProducerAdapter {
 	log := facade.Log()
 	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
-		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+		log.Error(fmt.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
-	p := &RabbitmqDelayDemoProducer{
-		RabbitmqProducer: &queue.RabbitmqProducer{
+	return queue.NewProducerAdapter(
+		queue.ProducerConfig{
+			Name:        "rabbitmq_delay_demo",
+			Description: "rabbitmq延迟队列生产者",
+			Connection:  "rabbitmq",
+			IsDelay:     true,
+			DelayMs:     10000,
+		},
+		&queue.RabbitmqProducer{
 			Mq:       mq,
 			Queue:    "rabbitmq_delay_demo",
 			Exchange: "rabbitmq_delay_demo_exchange",
 			Routing:  "rabbitmq_delay_demo",
 		},
-	}
-
-	p.RabbitmqProducer.Owner = p
-	return p
-}
-
-func (p *RabbitmqDelayDemoProducer) Name() string {
-	return "rabbitmq_delay_demo"
-}
-
-func (p *RabbitmqDelayDemoProducer) Connection() string { return "rabbitmq" }
-
-func (p *RabbitmqDelayDemoProducer) IsDelay() bool { return true }
-
-func (p *RabbitmqDelayDemoProducer) DelayMs() int64 { return 10000 }
-
-func (p *RabbitmqDelayDemoProducer) Description() string {
-	return "rabbitmq延迟队列生产者"
+	)
 }

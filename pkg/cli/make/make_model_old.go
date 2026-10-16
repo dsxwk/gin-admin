@@ -6,12 +6,12 @@ import (
 	appmodel "gin/app/model"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
+	"gin/pkg/pathx"
 	"github.com/samber/lo"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -83,7 +83,7 @@ func (m *MakeModelOld) Execute(values map[string]string) {
 // generateFiles 生成模型文件
 func (m *MakeModelOld) generateFiles(path, conn string, tables []string, camel bool) {
 	var (
-		root    = pkg.RootPath()
+		root    = pathx.RootPath()
 		p       = filepath.Base(path)
 		outPath = filepath.Join(root + "/app/temp")
 	)

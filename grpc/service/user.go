@@ -8,9 +8,9 @@ import (
 	"gin/grpc/model"
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
-	"gin/pkg"
 	"time"
 
+	"gin/pkg/cryptox"
 	"github.com/go-viper/mapstructure/v2"
 	grpclib "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -137,7 +137,7 @@ func (s UserService) Create(ctx context.Context, req *proto.UserCreateRequest) (
 		Nickname: dto.Nickname,
 		Gender:   dto.Gender,
 		Age:      dto.Age,
-		Password: pkg.BcryptHash(dto.Password),
+		Password: cryptox.BcryptHash(dto.Password),
 	}
 
 	tx := db.Begin()
@@ -229,7 +229,7 @@ func (s UserService) Update(ctx context.Context, req *proto.UserUpdateRequest) (
 	}
 
 	if v, ok := data["password"].(string); ok && v != "" {
-		data["password"] = pkg.BcryptHash(v)
+		data["password"] = cryptox.BcryptHash(v)
 	}
 	rows := model.FilterFields(db, model.User{}, data)
 	rows[model.UpdatedField] = time.Now()

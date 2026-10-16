@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"gin/common/flag"
-	"gin/pkg"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"gin/pkg/pathx"
+	"gin/pkg/stringx"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/spf13/pflag"
@@ -155,9 +156,9 @@ func PrintArgs(opts []CommandOption) {
 		// 输出：带颜色的 flag + 空格 + 描述 + 空格 + required
 		fmt.Printf("  %s%s%s%s%s\n",
 			colFlag,
-			pkg.Spaces(flagPad),
+			stringx.Spaces(flagPad),
 			colDesc,
-			pkg.Spaces(descPad),
+			stringx.Spaces(descPad),
 			required,
 		)
 	}
@@ -232,7 +233,7 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 	switch _make {
 	case "model-old":
 	case "model", "console", "controller", "service", "request", "middleware", "router", "event", "listener", "facade", "provider", "consumer", "producer", "enum", "errcode", "mcp", "es", "ws", "grpc_request", "grpc_service", "grpc_proto":
-		templateFile = filepath.Join(pkg.RootPath(), "common", "template", _make+".tpl")
+		templateFile = filepath.Join(pathx.RootPath(), "common", "template", _make+".tpl")
 	default:
 		b.ExitError("未找到 " + _make + " 模版文件")
 	}
@@ -243,8 +244,8 @@ func (b *BaseCommand) GetTemplate(_make string) string {
 // GetQueueTemplates 获取队列模版文件
 func (b *BaseCommand) GetQueueTemplates() map[string]string {
 	return map[string]string{
-		"consumer": filepath.Join(pkg.RootPath(), "common", "template", "consumer.tpl"),
-		"producer": filepath.Join(pkg.RootPath(), "common", "template", "producer.tpl"),
+		"consumer": filepath.Join(pathx.RootPath(), "common", "template", "consumer.tpl"),
+		"producer": filepath.Join(pathx.RootPath(), "common", "template", "producer.tpl"),
 	}
 }
 

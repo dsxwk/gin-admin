@@ -2,7 +2,7 @@ package grpcclient
 
 import (
 	"context"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
 	"time"

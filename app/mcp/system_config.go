@@ -7,24 +7,30 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-// SystemConfigQuery 系统配置查询工具
-type SystemConfigQuery struct{}
-
-func (t *SystemConfigQuery) Name() string { return "query_system_config" }
-func (t *SystemConfigQuery) Description() string {
-	return "查询系统配置项,如站点名称、LOGO等"
+// SystemConfigQueryArgs 系统配置查询参数
+type SystemConfigQueryArgs struct {
+	Key string `json:"key"`
 }
 
-func (t *SystemConfigQuery) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"key": {Type: "string", Description: "配置键名,如site_name,留空查全部"},
+// NewSystemConfigQueryTool 创建系统配置查询工具
+func NewSystemConfigQueryTool() *mcp.ToolAdapter[SystemConfigQueryArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "query_system_config",
+			Description: "查询系统配置项,如站点名称、LOGO等",
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"key": {Type: "string", Description: "配置键名,如site_name,留空查全部"},
+				},
+			},
 		},
-	}
+		handleSystemConfigQuery,
+	)
 }
 
-func (t *SystemConfigQuery) Call(ctx context.Context, args map[string]any) (any, error) {
+// handleSystemConfigQuery 处理系统配置查询工具
+func handleSystemConfigQuery(ctx context.Context, _ int64, args *SystemConfigQueryArgs) (any, error) {
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil
@@ -32,9 +38,8 @@ func (t *SystemConfigQuery) Call(ctx context.Context, args map[string]any) (any,
 
 	var configs []model.SystemConfig
 	query := db.Model(&model.SystemConfig{})
-
-	if key, ok := args["key"].(string); ok && key != "" {
-		query = query.Where("`key` = ?", key)
+	if args.Key != "" {
+		query = query.Where("`key` = ?", args.Key)
 	}
 
 	if err := query.Find(&configs).Error; err != nil {

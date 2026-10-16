@@ -3,9 +3,9 @@ package request
 import (
 	"gin/app/errcode"
 	"gin/common/base"
-	"gin/pkg"
 
 	"github.com/gookit/validate"
+	"fmt"
 )
 
 // User 用户请求验证
@@ -134,8 +134,8 @@ func (s User) Translates() map[string]string {
 		"UserDepts":                 "用户部门",
 	}
 	for i := range s.UserDepts {
-		prefix := pkg.Sprintf("UserDepts.%d.", i)
-		rowLabel := pkg.Sprintf("用户部门第 %d 项 ", i+1)
+		prefix := fmt.Sprintf("UserDepts.%d.", i)
+		rowLabel := fmt.Sprintf("用户部门第 %d 项 ", i+1)
 		ms[prefix+"DepartmentId"] = rowLabel + "部门ID"
 	}
 	return ms
@@ -176,8 +176,8 @@ func (s UserImport) Translates() map[string]string {
 		"Data": "导入数据",
 	}
 	for i := range s.Data {
-		prefix := pkg.Sprintf("Data.%d.", i)
-		rowLabel := pkg.Sprintf("第 %d 行 ", i+1)
+		prefix := fmt.Sprintf("Data.%d.", i)
+		rowLabel := fmt.Sprintf("第 %d 行 ", i+1)
 		ms[prefix+"Username"] = rowLabel + "用户名"
 		ms[prefix+"Password"] = rowLabel + "密码"
 		ms[prefix+"FullName"] = rowLabel + "姓名"

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"gin/app/errcode"
 	"gin/app/facade"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	h "gin/pkg/serviceprovider/http"
 	"net/http"
 	"net/http/httptest"

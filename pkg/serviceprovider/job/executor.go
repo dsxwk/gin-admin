@@ -12,6 +12,9 @@ func Execute(ctx context.Context, item Job, message Message) error {
 	if item == nil {
 		return fmt.Errorf("job [%s] 未注册", message.JobName)
 	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	if err := waitUntil(ctx, message.RunAt); err != nil {
 		return err
 	}
@@ -29,7 +32,12 @@ func Execute(ctx context.Context, item Job, message Message) error {
 
 	var lastErr error
 	for attempt := 0; attempt < attempts; attempt++ {
-		if lastErr = item.Handle(payload); lastErr == nil {
+		if contextual, ok := item.(ContextJob); ok {
+			lastErr = contextual.HandleContext(ctx, payload)
+		} else {
+			lastErr = item.Handle(payload)
+		}
+		if lastErr == nil {
 			return nil
 		}
 		if attempt+1 < attempts {

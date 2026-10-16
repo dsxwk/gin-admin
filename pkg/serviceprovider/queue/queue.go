@@ -1,13 +1,6 @@
 package queue
 
-import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"gin/config"
-	"sync"
-)
+import "context"
 
 // Consumer 队列消费者接口
 type Consumer interface {
@@ -18,15 +11,18 @@ type Consumer interface {
 	IsDelay() bool
 	Start() error
 	Stop() error
-	Enabled(cfg *config.Config) bool
 	Status() string
 }
 
 const (
-	ConsumerStatusStopped  string = "stopped"
+	// ConsumerStatusStopped 已停止
+	ConsumerStatusStopped string = "stopped"
+	// ConsumerStatusStarting 启动中
 	ConsumerStatusStarting string = "starting"
-	ConsumerStatusRunning  string = "running"
-	ConsumerStatusError    string = "error"
+	// ConsumerStatusRunning 运行中
+	ConsumerStatusRunning string = "running"
+	// ConsumerStatusError 异常
+	ConsumerStatusError string = "error"
 )
 
 // PayloadHandler 消息负载处理接口
@@ -63,114 +59,33 @@ type ConsumerHandler interface {
 	PayloadHandler
 }
 
-// Registry 泛型注册表
-type Registry[T Named] struct {
-	items     map[string]T
-	factories []func() T
-	mu        sync.RWMutex
+// ConsumerDriver 消费者驱动接口
+type ConsumerDriver interface {
+	Start(handler ConsumerHandler)
+	Stop() error
+	Status() string
 }
 
-func NewRegistry[T Named]() *Registry[T] {
-	return &Registry[T]{items: make(map[string]T)}
+// ConsumerConfig 消费者配置
+type ConsumerConfig struct {
+	Name        string
+	Description string
+	Connection  string
+	Retry       int
+	IsDelay     bool
 }
 
-func (r *Registry[T]) Register(item T) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	name := item.Name()
-
-	if _, exists := r.items[name]; exists {
-		return fmt.Errorf("queue %s already registered", name)
-	}
-
-	r.items[name] = item
-	return nil
+// ProducerDriver 生产者驱动接口
+type ProducerDriver interface {
+	Publish(ctx context.Context, msg any) error
+	Close() error
 }
 
-// Factory 注册延迟创建工厂
-func (r *Registry[T]) Factory(factory func() T) {
-	if factory == nil {
-		return
-	}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.factories = append(r.factories, factory)
-}
-
-// RegisterFactories 创建并注册全部延迟实例
-func (r *Registry[T]) RegisterFactories() error {
-	r.mu.Lock()
-	factories := r.factories
-	r.factories = nil
-	r.mu.Unlock()
-
-	var errs []error
-	for _, factory := range factories {
-		item := factory()
-		if any(item) == nil {
-			continue
-		}
-		if err := r.Register(item); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errors.Join(errs...)
-}
-
-func (r *Registry[T]) Get(name string) (T, bool) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	item, exists := r.items[name]
-	return item, exists
-}
-
-func (r *Registry[T]) All() []T {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	items := make([]T, 0, len(r.items))
-	for _, item := range r.items {
-		items = append(items, item)
-	}
-	return items
-}
-
-func (r *Registry[T]) Names() []string {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	names := make([]string, 0, len(r.items))
-	for name := range r.items {
-		names = append(names, name)
-	}
-	return names
-}
-
-func (r *Registry[T]) Count() int {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	return len(r.items)
-}
-
-func (r *Registry[T]) Exists(name string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	_, exists := r.items[name]
-	return exists
-}
-
-// TryHandle 自动反序列化并调用处理,支持上下文
-func TryHandle[T PayloadHandler](ctx context.Context, h T, body []byte) error {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	payload := h.NewPayload()
-	if err := json.Unmarshal(body, payload); err != nil {
-		return err
-	}
-	if handler, ok := any(h).(ContextPayloadHandler); ok {
-		return handler.HandleContext(ctx, payload)
-	}
-	return h.Handle(payload)
+// ProducerConfig 生产者配置
+type ProducerConfig struct {
+	Name        string
+	Description string
+	Connection  string
+	IsDelay     bool
+	DelayMs     int64
 }

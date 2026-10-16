@@ -2,9 +2,9 @@ package logger
 
 import (
 	"context"
-	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
 	"os"
 	"path/filepath"
@@ -138,18 +138,18 @@ func (l *Logger) WithDebugger(c context.Context) *zap.Logger {
 	trace, _ := debugger.Store.Get(traceId)
 
 	return l.Logger.With(
-		zap.String(ctxkey.TraceIDKey, traceId),
-		zap.String(ctxkey.IpKey, getString(c, ctxkey.IpKey)),
-		zap.String(ctxkey.PathKey, getString(c, ctxkey.PathKey)),
-		zap.String(ctxkey.MethodKey, getString(c, ctxkey.MethodKey)),
-		zap.Any(ctxkey.ParamsKey, c.Value(ctxkey.ParamsKey)),
-		zap.Float64(ctxkey.MsKey, ms),
-		zap.Any(ctxkey.DebuggerKey, trace),
+		zap.String("traceId", traceId),
+		zap.String("ip", getString(c, ctxkey.IpKey)),
+		zap.String("path", getString(c, ctxkey.PathKey)),
+		zap.String("method", getString(c, ctxkey.MethodKey)),
+		zap.Any("params", c.Value(ctxkey.ParamsKey)),
+		zap.Float64("ms", ms),
+		zap.Any("debugger", trace),
 	)
 }
 
 // 防止panic
-func getString(c context.Context, key string) string {
+func getString(c context.Context, key ctxkey.Key) string {
 	if c == nil {
 		return "unknown"
 	}

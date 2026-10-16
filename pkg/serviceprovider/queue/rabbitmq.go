@@ -2,11 +2,8 @@ package queue
 
 import (
 	"context"
-	"encoding/json"
-	"gin/common/ctxkey"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
 	"gin/pkg/serviceprovider/logger"
@@ -14,6 +11,7 @@ import (
 	"time"
 
 	"github.com/rabbitmq/amqp091-go"
+	"fmt"
 )
 
 // RabbitMQ RabbitMQ连接
@@ -25,6 +23,7 @@ type RabbitMQ struct {
 	Bus     *eventbus.Bus
 }
 
+// NewRabbitMQ 创建RabbitMQ连接
 func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *eventbus.Bus) (*RabbitMQ, error) {
 	conn, err := amqp091.Dial(conf.Queue.Rabbitmq.Url)
 	if err != nil {
@@ -37,6 +36,7 @@ func NewRabbitMQ(conf *config.Config, log *logger.Logger, bus *eventbus.Bus) (*R
 	return &RabbitMQ{Conn: conn, Channel: ch, Conf: conf, Log: log, Bus: bus}, nil
 }
 
+// Close 关闭RabbitMQ连接
 func (r *RabbitMQ) Close() error {
 	var err1, err2 error
 	if r.Channel != nil {
@@ -65,6 +65,7 @@ type RabbitmqConsumer struct {
 	cancel   context.CancelFunc
 }
 
+// Status 获取消费者状态
 func (c *RabbitmqConsumer) Status() string {
 	c.statusMu.RLock()
 	defer c.statusMu.RUnlock()
@@ -74,13 +75,15 @@ func (c *RabbitmqConsumer) Status() string {
 	return c.status
 }
 
+// setStatus 设置消费者状态
 func (c *RabbitmqConsumer) setStatus(status string) {
 	c.statusMu.Lock()
 	defer c.statusMu.Unlock()
 	c.status = status
 }
 
-func (c *RabbitmqConsumer) Start[T ConsumerHandler](h T) {
+// Start 启动消费者
+func (c *RabbitmqConsumer) Start(handler ConsumerHandler) {
 	c.setStatus(ConsumerStatusStarting)
 	c.ctx, c.cancel = context.WithCancel(context.Background())
 
@@ -92,13 +95,14 @@ func (c *RabbitmqConsumer) Start[T ConsumerHandler](h T) {
 				flag.Infof("[RabbitMq] 消费者 %s 已停止", c.Queue)
 				return
 			default:
-				c.consumeLoop(h)
+				c.consumeLoop(handler)
 			}
 		}
 	}()
 }
 
-func (c *RabbitmqConsumer) consumeLoop[T ConsumerHandler](h T) {
+// consumeLoop 循环消费消息
+func (c *RabbitmqConsumer) consumeLoop(handler ConsumerHandler) {
 	if c.Mq == nil || c.Mq.Channel == nil {
 		c.setStatus(ConsumerStatusError)
 		time.Sleep(time.Second)
@@ -107,36 +111,40 @@ func (c *RabbitmqConsumer) consumeLoop[T ConsumerHandler](h T) {
 
 	args := amqp091.Table{}
 	exchangeType := "direct"
-	if h.IsDelay() {
+	if handler.IsDelay() {
 		exchangeType = "x-delayed-message"
 		args["x-delayed-type"] = "direct"
 	}
 
+	// ExchangeDeclare 声明交换机
 	if err := c.Mq.Channel.ExchangeDeclare(c.Exchange, exchangeType, true, false, false, false, args); err != nil {
 		c.setStatus(ConsumerStatusError)
-		c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] ExchangeDeclare error: %v", err))
+		c.Mq.Log.Error(fmt.Sprintf("[RabbitMq] ExchangeDeclare error: %v", err))
 		time.Sleep(time.Second)
 		return
 	}
 
+	// QueueDeclare 声明队列
 	if _, err := c.Mq.Channel.QueueDeclare(c.Queue, true, false, false, false, nil); err != nil {
 		c.setStatus(ConsumerStatusError)
-		c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] QueueDeclare error: %v", err))
+		c.Mq.Log.Error(fmt.Sprintf("[RabbitMq] QueueDeclare error: %v", err))
 		time.Sleep(time.Second)
 		return
 	}
 
+	// QueueBind 绑定队列
 	if err := c.Mq.Channel.QueueBind(c.Queue, c.Routing, c.Exchange, false, nil); err != nil {
 		c.setStatus(ConsumerStatusError)
-		c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] QueueBind error: %v", err))
+		c.Mq.Log.Error(fmt.Sprintf("[RabbitMq] QueueBind error: %v", err))
 		time.Sleep(time.Second)
 		return
 	}
 
+	// Consume 消费消息
 	msgs, err := c.Mq.Channel.Consume(c.Queue, "", false, false, false, false, nil)
 	if err != nil {
 		c.setStatus(ConsumerStatusError)
-		c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] Consume error: %v", err))
+		c.Mq.Log.Error(fmt.Sprintf("[RabbitMq] Consume error: %v", err))
 		time.Sleep(time.Second)
 		return
 	}
@@ -147,35 +155,23 @@ func (c *RabbitmqConsumer) consumeLoop[T ConsumerHandler](h T) {
 		case <-c.ctx.Done():
 			return
 		default:
-			c.handleMessage(msg, h)
+			c.handleMessage(msg, handler)
 		}
 	}
 }
 
-func (c *RabbitmqConsumer) handleMessage[T ConsumerHandler](msg amqp091.Delivery, h T) {
-	maxRetry := h.Retry()
-	retry := 0
-	for {
-		err := TryHandle(c.ctx, h, msg.Body)
-		if err == nil {
-			if ackErr := msg.Ack(false); ackErr != nil {
-				c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] Ack error: %v", ackErr))
-			}
-			break
-		}
-
-		retry++
-		if retry >= maxRetry {
-			c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] Retry failed: %s", string(msg.Body)))
-			if ackErr := msg.Ack(false); ackErr != nil {
-				c.Mq.Log.Error(pkg.Sprintf("[RabbitMq] Ack error: %v", ackErr))
-			}
-			break
-		}
-		time.Sleep(time.Second)
+// handleMessage 处理消息
+func (c *RabbitmqConsumer) handleMessage(msg amqp091.Delivery, handler ConsumerHandler) {
+	maxRetry := handler.Retry()
+	if handleErr := handleWithRetry(c.ctx, handler, msg.Body, maxRetry); handleErr != nil {
+		c.Mq.Log.Error(fmt.Sprintf("[RabbitMq] Retry failed: %s", string(msg.Body)))
+	}
+	if ackErr := msg.Ack(false); ackErr != nil {
+		c.Mq.Log.Error(fmt.Sprintf("[RabbitMq] Ack error: %v", ackErr))
 	}
 }
 
+// Stop 停止消费者
 func (c *RabbitmqConsumer) Stop() error {
 	if c.cancel != nil {
 		c.cancel()
@@ -197,6 +193,12 @@ type RabbitmqProducer struct {
 	Headers  amqp091.Table
 }
 
+// SetOwner 设置生产者归属
+func (p *RabbitmqProducer) SetOwner(owner Producer) {
+	p.Owner = owner
+}
+
+// newQueue 创建交换机与队列
 func (p *RabbitmqProducer) newQueue() error {
 	args := amqp091.Table{}
 	exchangeType := "direct"
@@ -205,36 +207,31 @@ func (p *RabbitmqProducer) newQueue() error {
 		args["x-delayed-type"] = "direct"
 	}
 
+	// ExchangeDeclare 声明交换机
 	if err := p.Mq.Channel.ExchangeDeclare(p.Exchange, exchangeType, true, false, false, false, args); err != nil {
 		return err
 	}
 
+	// QueueDeclare 声明队列
 	if _, err := p.Mq.Channel.QueueDeclare(p.Queue, true, false, false, false, nil); err != nil {
 		return err
 	}
 
+	// QueueBind 绑定队列
 	return p.Mq.Channel.QueueBind(p.Queue, p.Routing, p.Exchange, false, nil)
 }
 
+// Publish 发布消息
 func (p *RabbitmqProducer) Publish(ctx context.Context, msg any) error {
 	// 自动序列化为JSON
-	var body []byte
-	switch v := msg.(type) {
-	case []byte:
-		body = v
-	case string:
-		body = []byte(v)
-	default:
-		var err error
-		body, err = json.Marshal(msg)
-		if err != nil {
-			return err
-		}
+	body, err := marshalMessage(msg)
+	if err != nil {
+		return err
 	}
 	start := time.Now()
 
-	if err := p.newQueue(); err != nil {
-		p.Mq.Log.Error(pkg.Sprintf("[RabbitMq] newQueue error: %v", err))
+	if err = p.newQueue(); err != nil {
+		p.Mq.Log.Error(fmt.Sprintf("[RabbitMq] newQueue error: %v", err))
 		return err
 	}
 
@@ -252,22 +249,13 @@ func (p *RabbitmqProducer) Publish(ctx context.Context, msg any) error {
 		Headers:     headers,
 	}
 
-	err := p.Mq.Channel.Publish(p.Exchange, p.Routing, false, false, pub)
+	err = p.Mq.Channel.Publish(p.Exchange, p.Routing, false, false, pub)
 	if err != nil {
-		p.Mq.Log.Error(pkg.Sprintf("[RabbitMq] Publish error: %v", err))
-	}
-
-	traceId := "unknown"
-	if ctx != nil {
-		if id := ctx.Value(ctxkey.TraceIDKey); id != nil {
-			if s, ok := id.(string); ok && s != "" {
-				traceId = s
-			}
-		}
+		p.Mq.Log.Error(fmt.Sprintf("[RabbitMq] Publish error: %v", err))
 	}
 
 	p.Mq.Bus.Publish(ctx, debugger.TopicMQ, debugger.MQEvent{
-		TraceID: traceId,
+		TraceID: traceID(ctx),
 		Driver:  "rabbitmq",
 		Topic:   p.Exchange + ":" + p.Routing,
 		Message: string(body),
@@ -283,6 +271,7 @@ func (p *RabbitmqProducer) Publish(ctx context.Context, msg any) error {
 	return err
 }
 
+// Close 关闭生产者
 func (p *RabbitmqProducer) Close() error {
 	if p.Mq != nil {
 		return p.Mq.Close()

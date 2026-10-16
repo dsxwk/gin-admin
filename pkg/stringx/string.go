@@ -1,9 +1,8 @@
-package pkg
+package stringx
 
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 	"unicode"
 )
 
@@ -38,23 +37,11 @@ func Spaces(n int) string {
 }
 
 // RandString 生成指定长度的随机字符串
-func RandString(len int) string {
-	bytes := make([]byte, len)
-	for i := 0; i < len; i++ {
+func RandString(length int) string {
+	bytes := make([]byte, length)
+	for i := 0; i < length; i++ {
 		b := rand.Intn(26) + 65
 		bytes[i] = byte(b)
 	}
 	return string(bytes)
-}
-
-// Sprintf 格式化字符串
-func Sprintf(format string, args ...any) string {
-	var b strings.Builder
-
-	// 预估容量(可选)
-	b.Grow(len(format) + 64)
-
-	_, _ = fmt.Fprintf(&b, format, args...)
-
-	return b.String()
 }

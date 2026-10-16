@@ -9,7 +9,6 @@ import (
 	"gin/app/service"
 	"gin/common/flag"
 	"gin/config"
-	"gin/pkg"
 	"gin/pkg/errcode"
 	"gin/pkg/route"
 	"gin/pkg/serviceprovider"
@@ -23,6 +22,7 @@ import (
 	"syscall"
 	"time"
 
+	"gin/pkg/convert"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/mattn/go-runewidth"
@@ -125,8 +125,8 @@ func (a *App) Run() {
 	// select {}
 }
 
-// InitCLI 初始化CLI服务,不启动后台任务
-func InitCLI() error {
+// SetupCLI 初始化CLI运行环境,不启动后台任务
+func SetupCLI() error {
 	config.NewConfig()
 	flag.SetSilent(true)
 	defer flag.SetSilent(false)
@@ -143,59 +143,50 @@ func InitCLI() error {
 func (a *App) printStartupInfo(conf *config.Config) {
 	// 获取IP地址
 	networkIP := getNetworkIP()
-	port := pkg.IntToString(conf.App.Port)
-
-	// 构建数据
-	data := map[string]any{
-		"应用":  conf.App.Name,
-		"环境":  conf.App.Env,
-		"端口":  color.YellowString(pkg.IntToString[int64](conf.App.Port)),
-		"数据库": conf.Databases.Driver,
-	}
-
-	// 地址信息
-	data[pkg.Sprintf("%s Local Address:", flag.NetworkIco)] = pkg.Sprintf("http://127.0.0.1:%s", port)
-	data[pkg.Sprintf("%s Local Swagger:", flag.PointerIco)] = pkg.Sprintf("http://127.0.0.1:%s/swagger/index.html", port)
-	data[pkg.Sprintf("%s Local Test API:", flag.PointerIco)] = pkg.Sprintf("http://127.0.0.1:%s/ping", port)
-
-	// 网络地址信息
+	port := convert.IntToString(conf.App.Port)
+	localHost := "127.0.0.1"
+	networkAddress := "未获取到网络地址"
+	networkSwagger := "未获取到网络地址"
+	networkTestAPI := "未获取到网络地址"
 	if networkIP != "" {
-		data[pkg.Sprintf("%s Network Address:", flag.NetworkIco)] = pkg.Sprintf("http://%s:%s", networkIP, port)
-		data[pkg.Sprintf("%s Network Swagger:", flag.PointerIco)] = pkg.Sprintf("http://%s:%s/swagger/index.html", networkIP, port)
-		data[pkg.Sprintf("%s Network Test API:", flag.PointerIco)] = pkg.Sprintf("http://%s:%s/ping", networkIP, port)
-	} else {
-		data[pkg.Sprintf("%s Network Address:", flag.NetworkIco)] = "未获取到网络地址"
-		data[pkg.Sprintf("%s Network Swagger:", flag.PointerIco)] = "未获取到网络地址"
-		data[pkg.Sprintf("%s Network Test API:", flag.PointerIco)] = "未获取到网络地址"
+		networkHost := "http://" + networkIP + ":" + port
+		networkAddress = networkHost
+		networkSwagger = networkHost + "/swagger/index.html"
+		networkTestAPI = networkHost + "/ping"
 	}
 
-	// 定义显示顺序
-	order := []string{
-		"应用", "环境", "端口", "数据库",
-		pkg.Sprintf("%s Local Address:", flag.NetworkIco),
-		pkg.Sprintf("%s Network Address:", flag.NetworkIco),
-		pkg.Sprintf("%s Local Swagger:", flag.PointerIco),
-		pkg.Sprintf("%s Network Swagger:", flag.PointerIco),
-		pkg.Sprintf("%s Local Test API:", flag.PointerIco),
-		pkg.Sprintf("%s Network Test API:", flag.PointerIco),
+	// 构建启动信息
+	items := []startupItem{
+		{label: "应用", value: conf.App.Name},
+		{label: "环境", value: conf.App.Env},
+		{label: "端口", value: color.YellowString(convert.IntToString[int64](conf.App.Port))},
+		{label: "数据库", value: conf.Databases.Driver},
+		{label: startupLabel(flag.NetworkIco, "Local Address"), value: "http://" + localHost + ":" + port},
+		{label: startupLabel(flag.NetworkIco, "Network Address"), value: networkAddress},
+		{label: startupLabel(flag.PointerIco, "Local Swagger"), value: "http://" + localHost + ":" + port + "/swagger/index.html"},
+		{label: startupLabel(flag.PointerIco, "Network Swagger"), value: networkSwagger},
+		{label: startupLabel(flag.PointerIco, "Local Test API"), value: "http://" + localHost + ":" + port + "/ping"},
+		{label: startupLabel(flag.PointerIco, "Network Test API"), value: networkTestAPI},
 	}
 
-	PrintAligned(data, order)
+	printAligned(items)
 
 	flag.Successf("Gin server started successfully!")
 }
 
-// PrintAligned 打印冒号对齐,支持中文
-func PrintAligned(data map[string]any, order []string) {
-	if len(order) == 0 {
-		return
-	}
+// startupItem 启动信息项
+type startupItem struct {
+	label string
+	value any
+}
 
+// printAligned 打印冒号对齐,支持中文
+func printAligned(items []startupItem) {
 	// 找出最长key的显示宽度
 	maxLen := 0
-	for _, k := range order {
-		if val, ok := data[k]; ok && val != nil {
-			w := runewidth.StringWidth(k)
+	for _, item := range items {
+		if item.value != nil {
+			w := runewidth.StringWidth(item.label)
 			if w > maxLen {
 				maxLen = w
 			}
@@ -203,18 +194,18 @@ func PrintAligned(data map[string]any, order []string) {
 	}
 
 	// 打印每一行
-	for _, k := range order {
-		if val, ok := data[k]; ok && val != nil {
-			key := ensureEmojiSpace(strings.TrimSuffix(k, ":"))
+	for _, item := range items {
+		if item.value != nil {
+			key := ensureEmojiSpace(strings.TrimSuffix(item.label, ":"))
 			padding := maxLen - runewidth.StringWidth(key) + 2
 
 			// 根据值的类型处理颜色
-			switch v := val.(type) {
+			switch v := item.value.(type) {
 			case string:
 				if strings.HasPrefix(v, "http") {
 					// URL使用青色
 					fmt.Printf("%s:%s%s\n", key, spaces(padding), color.CyanString(v))
-				} else if strings.Contains(k, "Network") && v == "未获取到网络地址" {
+				} else if strings.Contains(item.label, "Network") && v == "未获取到网络地址" {
 					// 未获取到网络地址使用黄色
 					fmt.Printf("%s:%s%s\n", key, spaces(padding), color.YellowString(v))
 				} else {
@@ -226,6 +217,11 @@ func PrintAligned(data map[string]any, order []string) {
 			}
 		}
 	}
+}
+
+// startupLabel 构建启动信息标签
+func startupLabel(icon, label string) string {
+	return icon + " " + label + ":"
 }
 
 // getNetworkIP 获取局域网IP地址
@@ -267,7 +263,7 @@ func isVirtualIP(ip string) bool {
 
 // startHttpServer 启动http服务
 func (a *App) startHttpServer(conf *config.Config) *http.Server {
-	port := pkg.IntToString(conf.App.Port)
+	port := convert.IntToString(conf.App.Port)
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           a.Engine,
@@ -330,5 +326,5 @@ func spaces(n int) string {
 		return ""
 	}
 
-	return fmt.Sprintf("%*s", n, "")
+	return strings.Repeat(" ", n)
 }

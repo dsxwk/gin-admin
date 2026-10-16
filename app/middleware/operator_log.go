@@ -5,7 +5,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +27,7 @@ func (s OperatorLog) Handle() gin.HandlerFunc {
 			}
 			// 从gin上下文获取userId
 			var userId int64
-			if v, exists := c.Get(ctxkey.UserIdKey); exists {
+			if v, exists := c.Get(ctxkey.GinUserIDKey); exists {
 				if id, ok := v.(int64); ok {
 					userId = id
 				}

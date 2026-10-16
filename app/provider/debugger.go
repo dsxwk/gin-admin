@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"context"
 	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
@@ -20,8 +19,7 @@ func (p *DebuggerProvider) Name() string {
 
 // Register 创建调试器并注册到容器
 func (p *DebuggerProvider) Register(app *container.Container) {
-	registry := app.Event()
-	p.instance = debugger.New(registry.Bus())
+	p.instance = debugger.New(app.Event().Bus())
 	app.SetDebugger(p.instance)
 }
 
@@ -34,33 +32,14 @@ func (p *DebuggerProvider) Boot(_ *container.Container) {
 // Runners 后台运行任务
 func (p *DebuggerProvider) Runners() []serviceprovider.Runner {
 	return []serviceprovider.Runner{
-		&DebuggerRunner{instance: p.instance},
+		serviceprovider.NewShutdownRunner("debugger_runner", func() error {
+			p.instance.Stop()
+			return nil
+		}),
 	}
 }
 
 // Dependencies 依赖服务
 func (p *DebuggerProvider) Dependencies() []string {
 	return []string{serviceprovider.ServiceEvent, serviceprovider.ServiceLog}
-}
-
-// DebuggerRunner 调试器后台任务
-type DebuggerRunner struct {
-	instance *debugger.Debugger
-}
-
-// Run 运行等待任务
-func (r *DebuggerRunner) Run(ctx context.Context) error {
-	<-ctx.Done()
-	return nil
-}
-
-// Stop 停止调试器
-func (r *DebuggerRunner) Stop() error {
-	r.instance.Stop()
-	return nil
-}
-
-// Name 任务名称
-func (r *DebuggerRunner) Name() string {
-	return "debugger_runner"
 }

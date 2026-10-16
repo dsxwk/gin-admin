@@ -1,10 +1,10 @@
 package orm
 
 import (
-	"gin/pkg"
 
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 func openSqlsrv() (*gorm.DB, error) {
@@ -23,7 +23,7 @@ func getSqlsrvDsn() string {
 	   - SQLServer 默认端口 1433
 	*/
 
-	return pkg.Sprintf(
+	return fmt.Sprintf(
 		"sqlserver://%s:%s@%s:%s?database=%s",
 		conf.Databases.Sqlsrv.Username,
 		conf.Databases.Sqlsrv.Password,

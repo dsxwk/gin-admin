@@ -116,7 +116,7 @@ func (m *MakeMcp) generateFile(_make, file, rawName, name, desc string) {
 		}
 		qualifier = alias + "."
 	}
-	if err = cli.AddItem(toolsFile, "return []servicemcp.Tool{", "&"+qualifier+structName+"{}"); err != nil {
+	if err = cli.AddItem(toolsFile, "return []servicemcp.Tool{", qualifier+"New"+structName+"Tool()"); err != nil {
 		flag.Errorf("自动注册MCP工具失败: %s", err.Error())
 		return
 	}

@@ -4,11 +4,11 @@ import (
 	"gin/app/facade"
 	"gin/app/middleware"
 	_ "gin/docs"
-	"gin/pkg"
 	"gin/pkg/errcode"
 	"gin/pkg/route"
 	"net/http"
 
+	"gin/pkg/pathx"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -34,7 +34,7 @@ func NewRouters(router *gin.Engine) {
 	router.Use(corsMiddleware, timeoutMiddleware, loggerMiddleware, recoverMiddleware, operatorLogMiddleware)
 
 	// 静态文件
-	router.StaticFS("/public", http.Dir(pkg.RootPath()+"/public"))
+	router.StaticFS("/public", http.Dir(pathx.RootPath()+"/public"))
 
 	// Swagger 文档
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

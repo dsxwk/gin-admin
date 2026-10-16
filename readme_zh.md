@@ -363,7 +363,6 @@ $ ./cli demo:command --args=11
 │   └── cli.go                # 命令行工具入口文件
 ├── common                    # 公共模块
 │   ├── base                  # 基类
-│   ├── ctxkey                # 上下文键名
 │   ├── flag                  # 特殊符号
 │   └── template              # 模版
 ├── config                    # 配置文件
@@ -379,7 +378,12 @@ $ ./cli demo:command --args=11
 │   │   ├── grpcgen           # gRPC代码生成
 │   │   └── make              # 生成命令
 │   ├── container             # 容器
+│   ├── convert               # 类型转换
+│   ├── cryptox               # 加密工具
+│   ├── ctxkey                # 上下文键名
 │   ├── errcode               # 错误码
+│   ├── mapx                  # Map工具
+│   ├── pathx                 # 路径工具
 │   ├── serviceprovider       # 服务提供者相关包
 │   │   ├── agent             # Agent Provider
 │   │   ├── cache             # 缓存
@@ -397,7 +401,9 @@ $ ./cli demo:command --args=11
 │   │   ├── ratelimit         # 限流
 │   │   ├── request           # 请求
 │   │   └── ws                # WebSocket
-│   └── time                  # 时间处理
+│   ├── stringx               # 字符串工具
+│   ├── timex                 # 时间处理
+│   └── treex                 # 树形结构
 ├── public                    # 静态资源目录
 │   └── ws-test.html          # WebSocket测试页面
 ├── router                    # 路由
@@ -762,7 +768,7 @@ import (
 )
 
 func main() {
-  _ = bootstrap.InitCLI()
+  _ = bootstrap.SetupCLI()
 
   commands := slices.Concat(console.All(), registry.All())
   cli.Execute(commands...)
@@ -2630,9 +2636,8 @@ $ go run ./cmd/cli.go make:queue --connection=kafka --name=order_delay --delay=t
 package consumer
 
 import (
+	"context"
 	"gin/app/facade"
-	"gin/common/flag"
-	"gin/config"
 	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
 	"time"
@@ -2640,17 +2645,12 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// KafkaDemoConsumer Kafka消费者
-type KafkaDemoConsumer struct {
-	*queue.KafkaConsumer
-}
-
 // KafkaDemoPayload 消息体
 type KafkaDemoPayload struct {
 	Name string `json:"name"`
 }
 
-func NewKafkaDemoConsumer() *KafkaDemoConsumer {
+func NewKafkaDemoConsumer() *queue.ConsumerAdapter[KafkaDemoPayload] {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Reader = kafka.NewReader(kafka.ReaderConfig{
@@ -2663,57 +2663,27 @@ func NewKafkaDemoConsumer() *KafkaDemoConsumer {
 		CommitInterval: 0,
 		MaxWait:        5 * time.Second,
 	})
-	return &KafkaDemoConsumer{
-		KafkaConsumer: &queue.KafkaConsumer{
+
+	return queue.NewConsumerAdapter(
+		queue.ConsumerConfig{
+			Name:        "kafka_demo",
+			Description: "kafka普通队列消费者",
+			Connection:  "kafka",
+			Retry:       3,
+		},
+		&queue.KafkaConsumer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Group: "kafka_demo_group",
 		},
-	}
+		handleKafkaDemo,
+	)
 }
 
-func (c *KafkaDemoConsumer) Name() string {
-	return "kafka_demo"
-}
-
-func (c *KafkaDemoConsumer) Description() string {
-	return "kafka普通队列消费者"
-}
-
-func (c *KafkaDemoConsumer) Connection() string {
-	return "kafka"
-}
-
-func (c *KafkaDemoConsumer) Retry() int {
-	return 3
-}
-
-func (c *KafkaDemoConsumer) IsDelay() bool {
-	return false
-}
-
-func (c *KafkaDemoConsumer) Start() error {
-	c.KafkaConsumer.Start(c)
-	flag.Infof("Kafka消费者启动成功: %s", c.Name())
-	return nil
-}
-
-func (c *KafkaDemoConsumer) Stop() error {
-	return c.KafkaConsumer.Stop()
-}
-
-func (c *KafkaDemoConsumer) Enabled(cfg *config.Config) bool {
-	return cfg.Queue.Kafka.Enabled
-}
-
-func (c *KafkaDemoConsumer) NewPayload() any {
-	return &KafkaDemoPayload{}
-}
-
-func (c *KafkaDemoConsumer) Handle(payload any) error {
-	data := payload.(*KafkaDemoPayload)
+// handleKafkaDemo 处理Kafka消息
+func handleKafkaDemo(_ context.Context, data *KafkaDemoPayload) error {
 	facade.Log().Info(pkg.Sprintf("Kafka Received Msg: name=%s", data.Name))
-	// todo 处理业务逻辑
+	// 待处理业务逻辑
 	return nil
 }
 ```
@@ -2730,18 +2700,13 @@ sq.NewConsumerFactory("kafka", consumer.NewKafkaDemoConsumer)
 package producer
 
 import (
-	"context"
 	"gin/app/facade"
 	"gin/pkg/serviceprovider/queue"
 
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaDemoProducer struct {
-	*queue.KafkaProducer
-}
-
-func NewKafkaDemoProducer() *KafkaDemoProducer {
+func NewKafkaDemoProducer() *queue.ProducerAdapter {
 	cfg := facade.Config()
 	kfk := queue.NewKafka(cfg, facade.Log(), facade.Event().Bus())
 	kfk.Writer = &kafka.Writer{
@@ -2750,43 +2715,19 @@ func NewKafkaDemoProducer() *KafkaDemoProducer {
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: kafka.RequireAll,
 	}
-	p := &KafkaDemoProducer{
-		KafkaProducer: &queue.KafkaProducer{
+
+	return queue.NewProducerAdapter(
+		queue.ProducerConfig{
+			Name:        "kafka_demo",
+			Description: "kafka普通队列生产者",
+			Connection:  "kafka",
+		},
+		&queue.KafkaProducer{
 			Kafka: kfk,
 			Topic: "kafka_demo",
 			Key:   "kafka_demo_key",
 		},
-	}
-	p.KafkaProducer.Owner = p
-	return p
-}
-
-func (p *KafkaDemoProducer) Name() string {
-	return "kafka_demo"
-}
-
-func (p *KafkaDemoProducer) Description() string {
-	return "kafka普通队列生产者"
-}
-
-func (p *KafkaDemoProducer) Connection() string {
-	return "kafka"
-}
-
-func (p *KafkaDemoProducer) IsDelay() bool {
-	return false
-}
-
-func (p *KafkaDemoProducer) DelayMs() int64 {
-	return 0
-}
-
-func (p *KafkaDemoProducer) Publish(ctx context.Context, msg any) error {
-	return p.KafkaProducer.Publish(ctx, msg)
-}
-
-func (p *KafkaDemoProducer) Close() error {
-	return p.KafkaProducer.Close()
+	)
 }
 ```
 
@@ -2893,11 +2834,11 @@ $ go run ./cmd/cli.go producer:list
 package job
 
 import (
+    "context"
     "gin/app/facade"
     "gin/pkg"
+    servicejob "gin/pkg/serviceprovider/job"
 )
-
-type SendEmailJob struct{}
 
 type SendEmail struct {
     To      string `json:"to"`
@@ -2905,16 +2846,20 @@ type SendEmail struct {
     Content string `json:"content"`
 }
 
-func (j *SendEmailJob) Name() string        { return "send_email" }
-func (j *SendEmailJob) Description() string { return "发送邮件任务" }
-func (j *SendEmailJob) Connection() string  { return "redis" }
-func (j *SendEmailJob) Retry() int          { return 3 }
-func (j *SendEmailJob) Delay() int64        { return 3000 }
-func (j *SendEmailJob) NewPayload() any     { return &SendEmail{} }
+func NewSendEmailJob() *servicejob.Adapter[SendEmail] {
+    return servicejob.NewAdapter(
+        servicejob.Config{
+            Name:        "send_email",
+            Description: "发送邮件任务",
+            Connection:  "redis",
+            Retry:       3,
+            Delay:       3000,
+        },
+        handleSendEmail,
+    )
+}
 
-func (j *SendEmailJob) Handle(payload any) error {
-    data := payload.(*SendEmail)
-    // TODO: 实现业务逻辑
+func handleSendEmail(_ context.Context, data *SendEmail) error {
     facade.Log().Info(pkg.Sprintf("发送邮件至: %s, 主题: %s", data.To, data.Subject))
     return nil
 }
@@ -2924,7 +2869,7 @@ func (j *SendEmailJob) Handle(payload any) error {
 
 ```go
 return []servicejob.Job{
-    &SendEmailJob{},
+    NewSendEmailJob(),
 }
 ```
 
@@ -2973,9 +2918,10 @@ count, err := facade.Job().Count(ctx)
 | `Description() string`      | 任务描述                                                                |
 | `Connection() string`       | 驱动: `"sync"`、`"redis"`、`"kafka"`、`"rabbitmq"` (空字符串默认 redis) |
 | `Retry() int`               | 重试次数 (`0` = 执行一次)                                               |
-| `Delay() int64`             | 重试间隔时间(毫秒)                                                      |
+| `Delay() int64`             | 首次延迟及重试间隔(毫秒), `0` 表示不延迟                                |
 | `NewPayload() any`          | 返回 payload 结构体指针, 用于反序列化                                   |
 | `Handle(payload any) error` | 业务处理逻辑, `payload` 已反序列化                                      |
+| `HandleContext(...)`        | 可选方法, 支持上下文取消, `Adapter` 默认实现                            |
 
 ### Job列表
 
@@ -3043,6 +2989,31 @@ mcp:
 $ go run ./cmd/cli.go mcp:list
 $ go run ./cmd/cli.go make:mcp --file=user_search --name=user_search --desc=搜索用户
 ```
+
+生成的工具默认使用泛型适配器:
+
+```go
+type UserSearchArgs struct {
+    Keyword string `json:"keyword"`
+}
+
+func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
+    return mcp.NewToolAdapter(
+        mcp.ToolConfig{
+            Name:        "user_search",
+            Description: "搜索用户",
+            InputSchema: mcp.InputSchema{},
+        },
+        handleUserSearch,
+    )
+}
+
+func handleUserSearch(_ context.Context, _ int64, args *UserSearchArgs) (any, error) {
+    return map[string]any{"keyword": args.Keyword}, nil
+}
+```
+
+> `ToolAdapter` 是标准写法; 如需完全自定义调用流程, 仍可直接实现 `Tool` 接口。
 
 ## MCP调用
 

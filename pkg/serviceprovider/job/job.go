@@ -1,6 +1,9 @@
 package job
 
-import "gin/pkg/serviceprovider/queue"
+import (
+	"context"
+	"gin/pkg/serviceprovider/queue"
+)
 
 // Job 任务接口
 type Job interface {
@@ -10,8 +13,23 @@ type Job interface {
 	Description() string
 	// Connection 任务连接, 默认 "redis",可选 "sync","kafka","rabbitmq"
 	Connection() string
-	// Retry 重试次数, 默认3
+	// Retry 重试次数, 0表示不重试
 	Retry() int
-	// Delay 重试间隔时间(毫秒), 默认1000
+	// Delay 首次延迟及重试间隔(毫秒), 0表示不延迟
 	Delay() int64
+}
+
+// ContextJob 支持上下文的任务接口
+type ContextJob interface {
+	Job
+	HandleContext(ctx context.Context, payload any) error
+}
+
+// Config 任务配置
+type Config struct {
+	Name        string
+	Description string
+	Connection  string
+	Retry       int
+	Delay       int64
 }

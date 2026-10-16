@@ -4,7 +4,7 @@ import (
 	"context"
 	"gin/app/facade"
 	"gin/app/queue/consumer"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"testing"
 	"time"
 
@@ -117,19 +117,15 @@ func TestRabbitMQConsumerStatus(t *testing.T) {
 		t.Skip("RabbitMQ未启用, 跳过测试")
 	}
 
-	consumers := facade.Queue().Consumers()
-	if len(consumers) == 0 {
+	statuses := facade.Queue().ConsumerStatus()
+	if len(statuses) == 0 {
 		t.Skip("未注册消费者")
 	}
 
-	for _, c := range consumers {
-		name := c.Name()
-		status := c.Status()
-		enabled := c.Enabled(cfg)
-
-		t.Run(name, func(t *testing.T) {
-			t.Logf("消费者: %s, 状态: %s, 启用: %v", name, status, enabled)
-			assert.NotEmpty(t, name, "消费者名称不能为空")
+	for _, status := range statuses {
+		t.Run(status.Name, func(t *testing.T) {
+			t.Logf("消费者: %s, 状态: %s, 启用: %v", status.Name, status.Status, status.Enabled)
+			assert.NotEmpty(t, status.Name, "消费者名称不能为空")
 
 		})
 	}

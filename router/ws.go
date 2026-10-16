@@ -5,7 +5,7 @@ import (
 
 	"gin/app/facade"
 	"gin/app/middleware"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/ws"
 

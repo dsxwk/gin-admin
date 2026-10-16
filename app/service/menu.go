@@ -6,7 +6,8 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg"
+	"gin/pkg/mapx"
+	"gin/pkg/treex"
 	"strings"
 	"time"
 )
@@ -58,7 +59,7 @@ func (s *MenuService) List(ctx context.Context, req request.Menu) (pageData requ
 }
 
 // RoleMenu 角色菜单
-func (s *MenuService) RoleMenu(ctx context.Context, req request.Menu) (tree []pkg.TreeNode, err error) {
+func (s *MenuService) RoleMenu(ctx context.Context, req request.Menu) (tree []treex.TreeNode, err error) {
 	var (
 		m      model.Menu
 		models []model.Menu
@@ -203,14 +204,14 @@ func (s *MenuService) Update(ctx context.Context, id int64, data map[string]any)
 		ok         bool
 	)
 
-	if pkg.HasKey(data, "meta") {
+	if mapx.HasKey(data, "meta") {
 		meta, ok = data["meta"].(map[string]any)
 		if !ok {
 			return errors.New("meta数据格式错误")
 		}
 	}
 
-	if pkg.HasKey(data, "menuAction") {
+	if mapx.HasKey(data, "menuAction") {
 		menuAction, ok = data["menuAction"].(map[string]any)
 		if !ok {
 			return errors.New("菜单功能数据格式错误")

@@ -6,7 +6,7 @@ import (
 	appes "gin/app/es"
 	"gin/app/facade"
 	"gin/app/model"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/config"
 	eslib "gin/pkg/serviceprovider/es"
 	"maps"

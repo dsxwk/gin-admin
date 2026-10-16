@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 	"fmt"
-	"gin/config"
 	"gin/pkg/serviceprovider/queue"
 )
 
@@ -104,21 +103,6 @@ func (c *Consumer) Stop() error {
 		return c.rabbitmq.Stop()
 	default:
 		return nil
-	}
-}
-
-// Enabled 是否启用消费者
-func (c *Consumer) Enabled(cfg *config.Config) bool {
-	if cfg == nil {
-		return false
-	}
-	switch c.connection {
-	case "kafka":
-		return cfg.Queue.Kafka.Enabled
-	case "rabbitmq":
-		return cfg.Queue.Rabbitmq.Enabled
-	default:
-		return true
 	}
 }
 

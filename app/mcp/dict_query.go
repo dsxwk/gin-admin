@@ -7,28 +7,34 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-// DictQuery 字典查询工具
-type DictQuery struct{}
-
-func (t *DictQuery) Name() string { return "query_dict" }
-func (t *DictQuery) Description() string {
-	return "根据字典类型查询字典项,如性别、状态等枚举值"
+// DictQueryArgs 字典查询参数
+type DictQueryArgs struct {
+	Type  string `json:"type"`
+	Label string `json:"label"`
 }
 
-func (t *DictQuery) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"type":  {Type: "string", Description: "字典类型编码,如gender、status"},
-			"label": {Type: "string", Description: "按字典标签模糊搜索"},
+// NewDictQueryTool 创建字典查询工具
+func NewDictQueryTool() *mcp.ToolAdapter[DictQueryArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "query_dict",
+			Description: "根据字典类型查询字典项,如性别、状态等枚举值",
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"type":  {Type: "string", Description: "字典类型编码,如gender、status"},
+					"label": {Type: "string", Description: "按字典标签模糊搜索"},
+				},
+				Required: []string{"type"},
+			},
 		},
-		Required: []string{"type"},
-	}
+		handleDictQuery,
+	)
 }
 
-func (t *DictQuery) Call(ctx context.Context, args map[string]any) (any, error) {
-	typeName, _ := args["type"].(string)
-	if typeName == "" {
+// handleDictQuery 处理字典查询工具
+func handleDictQuery(ctx context.Context, _ int64, args *DictQueryArgs) (any, error) {
+	if args.Type == "" {
 		return nil, nil
 	}
 
@@ -38,10 +44,9 @@ func (t *DictQuery) Call(ctx context.Context, args map[string]any) (any, error) 
 	}
 
 	var dicts []model.Dict
-	query := db.Model(&model.Dict{}).Where("name = ?", typeName).Order("sort ASC, id ASC")
-
-	if label, ok := args["label"].(string); ok && label != "" {
-		query = query.Where("title LIKE ?", "%"+label+"%")
+	query := db.Model(&model.Dict{}).Where("name = ?", args.Type).Order("sort ASC, id ASC")
+	if args.Label != "" {
+		query = query.Where("title LIKE ?", "%"+args.Label+"%")
 	}
 
 	if err := query.Find(&dicts).Error; err != nil {
@@ -58,5 +63,5 @@ func (t *DictQuery) Call(ctx context.Context, args map[string]any) (any, error) 
 	for i, d := range dicts {
 		items[i] = Item{ID: d.ID, Label: d.Title, Value: d.Value, Sort: d.Sort}
 	}
-	return map[string]any{"type": typeName, "total": len(items), "list": items}, nil
+	return map[string]any{"type": args.Type, "total": len(items), "list": items}, nil
 }

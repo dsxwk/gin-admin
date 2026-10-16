@@ -1,27 +1,34 @@
 package {{.Package}}
 
 import (
-    "context"
-    "gin/pkg/serviceprovider/mcp"
+	"context"
+	"gin/pkg/serviceprovider/mcp"
 )
 
-// {{.Name}} {{.Description}}工具
-type {{.Name}} struct{}
-
-func (t *{{.Name}}) Name() string { return "{{.ToolName}}" }
-func (t *{{.Name}}) Description() string { return "{{.Description}}" }
-
-func (t *{{.Name}}) InputSchema() mcp.InputSchema {
-    return mcp.InputSchema{
-        Type: "object",
-        Properties: map[string]mcp.Property{
-            // TODO: 添加参数
-        },
-        Required: []string{},
-    }
+// {{.Name}}Args {{.Description}}参数
+type {{.Name}}Args struct {
 }
 
-func (t *{{.Name}}) Call(ctx context.Context, args map[string]any) (any, error) {
-    // TODO: 实现工具逻辑
-    return map[string]any{}, nil
+// New{{.Name}}Tool 创建{{.Description}}
+func New{{.Name}}Tool() *mcp.ToolAdapter[{{.Name}}Args] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "{{.ToolName}}",
+			Description: "{{.Description}}",
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					// 待添加参数
+				},
+				Required: []string{},
+			},
+		},
+		handle{{.Name}},
+	)
+}
+
+// handle{{.Name}} 处理{{.Description}}
+func handle{{.Name}}(_ context.Context, _ int64, args *{{.Name}}Args) (any, error) {
+	// 待处理业务逻辑
+	return map[string]any{}, nil
 }

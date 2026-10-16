@@ -3,9 +3,9 @@ package request
 import (
 	"gin/app/errcode"
 	"gin/common/base"
-	"gin/pkg"
 
 	"github.com/gookit/validate"
+	"fmt"
 )
 
 // UserLogin 用户登录
@@ -60,7 +60,7 @@ func (s Login) ConfigValidation(v *validate.Validation) {
 // Messages 验证器错误消息
 func (s Login) Messages() map[string]string {
 	return validate.MS{
-		"required": pkg.Sprintf("%s {field} %s",
+		"required": fmt.Sprintf("%s {field} %s",
 			s.Trans("validator.common.field", nil),
 			s.Trans("validator.common.required", nil),
 		),

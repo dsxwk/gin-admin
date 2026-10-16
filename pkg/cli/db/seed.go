@@ -10,9 +10,9 @@ import (
 	"gin/common/base"
 	"gin/common/flag"
 	"gin/database/migrations"
-	"gin/pkg"
 	"gin/pkg/cli"
 
+	"gin/pkg/pathx"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -91,7 +91,7 @@ func (s *Seed) Execute(values map[string]string) {
 
 // initDatabase 逐条执行数据库初始化语句
 func (s *Seed) initDatabase() {
-	file := filepath.Join(pkg.RootPath(), "database", "gin.sql")
+	file := filepath.Join(pathx.RootPath(), "database", "gin.sql")
 
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		flag.Errorf("初始化sql文件不存在: %s", file)

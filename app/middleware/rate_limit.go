@@ -5,10 +5,10 @@ import (
 	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/ctxkey"
-	"gin/pkg"
+	"gin/pkg/ctxkey"
 	"time"
 
+	"gin/pkg/convert"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 )
@@ -50,7 +50,7 @@ func (r RateLimit) UserRateLimit(rps rate.Limit, burst int) gin.HandlerFunc {
 			return
 		}
 
-		userID := c.GetInt64(ctxkey.UserIdKey)
+		userID := c.GetInt64(ctxkey.GinUserIDKey)
 		if userID <= 0 {
 			c.Next()
 			return
@@ -58,7 +58,7 @@ func (r RateLimit) UserRateLimit(rps rate.Limit, burst int) gin.HandlerFunc {
 
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 100*time.Millisecond)
 		defer cancel()
-		if err := limiter.WaitUser(ctx, pkg.IntToString[int64](userID), c.FullPath(), rps, burst); err != nil {
+		if err := limiter.WaitUser(ctx, convert.IntToString[int64](userID), c.FullPath(), rps, burst); err != nil {
 			facade.Response().Error(c, errcode.RateLimitError())
 			return
 		}

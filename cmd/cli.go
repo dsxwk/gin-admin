@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	if err := bootstrap.InitCLI(); err != nil {
+	if err := bootstrap.SetupCLI(); err != nil {
 		flag.Errorf("初始化CLI失败: %v", err)
 		os.Exit(1)
 	}

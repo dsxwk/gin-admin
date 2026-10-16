@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
-	"gin/pkg"
 	"sort"
 	"strings"
 	"time"
@@ -299,7 +298,7 @@ func BatchUpdateSql(db *gorm.DB, model any, data []map[string]any, primaryKey st
 		where = append(where, "`"+DeletedField+"` IS NULL")
 	}
 
-	sql := pkg.Sprintf(
+	sql := fmt.Sprintf(
 		"UPDATE `%s` SET %s WHERE %s",
 		table,
 		strings.Join(setSQL, ", "),

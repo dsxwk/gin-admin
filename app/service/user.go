@@ -9,9 +9,10 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg"
 	"time"
 
+	"gin/pkg/convert"
+	"gin/pkg/cryptox"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
@@ -113,7 +114,7 @@ func (s *UserService) Create(ctx context.Context, req request.User) (m model.Use
 		Gender:   req.Gender,
 		Age:      req.Age,
 		// 处理密码
-		Password: pkg.BcryptHash(req.Password),
+		Password: cryptox.BcryptHash(req.Password),
 	}
 
 	tx := db.Begin()
@@ -221,7 +222,7 @@ func (s *UserService) Update(ctx context.Context, id int64, data map[string]any)
 		return errors.New("用户名已存在")
 	}
 	if lo.HasKey(data, "password") && data["password"] != "" {
-		data["password"] = pkg.BcryptHash(data["password"].(string))
+		data["password"] = cryptox.BcryptHash(data["password"].(string))
 	}
 	rows := model.FilterFields(db, model.User{}, data)
 	rows[model.UpdatedField] = time.Now()
@@ -451,17 +452,17 @@ func (s *UserService) Import(ctx context.Context, createdUser int64, req request
 
 		// 校验导入数据内用户名重复
 		if firstRow, ok := seenUsername[item.Username]; ok {
-			return req, errors.New("第 " + pkg.IntToString(row) + " 行,用户名 " + item.Username + " 重复(与第" + pkg.IntToString(firstRow) + "行)")
+			return req, errors.New("第 " + convert.IntToString(row) + " 行,用户名 " + item.Username + " 重复(与第" + convert.IntToString(firstRow) + "行)")
 		}
 		// 校验导入数据内邮箱重复
 		if firstRow, ok := seenEmail[item.Email]; ok {
-			return req, errors.New("第 " + pkg.IntToString(row) + " 行,邮箱 " + item.Email + " 重复(与第" + pkg.IntToString(firstRow) + "行)")
+			return req, errors.New("第 " + convert.IntToString(row) + " 行,邮箱 " + item.Email + " 重复(与第" + convert.IntToString(firstRow) + "行)")
 		}
 		if existingUsernames[item.Username] {
-			return req, errors.New("第 " + pkg.IntToString(row) + " 行,用户名 " + item.Username + " 已存在")
+			return req, errors.New("第 " + convert.IntToString(row) + " 行,用户名 " + item.Username + " 已存在")
 		}
 		if existingEmails[item.Email] {
-			return req, errors.New("第 " + pkg.IntToString(row) + " 行,邮箱 " + item.Email + " 已存在")
+			return req, errors.New("第 " + convert.IntToString(row) + " 行,邮箱 " + item.Email + " 已存在")
 		}
 
 		// 记录已处理的行号,供后续行检查内部重复
@@ -470,7 +471,7 @@ func (s *UserService) Import(ctx context.Context, createdUser int64, req request
 
 		batchUsers = append(batchUsers, model.User{
 			Username: item.Username,
-			Password: pkg.BcryptHash(item.Password),
+			Password: cryptox.BcryptHash(item.Password),
 			FullName: item.FullName,
 			Nickname: item.Nickname,
 			Email:    item.Email,
@@ -517,7 +518,7 @@ func (s *UserService) Password(ctx context.Context, id int64, user request.UserP
 		db = s.DB(ctx, &m)
 	)
 
-	user.Password = pkg.BcryptHash(user.Password)
+	user.Password = cryptox.BcryptHash(user.Password)
 
 	return db.Model(&m).Where("id = ?", id).Updates(user).Error
 }

@@ -7,36 +7,44 @@ import (
 	"gin/pkg/serviceprovider/mcp"
 )
 
-// UserSearch 用户搜索工具
-type UserSearch struct{}
-
-func (t *UserSearch) Name() string        { return "search_users" }
-func (t *UserSearch) Description() string { return "根据姓名或用户名搜索系统用户" }
-
-func (t *UserSearch) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"keyword": {Type: "string", Description: "搜索关键词,匹配姓名或用户名"},
-			"limit":   {Type: "integer", Description: "返回条数,默认20,最大100"},
-		},
-		Required: []string{"keyword"},
-	}
+// UserSearchArgs 用户搜索参数
+type UserSearchArgs struct {
+	Keyword string `json:"keyword"`
+	Limit   int    `json:"limit"`
 }
 
-func (t *UserSearch) Call(ctx context.Context, args map[string]any) (any, error) {
-	keyword, _ := args["keyword"].(string)
-	if keyword == "" {
+// NewUserSearchTool 创建用户搜索工具
+func NewUserSearchTool() *mcp.ToolAdapter[UserSearchArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "search_users",
+			Description: "根据姓名或用户名搜索系统用户",
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"keyword": {Type: "string", Description: "搜索关键词,匹配姓名或用户名"},
+					"limit":   {Type: "integer", Description: "返回条数,默认20,最大100"},
+				},
+				Required: []string{"keyword"},
+			},
+		},
+		handleUserSearch,
+	)
+}
+
+// handleUserSearch 处理用户搜索工具
+func handleUserSearch(ctx context.Context, _ int64, args *UserSearchArgs) (any, error) {
+	if args.Keyword == "" {
 		return nil, nil
 	}
 
 	limit := 20
-	if l, ok := args["limit"].(float64); ok && l > 0 {
-		limit = min(int(l), 100)
+	if args.Limit > 0 {
+		limit = min(args.Limit, 100)
 	}
 
 	var users []model.User
-	like := "%" + keyword + "%"
+	like := "%" + args.Keyword + "%"
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil
@@ -67,5 +75,5 @@ func (t *UserSearch) Call(ctx context.Context, args map[string]any) (any, error)
 		}
 		items[i] = Item{ID: u.ID, Username: u.Username, FullName: u.FullName, Email: u.Email, Status: u.Status, Dept: dept}
 	}
-	return map[string]any{"keyword": keyword, "total": len(items), "list": items}, nil
+	return map[string]any{"keyword": args.Keyword, "total": len(items), "list": items}, nil
 }

@@ -3,7 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/common/flag"
 	"gin/config"
 	"gin/pkg/serviceprovider/debugger"

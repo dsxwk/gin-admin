@@ -4,13 +4,14 @@ import (
 	"gin/app/facade"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/cli"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
+	"gin/pkg/convert"
+	"gin/pkg/pathx"
 	"github.com/samber/lo"
 )
 
@@ -45,12 +46,12 @@ func (m *MakeJob) Help() []base.CommandOption {
 		},
 		{
 			Flag:     base.Flag{Short: "R", Long: "retry", Default: "0"},
-			Desc:     "重试次数, 默认0(使用全局默认3)",
+			Desc:     "重试次数, 0表示不重试",
 			Required: false,
 		},
 		{
 			Flag:     base.Flag{Short: "d", Long: "delay", Default: "0"},
-			Desc:     "重试间隔时间(毫秒), 默认0(使用全局默认1000)",
+			Desc:     "首次延迟及重试间隔(毫秒), 0表示不延迟",
 			Required: false,
 		},
 	}
@@ -75,8 +76,8 @@ func (m *MakeJob) Execute(values map[string]string) {
 		desc = name
 	}
 
-	retry, _ := pkg.StringToInt[int](values["retry"])
-	delay, _ := pkg.StringToInt[int64](values["delay"])
+	retry, _ := convert.StringToInt[int](values["retry"])
+	delay, _ := convert.StringToInt[int64](values["delay"])
 
 	camelName := lo.PascalCase(name)
 
@@ -89,7 +90,7 @@ func (m *MakeJob) Execute(values map[string]string) {
 		"Delay":       delay,
 	}
 
-	tplFile := filepath.Join(pkg.RootPath(), "common", "template", "job.tpl")
+	tplFile := filepath.Join(pathx.RootPath(), "common", "template", "job.tpl")
 	tpl, err := template.ParseFiles(tplFile)
 	if err != nil {
 		flag.Errorf("Error parsing job template: %s", err.Error())
@@ -108,7 +109,7 @@ func (m *MakeJob) Execute(values map[string]string) {
 	}
 
 	jobsFile := filepath.Join("app", "job", "registry.go")
-	if err = cli.AddItem(jobsFile, "return []servicejob.Job{", "&"+camelName+"Job{}"); err != nil {
+	if err = cli.AddItem(jobsFile, "return []servicejob.Job{", "New"+camelName+"Job()"); err != nil {
 		flag.Errorf("自动注册Job失败: %s", err.Error())
 		return
 	}

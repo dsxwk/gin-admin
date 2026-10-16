@@ -6,7 +6,7 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg"
+	"gin/pkg/mapx"
 	"time"
 )
 
@@ -98,7 +98,7 @@ func (s *DepartmentService) Update(ctx context.Context, id int64, data map[strin
 		return err
 	}
 
-	if pkg.HasKey(data, "deptLeaders") {
+	if mapx.HasKey(data, "deptLeaders") {
 		deptLeaders, ok := data["deptLeaders"].([]any)
 		if !ok {
 			deptLeaders = []any{}

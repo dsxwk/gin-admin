@@ -1,4 +1,4 @@
-package pkg
+package pathx
 
 import (
 	"os"

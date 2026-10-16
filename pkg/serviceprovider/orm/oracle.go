@@ -1,10 +1,10 @@
 package orm
 
 import (
-	"gin/pkg"
 
 	oracle "github.com/godoes/gorm-oracle"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 func openOracle() (*gorm.DB, error) {
@@ -17,14 +17,14 @@ func openOracle() (*gorm.DB, error) {
 func getOracleDsn() string {
 	connectString := ""
 	if conf.Databases.Oracle.ServiceName != "" {
-		connectString = pkg.Sprintf(
+		connectString = fmt.Sprintf(
 			"%s:%s/%s",
 			conf.Databases.Oracle.Host,
 			conf.Databases.Oracle.Port,
 			conf.Databases.Oracle.ServiceName,
 		)
 	} else if conf.Databases.Oracle.Sid != "" {
-		connectString = pkg.Sprintf(
+		connectString = fmt.Sprintf(
 			"%s:%s/%s?sid=true",
 			conf.Databases.Oracle.Host,
 			conf.Databases.Oracle.Port,
@@ -32,7 +32,7 @@ func getOracleDsn() string {
 		)
 	}
 
-	return pkg.Sprintf(
+	return fmt.Sprintf(
 		`user="%s" password="%s" connectString="%s"`,
 		conf.Databases.Oracle.Username,
 		conf.Databases.Oracle.Password,

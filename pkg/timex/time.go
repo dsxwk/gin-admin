@@ -1,4 +1,4 @@
-package time
+package timex
 
 import (
 	"strings"
@@ -22,6 +22,7 @@ func Location() *time.Location {
 	return defaultLocation
 }
 
+// Time 时间处理结构
 type Time struct {
 	t time.Time
 }

@@ -1,67 +1,38 @@
 package consumer
 
 import (
+	"context"
 	"gin/app/facade"
-	"gin/common/flag"
-	"gin/config"
-	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
+	"fmt"
 )
-
-// RedisDelayDemoConsumer Redis延迟消费者
-type RedisDelayDemoConsumer struct {
-	*queue.RedisConsumer
-}
 
 // RedisDelayDemoPayload 延迟消息体
 type RedisDelayDemoPayload struct {
 	Name string `json:"name"`
 }
 
-func (c *RedisDelayDemoConsumer) NewPayload() any {
-	return &RedisDelayDemoPayload{}
-}
-
-func (c *RedisDelayDemoConsumer) Handle(payload any) error {
-	data := payload.(*RedisDelayDemoPayload)
-	facade.Log().Info(pkg.Sprintf("Redis Delay Received Msg: name=%s", data.Name))
-	return nil
-}
-
-func NewRedisDelayDemoConsumer() *RedisDelayDemoConsumer {
-	return &RedisDelayDemoConsumer{
-		RedisConsumer: &queue.RedisConsumer{
+// NewRedisDelayDemoConsumer 创建Redis延迟消费者
+func NewRedisDelayDemoConsumer() *queue.ConsumerAdapter[RedisDelayDemoPayload] {
+	return queue.NewConsumerAdapter(
+		queue.ConsumerConfig{
+			Name:        "redis_delay_demo",
+			Description: "redis延迟队列消费者",
+			Connection:  "redis",
+			Retry:       3,
+			IsDelay:     true,
+		},
+		&queue.RedisConsumer{
 			Queue:     "redis_delay_demo",
 			GetClient: facade.RedisClient,
 			Log:       facade.Log(),
 		},
-	}
+		handleRedisDelayDemo,
+	)
 }
 
-func (c *RedisDelayDemoConsumer) Name() string {
-	return "redis_delay_demo"
-}
-
-func (c *RedisDelayDemoConsumer) Connection() string { return "redis" }
-
-func (c *RedisDelayDemoConsumer) Retry() int { return 3 }
-
-func (c *RedisDelayDemoConsumer) IsDelay() bool { return true }
-
-func (c *RedisDelayDemoConsumer) Description() string {
-	return "redis延迟队列消费者"
-}
-
-func (c *RedisDelayDemoConsumer) Start() error {
-	c.RedisConsumer.Start(c)
-	flag.Infof("Redis延迟消费者启动成功: %s", c.Name())
+// handleRedisDelayDemo 处理Redis延迟消息
+func handleRedisDelayDemo(_ context.Context, data *RedisDelayDemoPayload) error {
+	facade.Log().Info(fmt.Sprintf("Redis Delay Received Msg: name=%s", data.Name))
 	return nil
-}
-
-func (c *RedisDelayDemoConsumer) Stop() error {
-	return c.RedisConsumer.Stop()
-}
-
-func (c *RedisDelayDemoConsumer) Enabled(_ *config.Config) bool {
-	return true
 }

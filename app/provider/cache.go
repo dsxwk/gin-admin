@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"context"
 	"gin/common/flag"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
@@ -41,27 +40,6 @@ func (p *CacheProvider) Runners() []serviceprovider.Runner {
 	}
 
 	return []serviceprovider.Runner{
-		&cacheShutdownRunner{manager: p.manager},
+		serviceprovider.NewShutdownRunner("cache_shutdown", p.manager.Close),
 	}
-}
-
-// cacheShutdownRunner 缓存关闭任务
-type cacheShutdownRunner struct {
-	manager *cache.Manager
-}
-
-// Run 等待停止信号
-func (r *cacheShutdownRunner) Run(ctx context.Context) error {
-	<-ctx.Done()
-	return nil
-}
-
-// Stop 关闭缓存驱动
-func (r *cacheShutdownRunner) Stop() error {
-	return r.manager.Close()
-}
-
-// Name 任务名称
-func (r *cacheShutdownRunner) Name() string {
-	return "cache_shutdown"
 }

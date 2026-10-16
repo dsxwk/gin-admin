@@ -3,7 +3,7 @@ package event
 import (
 	"context"
 	"gin/app/facade"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/eventbus"
 	"testing"

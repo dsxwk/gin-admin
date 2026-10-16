@@ -6,7 +6,7 @@ import (
 	"gin/app/facade"
 	"gin/app/model"
 	"gin/common/base"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +29,7 @@ func (s Permission) Handle() gin.HandlerFunc {
 }
 
 func (s Permission) hasPermission(c *gin.Context, code string) bool {
-	userID := c.GetInt64(ctxkey.UserIdKey)
+	userID := c.GetInt64(ctxkey.GinUserIDKey)
 	ctx := c.Request.Context()
 	redisKey := fmt.Sprintf("permission:user:%d", userID)
 

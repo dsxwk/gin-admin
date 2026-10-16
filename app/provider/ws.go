@@ -66,37 +66,18 @@ func (p *WsProvider) Runners() []serviceprovider.Runner {
 		return nil
 	}
 
+	manager := p.manager
+	closeWait := p.closeWait
 	return []serviceprovider.Runner{
-		&wsShutdownRunner{manager: p.manager, closeWait: p.closeWait},
+		serviceprovider.NewShutdownRunner("websocket_shutdown", func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), closeWait)
+			defer cancel()
+			return manager.Close(ctx)
+		}),
 	}
 }
 
 // Dependencies 依赖服务
 func (p *WsProvider) Dependencies() []string {
 	return []string{serviceprovider.ServiceConfig}
-}
-
-// wsShutdownRunner WebSocket关闭任务
-type wsShutdownRunner struct {
-	manager   *ws.Manager
-	closeWait time.Duration
-}
-
-// Run 等待停止信号
-func (r *wsShutdownRunner) Run(ctx context.Context) error {
-	<-ctx.Done()
-	return nil
-}
-
-// Stop 关闭全部WebSocket连接
-func (r *wsShutdownRunner) Stop() error {
-	ctx, cancel := context.WithTimeout(context.Background(), r.closeWait)
-	defer cancel()
-
-	return r.manager.Close(ctx)
-}
-
-// Name 任务名称
-func (r *wsShutdownRunner) Name() string {
-	return "websocket_shutdown"
 }

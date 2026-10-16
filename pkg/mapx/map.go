@@ -1,4 +1,4 @@
-package pkg
+package mapx
 
 import (
 	"fmt"
@@ -37,23 +37,17 @@ func ArrayFilter[T any](arr []T, fn func(T) bool) []T {
 // []map[string]any, []map[string]any → []map[string]any
 func FilterFields(data any, filter any) any {
 	switch d := data.(type) {
-
-	// map
 	case map[string]any:
 		f, ok := filter.(map[string]any)
 		if !ok {
-			return d // filter不是map,直接返回原数据
+			return d
 		}
 		return filterMap(d, f)
-
-	// slice
 	case []map[string]any:
 		f, ok := filter.([]map[string]any)
 		if !ok {
-			return d // filter不是slice,返回原数据
+			return d
 		}
-
-		// slice长度不一致无法过滤
 		if len(d) != len(f) {
 			return d
 		}

@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"gin/common/base"
 	"gin/common/flag"
-	"gin/pkg"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"gin/pkg/pathx"
 	"github.com/bufbuild/protocompile"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
@@ -73,7 +73,7 @@ func (g *GrpcGen) Help() []base.CommandOption {
 
 // Execute 执行命令
 func (g *GrpcGen) Execute(values map[string]string) {
-	root := pkg.RootPath()
+	root := pathx.RootPath()
 	genType := values["type"]
 	if genType != "all" && genType != "pb" && genType != "grpc" {
 		flag.Errorf("参数 --type 只能是 all/pb/grpc")

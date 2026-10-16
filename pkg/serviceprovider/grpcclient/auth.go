@@ -3,7 +3,7 @@ package grpcclient
 import (
 	"context"
 	"errors"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"maps"
 	"strings"
 

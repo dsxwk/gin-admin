@@ -14,53 +14,57 @@ import (
 	"strings"
 )
 
-// CliExec CLI命令执行工具
-type CliExec struct{}
+// CliExecArgs CLI命令执行参数
+type CliExecArgs struct {
+	Command string `json:"command"`
+	Args    string `json:"args"`
+}
 
-func (t *CliExec) Name() string { return "execute_cli" }
-func (t *CliExec) Description() string {
-	return `执行CLI命令,可用命令: 
-				make:controller(创建控制器/file=路径,desc=描述), 
-				make:model(创建模型/name=名称,table=表名), 
-				make:service(创建服务/name=名称), 
-				make:request(创建验证器/name=名称), 
-				make:middleware(创建中间件/name=名称), 
-				make:router(创建路由/file=路径), 
-				make:docs(生成Swagger文档), 
+// NewCliExecTool 创建CLI命令执行工具
+func NewCliExecTool() *mcp.ToolAdapter[CliExecArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name: "execute_cli",
+			Description: `执行CLI命令,可用命令:
+				make:controller(创建控制器/file=路径,desc=描述),
+				make:model(创建模型/name=名称,table=表名),
+				make:service(创建服务/name=名称),
+				make:request(创建验证器/name=名称),
+				make:middleware(创建中间件/name=名称),
+				make:router(创建路由/file=路径),
+				make:docs(生成Swagger文档),
 				permission:sync(同步用户权限到Redis),
-				route:list(查看路由列表), 
-				job:list(查看Job列表)`
-}
-
-func (t *CliExec) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"command": {Type: "string", Description: "CLI命令名称,如make:controller"},
-			"args":    {Type: "string", Description: "命令参数,格式: name=User&file=v1/user&desc=用户管理,多个参数用&分隔"},
+				route:list(查看路由列表),
+				job:list(查看Job列表)`,
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"command": {Type: "string", Description: "CLI命令名称,如make:controller"},
+					"args":    {Type: "string", Description: "命令参数,格式: name=User&file=v1/user&desc=用户管理,多个参数用&分隔"},
+				},
+				Required: []string{"command"},
+			},
 		},
-		Required: []string{"command"},
-	}
+		handleCliExec,
+	)
 }
 
-func (t *CliExec) Call(_ context.Context, args map[string]any) (any, error) {
-	cmdName, _ := args["command"].(string)
-	if cmdName == "" {
+// handleCliExec 处理CLI命令执行工具
+func handleCliExec(_ context.Context, _ int64, args *CliExecArgs) (any, error) {
+	if args.Command == "" {
 		return map[string]any{"error": "请指定命令名称,如make:controller"}, nil
 	}
 
-	// 查找命令
 	commands := cli.NewRegistry(slices.Concat(console.All(), registry.All())...)
-	cmd, exists := commands.Get(cmdName)
+	cmd, exists := commands.Get(args.Command)
 	if !exists {
-		available := t.listAvailable()
-		return map[string]any{"error": fmt.Sprintf("命令 %s 不存在。可用命令: %s", cmdName, available)}, nil
+		available := listAvailableCliCommands()
+		return map[string]any{"error": fmt.Sprintf("命令 %s 不存在。可用命令: %s", args.Command, available)}, nil
 	}
 
-	// 解析参数
 	values := make(map[string]string)
-	if argsStr, ok := args["args"].(string); ok && argsStr != "" {
-		for pair := range strings.SplitSeq(argsStr, "&") {
+	if args.Args != "" {
+		for pair := range strings.SplitSeq(args.Args, "&") {
 			kv := strings.SplitN(pair, "=", 2)
 			if len(kv) == 2 {
 				values[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
@@ -70,33 +74,30 @@ func (t *CliExec) Call(_ context.Context, args map[string]any) (any, error) {
 		}
 	}
 
-	// 如果提供了name但没提供file,自动填充
 	if name, ok := values["name"]; ok && values["file"] == "" {
 		values["file"] = name
 	}
 
-	// 捕获stdout执行命令
-	output := t.captureOutput(func() {
+	output := captureCliOutput(func() {
 		cmd.Execute(values)
 	})
 
-	// 构建结果文件路径
-	resultFile := t.buildResultPath(cmdName, values)
+	resultFile := buildCliResultPath(args.Command, values)
 	result := map[string]any{
-		"command": cmdName,
+		"command": args.Command,
 		"args":    values,
 		"output":  output,
 	}
 	if resultFile != "" {
 		result["created"] = resultFile
 	}
-	result["message"] = fmt.Sprintf("命令 %s 执行完成", cmdName)
+	result["message"] = fmt.Sprintf("命令 %s 执行完成", args.Command)
 
 	return result, nil
 }
 
-// captureOutput 捕获stdout输出
-func (t *CliExec) captureOutput(fn func()) string {
+// captureCliOutput 捕获CLI标准输出
+func captureCliOutput(fn func()) string {
 	old := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -116,7 +117,8 @@ func (t *CliExec) captureOutput(fn func()) string {
 	return <-done
 }
 
-func (t *CliExec) listAvailable() string {
+// listAvailableCliCommands 获取可用CLI命令
+func listAvailableCliCommands() string {
 	names := []string{
 		"make:controller", "make:model", "make:service", "make:request",
 		"make:middleware", "make:router", "make:docs",
@@ -126,7 +128,8 @@ func (t *CliExec) listAvailable() string {
 	return strings.Join(names, ", ")
 }
 
-func (t *CliExec) buildResultPath(cmdName string, values map[string]string) string {
+// buildCliResultPath 构建CLI生成文件路径
+func buildCliResultPath(cmdName string, values map[string]string) string {
 	file, _ := values["file"]
 	name, _ := values["name"]
 	if file == "" {

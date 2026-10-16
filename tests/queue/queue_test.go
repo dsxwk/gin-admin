@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"gin/app/facade"
+	"gin/config"
 	"gin/pkg/serviceprovider/queue"
 	"testing"
 	"time"
@@ -59,6 +60,54 @@ func (p *queueFacadeTestProducer) Close() error {
 	return nil
 }
 
+type queueConsumerTestDriver struct {
+	started bool
+	stopped bool
+}
+
+// Start 启动测试消费者驱动
+func (d *queueConsumerTestDriver) Start(_ queue.ConsumerHandler) {
+	d.started = true
+}
+
+// Stop 停止测试消费者驱动
+func (d *queueConsumerTestDriver) Stop() error {
+	d.stopped = true
+	return nil
+}
+
+// Status 获取测试消费者驱动状态
+func (d *queueConsumerTestDriver) Status() string {
+	return queue.ConsumerStatusStopped
+}
+
+type queueAdapterTestPayload struct {
+	Name string `json:"name"`
+}
+
+type queueProducerTestDriver struct {
+	owner   queue.Producer
+	closed  bool
+	message any
+}
+
+// SetOwner 设置测试生产者归属
+func (d *queueProducerTestDriver) SetOwner(owner queue.Producer) {
+	d.owner = owner
+}
+
+// Publish 发布测试消息
+func (d *queueProducerTestDriver) Publish(_ context.Context, message any) error {
+	d.message = message
+	return nil
+}
+
+// Close 关闭测试生产者
+func (d *queueProducerTestDriver) Close() error {
+	d.closed = true
+	return nil
+}
+
 // TestQueueRegistryRegisterAndGet 测试注册表注册和查询
 func TestQueueRegistryRegisterAndGet(t *testing.T) {
 	registry := queue.NewRegistry[queueRegistryTestItem]()
@@ -77,24 +126,101 @@ func TestQueueRegistryRegisterAndGet(t *testing.T) {
 	require.Equal(t, queueRegistryTestItem{}, missing)
 }
 
-// TestQueueRegistryFactory 测试注册表延迟创建工厂
-func TestQueueRegistryFactory(t *testing.T) {
-	registry := queue.NewRegistry[queueRegistryTestItem]()
-	item := queueRegistryTestItem{name: "queue_registry_factory_test"}
-	created := false
+// TestQueueConsumerAdapter 测试泛型消费者适配器
+func TestQueueConsumerAdapter(t *testing.T) {
+	driver := &queueConsumerTestDriver{}
+	handled := false
+	adapter := queue.NewConsumerAdapter(
+		queue.ConsumerConfig{
+			Name:        "queue_adapter_test",
+			Description: "queue adapter test",
+			Connection:  "test",
+			Retry:       3,
+		},
+		driver,
+		func(_ context.Context, payload *queueAdapterTestPayload) error {
+			handled = payload.Name == "adapter"
+			return nil
+		},
+	)
 
-	registry.Factory(func() queueRegistryTestItem {
-		created = true
-		return item
-	})
+	require.Equal(t, "queue_adapter_test", adapter.Name())
+	require.Equal(t, 3, adapter.Retry())
+	require.False(t, adapter.IsDelay())
+	require.IsType(t, &queueAdapterTestPayload{}, adapter.NewPayload())
+	require.NoError(t, adapter.Handle(&queueAdapterTestPayload{Name: "adapter"}))
+	require.True(t, handled)
+	require.NoError(t, adapter.Start())
+	require.True(t, driver.started)
+	require.NoError(t, adapter.Stop())
+	require.True(t, driver.stopped)
+}
 
-	require.False(t, created)
-	require.NoError(t, registry.RegisterFactories())
-	require.True(t, created)
+// TestQueueProducerAdapter 测试生产者适配器
+func TestQueueProducerAdapter(t *testing.T) {
+	driver := &queueProducerTestDriver{}
+	adapter := queue.NewProducerAdapter(
+		queue.ProducerConfig{
+			Name:        "queue_producer_adapter_test",
+			Description: "queue producer adapter test",
+			Connection:  "test",
+			IsDelay:     true,
+			DelayMs:     1000,
+		},
+		driver,
+	)
 
-	current, ok := registry.Get(item.Name())
-	require.True(t, ok)
-	require.Equal(t, item, current)
+	require.Same(t, adapter, driver.owner)
+	require.Equal(t, int64(1000), adapter.DelayMs())
+	require.NoError(t, adapter.Publish(context.Background(), "message"))
+	require.Equal(t, "message", driver.message)
+	require.NoError(t, adapter.Close())
+	require.True(t, driver.closed)
+}
+
+// TestQueueManagerStartStop 测试队列管理器启停
+func TestQueueManagerStartStop(t *testing.T) {
+	consumerDriver := &queueConsumerTestDriver{}
+	producerDriver := &queueProducerTestDriver{}
+	consumer := queue.NewConsumerAdapter(
+		queue.ConsumerConfig{
+			Name:       "queue_manager_consumer_test",
+			Connection: "test",
+		},
+		consumerDriver,
+		func(_ context.Context, _ *queueAdapterTestPayload) error {
+			return nil
+		},
+	)
+	producer := queue.NewProducerAdapter(
+		queue.ProducerConfig{
+			Name:       "queue_manager_producer_test",
+			Connection: "test",
+		},
+		producerDriver,
+	)
+
+	manager, err := queue.NewManager(
+		func() *config.Config {
+			return &config.Config{}
+		},
+		[]queue.ConsumerFactory{
+			queue.NewConsumerFactory("test", func() queue.Consumer {
+				return consumer
+			}),
+		},
+		[]queue.ProducerFactory{
+			queue.NewProducerFactory("test", func() queue.Producer {
+				return producer
+			}),
+		},
+	)
+	require.NoError(t, err)
+	require.NoError(t, manager.Start())
+	require.True(t, consumerDriver.started)
+	require.NoError(t, manager.Stop())
+	require.True(t, consumerDriver.stopped)
+	require.True(t, producerDriver.closed)
 }
 
 // TestRedisDelayedMessageEnvelope 测试延迟消息唯一标识和兼容解析
@@ -138,8 +264,14 @@ func TestRedisDelayedMessageAtomicClaim(t *testing.T) {
 
 // TestQueueFacadeProducers 测试门面获取全部生产者
 func TestQueueFacadeProducers(t *testing.T) {
+	manager, err := queue.NewManager(func() *config.Config {
+		return nil
+	}, nil, nil)
+	require.NoError(t, err)
+	facade.App().SetQueue(manager)
+
 	producer := &queueFacadeTestProducer{name: "queue_facade_test"}
-	facade.Queue().Register(producer)
+	facade.Queue().RegisterProducer(producer)
 
 	current := facade.Queue().Producer(producer.Name())
 	require.Same(t, producer, current)

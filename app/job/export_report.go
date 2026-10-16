@@ -1,12 +1,11 @@
 package job
 
 import (
+	"context"
 	"gin/app/facade"
-	"gin/pkg"
+	servicejob "gin/pkg/serviceprovider/job"
+	"fmt"
 )
-
-// ExportReportJob 导出报表任务
-type ExportReportJob struct{}
 
 // ExportReport 导出报表参数
 type ExportReport struct {
@@ -16,15 +15,22 @@ type ExportReport struct {
 	UserID     int64  `json:"userId"`
 }
 
-func (j *ExportReportJob) Name() string        { return "export_report" }
-func (j *ExportReportJob) Description() string { return "导出报表任务" }
-func (j *ExportReportJob) Connection() string  { return "rabbitmq" }
-func (j *ExportReportJob) Retry() int          { return 0 }
-func (j *ExportReportJob) Delay() int64        { return 10000 }
-func (j *ExportReportJob) NewPayload() any     { return &ExportReport{} }
+// NewExportReportJob 创建导出报表任务
+func NewExportReportJob() *servicejob.Adapter[ExportReport] {
+	return servicejob.NewAdapter(
+		servicejob.Config{
+			Name:        "export_report",
+			Description: "导出报表任务",
+			Connection:  "rabbitmq",
+			Retry:       0,
+			Delay:       10000,
+		},
+		handleExportReport,
+	)
+}
 
-func (j *ExportReportJob) Handle(payload any) error {
-	data := payload.(*ExportReport)
-	facade.Log().Info(pkg.Sprintf("Job [export_report] 导出报表: type=%s user=%d", data.ReportType, data.UserID))
+// handleExportReport 处理导出报表任务
+func handleExportReport(_ context.Context, data *ExportReport) error {
+	facade.Log().Info(fmt.Sprintf("Job [export_report] 导出报表: type=%s user=%d", data.ReportType, data.UserID))
 	return nil
 }

@@ -1,12 +1,11 @@
 package job
 
 import (
+	"context"
 	"gin/app/facade"
-	"gin/pkg"
+	servicejob "gin/pkg/serviceprovider/job"
+	"fmt"
 )
-
-// SyncUserJob 同步用户任务
-type SyncUserJob struct{}
 
 // SyncUser 同步用户参数
 type SyncUser struct {
@@ -14,15 +13,22 @@ type SyncUser struct {
 	Action string `json:"action"`
 }
 
-func (j *SyncUserJob) Name() string        { return "sync_user" }
-func (j *SyncUserJob) Description() string { return "同步用户任务" }
-func (j *SyncUserJob) Connection() string  { return "sync" }
-func (j *SyncUserJob) Retry() int          { return 1 }
-func (j *SyncUserJob) Delay() int64        { return 0 }
-func (j *SyncUserJob) NewPayload() any     { return &SyncUser{} }
+// NewSyncUserJob 创建同步用户任务
+func NewSyncUserJob() *servicejob.Adapter[SyncUser] {
+	return servicejob.NewAdapter(
+		servicejob.Config{
+			Name:        "sync_user",
+			Description: "同步用户任务",
+			Connection:  "sync",
+			Retry:       1,
+			Delay:       0,
+		},
+		handleSyncUser,
+	)
+}
 
-func (j *SyncUserJob) Handle(payload any) error {
-	data := payload.(*SyncUser)
-	facade.Log().Info(pkg.Sprintf("Job [sync_user] 同步用户: user=%d action=%s", data.UserID, data.Action))
+// handleSyncUser 处理同步用户任务
+func handleSyncUser(_ context.Context, data *SyncUser) error {
+	facade.Log().Info(fmt.Sprintf("Job [sync_user] 同步用户: user=%d action=%s", data.UserID, data.Action))
 	return nil
 }

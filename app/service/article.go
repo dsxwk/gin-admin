@@ -5,7 +5,7 @@ import (
 	"gin/app/model"
 	"gin/app/request"
 	"gin/common/base"
-	"gin/pkg"
+	"gin/pkg/mapx"
 )
 
 type ArticleService struct {
@@ -76,7 +76,7 @@ func (s *ArticleService) Create(ctx context.Context, createdUser int64, req requ
 
 // Update 更新
 func (s *ArticleService) Update(ctx context.Context, id int64, data map[string]any) (err error) {
-	if pkg.HasKey(data, "tag") {
+	if mapx.HasKey(data, "tag") {
 		data["tag"] = &model.JsonValue{Data: data["tag"]}
 	}
 	return s.Updates(ctx, &model.Article{}, id, data)

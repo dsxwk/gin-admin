@@ -8,38 +8,45 @@ import (
 	"strconv"
 )
 
-// DepartmentQuery 部门查询工具
-type DepartmentQuery struct{}
-
-func (t *DepartmentQuery) Name() string { return "query_departments" }
-func (t *DepartmentQuery) Description() string {
-	return "查询部门列表或指定上级的子部门,返回部门树结构"
+// DepartmentQueryArgs 部门查询参数
+type DepartmentQueryArgs struct {
+	Pid       *int   `json:"pid"`
+	Name      string `json:"name"`
+	WithUsers bool   `json:"with_users"`
 }
 
-func (t *DepartmentQuery) InputSchema() mcp.InputSchema {
-	return mcp.InputSchema{
-		Type: "object",
-		Properties: map[string]mcp.Property{
-			"pid":        {Type: "integer", Description: "上级部门ID,0查全部顶级部门"},
-			"name":       {Type: "string", Description: "按部门名称模糊搜索"},
-			"with_users": {Type: "boolean", Description: "是否包含部门成员数量,默认false"},
+// NewDepartmentQueryTool 创建部门查询工具
+func NewDepartmentQueryTool() *mcp.ToolAdapter[DepartmentQueryArgs] {
+	return mcp.NewToolAdapter(
+		mcp.ToolConfig{
+			Name:        "query_departments",
+			Description: "查询部门列表或指定上级的子部门,返回部门树结构",
+			InputSchema: mcp.InputSchema{
+				Type: "object",
+				Properties: map[string]mcp.Property{
+					"pid":        {Type: "integer", Description: "上级部门ID,0查全部顶级部门"},
+					"name":       {Type: "string", Description: "按部门名称模糊搜索"},
+					"with_users": {Type: "boolean", Description: "是否包含部门成员数量,默认false"},
+				},
+			},
 		},
-	}
+		handleDepartmentQuery,
+	)
 }
 
-func (t *DepartmentQuery) Call(ctx context.Context, args map[string]any) (any, error) {
+// handleDepartmentQuery 处理部门查询工具
+func handleDepartmentQuery(ctx context.Context, _ int64, args *DepartmentQueryArgs) (any, error) {
 	db := facade.DB("mysql").WithContext(ctx)
 	if db == nil {
 		return nil, nil
 	}
 
 	query := db.Model(&model.Department{}).Order("sort ASC, id ASC")
-
-	if pid, ok := args["pid"].(float64); ok {
-		query = query.Where("pid = ?", int(pid))
+	if args.Pid != nil {
+		query = query.Where("pid = ?", *args.Pid)
 	}
-	if name, ok := args["name"].(string); ok && name != "" {
-		query = query.Where("name LIKE ?", "%"+name+"%")
+	if args.Name != "" {
+		query = query.Where("name LIKE ?", "%"+args.Name+"%")
 	}
 
 	var depts []model.Department

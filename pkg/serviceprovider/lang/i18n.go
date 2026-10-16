@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/config"
 	"os"
 	"path/filepath"

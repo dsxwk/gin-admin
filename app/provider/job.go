@@ -1,10 +1,8 @@
 package provider
 
 import (
-	"context"
 	"gin/app/job"
 	"gin/common/flag"
-	"gin/pkg"
 	"gin/pkg/container"
 	"gin/pkg/serviceprovider"
 	"gin/pkg/serviceprovider/eventbus"
@@ -15,6 +13,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/segmentio/kafka-go"
+	"fmt"
 )
 
 // JobProvider 任务服务提供者
@@ -56,7 +55,7 @@ func (p *JobProvider) Register(app *container.Container) {
 	}
 
 	app.SetJob(manager)
-	flag.Infof(pkg.Sprintf("已注册 %d 个Job", len(jobs)))
+	flag.Infof(fmt.Sprintf("已注册 %d 个Job", len(jobs)))
 }
 
 // Boot 启动服务
@@ -129,7 +128,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 			if cfg.Queue.Rabbitmq.Enabled {
 				driver, err := queue.NewRabbitMQ(cfg, p.log, bus)
 				if err != nil {
-					p.log.Error(pkg.Sprintf("Job RabbitMQ 连接失败: %v", err))
+					p.log.Error(fmt.Sprintf("Job RabbitMQ 连接失败: %v", err))
 					continue
 				}
 				p.consumers = append(p.consumers, servicejob.NewRabbitmqConsumer(manager, &queue.RabbitmqConsumer{
@@ -146,7 +145,7 @@ func (p *JobProvider) Boot(app *container.Container) {
 
 	for _, consumer := range p.consumers {
 		if err := consumer.Start(); err != nil {
-			p.log.Error(pkg.Sprintf("Job消费者 %s 启动失败: %v", consumer.Name(), err))
+			p.log.Error(fmt.Sprintf("Job消费者 %s 启动失败: %v", consumer.Name(), err))
 			continue
 		}
 		flag.Infof("Job消费者已启动: %s", consumer.Name())
@@ -155,11 +154,18 @@ func (p *JobProvider) Boot(app *container.Container) {
 
 // Runners 后台运行任务
 func (p *JobProvider) Runners() []serviceprovider.Runner {
+	consumers := p.consumers
+	log := p.log
 	return []serviceprovider.Runner{
-		&jobShutdownRunner{
-			consumers: p.consumers,
-			log:       p.log,
-		},
+		serviceprovider.NewShutdownRunner("job_shutdown", func() error {
+			for _, consumer := range consumers {
+				if err := consumer.Stop(); err != nil {
+					log.Error(fmt.Sprintf("Job消费者 %s 关闭失败: %v", consumer.Name(), err))
+				}
+			}
+			flag.Infof("所有Job消费者已关闭")
+			return nil
+		}),
 	}
 }
 
@@ -171,32 +177,4 @@ func (p *JobProvider) Dependencies() []string {
 		serviceprovider.ServiceEvent,
 		serviceprovider.ServiceCache,
 	}
-}
-
-// jobShutdownRunner 任务关闭器
-type jobShutdownRunner struct {
-	consumers []queue.Consumer
-	log       *logger.Logger
-}
-
-// Run 运行等待
-func (r *jobShutdownRunner) Run(ctx context.Context) error {
-	<-ctx.Done()
-	return nil
-}
-
-// Stop 停止所有Worker
-func (r *jobShutdownRunner) Stop() error {
-	for _, consumer := range r.consumers {
-		if err := consumer.Stop(); err != nil {
-			r.log.Error(pkg.Sprintf("Job消费者 %s 关闭失败: %v", consumer.Name(), err))
-		}
-	}
-	flag.Infof("所有Job消费者已关闭")
-	return nil
-}
-
-// Name 任务名称
-func (r *jobShutdownRunner) Name() string {
-	return "job_shutdown"
 }

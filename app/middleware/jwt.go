@@ -5,7 +5,7 @@ import (
 	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +31,7 @@ func (s Jwt) Handle() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(ctxkey.UserIdKey, int64(data["id"].(float64)))
+		c.Set(ctxkey.GinUserIDKey, int64(data["id"].(float64)))
 		c.Next()
 	}
 }

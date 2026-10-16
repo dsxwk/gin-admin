@@ -1,75 +1,45 @@
 package consumer
 
 import (
+	"context"
 	"gin/app/facade"
-	"gin/common/flag"
-	"gin/config"
-	"gin/pkg"
 	"gin/pkg/serviceprovider/queue"
+	"fmt"
 )
-
-// RabbitmqDemoConsumer RabbitMQ普通消费者
-type RabbitmqDemoConsumer struct {
-	*queue.RabbitmqConsumer
-}
 
 // RabbitmqDemoPayload 示例消息体
 type RabbitmqDemoPayload struct {
 	Name string `json:"name"`
 }
 
-func (c *RabbitmqDemoConsumer) NewPayload() any {
-	return &RabbitmqDemoPayload{}
-}
-
-func (c *RabbitmqDemoConsumer) Connection() string { return "rabbitmq" }
-
-func (c *RabbitmqDemoConsumer) Retry() int { return 3 }
-
-func (c *RabbitmqDemoConsumer) IsDelay() bool { return false }
-
-func (c *RabbitmqDemoConsumer) Handle(payload any) error {
-	data := payload.(*RabbitmqDemoPayload)
-	facade.Log().Info(pkg.Sprintf("RabbitMq Received Msg: name=%s", data.Name))
-	return nil
-}
-
-func NewRabbitmqDemoConsumer() *RabbitmqDemoConsumer {
+// NewRabbitmqDemoConsumer 创建RabbitMQ普通消费者
+func NewRabbitmqDemoConsumer() *queue.ConsumerAdapter[RabbitmqDemoPayload] {
 	log := facade.Log()
 	mq, err := queue.NewRabbitMQ(facade.Config(), log, facade.Event().Bus())
 	if err != nil {
-		log.Error(pkg.Sprintf("RabbitMQ连接失败: %v", err))
+		log.Error(fmt.Sprintf("RabbitMQ连接失败: %v", err))
 		return nil
 	}
 
-	return &RabbitmqDemoConsumer{
-		RabbitmqConsumer: &queue.RabbitmqConsumer{
+	return queue.NewConsumerAdapter(
+		queue.ConsumerConfig{
+			Name:        "rabbitmq_demo",
+			Description: "rabbitmq普通队列消费者",
+			Connection:  "rabbitmq",
+			Retry:       3,
+		},
+		&queue.RabbitmqConsumer{
 			Mq:       mq,
 			Queue:    "rabbitmq_demo",
 			Exchange: "rabbitmq_demo_exchange",
 			Routing:  "rabbitmq_demo",
 		},
-	}
+		handleRabbitmqDemo,
+	)
 }
 
-func (c *RabbitmqDemoConsumer) Name() string {
-	return "rabbitmq_demo"
-}
-
-func (c *RabbitmqDemoConsumer) Description() string {
-	return "rabbitmq普通队列消费者"
-}
-
-func (c *RabbitmqDemoConsumer) Start() error {
-	c.RabbitmqConsumer.Start(c)
-	flag.Infof("RabbitMQ消费者启动成功: %s", c.Name())
+// handleRabbitmqDemo 处理RabbitMQ普通消息
+func handleRabbitmqDemo(_ context.Context, data *RabbitmqDemoPayload) error {
+	facade.Log().Info(fmt.Sprintf("RabbitMq Received Msg: name=%s", data.Name))
 	return nil
-}
-
-func (c *RabbitmqDemoConsumer) Stop() error {
-	return c.RabbitmqConsumer.Stop()
-}
-
-func (c *RabbitmqDemoConsumer) Enabled(cfg *config.Config) bool {
-	return cfg.Queue.Rabbitmq.Enabled
 }

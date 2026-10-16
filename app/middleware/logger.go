@@ -3,7 +3,7 @@ package middleware
 import (
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"gin/pkg/serviceprovider/debugger"
 	"strings"
 	"time"

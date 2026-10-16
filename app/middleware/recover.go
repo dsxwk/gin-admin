@@ -6,7 +6,7 @@ import (
 	"gin/app/errcode"
 	"gin/app/facade"
 	"gin/common/base"
-	"gin/common/ctxkey"
+	"gin/pkg/ctxkey"
 	"runtime"
 
 	"github.com/gin-gonic/gin"
@@ -62,7 +62,7 @@ func (s Recover) Handle() gin.HandlerFunc {
 	}
 }
 
-func getString(c context.Context, key string) string {
+func getString(c context.Context, key ctxkey.Key) string {
 	if c == nil {
 		return "unknown"
 	}
