@@ -34,28 +34,28 @@ type App struct {
 	application *serviceprovider.Application
 }
 
-// Init 初始化应用
-func Init() (*serviceprovider.Application, error) {
-	// 启动应用(加载所有providers)
-	app := serviceprovider.NewApp(provider.All()...)
-	if err := app.Boot(); err != nil {
-		return nil, err
-	}
-	return app, nil
-}
-
 // NewApp 创建应用实例
 func NewApp() *App {
-	app, err := Init()
-	if err != nil {
-		flag.Errorf("初始化应用失败: %v", err)
-		os.Exit(1)
+	return &App{
+		application: serviceprovider.NewApp(provider.All()...),
+	}
+}
+
+// Boot 启动应用
+func (a *App) Boot() error {
+	if a == nil || a.application == nil {
+		return errors.New("application not initialized")
+	}
+	if a.Engine != nil {
+		return nil
 	}
 
-	return &App{
-		Engine:      setupEngine(),
-		application: app,
+	if err := a.application.Boot(); err != nil {
+		return err
 	}
+
+	a.Engine = setupEngine()
+	return nil
 }
 
 // setupEngine 配置Gin引擎
@@ -99,6 +99,11 @@ func syncRoutePermissions() {
 }
 
 func (a *App) Run() {
+	if a == nil || a.Engine == nil {
+		flag.Errorf("应用未启动,无法运行服务")
+		os.Exit(1)
+	}
+
 	// 系统优化设置50：更积极回收
 	debug.SetGCPercent(50)
 

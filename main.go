@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"gin/bootstrap"
+	"gin/common/flag"
 )
 
 //go:generate go env -w GO111MODULE=on
@@ -20,6 +23,11 @@ import (
 // @contact.email 25076778@qq.com
 // @host 127.0.0.1:8080
 func main() {
-	// 初始化应用
-	bootstrap.NewApp().Run()
+	app := bootstrap.NewApp()
+	if err := app.Boot(); err != nil {
+		flag.Errorf("初始化应用失败: %v", err)
+		os.Exit(1)
+	}
+
+	app.Run()
 }
