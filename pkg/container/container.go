@@ -21,11 +21,11 @@ import (
 	"sync/atomic"
 )
 
-var app = New()
+var defaultContainer = New()
 
 // Default 获取默认服务容器
 func Default() *Container {
-	return app
+	return defaultContainer
 }
 
 // Container 服务容器
