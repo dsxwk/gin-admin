@@ -56,9 +56,13 @@ func (h *AgentHandler) Handle(ctx context.Context, client ws.Connection, message
 		return ws.SendError(client, errcode.ArgsError().WithMsg("问题不能为空"))
 	}
 
-	providerName, modelName, ok := facade.AgentProvider(payload.Provider)
-	if !ok {
+	agt := facade.Agent()
+	if agt == nil {
 		return ws.SendError(client, errors.New("agent未启用或配置错误"))
+	}
+	a, providerName, modelName, err := agt.Create(payload.Provider)
+	if err != nil {
+		return ws.SendError(client, err)
 	}
 
 	traceID, _ := ctx.Value(ctxkey.TraceIDKey).(string)
@@ -69,7 +73,6 @@ func (h *AgentHandler) Handle(ctx context.Context, client ws.Connection, message
 		if len([]rune(title)) > 200 {
 			title = string([]rune(title)[:200])
 		}
-		var err error
 		sessionID, err = agentService.CreateSession(ctx, userID, title, providerName, modelName, traceID)
 		if err != nil {
 			return ws.SendError(client, err)
@@ -81,15 +84,7 @@ func (h *AgentHandler) Handle(ctx context.Context, client ws.Connection, message
 		return ws.SendError(client, err)
 	}
 
-	a := facade.Agent(providerName)
-	if a == nil {
-		return ws.SendError(client, errors.New("agent未启用或配置错误"))
-	}
-	mcpTools := make([]mcp.Tool, 0)
-	if mcpHandler := facade.MCP(); mcpHandler != nil {
-		mcpTools = mcpHandler.Tools()
-	}
-	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", mcpTools)).
+	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", agt.Tools())).
 		WithSession(sessionID, &agentService).
 		WithHistory(history).
 		WithUserId(userID).

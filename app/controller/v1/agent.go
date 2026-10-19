@@ -43,10 +43,14 @@ func (s *AgentController) Ask(c *gin.Context) {
 		return
 	}
 
-	// 解析提供商信息
-	providerName, modelName, ok := facade.AgentProvider(req.Provider)
-	if !ok {
+	agt := facade.Agent()
+	if agt == nil {
 		s.Response.Error(c, errors.New("agent未启用或配置错误"))
+		return
+	}
+	a, providerName, modelName, err := agt.Create(req.Provider)
+	if err != nil {
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -61,7 +65,6 @@ func (s *AgentController) Ask(c *gin.Context) {
 		if len([]rune(title)) > 200 {
 			title = string([]rune(title)[:200])
 		}
-		var err error
 		sessionId, err = s.service.CreateSession(ctx, userId, title, providerName, modelName, traceId)
 		if err != nil {
 			s.Response.Error(c, err)
@@ -76,13 +79,7 @@ func (s *AgentController) Ask(c *gin.Context) {
 		return
 	}
 
-	// 构建Agent并注入会话记录器
-	a := facade.Agent(providerName)
-	if a == nil {
-		s.Response.Error(c, errors.New("agent未启用或配置错误"))
-		return
-	}
-	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", facade.MCP().Tools())).
+	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", agt.Tools())).
 		WithSession(sessionId, &s.service).
 		WithHistory(history).
 		WithUserId(userId).
@@ -127,9 +124,14 @@ func (s *AgentController) Stream(c *gin.Context) {
 		return
 	}
 
-	providerName, modelName, ok := facade.AgentProvider(req.Provider)
-	if !ok {
+	agentManager := facade.Agent()
+	if agentManager == nil {
 		s.Response.Error(c, errors.New("agent未启用或配置错误"))
+		return
+	}
+	a, providerName, modelName, err := agentManager.Create(req.Provider)
+	if err != nil {
+		s.Response.Error(c, err)
 		return
 	}
 
@@ -141,7 +143,6 @@ func (s *AgentController) Stream(c *gin.Context) {
 		if len([]rune(title)) > 200 {
 			title = string([]rune(title)[:200])
 		}
-		var err error
 		sessionId, err = s.service.CreateSession(ctx, userId, title, providerName, modelName, traceId)
 		if err != nil {
 			s.Response.Error(c, err)
@@ -155,16 +156,7 @@ func (s *AgentController) Stream(c *gin.Context) {
 		return
 	}
 
-	a := facade.Agent(providerName)
-	if a == nil {
-		s.Response.Error(c, errors.New("agent未启用或配置错误"))
-		return
-	}
-	mcpTools := make([]mcp.Tool, 0)
-	if mcpHandler := facade.MCP(); mcpHandler != nil {
-		mcpTools = mcpHandler.Tools()
-	}
-	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", mcpTools)).
+	a.WithSystemPrompt(mcp.BuildSystemPrompt("Gin-Admin后台AI助手", agentManager.Tools())).
 		WithSession(sessionId, &s.service).
 		WithHistory(history).
 		WithUserId(userId).

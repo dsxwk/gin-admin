@@ -2,6 +2,7 @@ package tests
 
 import (
 	"gin/app/console"
+	"gin/app/facade"
 	"gin/tests/util"
 	"strings"
 	"testing"
@@ -82,5 +83,20 @@ func TestConsoleCommandConfig(t *testing.T) {
 	}
 	if len(command.Help()) != 1 {
 		t.Fatal("命令帮助配置错误")
+	}
+}
+
+// TestAgentFacade 测试AI Agent门面
+func TestAgentFacade(t *testing.T) {
+	manager := facade.Agent()
+	if manager == nil {
+		t.Fatal("AI Agent服务未注册")
+	}
+	providerName, modelName, ok := manager.Provider()
+	if !ok {
+		t.Fatal("AI Agent默认提供商未配置")
+	}
+	if providerName == "" || modelName == "" {
+		t.Fatal("AI Agent默认提供商信息不完整")
 	}
 }

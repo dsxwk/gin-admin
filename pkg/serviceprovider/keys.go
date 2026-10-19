@@ -5,6 +5,8 @@ const (
 	ServiceConfig = "config"
 	// ServiceLog 日志服务
 	ServiceLog = "log"
+	// ServiceAgent AI Agent服务
+	ServiceAgent = "agent"
 	// ServiceDB 数据库服务
 	ServiceDB = "db"
 	// ServiceCache 缓存服务

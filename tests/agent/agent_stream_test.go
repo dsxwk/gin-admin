@@ -20,6 +20,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestAgentManagerCreate 测试Agent管理器创建实例
+func TestAgentManagerCreate(t *testing.T) {
+	cfg := &config.Config{
+		Agent: config.Agent{
+			Enabled: true,
+			Default: "test",
+			Providers: map[string]config.AgentProvider{
+				"test": {
+					BaseUrl: "http://127.0.0.1",
+					Model:   "test-model",
+				},
+			},
+			MaxTokens:      128,
+			Temperature:    0.5,
+			RequestTimeout: time.Second,
+		},
+	}
+
+	manager := agent.NewManager(cfg, nil, func(_ string, _ config.AgentProvider) agent.Provider {
+		return &agentStreamTestProvider{}
+	})
+	instance, providerName, modelName, err := manager.Create()
+	require.NoError(t, err)
+	require.NotNil(t, instance)
+	require.Equal(t, "test", providerName)
+	require.Equal(t, "test-model", modelName)
+	require.Empty(t, manager.Tools())
+}
+
 // wsResponse WebSocket测试响应
 type wsResponse struct {
 	Type string          `json:"type"`

@@ -2,6 +2,7 @@ package container
 
 import (
 	"gin/config"
+	serviceagent "gin/pkg/serviceprovider/agent"
 	"gin/pkg/serviceprovider/cache"
 	"gin/pkg/serviceprovider/debugger"
 	"gin/pkg/serviceprovider/es"
@@ -32,6 +33,7 @@ func Default() *Container {
 type Container struct {
 	config    atomic.Pointer[config.Config]
 	log       atomic.Pointer[logger.Logger]
+	agent     atomic.Pointer[serviceagent.Manager]
 	db        atomic.Pointer[orm.Manager]
 	cache     atomic.Pointer[cache.Manager]
 	file      atomic.Pointer[filesystem.Manager]
@@ -72,6 +74,16 @@ func (c *Container) SetLog(value *logger.Logger) {
 // Log 获取日志服务
 func (c *Container) Log() *logger.Logger {
 	return c.log.Load()
+}
+
+// SetAgent 设置AI Agent服务
+func (c *Container) SetAgent(value *serviceagent.Manager) {
+	c.agent.Store(value)
+}
+
+// Agent 获取AI Agent服务
+func (c *Container) Agent() *serviceagent.Manager {
+	return c.agent.Load()
 }
 
 // SetDB 设置数据库服务
