@@ -131,12 +131,12 @@ func (r *Registry) Execute(args []string) {
 			base.PrintArgs(cmd.Help())
 			os.Exit(1)
 		}
-		if err = cmd.Handle(values); err != nil {
+		if err = base.ExecuteWithCron(cmd, values); err != nil {
 			terminal.Errorf("%s", err.Error())
 			os.Exit(1)
 		}
 	} else {
-		if err := cmd.Handle(nil); err != nil {
+		if err := base.ExecuteWithCron(cmd, nil); err != nil {
 			terminal.Errorf("%s", err.Error())
 			os.Exit(1)
 		}

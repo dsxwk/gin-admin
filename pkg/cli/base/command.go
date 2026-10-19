@@ -2,17 +2,22 @@ package base
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"gin/pkg/pathx"
 	"gin/pkg/stringx"
 	"gin/pkg/terminal"
+	"maps"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"sort"
 	"strings"
+	"syscall"
 
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
+	"github.com/robfig/cron/v3"
 	"github.com/spf13/pflag"
 )
 
@@ -21,7 +26,19 @@ type Config struct {
 	Name        string
 	Description string
 	Options     []CommandOption
+	Cron        string
+	CronValues  map[string]string
 }
+
+// cronOption 通用cron参数
+var cronOption = CommandOption{
+	Flag: Flag{
+		Long: "cron",
+	},
+	Desc: "Cron表达式,如: */5 * * * * *,为空时手动执行",
+}
+
+var commandCronParser = cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 
 // Command 基础命令
 type Command struct {
@@ -32,6 +49,9 @@ type Command struct {
 func NewCommand(config Config) Command {
 	if config.Description == "" {
 		config.Description = config.Name
+	}
+	if !hasOption(config.Options, cronOption.Flag.Long) {
+		config.Options = append(config.Options, cronOption)
 	}
 	return Command{config: config}
 }
@@ -62,15 +82,157 @@ type CommandOption struct {
 
 // Handler 命令处理器
 type Handler interface {
-	Name() string                     // 命令名称，如 "make:controller"
-	Description() string              // 命令描述
+	Name() string                          // 命令名称，如 "make:controller"
+	Description() string                   // 命令描述
 	Handle(values map[string]string) error // 执行逻辑
-	Help() []CommandOption            // 获取命令帮助信息
+	Help() []CommandOption                 // 获取命令帮助信息
+}
+
+// Scheduled 定时命令接口
+type Scheduled interface {
+	Cron() string
+	CronValues() map[string]string
 }
 
 // Help 获取命令帮助
 func (b *Command) Help() []CommandOption {
 	return b.config.Options
+}
+
+// Cron 获取自动调度表达式
+func (b *Command) Cron() string {
+	return b.config.Cron
+}
+
+// CronValues 获取自动调度参数
+func (b *Command) CronValues() map[string]string {
+	return cloneValues(b.config.CronValues)
+}
+
+// CronManager 控制台定时任务管理器
+type CronManager struct {
+	scheduler *cron.Cron
+	count     int
+}
+
+// NewCronManager 创建控制台定时任务管理器
+func NewCronManager(commands ...Handler) (*CronManager, error) {
+	scheduler := cron.New(cron.WithParser(commandCronParser))
+	count := 0
+
+	for _, item := range commands {
+		scheduled, ok := item.(Scheduled)
+		if !ok {
+			continue
+		}
+
+		expression := strings.TrimSpace(scheduled.Cron())
+		if expression == "" {
+			continue
+		}
+		if _, err := commandCronParser.Parse(expression); err != nil {
+			return nil, fmt.Errorf("命令%s的cron表达式无效:%w", item.Name(), err)
+		}
+
+		handler := item
+		values := scheduled.CronValues()
+		if _, err := scheduler.AddFunc(expression, func() {
+			if err := handler.Handle(cloneValues(values)); err != nil {
+				terminal.Errorf("命令%s定时执行失败:%s", handler.Name(), err.Error())
+			}
+		}); err != nil {
+			return nil, fmt.Errorf("注册命令%s的cron任务失败:%w", item.Name(), err)
+		}
+		count++
+	}
+
+	return &CronManager{
+		scheduler: scheduler,
+		count:     count,
+	}, nil
+}
+
+// Run 启动控制台定时任务
+func (m *CronManager) Run(ctx context.Context) error {
+	if m == nil || m.scheduler == nil || m.count == 0 {
+		return nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	m.scheduler.Start()
+	terminal.Infof("控制台定时任务已启动,任务数:%d", m.count)
+	<-ctx.Done()
+	return nil
+}
+
+// Stop 停止控制台定时任务
+func (m *CronManager) Stop() error {
+	if m == nil || m.scheduler == nil {
+		return nil
+	}
+	m.scheduler.Stop()
+	terminal.Infof("控制台定时任务已停止")
+	return nil
+}
+
+// Name 获取定时任务管理器名称
+func (m *CronManager) Name() string {
+	return "console_cron"
+}
+
+// Len 获取定时任务数量
+func (m *CronManager) Len() int {
+	if m == nil {
+		return 0
+	}
+	return m.count
+}
+
+// ExecuteWithCron 执行命令或启动cron调度
+func ExecuteWithCron(command Handler, values map[string]string) error {
+	if command == nil {
+		return fmt.Errorf("命令未初始化")
+	}
+
+	expression := strings.TrimSpace(values["cron"])
+	if expression == "" {
+		return command.Handle(values)
+	}
+	if _, err := commandCronParser.Parse(expression); err != nil {
+		return fmt.Errorf("解析cron表达式失败:%w", err)
+	}
+
+	scheduler := cron.New(cron.WithParser(commandCronParser))
+	if _, err := scheduler.AddFunc(expression, func() {
+		if err := command.Handle(cloneValues(values)); err != nil {
+			terminal.Errorf("命令%s定时执行失败:%s", command.Name(), err.Error())
+		}
+	}); err != nil {
+		return fmt.Errorf("注册cron任务失败:%w", err)
+	}
+
+	scheduler.Start()
+	terminal.Infof("命令%s已启动定时执行,cron:%s", command.Name(), expression)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	<-ctx.Done()
+
+	scheduler.Stop()
+	terminal.Infof("命令%s定时执行已停止", command.Name())
+	return nil
+}
+
+// cloneValues 复制命令参数
+func cloneValues(values map[string]string) map[string]string {
+	if len(values) == 0 {
+		return values
+	}
+	result := make(map[string]string, len(values))
+	maps.Copy(result, values)
+	return result
 }
 
 // ParseFlags flag解析
@@ -80,6 +242,10 @@ func (b *Command) ParseFlags(name string, args []string, opts []CommandOption) (
 
 	flagRefs := make(map[string]*string)
 	for _, opt := range opts {
+		if opt.Flag.Short == "" {
+			flagRefs[opt.Flag.Long] = fs.String(opt.Flag.Long, opt.Flag.Default, opt.Desc)
+			continue
+		}
 		flagRefs[opt.Flag.Long] = fs.StringP(opt.Flag.Long, opt.Flag.Short, opt.Flag.Default, opt.Desc)
 	}
 
@@ -94,7 +260,7 @@ func (b *Command) ParseFlags(name string, args []string, opts []CommandOption) (
 
 	for _, opt := range opts {
 		if opt.Required && values[opt.Flag.Long] == "" {
-			return nil, fmt.Errorf("参数 -%s 或 --%s 不能为空", opt.Flag.Short, opt.Flag.Long)
+			return nil, fmt.Errorf("参数%s不能为空", optionLabel(opt))
 		}
 	}
 
@@ -139,7 +305,7 @@ func PrintArgs(opts []CommandOption) {
 	maxFlagWidth := 0
 	maxDescWidth := 0
 	for _, opt := range opts {
-		flagStr := fmt.Sprintf("-%s, --%s", opt.Flag.Short, opt.Flag.Long)
+		flagStr := optionLabel(opt)
 		if w := runewidth.StringWidth(flagStr); w > maxFlagWidth {
 			maxFlagWidth = w
 		}
@@ -149,7 +315,7 @@ func PrintArgs(opts []CommandOption) {
 	}
 
 	for _, opt := range opts {
-		flagStr := fmt.Sprintf("-%s, --%s", opt.Flag.Short, opt.Flag.Long)
+		flagStr := optionLabel(opt)
 		descStr := opt.Desc
 		colFlag := color.GreenString(flagStr)
 		colDesc := descStr
@@ -169,6 +335,24 @@ func PrintArgs(opts []CommandOption) {
 			required,
 		)
 	}
+}
+
+// hasOption 判断参数是否存在
+func hasOption(options []CommandOption, name string) bool {
+	for _, option := range options {
+		if option.Flag.Long == name {
+			return true
+		}
+	}
+	return false
+}
+
+// optionLabel 获取参数显示名称
+func optionLabel(option CommandOption) string {
+	if option.Flag.Short == "" {
+		return "--" + option.Flag.Long
+	}
+	return fmt.Sprintf("-%s, --%s", option.Flag.Short, option.Flag.Long)
 }
 
 // FormatArgs 格式化参数

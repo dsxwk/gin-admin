@@ -16,6 +16,10 @@ func NewDemoCommand() *DemoCommand {
 		Command: base.NewCommand(base.Config{
 			Name:        "demo:test",
 			Description: "演示控制台命令",
+			Cron:        "*/5 * * * * *",
+			CronValues: map[string]string{
+				"args": "arg1",
+			},
 			Options: []base.CommandOption{
 				{
 					Flag:     base.Flag{Short: "a", Long: "args"},

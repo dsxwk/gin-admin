@@ -22,6 +22,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg6/gfs v0.1.2
 	github.com/rabbitmq/amqp091-go v1.15.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.53.0
 	github.com/segmentio/kafka-go v0.4.51
 	github.com/shirou/gopsutil/v4 v4.26.9

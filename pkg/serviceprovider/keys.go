@@ -37,4 +37,6 @@ const (
 	ServiceRequest = "request"
 	// ServiceRateLimit 限流服务
 	ServiceRateLimit = "rate_limit"
+	// ServiceConsoleCron 控制台定时任务服务
+	ServiceConsoleCron = "console_cron"
 )

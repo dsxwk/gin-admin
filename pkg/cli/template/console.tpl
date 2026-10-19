@@ -14,8 +14,10 @@ type {{.Name}}Command struct {
 func New{{.Name}}Command() *{{.Name}}Command {
 	return &{{.Name}}Command{
 		Command: base.NewCommand(base.Config{
-			Name: {{if eq .Command ""}}"{{.Name}}-command"{{else}}"{{.Command}}"{{end}},
+			Name:        {{if eq .Command ""}}"{{.Name}}-command"{{else}}"{{.Command}}"{{end}},
 			Description: "{{.Description}}",
+			Cron:        "",
+			CronValues:  map[string]string{},
 			Options: []base.CommandOption{
 				{
 					Flag:     base.Flag{Short: "a", Long: "args"},

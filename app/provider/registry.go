@@ -25,5 +25,6 @@ func All() []serviceprovider.ServiceProvider {
 		&AgentProvider{},
 		&WsProvider{},
 		&RateLimitProvider{},
+		&ConsoleCronProvider{},
 	}
 }
