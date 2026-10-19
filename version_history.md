@@ -1,5 +1,12 @@
 # Version History
 
+## v3.4.1
+> - Register AI Agent management in the container and expose facade.Agent().Create with an injected provider factory
+> - Preserve files uploaded through the login test endpoint instead of deleting them immediately
+> - Add coverage for Agent manager creation and facade registration
+> - Scan all console commands at application startup and schedule commands that declare a cron expression
+> - Add the robfig/cron/v3 dependency for cron parsing and scheduling
+
 ## v3.4.0
 > - Refactor the pkg toolkit and split it into convert, cryptox, ctxkey, mapx, pathx, stringx, timex, and treex packages
 > - Move common/flag to pkg/terminal and unify terminal output package naming

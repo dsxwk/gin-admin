@@ -265,7 +265,7 @@
 
 # Version History
 
-> - Latest Version [v3.4.0](version_history.md#v340)
+> - Latest Version [v3.4.1](version_history.md#v341)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -746,6 +746,8 @@ func NewDemoCommand() *DemoCommand {
 		Command: base.NewCommand(base.Config{
 			Name:        "demo-test",
 			Description: "command-desc",
+			Cron:        "",
+			CronValues: map[string]string{},
 			Options: []base.CommandOption{
 				{
 					Flag:     base.Flag{Short: "a", Long: "args"},

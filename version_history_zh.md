@@ -1,5 +1,12 @@
 # 版本记录
 
+## v3.4.1
+> - AI Agent管理器注册到容器,门面通过facade.Agent().Create创建实例并注入提供商工厂
+> - 登录测试接口上传成功后不再立即删除文件
+> - 新增Agent管理器创建和门面注册测试
+> - 应用启动时扫描全部控制台命令,自动调度声明了cron表达式的命令
+> - 新增robfig/cron/v3依赖用于cron解析和调度
+
 ## v3.4.0
 > - 重构pkg工具包,拆分convert、cryptox、ctxkey、mapx、pathx、stringx、timex和treex子包
 > - 将common/flag迁移为pkg/terminal,统一终端输出包命名

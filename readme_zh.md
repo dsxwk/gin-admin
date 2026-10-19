@@ -254,7 +254,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.4.0](version_history_zh.md#v340)
+> - 最新版本 [v3.4.1](version_history_zh.md#v341)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -731,6 +731,8 @@ func NewDemoCommand() *DemoCommand {
 		Command: base.NewCommand(base.Config{
 			Name:        "demo-test",
 			Description: "command-desc",
+			Cron:        "",
+            CronValues: map[string]string{},
 			Options: []base.CommandOption{
 				{
 					Flag:     base.Flag{Short: "a", Long: "args"},
