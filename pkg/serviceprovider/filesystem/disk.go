@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"gin/app/errcode"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -12,8 +13,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-
-	"gin/app/errcode"
 
 	"github.com/pkg6/gfs"
 	"github.com/pkg6/gfs/localfs"
@@ -30,11 +29,13 @@ type Disk struct {
 
 // UploadResult 文件上传结果
 type UploadResult struct {
-	Disk     string `json:"disk"`     // 文件磁盘
-	Path     string `json:"path"`     // 文件路径
-	URL      string `json:"url"`      // 文件地址
-	Size     int64  `json:"size"`     // 文件大小
-	MimeType string `json:"mimeType"` // 文件类型
+	Disk       string `json:"disk"`       // 文件磁盘
+	OriginName string `json:"originName"` // 原始文件名
+	ObjectKey  string `json:"objectKey"`  // 存储对象Key
+	Path       string `json:"path"`       // 文件路径
+	URL        string `json:"url"`        // 文件地址
+	Size       int64  `json:"size"`       // 文件大小
+	MimeType   string `json:"mimeType"`   // 文件类型
 }
 
 // Name 获取文件磁盘名称
@@ -65,7 +66,14 @@ func (d *Disk) Upload(source any, objectPath string) (*UploadResult, error) {
 		}()
 	}
 
-	return d.UploadReaderWithSize(reader, objectPath, size)
+	result, err := d.UploadReaderWithSize(reader, objectPath, size)
+	if err != nil {
+		return nil, err
+	}
+	if originName := uploadOriginName(source); originName != "" {
+		result.OriginName = originName
+	}
+	return result, nil
 }
 
 // UploadReader 上传文件流
@@ -98,9 +106,11 @@ func (d *Disk) UploadReaderWithSize(reader io.Reader, objectPath string, size in
 	}
 
 	result := &UploadResult{
-		Disk: d.name,
-		Path: d.resultPath(objectPath),
-		Size: size,
+		Disk:       d.name,
+		OriginName: path.Base(objectPath),
+		ObjectKey:  objectPath,
+		Path:       d.resultPath(objectPath),
+		Size:       size,
 	}
 
 	if result.Size <= 0 {
@@ -121,6 +131,18 @@ func (d *Disk) UploadReaderWithSize(reader io.Reader, objectPath string, size in
 	}
 
 	return result, nil
+}
+
+// ObjectKey 获取标准化后的存储对象Key
+func (d *Disk) ObjectKey(objectPath string) (string, error) {
+	if err := d.ready(); err != nil {
+		return "", err
+	}
+	objectPath, err := normalizeObjectPath(objectPath)
+	if err != nil {
+		return "", err
+	}
+	return d.objectKey(objectPath), nil
 }
 
 // Read 读取文件
@@ -170,6 +192,7 @@ func (d *Disk) Delete(objectPath string) error {
 		} else if !errors.Is(statErr, os.ErrNotExist) {
 			return statErr
 		}
+		removeEmptyDirectories(filepath.Dir(storedPath), d.root)
 	}
 
 	return nil
@@ -322,6 +345,20 @@ func openUploadSource(source any) (io.Reader, io.Closer, int64, error) {
 	}
 }
 
+// uploadOriginName 获取上传文件原始名称
+func uploadOriginName(source any) string {
+	switch value := source.(type) {
+	case *multipart.FileHeader:
+		return value.Filename
+	case *os.File:
+		return filepath.Base(value.Name())
+	case string:
+		return filepath.Base(strings.TrimSpace(value))
+	default:
+		return ""
+	}
+}
+
 // normalizeObjectPath 标准化文件路径
 func normalizeObjectPath(value string) (string, error) {
 	value = strings.ReplaceAll(strings.TrimSpace(value), "\\", "/")
@@ -333,4 +370,33 @@ func normalizeObjectPath(value string) (string, error) {
 	}
 
 	return value, nil
+}
+
+// removeEmptyDirectories 回收空的父级目录
+func removeEmptyDirectories(dir, root string) {
+	if dir == "" || root == "" {
+		return
+	}
+
+	root = filepath.Clean(root)
+	dir = filepath.Clean(dir)
+	for dir != root {
+		rel, err := filepath.Rel(root, dir)
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+			return
+		}
+
+		entries, err := os.ReadDir(dir)
+		if errors.Is(err, os.ErrNotExist) {
+			dir = filepath.Dir(dir)
+			continue
+		}
+		if err != nil || len(entries) > 0 {
+			return
+		}
+		if err = os.Remove(dir); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return
+		}
+		dir = filepath.Dir(dir)
+	}
 }

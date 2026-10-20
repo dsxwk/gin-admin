@@ -2,13 +2,12 @@ package filesystem
 
 import (
 	"fmt"
+	"gin/app/errcode"
+	"gin/config"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"gin/app/errcode"
-	"gin/config"
 
 	"github.com/pkg6/gfs"
 	"github.com/pkg6/gfs/bosfs"

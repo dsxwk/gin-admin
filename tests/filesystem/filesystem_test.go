@@ -4,11 +4,16 @@ import (
 	"bytes"
 	"mime/multipart"
 	"net/http/httptest"
+	"os"
 	"path"
+	"path/filepath"
 	"testing"
+	"uuid"
 
 	"gin/app/errcode"
 	"gin/app/facade"
+	"gin/app/model"
+	"gin/pkg/pathx"
 
 	"github.com/stretchr/testify/require"
 )
@@ -69,6 +74,64 @@ func TestMultipartUpload(t *testing.T) {
 	data, err := disk.Read(result.Path)
 	require.NoError(t, err)
 	require.Equal(t, []byte("image-data"), data)
+}
+
+// TestFileRecordLifecycle 文件表记录生命周期测试
+func TestFileRecordLifecycle(t *testing.T) {
+	disk := facade.File().WithUploader(9).WithGroup(7).Disk()
+	objectPath := "tests/filesystem/file-record.txt"
+	require.NoError(t, disk.Delete(objectPath))
+	t.Cleanup(func() {
+		_ = disk.Delete(objectPath)
+	})
+
+	result, err := disk.Upload([]byte("record-data"), objectPath)
+	require.NoError(t, err)
+	require.NotEmpty(t, result.ObjectKey)
+	require.NotEmpty(t, result.OriginName)
+
+	db := facade.DB("mysql")
+	require.NotNil(t, db)
+	var count int64
+	require.NoError(t, db.Model(&model.File{}).
+		Where("storage = ? AND object_key = ?", result.Disk, result.ObjectKey).
+		Count(&count).Error)
+	require.Equal(t, int64(1), count)
+
+	var record model.File
+	require.NoError(t, db.Where("storage = ? AND object_key = ?", result.Disk, result.ObjectKey).
+		First(&record).Error)
+	require.Equal(t, int64(9), record.UploaderId)
+	require.Equal(t, int64(7), record.GroupId)
+	require.Equal(t, "file-record.txt", record.OriginName)
+
+	require.NoError(t, disk.Delete(objectPath))
+	count = 0
+	require.NoError(t, db.Model(&model.File{}).
+		Where("storage = ? AND object_key = ?", result.Disk, result.ObjectKey).
+		Count(&count).Error)
+	require.Zero(t, count)
+}
+
+// TestDeleteRemovesEmptyDirectories 删除文件后回收空目录测试
+func TestDeleteRemovesEmptyDirectories(t *testing.T) {
+	disk := facade.File().Disk()
+	objectDir := path.Join("tests/filesystem", "cleanup-"+uuid.New().String())
+	objectPath := path.Join(objectDir, "empty-dir.txt")
+	t.Cleanup(func() {
+		_ = disk.Delete(objectPath)
+	})
+
+	result, err := disk.Upload([]byte("cleanup"), objectPath)
+	require.NoError(t, err)
+
+	dirPath := filepath.Join(pathx.RootPath(), filepath.FromSlash(result.Path))
+	dirPath = filepath.Dir(dirPath)
+	require.DirExists(t, dirPath)
+
+	require.NoError(t, disk.Delete(objectPath))
+	_, err = os.Stat(dirPath)
+	require.ErrorIs(t, err, os.ErrNotExist)
 }
 
 // TestDiskNotFound 文件磁盘不存在测试

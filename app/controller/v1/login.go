@@ -206,7 +206,11 @@ func (s *LoginController) Test(c *gin.Context) {
 	}
 
 	objectPath := uuid.New().String() + strings.ToLower(path.Ext(fileHeader.Filename))
-	fileUpload, err := facade.File().Disk("local").Upload(fileHeader, objectPath)
+	fileUpload, err := facade.File().
+		WithContext(ctx).
+		WithUploader(s.GetUserID(c)).
+		Disk("local").
+		Upload(fileHeader, objectPath)
 	if err != nil {
 		s.Response.Error(c, err)
 		return
