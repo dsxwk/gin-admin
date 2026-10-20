@@ -1,13 +1,13 @@
 package filesystem
 
 import (
-	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"gin/app/errcode"
 	"gin/config"
 
 	"github.com/pkg6/gfs"
@@ -16,17 +16,6 @@ import (
 	"github.com/pkg6/gfs/kodofs"
 	"github.com/pkg6/gfs/localfs"
 	"github.com/pkg6/gfs/ossfs"
-)
-
-var (
-	// ErrNotInitialized 文件系统服务未初始化
-	ErrNotInitialized = errors.New("文件系统服务未初始化")
-	// ErrDiskNotFound 文件磁盘不存在
-	ErrDiskNotFound = errors.New("文件磁盘不存在")
-	// ErrInvalidPath 文件路径不合法
-	ErrInvalidPath = errors.New("文件路径不合法")
-	// ErrUnsupportedSource 不支持的上传来源
-	ErrUnsupportedSource = errors.New("不支持的上传来源")
 )
 
 // diskEntry 文件磁盘配置
@@ -118,7 +107,7 @@ func NewManager(conf config.Filesystem) (*Manager, error) {
 		manager.defaultDisk = name
 	}
 	if _, ok := manager.disks[manager.defaultDisk]; !ok {
-		return nil, fmt.Errorf("%w: %s", ErrDiskNotFound, manager.defaultDisk)
+		return nil, fmt.Errorf("%w: %s", (errcode.FilesystemErrCode{}).DiskNotFound(), manager.defaultDisk)
 	}
 
 	return manager, nil
@@ -150,7 +139,7 @@ func (m *Manager) register(names []string, adapter gfs.IAdapter, root string, di
 // Disk 获取文件磁盘
 func (m *Manager) Disk(name ...string) *Disk {
 	if m == nil {
-		return &Disk{err: ErrNotInitialized}
+		return &Disk{err: (errcode.FilesystemErrCode{}).NotInitialized()}
 	}
 
 	diskName := m.defaultDisk
@@ -164,7 +153,7 @@ func (m *Manager) Disk(name ...string) *Disk {
 	if entry == nil {
 		return &Disk{
 			name: diskName,
-			err:  fmt.Errorf("%w: %s", ErrDiskNotFound, diskName),
+			err:  fmt.Errorf("%w: %s", (errcode.FilesystemErrCode{}).DiskNotFound(), diskName),
 		}
 	}
 

@@ -265,7 +265,7 @@
 
 # Version History
 
-> - Latest Version [v3.4.1](version_history.md#v341)
+> - Latest Version [v3.4.2](version_history.md#v342)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -2368,7 +2368,7 @@ Available disk names and aliases:
 | Baidu BOS | `bos`, `baidu` |
 | Qiniu KODO | `kodo`, `qiniu` |
 
-Cloud disks are registered only after the required credentials are configured. Calling an unconfigured disk returns `filesystem.ErrDiskNotFound`.
+Cloud disks are registered only after the required credentials are configured. Calling an unconfigured disk returns `(errcode.FilesystemErrCode{}).DiskNotFound()`.
 
 ## File Upload
 

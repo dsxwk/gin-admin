@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gin/app/errcode"
+
 	"github.com/pkg6/gfs"
 	"github.com/pkg6/gfs/localfs"
 )
@@ -77,7 +79,7 @@ func (d *Disk) UploadReaderWithSize(reader io.Reader, objectPath string, size in
 		return nil, err
 	}
 	if reader == nil {
-		return nil, ErrUnsupportedSource
+		return nil, (errcode.FilesystemErrCode{}).UnsupportedSource()
 	}
 
 	objectPath, err := normalizeObjectPath(objectPath)
@@ -224,13 +226,13 @@ func (d *Disk) URL(objectPath string) (string, error) {
 // ready 检查文件磁盘是否可用
 func (d *Disk) ready() error {
 	if d == nil {
-		return ErrNotInitialized
+		return (errcode.FilesystemErrCode{}).NotInitialized()
 	}
 	if d.err != nil {
 		return d.err
 	}
 	if d.adapter == nil {
-		return ErrNotInitialized
+		return (errcode.FilesystemErrCode{}).NotInitialized()
 	}
 	return nil
 }
@@ -288,7 +290,7 @@ func (d *Disk) applyDisplayRoot(uri *url.URL) {
 func openUploadSource(source any) (io.Reader, io.Closer, int64, error) {
 	switch value := source.(type) {
 	case nil:
-		return nil, nil, 0, ErrUnsupportedSource
+		return nil, nil, 0, (errcode.FilesystemErrCode{}).UnsupportedSource()
 	case []byte:
 		return bytes.NewReader(value), nil, int64(len(value)), nil
 	case *multipart.FileHeader:
@@ -316,7 +318,7 @@ func openUploadSource(source any) (io.Reader, io.Closer, int64, error) {
 	case io.Reader:
 		return value, nil, 0, nil
 	default:
-		return nil, nil, 0, ErrUnsupportedSource
+		return nil, nil, 0, (errcode.FilesystemErrCode{}).UnsupportedSource()
 	}
 }
 
@@ -327,7 +329,7 @@ func normalizeObjectPath(value string) (string, error) {
 	value = path.Clean(value)
 
 	if value == "" || value == "." || value == ".." || strings.HasPrefix(value, "../") {
-		return "", ErrInvalidPath
+		return "", (errcode.FilesystemErrCode{}).InvalidPath()
 	}
 
 	return value, nil

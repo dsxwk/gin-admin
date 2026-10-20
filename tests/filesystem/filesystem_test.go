@@ -7,8 +7,8 @@ import (
 	"path"
 	"testing"
 
+	"gin/app/errcode"
 	"gin/app/facade"
-	"gin/pkg/serviceprovider/filesystem"
 
 	"github.com/stretchr/testify/require"
 )
@@ -76,5 +76,5 @@ func TestDiskNotFound(t *testing.T) {
 	require.NotNil(t, facade.File())
 
 	_, err := facade.File().Disk("not-exists").Upload([]byte("hello"), "tests/filesystem/not-exists.txt")
-	require.ErrorIs(t, err, filesystem.ErrDiskNotFound)
+	require.ErrorIs(t, err, (errcode.FilesystemErrCode{}).DiskNotFound())
 }

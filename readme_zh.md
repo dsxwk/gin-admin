@@ -254,7 +254,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.4.1](version_history_zh.md#v341)
+> - 最新版本 [v3.4.2](version_history_zh.md#v342)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -2358,7 +2358,7 @@ filesystem:
 | 百度云BOS | `bos`, `baidu` |
 | 七牛云KODO | `kodo`, `qiniu` |
 
-云存储只有配置完整凭据后才会注册; 调用未配置的磁盘会返回 `filesystem.ErrDiskNotFound`。
+云存储只有配置完整凭据后才会注册; 调用未配置的磁盘会返回 `(errcode.FilesystemErrCode{}).DiskNotFound()`。
 
 ## 文件上传
 
