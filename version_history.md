@@ -1,5 +1,13 @@
 # Version History
 
+## v3.4.2
+> - Unify the error codes in the file system, and synchronously update the error code calling methods in the file system tests and documentation
+> - Persist upload metadata to the file table and hard delete the corresponding record when the physical file is removed
+> - Wrap the storage manager in facade.File() to record uploader, group, object key, MIME type, URL, and size
+> - Add the file and file_group migration and widen mime_type for standard MIME values
+> - Add interfaces related to file management and file grouping management
+> - New table backup in database
+
 ## v3.4.1
 > - Register AI Agent management in the container and expose facade.Agent().Create with an injected provider factory
 > - Preserve files uploaded through the login test endpoint instead of deleting them immediately
