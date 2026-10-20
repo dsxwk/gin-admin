@@ -8,6 +8,9 @@ import (
 	"gin/pkg/pathx"
 	"gin/pkg/route"
 	"net/http"
+	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -35,6 +38,7 @@ func NewRouters(router *gin.Engine) []string {
 
 	// 静态文件
 	router.StaticFS("/public", http.Dir(pathx.RootPath()+"/public"))
+	registerLocalStorageStatic(router, cfg.Filesystem.Local.Root)
 
 	// Swagger 文档
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -51,4 +55,29 @@ func NewRouters(router *gin.Engine) []string {
 
 	// 业务路由
 	return route.Mount(router, routeGroup, authMiddleware, All()...)
+}
+
+// registerLocalStorageStatic 注册本地文件静态访问
+func registerLocalStorageStatic(router *gin.Engine, localRoot string) {
+	publicPath, staticDir := localStorageStatic(localRoot)
+	if router == nil || publicPath == "/" || staticDir == "" {
+		return
+	}
+	router.StaticFS(publicPath, gin.Dir(staticDir, false))
+}
+
+// localStorageStatic 获取本地文件访问前缀与目录
+func localStorageStatic(localRoot string) (string, string) {
+	localRoot = strings.TrimSpace(localRoot)
+	if localRoot == "" {
+		localRoot = filepath.Join("storage", "uploads")
+	}
+	localRoot = filepath.Clean(localRoot)
+
+	publicPath := "/" + strings.Trim(path.Clean(strings.ReplaceAll(localRoot, "\\", "/")), "/")
+	staticDir := localRoot
+	if !filepath.IsAbs(staticDir) {
+		staticDir = filepath.Join(pathx.RootPath(), staticDir)
+	}
+	return publicPath, filepath.Clean(staticDir)
 }

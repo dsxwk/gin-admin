@@ -14,6 +14,8 @@ func All() []route.Router {
 		&DashboardRouter{},
 		&DepartmentRouter{},
 		&DictRouter{},
+		&FileRouter{},
+		&FileGroupRouter{},
 		&ImportRecordsRouter{},
 		&MenuRouter{},
 		&OperatorLogRouter{},
