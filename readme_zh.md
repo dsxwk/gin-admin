@@ -2418,11 +2418,24 @@ type UploadResult struct {
 }
 ```
 
+`facade.File()` 会在底层文件操作之上写入或删除 `file` 表记录,可通过链式调用设置上下文、上传者和分组:
+
+```go
+result, err := facade.File().
+    WithContext(ctx).
+    WithUploader(userID).
+    WithGroup(groupID).
+    Disk("local").
+    Upload(fileHeader, objectKey)
+```
+
 当配置了 `filesystem.local.root` 时, 本地磁盘会在 `Path` 和 `URL` 中拼接根目录:
 
 ```json
 {
   "disk": "local",
+  "originName": "avatar.png",
+  "objectKey": "avatar/550e8400-e29b-41d4-a716-446655440000.png",
   "path": "storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
   "url": "/storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
   "size": 1024,

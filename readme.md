@@ -2428,11 +2428,24 @@ type UploadResult struct {
 }
 ```
 
+`facade.File()` records uploads in the `file` table and removes the record when the physical file is deleted. Context, uploader, and group can be set with chained calls:
+
+```go
+result, err := facade.File().
+    WithContext(ctx).
+    WithUploader(userID).
+    WithGroup(groupID).
+    Disk("local").
+    Upload(fileHeader, objectKey)
+```
+
 When `filesystem.local.root` is set, the local disk adds the root to both `Path` and `URL`:
 
 ```json
 {
   "disk": "local",
+  "originName": "avatar.png",
+  "objectKey": "avatar/550e8400-e29b-41d4-a716-446655440000.png",
   "path": "storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
   "url": "/storage/uploads/avatar/550e8400-e29b-41d4-a716-446655440000.png",
   "size": 1024,
