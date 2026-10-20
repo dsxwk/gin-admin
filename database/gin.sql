@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 14/10/2026 15:48:15
+ Date: 20/10/2026 17:24:10
 */
 
 SET NAMES utf8mb4;
@@ -38,7 +38,7 @@ CREATE TABLE `agent_message`  (
   INDEX `idx_session_id`(`session_id`) USING BTREE,
   INDEX `idx_tool_call_id`(`tool_call_id`) USING BTREE,
   INDEX `idx_created_at`(`created_at`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 74 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI消息详情表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 69 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI消息详情表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of agent_message
@@ -108,7 +108,7 @@ CREATE TABLE `agent_session`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_created_at`(`created_at`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI会话主表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI会话主表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of agent_session
@@ -136,7 +136,7 @@ CREATE TABLE `article`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of article
@@ -157,7 +157,7 @@ CREATE TABLE `category`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of category
@@ -175,7 +175,7 @@ CREATE TABLE `config_category`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '配置分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '配置分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of config_category
@@ -200,7 +200,7 @@ CREATE TABLE `department`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE,
   INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of department
@@ -227,7 +227,7 @@ CREATE TABLE `department_leaders`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_dept_id`(`department_id`) USING BTREE,
   INDEX `idx_leader_user_id`(`leader_user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门领导表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门领导表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of department_leaders
@@ -254,7 +254,7 @@ CREATE TABLE `dict`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_pid`(`pid`) USING BTREE,
   INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of dict
@@ -263,6 +263,58 @@ INSERT INTO `dict` VALUES (1, 0, 'gender', '性别', '', 1, 0, '{\"test\": 111, 
 INSERT INTO `dict` VALUES (2, 1, 'gender', '男', '1', 1, 0, '{\"a\": \"111\", \"b\": \"222\"}', '测试', '2025-06-06 21:49:00', '2026-08-27 10:55:30', NULL);
 INSERT INTO `dict` VALUES (3, 1, 'gender', '女', '2', 1, 0, '{\"test\": 111, \"test2\": \"test222\"}', '性别女', '2025-06-06 21:49:10', '2026-07-15 15:36:48', NULL);
 INSERT INTO `dict` VALUES (4, 1, 'gender', '保密', '0', 1, 0, '{}', '保密', '2026-07-03 13:43:30', '2026-07-21 16:43:12', NULL);
+
+-- ----------------------------
+-- Table structure for file
+-- ----------------------------
+DROP TABLE IF EXISTS `file`;
+CREATE TABLE `file`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `group_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '分组ID 0为未分组',
+  `storage` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'local' COMMENT '存储平台 local,qiniu,aliyun,tencent',
+  `origin_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '原始文件名(如: 商品主图.jpg)',
+  `object_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '存储路径/Key(如: 2026/10/20/xxx.jpg)',
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '完整访问URL',
+  `mime_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'MIME类型(如: application/octet-stream)',
+  `size` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '文件大小(字节)',
+  `hash` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '文件哈希值（MD5/SHA1，用于秒传校验）',
+  `ext` json NULL COMMENT '扩展信息（如图片宽高、视频时长等）',
+  `uploader_id` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '上传者ID（关联用户表）',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_group_id`(`group_id`) USING BTREE,
+  INDEX `idx_storage`(`storage`) USING BTREE,
+  INDEX `idx_hash`(`hash`) USING BTREE,
+  INDEX `idx_uploader`(`uploader_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文件表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of file
+-- ----------------------------
+INSERT INTO `file` VALUES (1, 0, 'local', '11111.jpg', '3528fde3-a082-4f39-87eb-71f7e467fbcf.jpg', '/storage/uploads/3528fde3-a082-4f39-87eb-71f7e467fbcf.jpg', 'image/jpeg', 47321, '', NULL, 0, '2026-10-20 14:32:55', '2026-10-20 14:32:55', NULL);
+
+-- ----------------------------
+-- Table structure for file_group
+-- ----------------------------
+DROP TABLE IF EXISTS `file_group`;
+CREATE TABLE `file_group`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `pid` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '父级ID',
+  `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '分组名称(如: 商品、头像)',
+  `sort` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '排序(越小越前)',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_pid`(`pid`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文件分组表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of file_group
+-- ----------------------------
+INSERT INTO `file_group` VALUES (1, 0, '头像', 0, '2026-10-20 16:52:48', '2026-10-20 16:52:48', NULL);
 
 -- ----------------------------
 -- Table structure for import_records
@@ -278,7 +330,7 @@ CREATE TABLE `import_records`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '导入记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '导入记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of import_records
@@ -346,7 +398,7 @@ INSERT INTO `menu` VALUES (59, 6, 2, 'sys.dic.addChildren', 1, 1, '2026-07-15 15
 INSERT INTO `menu` VALUES (60, 4, 2, 'user.password', 1, 1, '2026-07-16 14:41:52', '2026-07-16 14:42:32', NULL);
 INSERT INTO `menu` VALUES (61, 56, 2, 'user.importRecords.detail', 1, 0, '2026-07-17 14:35:15', '2026-07-17 15:47:14', NULL);
 INSERT INTO `menu` VALUES (62, 56, 2, 'user.importRecords.delete', 1, 0, '2026-07-17 15:30:12', '2026-07-17 15:45:23', NULL);
-INSERT INTO `menu` VALUES (63, 0, 1, 'operatorLog', 1, 8, '2026-07-27 10:58:51', '2026-10-14 10:32:28', NULL);
+INSERT INTO `menu` VALUES (63, 0, 1, 'operatorLog', 1, 10, '2026-07-27 10:58:51', '2026-10-20 16:45:53', NULL);
 INSERT INTO `menu` VALUES (64, 63, 2, 'operatorLog.detail', 1, 0, '2026-07-27 14:17:11', '2026-07-27 14:17:11', NULL);
 INSERT INTO `menu` VALUES (65, 63, 2, 'operatorLog.del', 1, 0, '2026-07-27 14:29:56', '2026-07-27 14:29:56', NULL);
 INSERT INTO `menu` VALUES (66, 63, 2, 'operatorLog.batchDel', 1, 0, '2026-07-27 14:30:40', '2026-07-27 14:31:31', NULL);
@@ -359,6 +411,15 @@ INSERT INTO `menu` VALUES (72, 0, 1, 'agent', 1, 1, '2026-08-13 10:38:41', '2026
 INSERT INTO `menu` VALUES (73, 2, 1, 'systemNotification', 1, 1, '2026-09-30 09:25:41', '2026-10-14 13:59:09', NULL);
 INSERT INTO `menu` VALUES (74, 73, 2, 'sys.notification.send', 1, 0, '2026-09-30 10:44:21', '2026-09-30 10:49:06', NULL);
 INSERT INTO `menu` VALUES (75, 73, 2, 'sys.notification.revoke', 1, 0, '2026-09-30 10:46:10', '2026-09-30 10:48:42', NULL);
+INSERT INTO `menu` VALUES (76, 0, 1, 'file', 1, 8, '2026-10-20 16:13:06', '2026-10-20 16:13:33', NULL);
+INSERT INTO `menu` VALUES (77, 0, 1, 'fileGroup', 1, 9, '2026-10-20 16:44:42', '2026-10-20 16:45:47', NULL);
+INSERT INTO `menu` VALUES (78, 76, 2, 'file.upload', 1, 0, '2026-10-20 16:47:21', '2026-10-20 16:47:52', NULL);
+INSERT INTO `menu` VALUES (79, 76, 2, 'file.del', 1, 0, '2026-10-20 16:49:08', '2026-10-20 16:49:08', NULL);
+INSERT INTO `menu` VALUES (80, 77, 2, 'fileGroup.add', 1, 0, '2026-10-20 16:51:12', '2026-10-20 16:51:12', NULL);
+INSERT INTO `menu` VALUES (81, 77, 2, 'fileGroup.addChildren', 1, 0, '2026-10-20 16:52:28', '2026-10-20 16:52:28', NULL);
+INSERT INTO `menu` VALUES (82, 77, 2, 'fileGroup.edit', 1, 0, '2026-10-20 16:53:25', '2026-10-20 16:53:25', NULL);
+INSERT INTO `menu` VALUES (83, 77, 2, 'fileGroup.del', 1, 0, '2026-10-20 16:53:51', '2026-10-20 16:53:51', NULL);
+INSERT INTO `menu` VALUES (84, 76, 2, 'file.updateGroup', 1, 0, '2026-10-20 17:01:06', '2026-10-20 17:01:06', NULL);
 
 -- ----------------------------
 -- Table structure for menu_actions
@@ -381,7 +442,7 @@ CREATE TABLE `menu_actions`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 60 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单功能表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_actions
@@ -424,6 +485,13 @@ INSERT INTO `menu_actions` VALUES (57, 74, 1, 'btn', 'primary', 'default', 2, '�
 INSERT INTO `menu_actions` VALUES (58, 37, 1, 'btn', 'primary', 'default', 2, '新增角色', '', 'role.add', 2, '2026-10-14 15:47:03', '2026-10-14 15:47:03', NULL);
 INSERT INTO `menu_actions` VALUES (59, 38, 2, 'btn', 'primary', 'small', 2, '编辑', '', 'role.edit', 2, '2026-10-14 15:47:09', '2026-10-14 15:47:09', NULL);
 INSERT INTO `menu_actions` VALUES (60, 39, 2, 'btn', 'danger', 'small', 2, '删除', '', 'role.del', 2, '2026-10-14 15:47:14', '2026-10-14 15:47:14', NULL);
+INSERT INTO `menu_actions` VALUES (62, 78, 2, 'btn', 'primary', 'default', 2, '文件上传', '', 'file.upload', 2, '2026-10-20 16:47:52', '2026-10-20 16:47:52', NULL);
+INSERT INTO `menu_actions` VALUES (63, 79, 2, 'btn', 'danger', 'small', 2, '删除', '', 'file.del', 2, '2026-10-20 16:49:08', '2026-10-20 16:49:08', NULL);
+INSERT INTO `menu_actions` VALUES (64, 80, 1, 'btn', 'primary', 'default', 2, '添加分组', '', 'fileGroup.add', 2, '2026-10-20 16:51:12', '2026-10-20 16:51:12', NULL);
+INSERT INTO `menu_actions` VALUES (65, 81, 2, 'btn', 'primary', 'small', 2, '新增子集', '', 'fileGroup.addChildren', 2, '2026-10-20 16:52:28', '2026-10-20 16:52:28', NULL);
+INSERT INTO `menu_actions` VALUES (66, 82, 2, 'btn', 'primary', 'small', 2, '编辑', '', 'fileGroup.edit', 2, '2026-10-20 16:53:25', '2026-10-20 16:53:25', NULL);
+INSERT INTO `menu_actions` VALUES (67, 83, 2, 'btn', 'danger', 'small', 2, '删除', '', 'fileGroup.del', 2, '2026-10-20 16:53:51', '2026-10-20 16:53:51', NULL);
+INSERT INTO `menu_actions` VALUES (68, 84, 2, 'btn', 'primary', 'small', 2, '设置分组', '', 'file.updateGroup', 2, '2026-10-20 17:01:06', '2026-10-20 17:01:06', NULL);
 
 -- ----------------------------
 -- Table structure for menu_meta
@@ -448,7 +516,7 @@ CREATE TABLE `menu_meta`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_menu_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 75 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 74 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单元数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_meta
@@ -461,13 +529,15 @@ INSERT INTO `menu_meta` VALUES (55, 21, '配置列表', '', 'iconfont icon-quanj
 INSERT INTO `menu_meta` VALUES (56, 22, '系统配置', '', 'iconfont icon--chaifenhang', '/system/config/setting', '', 'system/config/setting', 2, 1, 2, '', 2, '2026-10-14 10:30:57', '2026-10-14 10:30:57', NULL);
 INSERT INTO `menu_meta` VALUES (62, 2, '系统设置', 'message.router.system', 'iconfont icon-xitongshezhi', '/system', '/system/menu', 'layouts/routerView/parent', 2, 1, 2, '', 2, '2026-10-14 10:32:12', '2026-10-14 10:32:12', NULL);
 INSERT INTO `menu_meta` VALUES (63, 10, '文章管理', 'message.article.title', 'ele-Collection', '/article', '', 'article/index', 2, 1, 2, '', 2, '2026-10-14 10:32:24', '2026-10-14 10:32:24', NULL);
-INSERT INTO `menu_meta` VALUES (64, 63, '操作日志', '', 'ele-AlarmClock', '/operator-log', '', 'operator_log/index', 2, 1, 2, '', 2, '2026-10-14 10:32:28', '2026-10-14 10:32:28', NULL);
 INSERT INTO `menu_meta` VALUES (68, 4, '用户管理', 'message.router.user', 'iconfont icon-icon-', '/user', '', 'user/index', 2, 1, 2, '', 2, '2026-10-14 13:57:32', '2026-10-14 13:57:32', NULL);
 INSERT INTO `menu_meta` VALUES (70, 6, '字典管理', 'message.router.dic', 'ele-Collection', '/dic', '', 'dic/index', 2, 1, 2, '', 2, '2026-10-14 13:58:25', '2026-10-14 13:58:25', NULL);
 INSERT INTO `menu_meta` VALUES (71, 73, '通知管理', 'message.router.systemNotification', 'iconfont icon-tongzhi1', '/system/notification', '', 'system/notification/index', 2, 1, 2, '', 2, '2026-10-14 13:59:09', '2026-10-14 13:59:09', NULL);
 INSERT INTO `menu_meta` VALUES (72, 5, '角色管理', 'message.router.role', 'fa fa-user-circle-o', '/role', '', 'role/index', 2, 1, 2, '', 2, '2026-10-14 13:59:37', '2026-10-14 13:59:37', NULL);
 INSERT INTO `menu_meta` VALUES (73, 67, '部门管理', '', 'ele-Avatar', '/department', '', 'department/index', 2, 1, 2, '', 2, '2026-10-14 14:00:05', '2026-10-14 14:00:05', NULL);
 INSERT INTO `menu_meta` VALUES (74, 23, '配置分类', '', 'iconfont icon--chaifenlie', '/system/config/category/index', '', 'system/config/category/index', 2, 1, 2, '', 2, '2026-10-14 14:02:16', '2026-10-14 14:02:16', NULL);
+INSERT INTO `menu_meta` VALUES (77, 76, '文件管理', '', 'ele-DocumentAdd', '/file', '', 'file/index', 2, 1, 2, '', 2, '2026-10-20 16:13:33', '2026-10-20 16:13:33', NULL);
+INSERT INTO `menu_meta` VALUES (80, 77, '文件分组管理', '', 'iconfont icon-bolangneng', '/file-group', '', 'fileGroup/index', 2, 1, 2, '', 2, '2026-10-20 16:45:47', '2026-10-20 16:45:47', NULL);
+INSERT INTO `menu_meta` VALUES (81, 63, '操作日志', '', 'ele-AlarmClock', '/operator-log', '', 'operator_log/index', 2, 1, 2, '', 2, '2026-10-20 16:45:53', '2026-10-20 16:45:53', NULL);
 
 -- ----------------------------
 -- Table structure for migrations
@@ -479,12 +549,13 @@ CREATE TABLE `migrations`  (
   `created_at` datetime(3) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `migration`(`migration`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of migrations
 -- ----------------------------
 INSERT INTO `migrations` VALUES (1, '20251212_create_user_table', '2025-12-12 17:04:27.313');
+INSERT INTO `migrations` VALUES (2, '20261020_create_file_table', '2026-10-20 13:51:20.836');
 
 -- ----------------------------
 -- Table structure for notification_users
@@ -500,7 +571,7 @@ CREATE TABLE `notification_users`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_to_user_id`(`to_user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统通知用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统通知用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of notification_users
@@ -532,7 +603,7 @@ CREATE TABLE `operator_log`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_trace_id`(`trace_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 58 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of operator_log
@@ -676,6 +747,13 @@ INSERT INTO `permission` VALUES (77, 'POST:/api/v1/operator-log/batch-delete', '
 INSERT INTO `permission` VALUES (78, 'GET:/api/v1/agent/history', 'GET', '/api/v1/agent/history', '2026-08-31 11:10:42', '2026-08-31 11:10:42', NULL);
 INSERT INTO `permission` VALUES (79, 'GET:/api/v1/agent/stream', 'GET', '/api/v1/agent/stream', '2026-10-09 10:49:48', '2026-10-09 10:49:48', NULL);
 INSERT INTO `permission` VALUES (80, 'DELETE:/api/v1/agent/sessions/:id', 'DELETE', '/api/v1/agent/sessions/:id', '2026-10-10 08:42:06', '2026-10-10 08:42:06', NULL);
+INSERT INTO `permission` VALUES (81, 'POST:/api/v1/file/upload', 'POST', '/api/v1/file/upload', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
+INSERT INTO `permission` VALUES (82, 'POST:/api/v1/file-group', 'POST', '/api/v1/file-group', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
+INSERT INTO `permission` VALUES (83, 'DELETE:/api/v1/file-group/:id', 'DELETE', '/api/v1/file-group/:id', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
+INSERT INTO `permission` VALUES (84, 'DELETE:/api/v1/file/:id', 'DELETE', '/api/v1/file/:id', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
+INSERT INTO `permission` VALUES (85, 'PUT:/api/v1/file-group/:id', 'PUT', '/api/v1/file-group/:id', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
+INSERT INTO `permission` VALUES (86, 'GET:/api/v1/file-group', 'GET', '/api/v1/file-group', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
+INSERT INTO `permission` VALUES (87, 'GET:/api/v1/file', 'GET', '/api/v1/file', '2026-10-20 16:00:13', '2026-10-20 16:00:13', NULL);
 
 -- ----------------------------
 -- Table structure for role_menus
@@ -691,7 +769,7 @@ CREATE TABLE `role_menus`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1044 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1043 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色菜单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menus
@@ -701,62 +779,71 @@ INSERT INTO `role_menus` VALUES (304, 2, 27, 'test', '2026-07-20 14:19:04', '202
 INSERT INTO `role_menus` VALUES (919, 2, 1, 'test', '2026-09-30 09:04:35', '2026-09-30 09:04:35', NULL);
 INSERT INTO `role_menus` VALUES (931, 2, 75, 'test', '2026-09-30 10:48:42', '2026-09-30 10:48:42', NULL);
 INSERT INTO `role_menus` VALUES (933, 2, 74, 'test', '2026-09-30 10:49:06', '2026-09-30 10:49:06', NULL);
-INSERT INTO `role_menus` VALUES (935, 1, 1, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (936, 1, 72, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (938, 1, 74, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (939, 1, 75, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (942, 1, 69, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (943, 1, 68, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (944, 1, 70, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (945, 1, 71, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (947, 1, 58, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (948, 1, 24, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (949, 1, 25, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (950, 1, 27, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (952, 1, 54, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (953, 1, 56, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (954, 1, 61, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (955, 1, 62, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (956, 1, 32, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (957, 1, 33, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (958, 1, 34, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (959, 1, 60, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (960, 1, 35, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (966, 1, 40, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (967, 1, 41, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (968, 1, 59, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (969, 1, 42, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (972, 1, 51, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (973, 1, 52, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (974, 1, 53, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (976, 1, 48, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (977, 1, 49, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (978, 1, 50, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (981, 1, 45, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (982, 1, 43, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (983, 1, 44, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (985, 1, 64, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (986, 1, 65, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `role_menus` VALUES (987, 1, 66, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
 INSERT INTO `role_menus` VALUES (1014, 2, 3, 'test', '2026-10-14 10:30:33', '2026-10-14 10:30:33', NULL);
-INSERT INTO `role_menus` VALUES (1015, 1, 3, 'admin', '2026-10-14 10:30:33', '2026-10-14 10:30:33', NULL);
-INSERT INTO `role_menus` VALUES (1016, 1, 20, 'admin', '2026-10-14 10:30:38', '2026-10-14 10:30:38', NULL);
-INSERT INTO `role_menus` VALUES (1017, 1, 21, 'admin', '2026-10-14 10:30:52', '2026-10-14 10:30:52', NULL);
-INSERT INTO `role_menus` VALUES (1018, 1, 22, 'admin', '2026-10-14 10:30:57', '2026-10-14 10:30:57', NULL);
 INSERT INTO `role_menus` VALUES (1024, 2, 2, 'test', '2026-10-14 10:32:12', '2026-10-14 10:32:12', NULL);
-INSERT INTO `role_menus` VALUES (1025, 1, 2, 'admin', '2026-10-14 10:32:12', '2026-10-14 10:32:12', NULL);
-INSERT INTO `role_menus` VALUES (1026, 1, 10, 'admin', '2026-10-14 10:32:24', '2026-10-14 10:32:24', NULL);
-INSERT INTO `role_menus` VALUES (1027, 1, 63, 'admin', '2026-10-14 10:32:28', '2026-10-14 10:32:28', NULL);
-INSERT INTO `role_menus` VALUES (1033, 1, 4, 'admin', '2026-10-14 13:57:32', '2026-10-14 13:57:32', NULL);
-INSERT INTO `role_menus` VALUES (1035, 1, 6, 'admin', '2026-10-14 13:58:25', '2026-10-14 13:58:25', NULL);
 INSERT INTO `role_menus` VALUES (1036, 2, 73, 'test', '2026-10-14 13:59:09', '2026-10-14 13:59:09', NULL);
-INSERT INTO `role_menus` VALUES (1037, 1, 73, 'admin', '2026-10-14 13:59:09', '2026-10-14 13:59:09', NULL);
-INSERT INTO `role_menus` VALUES (1038, 1, 5, 'admin', '2026-10-14 13:59:37', '2026-10-14 13:59:37', NULL);
-INSERT INTO `role_menus` VALUES (1039, 1, 67, 'admin', '2026-10-14 14:00:05', '2026-10-14 14:00:05', NULL);
-INSERT INTO `role_menus` VALUES (1040, 1, 23, 'admin', '2026-10-14 14:02:16', '2026-10-14 14:02:16', NULL);
-INSERT INTO `role_menus` VALUES (1041, 1, 37, 'admin', '2026-10-14 15:47:03', '2026-10-14 15:47:03', NULL);
-INSERT INTO `role_menus` VALUES (1042, 1, 38, 'admin', '2026-10-14 15:47:09', '2026-10-14 15:47:09', NULL);
-INSERT INTO `role_menus` VALUES (1043, 1, 39, 'admin', '2026-10-14 15:47:14', '2026-10-14 15:47:14', NULL);
+INSERT INTO `role_menus` VALUES (1047, 1, 1, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1048, 1, 72, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1049, 1, 4, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1050, 1, 54, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1051, 1, 56, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1052, 1, 61, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1053, 1, 62, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1054, 1, 32, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1055, 1, 33, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1056, 1, 34, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1057, 1, 60, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1058, 1, 35, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1059, 1, 67, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1060, 1, 68, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1061, 1, 69, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1062, 1, 71, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1063, 1, 70, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1064, 1, 5, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1065, 1, 37, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1066, 1, 38, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1067, 1, 39, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1068, 1, 6, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1069, 1, 40, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1070, 1, 41, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1071, 1, 59, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1072, 1, 42, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1073, 1, 2, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1074, 1, 73, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1075, 1, 74, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1076, 1, 75, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1077, 1, 3, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1078, 1, 58, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1079, 1, 24, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1080, 1, 25, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1081, 1, 27, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1082, 1, 20, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1083, 1, 23, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1084, 1, 53, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1085, 1, 51, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1086, 1, 52, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1087, 1, 21, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1088, 1, 48, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1089, 1, 49, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1090, 1, 50, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1091, 1, 22, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1092, 1, 10, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1093, 1, 43, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1094, 1, 44, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1095, 1, 45, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1096, 1, 76, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1098, 1, 64, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1099, 1, 65, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1100, 1, 66, 'admin', '2026-10-20 16:20:02', '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_menus` VALUES (1103, 1, 77, 'admin', '2026-10-20 16:45:47', '2026-10-20 16:45:47', NULL);
+INSERT INTO `role_menus` VALUES (1104, 1, 63, 'admin', '2026-10-20 16:45:53', '2026-10-20 16:45:53', NULL);
+INSERT INTO `role_menus` VALUES (1106, 1, 78, 'admin', '2026-10-20 16:47:52', '2026-10-20 16:47:52', NULL);
+INSERT INTO `role_menus` VALUES (1107, 1, 79, 'admin', '2026-10-20 16:49:08', '2026-10-20 16:49:08', NULL);
+INSERT INTO `role_menus` VALUES (1108, 1, 80, 'admin', '2026-10-20 16:51:12', '2026-10-20 16:51:12', NULL);
+INSERT INTO `role_menus` VALUES (1109, 1, 81, 'admin', '2026-10-20 16:52:28', '2026-10-20 16:52:28', NULL);
+INSERT INTO `role_menus` VALUES (1110, 1, 82, 'admin', '2026-10-20 16:53:25', '2026-10-20 16:53:25', NULL);
+INSERT INTO `role_menus` VALUES (1111, 1, 83, 'admin', '2026-10-20 16:53:51', '2026-10-20 16:53:51', NULL);
+INSERT INTO `role_menus` VALUES (1112, 1, 84, 'admin', '2026-10-20 17:01:06', '2026-10-20 17:01:06', NULL);
 
 -- ----------------------------
 -- Table structure for role_permissions
@@ -770,7 +857,7 @@ CREATE TABLE `role_permissions`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_role_id`(`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 803 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 802 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_permissions
@@ -778,66 +865,73 @@ CREATE TABLE `role_permissions`  (
 INSERT INTO `role_permissions` VALUES (623, 2, 62, '2026-08-13 14:06:50', NULL);
 INSERT INTO `role_permissions` VALUES (624, 2, 63, '2026-08-13 14:06:50', NULL);
 INSERT INTO `role_permissions` VALUES (625, 2, 60, '2026-08-13 14:06:50', NULL);
-INSERT INTO `role_permissions` VALUES (743, 1, 1, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (744, 1, 2, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (745, 1, 3, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (746, 1, 4, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (747, 1, 5, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (748, 1, 6, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (749, 1, 7, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (750, 1, 8, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (751, 1, 9, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (752, 1, 10, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (753, 1, 11, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (754, 1, 12, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (755, 1, 13, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (756, 1, 14, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (757, 1, 15, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (758, 1, 16, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (759, 1, 17, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (760, 1, 18, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (761, 1, 19, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (762, 1, 20, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (763, 1, 21, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (764, 1, 22, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (765, 1, 23, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (766, 1, 24, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (767, 1, 25, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (768, 1, 26, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (769, 1, 27, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (770, 1, 28, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (771, 1, 29, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (772, 1, 30, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (773, 1, 31, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (774, 1, 32, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (775, 1, 33, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (776, 1, 34, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (777, 1, 35, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (778, 1, 36, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (779, 1, 37, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (780, 1, 38, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (781, 1, 39, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (782, 1, 40, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (783, 1, 41, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (784, 1, 42, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (785, 1, 43, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (786, 1, 64, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (787, 1, 65, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (788, 1, 66, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (789, 1, 67, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (790, 1, 68, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (791, 1, 69, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (792, 1, 70, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (793, 1, 71, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (794, 1, 72, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (795, 1, 73, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (796, 1, 74, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (797, 1, 75, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (798, 1, 76, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (799, 1, 77, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (800, 1, 78, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (801, 1, 79, '2026-10-10 08:46:41', NULL);
-INSERT INTO `role_permissions` VALUES (802, 1, 80, '2026-10-10 08:46:41', NULL);
+INSERT INTO `role_permissions` VALUES (803, 1, 66, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (804, 1, 78, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (805, 1, 67, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (806, 1, 80, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (807, 1, 79, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (808, 1, 1, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (809, 1, 3, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (810, 1, 38, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (811, 1, 19, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (812, 1, 8, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (813, 1, 6, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (814, 1, 15, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (815, 1, 39, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (816, 1, 20, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (817, 1, 17, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (818, 1, 65, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (819, 1, 72, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (820, 1, 69, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (821, 1, 76, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (822, 1, 64, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (823, 1, 71, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (824, 1, 75, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (825, 1, 70, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (826, 1, 12, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (827, 1, 16, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (828, 1, 18, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (829, 1, 21, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (830, 1, 10, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (831, 1, 28, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (832, 1, 40, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (833, 1, 2, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (834, 1, 23, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (835, 1, 9, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (836, 1, 33, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (837, 1, 25, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (838, 1, 73, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (839, 1, 68, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (840, 1, 74, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (841, 1, 77, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (842, 1, 43, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (843, 1, 42, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (844, 1, 24, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (845, 1, 31, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (846, 1, 32, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (847, 1, 34, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (848, 1, 35, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (849, 1, 26, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (850, 1, 7, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (851, 1, 4, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (852, 1, 11, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (853, 1, 27, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (854, 1, 37, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (855, 1, 13, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (856, 1, 29, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (857, 1, 41, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (858, 1, 14, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (859, 1, 30, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (860, 1, 5, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (861, 1, 36, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (862, 1, 22, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (863, 1, 87, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (864, 1, 86, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (865, 1, 82, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (866, 1, 83, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (867, 1, 85, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (868, 1, 84, '2026-10-20 16:20:02', NULL);
+INSERT INTO `role_permissions` VALUES (869, 1, 81, '2026-10-20 16:20:02', NULL);
 
 -- ----------------------------
 -- Table structure for roles
@@ -852,12 +946,12 @@ CREATE TABLE `roles`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of roles
 -- ----------------------------
-INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2026-10-09 11:54:07', NULL);
+INSERT INTO `roles` VALUES (1, 'admin', '超级管理员', 1, '2025-05-26 16:52:43', '2026-10-20 16:20:01', NULL);
 INSERT INTO `roles` VALUES (2, 'test', '测试', 1, '2025-05-28 10:47:22', '2026-07-20 14:19:04', NULL);
 
 -- ----------------------------
@@ -877,7 +971,7 @@ CREATE TABLE `system_config`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `unq_key`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of system_config
@@ -916,7 +1010,7 @@ CREATE TABLE `system_notification`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_from_user_id`(`from_user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统通知表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统通知表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of system_notification
@@ -944,7 +1038,7 @@ CREATE TABLE `user`  (
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 61 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
@@ -988,7 +1082,7 @@ CREATE TABLE `user_departments`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
   INDEX `idx_dept_id`(`department_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户部门表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_departments
@@ -1014,7 +1108,7 @@ CREATE TABLE `user_roles`  (
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 70 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 69 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user_roles
@@ -1022,7 +1116,7 @@ CREATE TABLE `user_roles`  (
 INSERT INTO `user_roles` VALUES (35, 2, 2, 'test', '2026-07-20 14:19:04', '2026-07-20 14:19:04', NULL);
 INSERT INTO `user_roles` VALUES (55, 61, 2, 'test', '2026-08-04 16:28:39', '2026-08-04 16:28:39', NULL);
 INSERT INTO `user_roles` VALUES (58, 10, 2, 'test', '2026-08-07 16:06:05', '2026-08-07 16:06:05', NULL);
-INSERT INTO `user_roles` VALUES (68, 1, 1, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
-INSERT INTO `user_roles` VALUES (69, 10, 1, 'admin', '2026-10-09 11:54:08', '2026-10-09 11:54:08', NULL);
+INSERT INTO `user_roles` VALUES (70, 1, 1, 'admin', '2026-10-20 16:20:01', '2026-10-20 16:20:01', NULL);
+INSERT INTO `user_roles` VALUES (71, 10, 1, 'admin', '2026-10-20 16:20:01', '2026-10-20 16:20:01', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
