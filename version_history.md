@@ -1,5 +1,10 @@
 # Version History
 
+## v3.4.3
+> - Update swagger document
+> - Renaming the default connection for the configuration update database
+> - Optimize command line cron option parameters
+
 ## v3.4.2
 > - Unify the error codes in the file system, and synchronously update the error code calling methods in the file system tests and documentation
 > - Persist upload metadata to the file table and hard delete the corresponding record when the physical file is removed
