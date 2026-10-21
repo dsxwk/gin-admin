@@ -158,7 +158,7 @@ func (a *App) printStartupInfo(conf *config.Config) {
 		{label: "应用", value: conf.App.Name},
 		{label: "环境", value: conf.App.Env},
 		{label: "端口", value: color.YellowString(convert.IntToString[int64](conf.App.Port))},
-		{label: "数据库", value: conf.Databases.Driver},
+		{label: "数据库", value: conf.Databases.Default},
 		{label: startupLabel(terminal.NetworkIco, "Local Address"), value: "http://" + localHost + ":" + port},
 		{label: startupLabel(terminal.NetworkIco, "Network Address"), value: networkAddress},
 		{label: startupLabel(terminal.PointerIco, "Local Swagger"), value: "http://" + localHost + ":" + port + "/swagger/index.html"},

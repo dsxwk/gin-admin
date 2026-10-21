@@ -2,9 +2,9 @@ package orm
 
 import (
 	"fmt"
-	"gin/pkg/terminal"
 	"gin/config"
 	servicelogger "gin/pkg/serviceprovider/logger"
+	"gin/pkg/terminal"
 	"sync"
 
 	"gorm.io/gorm"
@@ -24,8 +24,8 @@ type Manager struct {
 // NewManager 创建数据库连接管理器
 func NewManager(conf *config.Config, logs ...*servicelogger.Logger) *Manager {
 	name := "mysql"
-	if conf != nil && conf.Databases.Driver != "" {
-		name = conf.Databases.Driver
+	if conf != nil && conf.Databases.Default != "" {
+		name = conf.Databases.Default
 	}
 
 	var log *servicelogger.Logger

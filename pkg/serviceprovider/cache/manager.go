@@ -16,8 +16,8 @@ type Manager struct {
 // NewManager 创建缓存管理器
 func NewManager(conf *config.Config) *Manager {
 	name := "memory"
-	if conf != nil && conf.Cache.Driver != "" {
-		name = conf.Cache.Driver
+	if conf != nil && conf.Cache.Default != "" {
+		name = conf.Cache.Default
 	}
 
 	return &Manager{

@@ -4,10 +4,10 @@ import "time"
 
 // Cache 缓存
 type Cache struct {
-	Driver string `mapstructure:"driver" yaml:"driver"`
-	Redis  Redis  `mapstructure:"redis" yaml:"redis"`
-	Memory Memory `mapstructure:"memory" yaml:"memory"`
-	Disk   Disk   `mapstructure:"disk" yaml:"disk"`
+	Default string `mapstructure:"default" yaml:"default"`
+	Redis   Redis  `mapstructure:"redis" yaml:"redis"`
+	Memory  Memory `mapstructure:"memory" yaml:"memory"`
+	Disk    Disk   `mapstructure:"disk" yaml:"disk"`
 }
 
 // Redis 数据库

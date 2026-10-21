@@ -4,7 +4,7 @@ import "time"
 
 // Databases 数据库
 type Databases struct {
-	Driver            string        `mapstructure:"driver" yaml:"driver"`                           // 默认数据库
+	Default           string        `mapstructure:"default" yaml:"default"`                         // 默认数据库
 	CLISoftDelete     bool          `mapstructure:"cli-soft-delete" yaml:"cli-soft-delete"`         // 命令行是否生成软删除字段
 	SlowQueryDuration time.Duration `mapstructure:"slow-query-duration" yaml:"slow-query-duration"` // 慢查询的时间,超过这个时间会记录到日志中
 	Pool              DatabasePool  `mapstructure:"pool" yaml:"pool"`                               // 连接池

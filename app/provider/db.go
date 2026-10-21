@@ -25,7 +25,7 @@ func (p *DbProvider) Register(app *container.Container) {
 
 // Boot 启动服务-测试数据库连接
 func (p *DbProvider) Boot(app *container.Container) {
-	driver := app.Config().Databases.Driver
+	driver := app.Config().Databases.Default
 	if _, err := p.manager.Connect(driver); err != nil {
 		terminal.Errorf("%v", err)
 		return
