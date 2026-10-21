@@ -69,11 +69,11 @@ func TestCommandConfig(t *testing.T) {
 	if command.Description() != "演示控制台命令" {
 		t.Fatalf("命令描述错误:%s", command.Description())
 	}
-	if len(command.Help()) != 2 || command.Help()[0].Desc != "演示参数" {
+	if len(command.Help()) != 1 || command.Help()[0].Desc != "演示参数" {
 		t.Fatal("命令帮助配置错误")
 	}
-	if command.Help()[1].Flag.Long != "cron" {
-		t.Fatal("命令缺少cron参数")
+	if command.Help()[0].Flag.Long != "args" {
+		t.Fatal("普通命令不应自动添加cron参数")
 	}
 }
 

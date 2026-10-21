@@ -50,7 +50,7 @@ func NewCommand(config Config) Command {
 	if config.Description == "" {
 		config.Description = config.Name
 	}
-	if !hasOption(config.Options, cronOption.Flag.Long) {
+	if strings.TrimSpace(config.Cron) != "" && !hasOption(config.Options, cronOption.Flag.Long) {
 		config.Options = append(config.Options, cronOption)
 	}
 	return Command{config: config}
