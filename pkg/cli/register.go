@@ -187,7 +187,7 @@ func (r *Registry) printText() {
 		parts := strings.SplitN(name, ":", 2)
 		group := parts[0]
 		if len(parts) == 1 {
-			group = "other"
+			group = parts[0]
 		}
 
 		groups[group] = append(groups[group], name)

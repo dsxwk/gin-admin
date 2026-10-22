@@ -254,7 +254,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.4.3](version_history_zh.md#v343)
+> - 最新版本 [v3.4.4](version_history_zh.md#v344)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -294,7 +294,20 @@ $ go mod vendor
 ## 初始化数据库
 
 ```bash
-$ go run ./cmd/cli.go db:seed --init=true
+$ go run ./cmd/cli.go db:init
+```
+
+### 数据库命令
+
+```bash
+$ go run ./cmd/cli.go migrate
+$ go run ./cmd/cli.go migrate:status
+$ go run ./cmd/cli.go migrate:rollback --step=1
+$ go run ./cmd/cli.go migrate:refresh --seed=true
+$ go run ./cmd/cli.go db:seed --name=UserSeeder
+$ go run ./cmd/cli.go migrate:fresh --seed=true
+$ go run ./cmd/cli.go make:migration --name=create_orders_table
+$ go run ./cmd/cli.go make:seeder --name=OrderSeeder
 ```
 
 ## 权限同步
@@ -518,8 +531,7 @@ Available commands:
 consumer:
   consumer:list    消费者列表
 db:
-  db:migrate       数据迁移
-  db:rollback      数据回滚
+  db:init          初始化数据库与数据
   db:seed          数据填充
 demo:
   demo:test     演示控制台命令
@@ -543,9 +555,15 @@ make:
   make:queue       创建消息队列(Kafka/RabbitMQ/Redis)
   make:request     验证请求创建
   make:router      路由创建
-  make:seed        生成数据库seeder模板
+  make:seeder      生成数据库Seeder
   make:service     服务创建
   make:ws         创建WebSocket消息处理器
+migrate:
+  migrate          执行待处理迁移
+  migrate:fresh    删除全部表后重新迁移
+  migrate:refresh  回滚全部迁移后重新执行
+  migrate:rollback 回滚最近迁移批次
+  migrate:status   查看迁移状态
 producer:
   producer:list    生产者列表
 route:
@@ -568,12 +586,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "consumer:list"
     },
     {
-      "description": "数据迁移",
-      "name": "db:migrate"
-    },
-    {
-      "description": "数据回滚",
-      "name": "db:rollback"
+      "description": "初始化数据库与数据",
+      "name": "db:init"
     },
     {
       "description": "数据填充",
@@ -652,8 +666,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:router"
     },
     {
-      "description": "生成数据库seeder模板",
-      "name": "make:seed"
+      "description": "生成数据库Seeder",
+      "name": "make:seeder"
     },
     {
       "description": "服务创建",
@@ -662,6 +676,26 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "创建ws消息处理器",
       "name": "make:ws"
+    },
+    {
+      "description": "执行待处理迁移",
+      "name": "migrate"
+    },
+    {
+      "description": "删除全部表后重新迁移",
+      "name": "migrate:fresh"
+    },
+    {
+      "description": "回滚全部迁移后重新执行",
+      "name": "migrate:refresh"
+    },
+    {
+      "description": "回滚最近迁移批次",
+      "name": "migrate:rollback"
+    },
+    {
+      "description": "查看迁移状态",
+      "name": "migrate:status"
     },
     {
       "description": "生产者列表",

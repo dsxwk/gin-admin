@@ -265,7 +265,7 @@
 
 # Version History
 
-> - Latest Version [v3.4.3](version_history.md#v343)
+> - Latest Version [v3.4.4](version_history.md#v344)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -308,7 +308,20 @@ $ go mod vendor
 ## Initialize Database
 
 ```bash
-$ go run ./cmd/cli.go db:seed --init=true
+$ go run ./cmd/cli.go db:init
+```
+
+### Database Commands
+
+```bash
+$ go run ./cmd/cli.go migrate
+$ go run ./cmd/cli.go migrate:status
+$ go run ./cmd/cli.go migrate:rollback --step=1
+$ go run ./cmd/cli.go migrate:refresh --seed=true
+$ go run ./cmd/cli.go db:seed --name=UserSeeder
+$ go run ./cmd/cli.go migrate:fresh --seed=true
+$ go run ./cmd/cli.go make:migration --name=create_orders_table
+$ go run ./cmd/cli.go make:seeder --name=OrderSeeder
 ```
 
 ## Permission Sync
@@ -533,8 +546,7 @@ Available commands:
 consumer:
   consumer:list    Consumer List
 db:
-  db:migrate       Database Migration
-  db:rollback      Database Rollback
+  db:init          Database Init
   db:seed          Database Seed
 demo:
   demo:test     Demo Console Command
@@ -558,9 +570,15 @@ make:
   make:queue       Queue Creation(Kafka/RabbitMQ/Redis)
   make:request     Request Creation
   make:router      Router Creation
-  make:seed        Generate database seeder template
+  make:seeder      Generate database seeder
   make:service     Service Creation
   make:ws          WebSocket Message Handler Creation
+migrate:
+  migrate          Run pending migrations
+  migrate:fresh    Drop all tables and rerun migrations
+  migrate:refresh  Rollback all migrations and rerun
+  migrate:rollback Rollback recent migration batches
+  migrate:status   Show migration status
 producer:
   producer:list    Producer List
 route:
@@ -583,12 +601,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "consumer:list"
     },
     {
-      "description": "Database migrate",
-      "name": "db:migrate"
-    },
-    {
-      "description": "Database rollback",
-      "name": "db:rollback"
+      "description": "Database init",
+      "name": "db:init"
     },
     {
       "description": "Database seed",
@@ -667,8 +681,8 @@ $ go run ./cmd/cli.go --format=json # -f=json
       "name": "make:router"
     },
     {
-      "description": "Generate database seeder template",
-      "name": "make:seed"
+      "description": "Generate database seeder",
+      "name": "make:seeder"
     },
     {
       "description": "Service Creation",
@@ -677,6 +691,26 @@ $ go run ./cmd/cli.go --format=json # -f=json
     {
       "description": "WebSocket Message Handler Creation",
       "name": "make:ws"
+    },
+    {
+      "description": "Run pending migrations",
+      "name": "migrate"
+    },
+    {
+      "description": "Drop all tables and rerun migrations",
+      "name": "migrate:fresh"
+    },
+    {
+      "description": "Rollback all migrations and rerun",
+      "name": "migrate:refresh"
+    },
+    {
+      "description": "Rollback recent migration batches",
+      "name": "migrate:rollback"
+    },
+    {
+      "description": "Show migration status",
+      "name": "migrate:status"
     },
     {
       "description": "Producer List",

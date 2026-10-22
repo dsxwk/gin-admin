@@ -9,6 +9,7 @@ import (
 	"gin/pkg/cli/jwt"
 	mk "gin/pkg/cli/make"
 	"gin/pkg/cli/mcp"
+	"gin/pkg/cli/migrate"
 	"gin/pkg/cli/permission"
 	"gin/pkg/cli/queue"
 	"gin/pkg/cli/route"
@@ -18,9 +19,14 @@ import (
 func All() []base.Handler {
 	return []base.Handler{
 		// 数据库
-		db.NewMigrate(),
-		db.NewRollback(),
+		db.NewInit(),
 		db.NewSeed(),
+		// 迁移
+		migrate.NewFresh(),
+		migrate.NewMigrate(),
+		migrate.NewRollback(),
+		migrate.NewRefresh(),
+		migrate.NewStatus(),
 		// 事件
 		event.NewEventList(),
 		event.NewEventListenerList(),
@@ -55,7 +61,7 @@ func All() []base.Handler {
 		mk.NewMakeQueue(),
 		mk.NewMakeRequest(),
 		mk.NewMakeRouter(),
-		mk.NewMakeSeed(),
+		mk.NewMakeSeeder(),
 		mk.NewMakeService(),
 		mk.NewMakeWs(),
 		// MCP

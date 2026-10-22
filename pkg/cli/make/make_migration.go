@@ -2,13 +2,13 @@ package make
 
 import (
 	"fmt"
-	"gin/pkg/cli/base"
-	"gin/pkg/terminal"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/samber/lo"
+	"gin/pkg/cli/base"
+	"gin/pkg/migration"
+	"gin/pkg/terminal"
 )
 
 type MakeMigration struct {
@@ -23,8 +23,13 @@ func NewMakeMigration() *MakeMigration {
 			Description: "生成数据库迁移模板",
 			Options: []base.CommandOption{
 				{
+					Flag:     base.Flag{Short: "n", Long: "name"},
+					Desc:     "迁移名称,如:create_orders_table",
+					Required: false,
+				},
+				{
 					Flag:     base.Flag{Short: "t", Long: "table"},
-					Desc:     "指定表名，留空生成所有表模板",
+					Desc:     "指定表名,未设置name时使用",
 					Required: false,
 				},
 			},
@@ -33,44 +38,44 @@ func NewMakeMigration() *MakeMigration {
 }
 
 func (s *MakeMigration) Handle(values map[string]string) error {
-	table := values["table"]
-
-	timestamp := time.Now().Format("20060102")
-	name := table
-	filename := fmt.Sprintf("%s_%s.go", timestamp, "create_"+name+"_table")
-	id := timestamp + "_create_" + name + "_table"
-	if name == "" {
-		name = "all_tables"
-		filename = fmt.Sprintf("%s_%s.go", timestamp, "create_"+name)
-		id = timestamp + "_create_" + name
+	timestamp := time.Now().Format("20060102150405")
+	plan, err := migration.BuildMigrationPlan(values["name"], values["table"], timestamp)
+	if err != nil {
+		return err
 	}
 
 	dir := filepath.Join("database", "migrations")
-	filePath := filepath.Join(dir, filename)
+	filePath := filepath.Join(dir, plan.FileName)
 	content := fmt.Sprintf(`package migrations
 
 import (
+	"context"
+
+	"gin/pkg/migration"
+
 	"gorm.io/gorm"
 )
 
 type %s struct{}
 
-func (m *%s) ID() string {
+// Name 迁移名称
+func (m *%s) Name() string {
 	return "%s"
 }
 
-func (m *%s) Migrate(db *gorm.DB) error {
-	// db.AutoMigrate(&model.User{})
-	// todo: 实现迁移逻辑
-	return nil
+// Up 执行迁移
+func (m *%s) Up(ctx context.Context, db *gorm.DB) error {
+	return migration.CreateTable(db.WithContext(ctx), "%s", func(t *migration.Table) {
+		t.Id()
+		t.Timestamps()
+	})
 }
 
-func (m *%s) Rollback(db *gorm.DB) error {
-	// db.Migrator().DropTable(&model.UserRoles{})
-	// todo: 实现回滚逻辑
-	return nil
+// Down 回滚迁移
+func (m *%s) Down(ctx context.Context, db *gorm.DB) error {
+	return migration.DropTable(db.WithContext(ctx), "%s")
 }
-`, "Create"+lo.PascalCase(name)+timestamp, "Create"+lo.PascalCase(name)+timestamp, id, "Create"+lo.PascalCase(name)+timestamp, "Create"+lo.PascalCase(name)+timestamp)
+`, plan.StructName, plan.StructName, plan.Name, plan.StructName, plan.TableName, plan.StructName, plan.TableName)
 
 	// 创建文件
 	f := s.CheckDirAndFile(filePath)
@@ -81,8 +86,14 @@ func (m *%s) Rollback(db *gorm.DB) error {
 
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 		terminal.Errorf("写入文件失败: %v", err)
-		return nil
-
+		return err
+	}
+	if err := migration.RegisterGenerated(
+		filepath.Join(dir, "registry.go"),
+		"migration.Migration",
+		"&"+plan.StructName+"{}",
+	); err != nil {
+		return fmt.Errorf("注册迁移失败: %w", err)
 	}
 
 	terminal.Successf("迁移文件生成成功: %s", filePath)

@@ -545,17 +545,13 @@ INSERT INTO `menu_meta` VALUES (81, 63, '操作日志', '', 'ele-AlarmClock', '/
 DROP TABLE IF EXISTS `migrations`;
 CREATE TABLE `migrations`  (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `migration` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` datetime(3) NULL DEFAULT NULL,
+  `migration` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '迁移名称',
+  `batch` int(11) NOT NULL DEFAULT 0 COMMENT '迁移批次',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `migration`(`migration`) USING BTREE
+  UNIQUE INDEX `migration`(`migration`) USING BTREE,
+  INDEX `idx_batch`(`batch`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of migrations
--- ----------------------------
-INSERT INTO `migrations` VALUES (1, '20251212_create_user_table', '2025-12-12 17:04:27.313');
-INSERT INTO `migrations` VALUES (2, '20261020_create_file_table', '2026-10-20 13:51:20.836');
 
 -- ----------------------------
 -- Table structure for notification_users
