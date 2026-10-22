@@ -1,5 +1,8 @@
 # Version History
 
+## v3.4.4
+> - Refactor database migrations and add batch migrations, schema DSL, migration status commands, Seeder progress output, and db:init, along with user table migration and seed examples
+
 ## v3.4.3
 > - Update swagger document
 > - Renaming the default connection for the configuration update database
