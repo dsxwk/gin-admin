@@ -294,11 +294,8 @@ func (r *Runner) withLock(ctx context.Context, run func() error) error {
 	defer func() { _ = conn.Close() }()
 
 	var acquired int
-	if err = conn.QueryRowContext(ctx,
-		"SELECT GET_LOCK(?, ?)",
-		mysqlMigrationLock,
-		mysqlLockTimeout,
-	).Scan(&acquired); err != nil {
+	if err = conn.QueryRowContext(ctx, "SELECT GET_LOCK(?, ?)", mysqlMigrationLock, mysqlLockTimeout).
+		Scan(&acquired); err != nil {
 		return fmt.Errorf("获取迁移锁失败: %w", err)
 	}
 	if acquired != 1 {
