@@ -9,20 +9,20 @@ import (
 
 // UserLogin 用户登录
 type UserLogin struct {
-	CaptchaID string `json:"captchaId" validate:"required" label:"验证码ID"`
-	Code      string `json:"code" validate:"required" label:"验证码"`
-	Username  string `json:"username" validate:"required" example:"admin" label:"用户名"`
-	Password  string `json:"password" validate:"required" example:"123456" label:"密码"`
+	CaptchaID string `json:"captchaId" label:"验证码ID"`
+	Code      string `json:"code" label:"验证码"`
+	Username  string `json:"username" example:"admin" label:"用户名"`
+	Password  string `json:"password" example:"123456" label:"密码"`
 }
 
 // RefreshToken 刷新token
 type RefreshToken struct {
-	Token string `json:"token" validate:"required" label:"刷新令牌"`
+	Token string `json:"token" label:"刷新令牌"`
 }
 
 type CheckCaptcha struct {
-	CaptchaID string `json:"captchaId" validate:"required" label:"验证码ID"`
-	Code      string `json:"code" validate:"required" label:"验证码"`
+	CaptchaID string `json:"captchaId" label:"验证码ID"`
+	Code      string `json:"code" label:"验证码"`
 }
 
 // Register 用户注册
