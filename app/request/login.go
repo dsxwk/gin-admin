@@ -1,11 +1,10 @@
 package request
 
 import (
-	"gin/app/errcode"
+	"fmt"
 	"gin/common/base"
 
-	"fmt"
-	"github.com/gookit/validate"
+	"github.com/dsxwk/validatex"
 )
 
 // UserLogin 用户登录
@@ -27,8 +26,7 @@ type CheckCaptcha struct {
 }
 
 // Register 用户注册
-type Register struct {
-}
+type Register struct{}
 
 // Login Validator
 type Login struct {
@@ -37,29 +35,29 @@ type Login struct {
 	RefreshToken RefreshToken
 }
 
-// Validate 请求验证
-func (s Login) Validate(data Login, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
+// ValidateWithScene 请求验证
+func (s Login) ValidateWithScene(scene string, translator *validatex.Translator) validatex.Errors {
+	switch scene {
+	case "Login":
+		return validatex.Check(
+			validatex.Str(translator, "UserLogin.Username", s.Username).Required().Errors(),
+			validatex.Str(translator, "UserLogin.Password", s.Password).Required().Errors(),
+		)
+	case "RefreshToken":
+		return validatex.Str(translator, "RefreshToken.Token", s.RefreshToken.Token).Required().Errors()
+	case "CheckCaptcha":
+		return validatex.Check(
+			validatex.Str(translator, "UserLogin.CaptchaID", s.CaptchaID).Required().Errors(),
+			validatex.Str(translator, "UserLogin.Code", s.Code).Required().Errors(),
+		)
+	default:
+		return nil
 	}
-
-	return nil
-}
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s Login) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		"Login":        []string{"UserLogin.Username", "UserLogin.Password"},
-		"RefreshToken": []string{"RefreshToken.Token"},
-	})
 }
 
 // Messages 验证器错误消息
-func (s Login) Messages() map[string]string {
-	return validate.MS{
+func (s Login) Messages() validatex.Messages {
+	return validatex.Messages{
 		"required": fmt.Sprintf("%s {field} %s",
 			s.Trans("validator.common.field", nil),
 			s.Trans("validator.common.required", nil),
@@ -68,8 +66,8 @@ func (s Login) Messages() map[string]string {
 }
 
 // Translates 字段翻译
-func (s Login) Translates() map[string]string {
-	return validate.MS{
+func (s Login) Translates() validatex.Translates {
+	return validatex.Translates{
 		"UserLogin.Username":  s.Trans("validator.login.username", nil),
 		"UserLogin.Password":  s.Trans("validator.login.password", nil),
 		"RefreshToken.Token":  s.Trans("validator.login.refreshToken", nil),

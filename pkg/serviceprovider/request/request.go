@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dsxwk/validatex"
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/validate"
 )
@@ -310,6 +311,14 @@ type contextSetter interface {
 	SetContext(context.Context)
 }
 
+type validatexValidator interface {
+	Validate(*validatex.Translator) validatex.Errors
+}
+
+type validatexSceneValidator interface {
+	ValidateWithScene(string, *validatex.Translator) validatex.Errors
+}
+
 // withContext 设置上下文并执行验证
 func (c Client) withContext(ctx context.Context, data any, scene string) error {
 	if setter, ok := data.(contextSetter); ok {
@@ -321,9 +330,37 @@ func (c Client) withContext(ctx context.Context, data any, scene string) error {
 		return nil
 	}
 
+	translator := validatexTranslator(data)
+	if validator, ok := data.(validatexSceneValidator); ok {
+		return validatexValidationError(validator.ValidateWithScene(scene, translator))
+	}
+	if validator, ok := data.(validatexValidator); ok {
+		return validatexValidationError(validator.Validate(translator))
+	}
+
 	v := validate.Struct(data, scene)
 	if !v.Validate(scene) {
 		return errcode.ArgsError().WithMsg(v.Errors.One())
 	}
 	return nil
+}
+
+// validatexTranslator 创建携带请求翻译配置的验证器
+func validatexTranslator(data any) *validatex.Translator {
+	translator := validatex.NewTranslator()
+	if provider, ok := data.(validatex.TranslatesProvider); ok {
+		translator.Translates = provider.Translates()
+	}
+	if provider, ok := data.(validatex.MessagesProvider); ok {
+		translator.Messages = provider.Messages()
+	}
+	return translator
+}
+
+// validatexValidationError 转换validatex字段错误为统一参数错误
+func validatexValidationError(errors validatex.Errors) error {
+	if len(errors) == 0 {
+		return nil
+	}
+	return errcode.ArgsError().WithMsg(errors.Error())
 }
