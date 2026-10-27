@@ -2,6 +2,7 @@
 /.idea
 /.vscode
 /.cache
+/.tmp
 /.gocache
 /.tools
 /vendor
