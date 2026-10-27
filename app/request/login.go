@@ -37,26 +37,26 @@ type Login struct {
 }
 
 // ValidateWithScene 请求验证
-func (s Login) ValidateWithScene(scene string, translator *validatex.Translator) validatex.Errors {
+func (s Login) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "Login":
 		return validatex.Check(
-			validatex.Str(translator, "UserLogin.Username", s.Username).Required().Errors(),
-			validatex.Str(translator, "UserLogin.Password", s.Password).Required().Errors(),
+			fields.Str("UserLogin.Username", s.Username).Required().Errors(),
+			fields.Str("UserLogin.Password", s.Password).Required().Errors(),
 		)
 	case "RefreshToken":
-		return validatex.Str(translator, "RefreshToken.Token", s.RefreshToken.Token).Required().Errors()
+		return fields.Str("RefreshToken.Token", s.RefreshToken.Token).Required().Errors()
 	case "CheckCaptcha":
 		return validatex.Check(
-			validatex.Str(translator, "UserLogin.CaptchaID", s.CaptchaID).Required().Errors(),
-			validatex.Str(translator, "UserLogin.Code", s.Code).Required().Errors(),
+			fields.Str("UserLogin.CaptchaID", s.CaptchaID).Required().Errors(),
+			fields.Str("UserLogin.Code", s.Code).Required().Errors(),
 		)
 	default:
 		return nil
 	}
 }
 
-// Messages 验证器错误消息
+// Messages 错误消息
 func (s Login) Messages() validatex.Messages {
 	return validatex.Messages{
 		"required": fmt.Sprintf("%s {field} %s",

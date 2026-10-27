@@ -66,6 +66,12 @@ github.com/dsxwk/validatex v1.0.2 h1:fXyVG/KvDB+W4IONOAqC//XL4mJClZ9tT6onbTMvK8U
 github.com/dsxwk/validatex v1.0.2/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
 github.com/dsxwk/validatex v1.0.3 h1:qOTLw0omxE4udBN64mkQfu2CRrRH/RH0XZm4/sWm4ts=
 github.com/dsxwk/validatex v1.0.3/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
+github.com/dsxwk/validatex v1.0.5 h1:9X7t/ry4vadK+lhfv/VU+TrGp23u3itgVUzj8QMkQXw=
+github.com/dsxwk/validatex v1.0.5/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
+github.com/dsxwk/validatex v1.1.0 h1:k8x5bD3ETT7JiJuzjlmDrmmoxpEpmzk6WkzW/hFkjk8=
+github.com/dsxwk/validatex v1.1.0/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
+github.com/dsxwk/validatex v1.1.1 h1:OWgmpkjYS9rC0DSHcB9LYd6OzxI+ffZcMpwK4eKv4xo=
+github.com/dsxwk/validatex v1.1.1/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
 github.com/dustin/go-humanize v1.1.0 h1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=
 github.com/dustin/go-humanize v1.1.0/go.mod h1:hc1CvRkJMsgxqjmjMQF3QNRAZBwY8AXBAzKYoSX9sFI=
 github.com/ebitengine/purego v0.11.1 h1:2zpWRSQNVKN4eKsKO9eM1ILDgWfYMY9GwqRmK6XeQ/0=
