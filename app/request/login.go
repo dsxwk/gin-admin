@@ -9,26 +9,27 @@ import (
 
 // UserLogin 用户登录
 type UserLogin struct {
-	CaptchaID string `json:"captchaId" label:"验证码ID"`
-	Code      string `json:"code" label:"验证码"`
-	Username  string `json:"username" example:"admin" label:"用户名"`
-	Password  string `json:"password" example:"123456" label:"密码"`
+	CaptchaID string `json:"captchaId" form:"captchaId" label:"验证码ID"`
+	Code      string `json:"code" form:"code" label:"验证码"`
+	Username  string `json:"username" form:"username" example:"admin" label:"用户名"`
+	Password  string `json:"password" form:"password" example:"123456" label:"密码"`
 }
 
 // RefreshToken 刷新token
 type RefreshToken struct {
-	Token string `json:"token" label:"刷新令牌"`
+	Token string `json:"token" form:"token" label:"刷新令牌"`
 }
 
+// CheckCaptcha 验证码校验
 type CheckCaptcha struct {
-	CaptchaID string `json:"captchaId" label:"验证码ID"`
-	Code      string `json:"code" label:"验证码"`
+	CaptchaID string `json:"captchaId" form:"captchaId" label:"验证码ID"`
+	Code      string `json:"code" form:"code" label:"验证码"`
 }
 
 // Register 用户注册
 type Register struct{}
 
-// Login Validator
+// Login 登录验证
 type Login struct {
 	base.Request
 	UserLogin
