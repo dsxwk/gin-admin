@@ -1,5 +1,11 @@
 # Version History
 
+## v.3.5.0
+> - Update dependency packages
+> - Reconstruction of login verification request
+> - Refactor all HTTP, WebSocket, and gRPC request validation to validatex
+> - Update HTTP and gRPC request generators, templates, and validation tests
+
 ## v3.4.4
 > - Refactor database migrations and add batch migrations, schema DSL, migration status commands, Seeder progress output, and db:init, along with user table migration and seed examples
 
