@@ -1,4 +1,12 @@
-## 中文 | [English](readme.md)
+# Gin Admin - Go + Gin 企业级后台管理框架
+
+中文 | [English](readme.md)
+
+Gin Admin(`gin-admin`)是一个基于Go、Gin和GORM开发的开源企业级后台管理系统和Admin API框架,包含管理后台后端、RBAC权限、JWT认证、gRPC、WebSocket、CLI代码生成器、Swagger、Redis、MySQL/PostgreSQL/SQLite、Elasticsearch、队列、国际化以及AI Agent/MCP能力。适用于企业后台管理系统、管理后台、SaaS后台、内部工具、RESTful API服务和微服务项目。
+
+**后端仓库:** [GitHub](https://github.com/dsxwk/gin-admin.git) | [Gitee](https://gitee.com/dsxwk/gin-admin.git)
+
+**前端仓库:** [GitHub](https://github.com/dsxwk/gin-web.git) | [Gitee](https://gitee.com/dsxwk/gin-web.git)
 
 - [项目简介](#项目简介)
     - [项目地址](#项目地址)

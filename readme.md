@@ -1,4 +1,12 @@
-## English | [中文](readme_zh.md)
+# Gin Admin - Go + Gin Enterprise Admin API Framework
+
+[中文](readme_zh.md) | English
+
+Gin Admin (`gin-admin`) is an open-source Go + Gin + GORM enterprise backend management system and Admin API framework. It includes an admin panel backend, RBAC permissions, JWT authentication, gRPC, WebSocket, CLI code generation, Swagger, Redis, MySQL/PostgreSQL/SQLite, Elasticsearch, queues, internationalization, and AI Agent/MCP support. It is designed for enterprise admin systems, management dashboards, SaaS backends, internal tools, RESTful APIs, and microservice projects.
+
+**Backend:** [GitHub](https://github.com/dsxwk/gin-admin.git) | [Gitee](https://gitee.com/dsxwk/gin-admin.git)
+
+**Frontend:** [GitHub](https://github.com/dsxwk/gin-web.git) | [Gitee](https://gitee.com/dsxwk/gin-web.git)
 
 - [Project Introduction](#Project-Introduction)
     - [Project Address](#Project-Address)
