@@ -311,14 +311,6 @@ type contextSetter interface {
 	SetContext(context.Context)
 }
 
-type validatexValidator interface {
-	Validate(*validatex.Translator) validatex.Errors
-}
-
-type validatexSceneValidator interface {
-	ValidateWithScene(string, *validatex.Translator) validatex.Errors
-}
-
 // withContext 设置上下文并执行验证
 func (c Client) withContext(ctx context.Context, data any, scene string) error {
 	if setter, ok := data.(contextSetter); ok {
@@ -331,11 +323,12 @@ func (c Client) withContext(ctx context.Context, data any, scene string) error {
 	}
 
 	translator := validatexTranslator(data)
-	if validator, ok := data.(validatexSceneValidator); ok {
-		return validatexValidationError(validator.ValidateWithScene(scene, translator))
+	fields := validatex.NewFields(translator)
+	if validator, ok := data.(validatex.SceneValidatable); ok {
+		return validatexValidationError(validator.ValidateWithScene(scene, fields))
 	}
-	if validator, ok := data.(validatexValidator); ok {
-		return validatexValidationError(validator.Validate(translator))
+	if validator, ok := data.(validatex.Validatable); ok {
+		return validatexValidationError(validator.Validate(fields))
 	}
 
 	v := validate.Struct(data, scene)

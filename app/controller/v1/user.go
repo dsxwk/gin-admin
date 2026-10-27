@@ -209,7 +209,7 @@ func (s *UserController) Delete(c *gin.Context) {
 func (s *UserController) Import(c *gin.Context) {
 	var (
 		ctx = c.Request.Context()
-		req request.UserImport
+		req request.User
 	)
 
 	// 绑定参数并验证
@@ -219,7 +219,7 @@ func (s *UserController) Import(c *gin.Context) {
 		return
 	}
 
-	result, err := s.service.Import(ctx, s.GetUserID(c), req)
+	result, err := s.service.Import(ctx, s.GetUserID(c), request.UserImport{Data: req.Data})
 	if err != nil {
 		s.Response.Error(c, err)
 		return
