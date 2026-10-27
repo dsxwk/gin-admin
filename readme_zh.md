@@ -66,6 +66,8 @@
         - [临时规则](#临时规则)
         - [验证使用](#验证使用)
         - [在控制器中使用](#在控制器中使用)
+    - [gRPC请求](#grpc请求)
+    - [CLI生成](#cli生成)
 - [服务](#服务)
     - [服务创建帮助](#服务创建帮助)
     - [服务创建](#服务创建)
@@ -254,7 +256,7 @@
 
 # 版本记录
 
-> - 最新版本 [v3.4.4](version_history_zh.md#v344)
+> - 最新版本 [v3.4.5](version_history_zh.md#v345)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明
@@ -917,6 +919,8 @@ $ go run ./cmd/cli.go grpc-make:proto --table=user
 $ go run ./cmd/cli.go grpc-make:request --table=user
 ```
 
+生成的请求结构使用`validatex.Fields`,生成的服务通过`validatex.ValidateRequest`和`validatex.ValidateSceneRequest`执行验证。
+
 命令选项:
 
 - `--path=grpc/request` 输出目录 (默认)
@@ -1142,173 +1146,100 @@ func (s *UserService) List(ctx context.Context, req request.User) (pageData requ
 
 # 表单验证
 
+请求验证统一使用 `github.com/dsxwk/validatex`。校验规则直接写在 Go 方法中，不再使用 `validate` 结构体标签。
+
 ## 验证创建帮助
 
 ```bash
-$ go run ./cmd/cli.go make:request -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v3.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:request  验证请求创建
-
-Options:
-  -f, --file        文件路径, 如: role  required:true
-  -t, --table       表名, 如: roles    required:false
-  -d, --desc        描述               required:false
-  -c, --camel       字段是否使用驼峰     required:false
-  -C, --connection  数据库连接          required:false
+$ go run ./cmd/cli.go make:request -h
 ```
+
+生成器支持文件模式、数据库表模式、驼峰字段和数据库连接选择。
 
 ## 验证创建
-
-```bash
-$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=角色请求验证
-```
 
 ```go
 package request
 
 import (
-	"gin/app/errcode"
-    "gin/common/base"
-    
-    "github.com/gookit/validate"
+	"gin/common/base"
+
+	"github.com/dsxwk/validatex"
 )
-
-// Roles 请求验证
-type Roles struct {
-    base.Request
-    ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-    Name   string `json:"name" form:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-    Desc   string `json:"desc" form:"desc" validate:"maxLen:100" label:"角色描述"`
-    Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-    PageListValidate
-}
-
-// RoleCreate 角色创建验证
-type RoleCreate struct {
-    Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-    Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
-    Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-}
-
-// RoleUpdate 角色更新验证
-type RoleUpdate struct {
-    ID     int64  `uri:"id" validate:"required|int|gt:0" label:"ID"`
-    Name   string `json:"name" validate:"required|minLen:1|maxLen:20" label:"角色名称"`
-    Desc   string `json:"desc" validate:"maxLen:100" label:"角色描述"`
-    Status int64  `json:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-}
-
-// Validate 请求验证
-func (s Roles) Validate(data Roles, scene string) error {
-    v := validate.Struct(data, scene)
-    if !v.Validate(scene) {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
-    }
-    return nil
-}
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s Roles) ConfigValidation(v *validate.Validation) {
-    scenes := validate.SValues{
-        "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-        "Create": []string{"Name", "Desc", "Status"},
-        "Update": []string{"ID", "Name", "Desc", "Status"},
-        "Detail": []string{"ID"},
-        "Delete": []string{"ID"},
-    }
-    v.WithScenes(scenes)
-}
-
-// Messages 验证器错误消息
-func (s Roles) Messages() map[string]string {
-    return validate.MS{
-        "required":                     "字段 {field} 必填",
-        "int":                          "字段 {field} 必须为整数",
-        "gt":                           "字段 {field} 必须大于 0",
-        "minLen":                       "{field} 长度不能少于 {min} 个字符",
-        "maxLen":                       "{field} 长度不能超过 {max} 个字符",
-        "PageListValidate.Page.gt":     "页码必须大于 0",
-        "PageListValidate.PageSize.gt": "每页数量必须大于 0",
-    }
-}
-
-// Translates 字段翻译
-func (s Roles) Translates() map[string]string {
-    return validate.MS{
-        "ID":                        "ID",
-        "Name":                      "角色名称",
-        "Desc":                      "角色描述",
-        "Status":                    "状态 1=启用 2=停用",
-        "PageListValidate.Page":     "页码",
-        "PageListValidate.PageSize": "每页数量",
-    }
-}
-
-```
-
-## 验证规则
-
-> 更多规则请查看 [gookit/validate](https://github.com/gookit/validate)
-
-```go
-package request
 
 // Roles 角色请求验证
 type Roles struct {
-    base.Request
-    ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-    Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"角色名称"`
-    Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"角色描述"`
-    Status int64  `json:"status" form:"status" validate:"required|int" label:"状态 1=启用 2=停用"`
-    PageListValidate
+	base.Request
+	ID     int64  `json:"id" form:"id" label:"ID"`
+	Name   string `json:"name" form:"name" label:"角色名称"`
+	Status int64  `json:"status" form:"status" label:"状态 1=启用 2=停用"`
+	PageListValidate
+}
+
+// ValidateWithScene 请求验证
+func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	switch scene {
+	case "List":
+		return s.PageListValidate.Validate(fields)
+	case "Create":
+		return validatex.Check(
+			fields.Str("Name", s.Name).Required().Max(20).Errors(),
+			fields.Int("Status", s.Status).Required().Errors(),
+		)
+	case "Update":
+		return validatex.Check(
+			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
+			fields.Str("Name", s.Name).Required().Max(20).Errors(),
+			fields.Int("Status", s.Status).Required().Errors(),
+		)
+	case "Detail", "Delete":
+		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+	default:
+		return nil
+	}
 }
 ```
 
-## 验证场景
+请求 provider 会统一创建一次 `validatex.Fields` 并传入请求方法。
+
+## 验证规则
+
+`Fields` 提供类型化字段构造器：
 
 ```go
-package request
+fields.Str("name", value).Required().Min(3).Max(20)
+fields.Int("age", value).Required().Gte(18)
+fields.Float("price", value).Required().Gt(0)
+fields.Bool("enabled", value).True()
+fields.Slice("ids", values).Required()
+fields.Map("labels", values).AllowedKeys("zh", "en")
+```
 
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s Roles) ConfigValidation(v *validate.Validation) {
-    scenes := validate.SValues{
-        "List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-        "Create": []string{"Name", "Desc", "Status"},
-        "Update": []string{"ID", "Name", "Desc", "Status"},
-        "Detail": []string{"ID"},
-        "Delete": []string{"ID"},
-    }
-    v.WithScenes(scenes)
-}
+完整规则请查看 validatex README。
+
+## 验证场景
+
+所有场景集中在一个 `ValidateWithScene` 中。列表分页仅在 `NotPage=false` 时校验：
+
+```go
+case "List":
+	return validatex.When(!s.NotPage, func() validatex.Errors {
+		return validatex.Check(
+			fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+		)
+	})
 ```
 
 ## 提示信息
 
 ```go
-package request
-
 // Messages 验证器错误消息
-func (s Roles) Messages() map[string]string {
-	return validate.MS{
-        "required":                     "字段 {field} 必填",
-        "int":                          "字段 {field} 必须为整数",
-        "PageListValidate.Page.gt":     "字段 {field} 需大于 0",
-        "PageListValidate.PageSize.gt": "字段 {field} 需大于 0",
+func (s Roles) Messages() validatex.Messages {
+	return validatex.Messages{
+		"required": "字段 {field} 必填",
+		"gt":       "字段 {field} 需大于 0",
+		"max":      "{field} 长度不能超过 {max} 个字符",
 	}
 }
 ```
@@ -1316,309 +1247,95 @@ func (s Roles) Messages() map[string]string {
 ## 字段翻译
 
 ```go
-package request
-
 // Translates 字段翻译
-func (s Roles) Translates() map[string]string {
-  return validate.MS{
-    "ID":       "ID",
-    "Name":     "角色名称",
-    "Desc":     "角色描述",
-    "Status":   "状态 1=启用 2=停用",
-    "Page":     "页码",
-    "PageSize": "每页数量",
-  }
+func (s Roles) Translates() validatex.Translates {
+	return validatex.Translates{
+		"ID":                        "ID",
+		"Name":                      "角色名称",
+		"Status":                    "状态",
+		"PageListValidate.Page":     "页码",
+		"PageListValidate.PageSize": "每页数量",
+	}
 }
 ```
 
 ## 批量验证
 
-> 方式1
+嵌套值实现 `Validate(fields validatex.Fields)`，容器使用 `Fields.Struct`、`SliceStruct` 和 `MapStruct`：
 
 ```go
-package request
-
-import (
-	"gin/app/errcode"
-	"gin/pkg"
-    
-	"github.com/gookit/validate"
-)
-
-// UserImport 用户导入
-type UserImport struct {
-    Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"导入数据"`
+type Roles struct {
+	UserRoles []UserRole
 }
 
-// UserImportItem 用户导入子项
-type UserImportItem struct {
-    Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"用户名"`
-    Password string `json:"password" validate:"required" label:"密码"`
-    FullName string `json:"fullName" validate:"required" label:"姓名"`
-    Nickname string `json:"nickname" validate:"required" label:"昵称"`
-    Email    string `json:"email" validate:"required|email" label:"邮箱"`
-    Gender   int64  `json:"gender" validate:"required|int" label:"性别"`
-    Age      int64  `json:"age" validate:"int" label:"年龄"`
-    Status   int64  `json:"status" validate:"int" label:"状态"`
-}
-
-// Validate 用户导入验证
-func (s UserImport) Validate(data UserImport, scene string) error {
-    v := validate.Struct(data, scene)
-    if !v.Validate(scene) {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
-    }
-    return nil
-}
-
-// ConfigValidation 配置验证
-func (s UserImport) ConfigValidation(v *validate.Validation) {
-    scenes := validate.SValues{
-        "Import": []string{"Data"},
-    }
-    v.WithScenes(scenes)
-}
-
-// Messages 验证器错误消息
-func (s UserImport) Messages() map[string]string {
-    return validate.MS{
-        "required": "{field} 必填",
-        "minLen":   "{field} 长度不能少于 {min} 个字符",
-        "maxLen":   "{field} 长度不能超过 {max} 个字符",
-        "int":      "{field} 必须为整数",
-        "regex":    "{field} 格式错误",
-        "email":    "{field} 邮箱格式错误",
-    }
-}
-
-// Translates 字段翻译
-func (s UserImport) Translates() map[string]string {
-    ms := validate.MS{
-        "Data": "导入数据",
-    }
-    for i := range s.Data {
-      prefix := pkg.Sprintf("Data.%d.", i)
-      rowLabel := pkg.Sprintf("第 %d 行 ", i+1)
-      ms[prefix+"Username"] = rowLabel + "用户名"
-      ms[prefix+"Password"] = rowLabel + "密码"
-      ms[prefix+"FullName"] = rowLabel + "姓名"
-      ms[prefix+"Nickname"] = rowLabel + "昵称"
-      ms[prefix+"Email"] = rowLabel + "邮箱"
-      ms[prefix+"Gender"] = rowLabel + "性别"
-      ms[prefix+"Age"] = rowLabel + "年龄"
-      ms[prefix+"Status"] = rowLabel + "状态"
-    }
-    return ms
+func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	return fields.SliceStruct("UserRoles", s.UserRoles)
 }
 ```
 
-> 方式2
-
-```go
-package request
-
-import (
-	"fmt"
-	"gin/app/errcode"
-    
-    "github.com/gookit/validate"
-)
-
-// SystemConfigValueUpdate 系统配置批量更新
-type SystemConfigValueUpdate struct {
-	ID           int64  `json:"id" validate:"required|int|gt:0"`
-	Key          string `json:"key" validate:""`
-	DefaultValue string `json:"defaultValue" validate:""`
-}
-
-// SystemConfigUpdates 系统配置批量更新验证
-type SystemConfigUpdates struct {
-	List []SystemConfigValueUpdate `json:"list" validate:"required" label:"配置列表"`
-}
-
-// Validate 系统配置批量更新请求验证
-func (s SystemConfigUpdates) Validate() error {
-    if len(s.List) == 0 {
-        return errcode.ArgsError().WithMsg("配置列表不能为空")
-    }
-
-    for i, item := range s.List {
-        v := validate.Struct(item)
-        if !v.Validate() {
-            return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]项 %s", i, v.Errors.One()))
-        }
-    }
-
-    return nil
-}
-
-// Translates 字段翻译
-func (s SystemConfigValueUpdate) Translates() map[string]string {
-    return validate.MS{
-        "ID":               "id",
-        "Key":              "标识",
-        "Name":             "名称",
-        "DefaultValue":     "默认值",
-        "OptionValue":      "可选值",
-        "Type":             "配置类型 1=输入框 2=单选 3=复选 4=下拉菜单 5=文本域 6=附件",
-        "ConfigCategoryId": "配置分类Id",
-    }
-}
-
-// Messages 验证器错误消息
-func (s SystemConfigValueUpdate) Messages() map[string]string {
-    return validate.MS{
-        "required": "字段 {field} 必填",
-        "int":      "字段 {field} 必须为整数",
-        "gt":       "字段 {field} 必须大于 0",
-    }
-}
-```
+错误路径会包含具体下标，例如 `UserRoles[2].RoleId`。
 
 ## 自定义验证
 
 ### 全局规则
 
-> 全局规则只需要在入口文件`main.go`中定义, 适用于所有验证器, 无需重复定义。
-
-```go
-package main
-
-import (
-	"github.com/gookit/validate"
-)
-
-// 初始化时注册
-func init() {
-	validate.AddValidator("is_even", func(val any, rule string) bool {
-		num, ok := val.(int)
-		if !ok {
-			return false
-		}
-		return num%2 == 0
-	})
-}
-```
+公共消息和字段翻译可以由公共函数返回，供多个请求类型复用。
 
 ### 局部规则
 
-```go
-package request
+使用 `Rule` 编写请求专属规则：
 
-// ValidateIsEven 定义局部规则方法(命名规则：Validate<规则名>)
-func (s User) ValidateIsEven(val any) bool {
-	num := val.(int)
-	return num%2 == 0
-}
+```go
+fields.Int("Age", s.Age).Rule(
+	"is_even",
+	"{field}必须为偶数",
+	func(value int64) bool {
+		return value%2 == 0
+	},
+).Errors()
 ```
 
 ### 临时规则
 
-```go
-package request
-
-import (
-	"gin/app/errcode"
-)
-
-// Validate 请求验证
-func (s User) Validate(data User, scene string) error {
-	v := validate.Struct(data, scene)
-	v.AddValidator("is_even", func(val any, rule string) bool {
-        num, ok := val.(int)
-        if !ok {
-            return false
-        }
-        return num%2 == 0
-    })
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-
-	return nil
-}
-```
+同一个 `Rule` 调用也可以实现仅在单个场景使用的规则。
 
 ### 验证使用
 
 ```go
-package request
-
 type User struct {
-    Age int `json:"gender" validate:"required|is_even" label:"年龄"`
+	Age int64 `json:"age" form:"age" label:"年龄"`
 }
 ```
 
 ### 在控制器中使用
 
-> `BindValidate`一步完成参数绑定和验证,`Validate`只做验证。两者都会把请求ctx自动注入`Request`,翻译和验证消息可以直接使用请求上下文。
-
 ```go
-package v1
-
-import (
-	"gin/app/errcode"
-    "gin/app/facade"
-    "gin/app/model"
-    "gin/app/request"
-    "gin/app/service"
-    "gin/common/base"
-    
-    "github.com/gin-gonic/gin"
-)
-
-type UserController struct {
-    base.Controller
-    service service.UserService
-}
-
-// List 列表
-// @Tags 用户管理
-// @Summary 列表
-// @Description 用户列表
-// @Param token header string true "认证Token"
-// @Param page query string true "页码"
-// @Param pageSize query string true "分页大小"
-// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "登录成功"
-// @Failure 400 {object} errcode.ArgsErrorResponse "参数错误"
-// @Failure 500 {object} errcode.SystemErrorResponse "系统错误"
-// @Router /api/v1/user [get]
-func (s *UserController) List(c *gin.Context) {
-    var (
-        ctx = c.Request.Context()
-        req request.User
-    )
-
-    // 方式1
-    /*err := c.ShouldBind(&req)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
-
-    // 验证
-    err = facade.Request().Validate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }*/
-    // 方式2
-    // 绑定参数并验证
-    err := facade.Request().BindValidate(c, &req, "List")
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
-
-    res, err := s.service.List(ctx, req)
-    if err != nil {
-        s.Response.Error(c, err)
-        return
-    }
-
-    s.Response.Success(c, errcode.Success().WithData(res))
+err := facade.Request().BindValidate(c, &req, "List")
+if err != nil {
+	s.Response.Error(c, err)
+	return
 }
 ```
+
+`BindValidate` 负责绑定并调用 `ValidateWithScene`；`Validate` 用于已经绑定完成的请求。
+
+## gRPC请求
+
+gRPC 请求结构使用相同的 validatex 接口：
+
+- 普通请求实现 `Validate(fields validatex.Fields)`
+- 场景请求实现 `ValidateWithScene(scene, fields)`
+
+生成的 gRPC 服务通过 `validatex.ValidateRequest` 和 `validatex.ValidateSceneRequest` 执行验证，并将 `validatex.Errors` 转换为 gRPC `InvalidArgument` 状态。
+
+## CLI生成
+
+`make:request` 和 `grpc-make:request` 现在生成：
+
+- 不包含 `validate` 标签的 `form`、`json` 结构体标签
+- `validatex.Fields` 校验表达式
+- `validatex.Messages` 和 `validatex.Translates`
+- `NotPage=true` 时自动跳过 `Page`、`PageSize` 的分页校验
 
 # 服务
 

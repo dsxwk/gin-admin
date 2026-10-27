@@ -66,6 +66,8 @@
         - [Temporary Rules](#Temporary-Rules)
         - [Validator Usage](#Validator-Usage)
         - [Used In The Controller](#Used-In-The-Controller)
+    - [gRPC Requests](#gRPC-Requests)
+    - [CLI Generation](#CLI-Generation)
 - [Service](#Service)
     - [Service Creation Help](#Service-Creation-Help)
     - [Service Creation](#Service-Creation)
@@ -265,7 +267,7 @@
 
 # Version History
 
-> - Latest Version [v3.4.4](version_history.md#v344)
+> - Latest Version [v3.4.5](version_history.md#v345)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
@@ -934,6 +936,8 @@ Generate a gRPC request from a database table:
 $ go run ./cmd/cli.go grpc-make:request --table=user
 ```
 
+Generated request structs use `validatex.Fields`; generated services validate through `validatex.ValidateRequest` and `validatex.ValidateSceneRequest`.
+
 Options:
 
 - `--path=grpc/request` Output directory (default)
@@ -1171,153 +1175,100 @@ func (s *UserService) List(ctx context.Context, req request.User) (pageData requ
 
 # Form Validation
 
+Request validation uses `github.com/dsxwk/validatex`. Validation rules are written in Go methods instead of `validate` struct tags.
+
 ## Validator Creation Help
 
 ```bash
-$ go run ./cmd/cli.go make:request -h # --help
-  ██████  ██████ ██   ██
-  ██   ██ ██      ██ ██
-  ██   ██ ██████   ███
-  ██   ██     ██  ██ ██
-  ██████  ██████ ██   ██
-
-Gin Cli v3.0.0, built with Go go1.25.2
-
-Usage:
-  cli [command] [options]
-
-Command:
-  make:request  Validator Creation
-
-Options:
-  -f, --file  File Path, Example: role                         required:true
-  -d, --desc  Description, Example: role-request-validation    required:false
-  -t, --table       Table, Example: roles                      required:false
-  -c, --camel       Column is use camel                        required:false
-  -C, --connection  Database connection                        required:false
+$ go run ./cmd/cli.go make:request -h
 ```
+
+The generator supports file mode, database-table mode, camel-case fields, and connection selection.
 
 ## Validator Creation
-
-```bash
-$ go run ./cmd/cli.go make:request --file=roles --table=roles --desc=role-request-validation
-```
 
 ```go
 package request
 
 import (
-	"gin/app/errcode"
 	"gin/common/base"
 
-	"github.com/gookit/validate"
+	"github.com/dsxwk/validatex"
 )
 
-// Roles role-request-validation
+// Roles 角色请求验证
 type Roles struct {
 	base.Request
-	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Name   string `json:"name" form:"name" validate:"required|max:255" label:"Role Name"`
-	Desc   string `json:"desc" form:"desc" validate:"required|max:255" label:"Role Description"`
-	Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
+	ID     int64  `json:"id" form:"id" label:"ID"`
+	Name   string `json:"name" form:"name" label:"角色名称"`
+	Status int64  `json:"status" form:"status" label:"状态 1=启用 2=停用"`
 	PageListValidate
 }
 
-func (s Roles) Validate(data Roles, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-	return nil
-}
-
-// ConfigValidation Configuration-Validation
-// - Define validation scenes
-// - You can also add verification settings
-func (s Roles) ConfigValidation(v *validate.Validation) {
-	scenes := validate.SValues{
-		"List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"Create": []string{"Name", "Desc", "Status"},
-		"Update": []string{"ID", "Name", "Desc", "Status"},
-		"Detail": []string{"ID"},
-		"Delete": []string{"ID"},
-	}
-	v.WithScenes(scenes)
-}
-
-// Messages messages
-func (s Roles) Messages() map[string]string {
-	return validate.MS{
-		"required":    "Field {field} Required",
-		"int":         "Field {field} Must be an integer",
-		"Page.gt":     "Field {field} Must be greater than 0",
-		"PageSize.gt": "Field {field} Must be greater than 0",
-	}
-}
-
-// Translates translate
-func (s Roles) Translates() map[string]string {
-	return validate.MS{
-		"ID":       "ID",
-		"Name":     "Role Name",
-		"Desc":     "Role Description",
-		"Status":   "Status 1=Enable 2=Disable",
-		"Page":     "Page",
-		"PageSize": "Page Size",
+// ValidateWithScene 请求验证
+func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	switch scene {
+	case "List":
+		return s.PageListValidate.Validate(fields)
+	case "Create":
+		return validatex.Check(
+			fields.Str("Name", s.Name).Required().Max(20).Errors(),
+			fields.Int("Status", s.Status).Required().Errors(),
+		)
+	case "Update":
+		return validatex.Check(
+			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
+			fields.Str("Name", s.Name).Required().Max(20).Errors(),
+			fields.Int("Status", s.Status).Required().Errors(),
+		)
+	case "Detail", "Delete":
+		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+	default:
+		return nil
 	}
 }
 ```
 
-### Validator Rules
+The request provider creates `validatex.Fields` once and injects it into the request method.
 
-> For more rules, please refer to [gookit/validate](https://github.com/gookit/validate)
+## Validator Rules
+
+`Fields` provides typed field constructors:
 
 ```go
-package request
-
-// Roles role-request-validation
-type Roles struct {
-	base.Request
-	ID     int64  `json:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	Name   string `json:"name" form:"name" validate:"required|maxLen:255" label:"Role Name"`
-	Desc   string `json:"desc" form:"desc" validate:"required|maxLen:255" label:"Role Description"`
-	Status int64  `json:"status" form:"status" validate:"required|int" label:"Status 1=Enable 2=Disable"`
-	PageListValidate
-}
+fields.Str("name", value).Required().Min(3).Max(20)
+fields.Int("age", value).Required().Gte(18)
+fields.Float("price", value).Required().Gt(0)
+fields.Bool("enabled", value).True()
+fields.Slice("ids", values).Required()
+fields.Map("labels", values).AllowedKeys("zh", "en")
 ```
+
+See the validatex README for the complete rule list.
 
 ## Validator Scenes
 
-```go
-package request
+Scenes are handled by one `switch` in `ValidateWithScene`. Pagination is validated only when `NotPage` is false:
 
-// ConfigValidation Configuration-Validation
-// - Define validation scenes
-// - You can also add verification settings
-func (s Roles) ConfigValidation(v *validate.Validation) {
-	scenes := validate.SValues{
-		"List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"Create": []string{"Name", "Desc", "Status"},
-		"Update": []string{"ID", "Name", "Desc", "Status"},
-		"Detail": []string{"ID"},
-		"Delete": []string{"ID"},
-	}
-	v.WithScenes(scenes)
-}
+```go
+case "List":
+	return validatex.When(!s.NotPage, func() validatex.Errors {
+		return validatex.Check(
+			fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+		)
+	})
 ```
 
 ## Prompt Message
 
 ```go
-package request
-
-// Messages Validator-Error-Message
-func (s Roles) Messages() map[string]string {
-	return validate.MS{
-		"required":                     "Field {field} Required",
-		"int":                          "Field {field} Must be an integer",
-		"PageListValidate.Page.gt":     "Field {field} Must be greater than 0",
-		"PageListValidate.PageSize.gt": "Field {field} Must be greater than 0",
+// Messages 验证器错误消息
+func (s Roles) Messages() validatex.Messages {
+	return validatex.Messages{
+		"required": "Field {field} is required",
+		"gt":       "Field {field} must be greater than 0",
+		"max":      "{field} cannot exceed {max} characters",
 	}
 }
 ```
@@ -1325,310 +1276,95 @@ func (s Roles) Messages() map[string]string {
 ## Field Translation
 
 ```go
-package request
-
-// Translates Field-Translation
-func (s Roles) Translates() map[string]string {
-	return validate.MS{
-		"ID":       "ID",
-		"Name":     "Role Name",
-		"Desc":     "Role Description",
-		"Status":   "Status 1=Enable 2=Disable",
-		"Page":     "Page",
-		"PageSize": "Page Size",
+// Translates 字段翻译
+func (s Roles) Translates() validatex.Translates {
+	return validatex.Translates{
+		"ID":                        "ID",
+		"Name":                      "Role Name",
+		"Status":                    "Status",
+		"PageListValidate.Page":     "Page",
+		"PageListValidate.PageSize": "Page Size",
 	}
 }
 ```
 
 ## Batch Validation
 
-> Method One
+Nested values implement `Validate(fields validatex.Fields)`. Containers use `Fields.Struct`, `SliceStruct`, and `MapStruct`:
 
 ```go
-package request
-
-import (
-	"gin/app/errcode"
-	"gin/pkg"
-
-	"github.com/gookit/validate"
-)
-
-// UserImport User Import
-type UserImport struct {
-	Data []UserImportItem `json:"data" validate:"required|minLen:1" label:"Import Data"`
+type Roles struct {
+	UserRoles []UserRole
 }
 
-// UserImportItem User Import Item
-type UserImportItem struct {
-	Username string `json:"username" validate:"required|minLen:3|maxLen:20|regex:^[a-zA-Z0-9_]+$" label:"Username"`
-	Password string `json:"password" validate:"required" label:"Password"`
-	FullName string `json:"fullName" validate:"required" label:"FullName"`
-	Nickname string `json:"nickname" validate:"required" label:"Nickname"`
-	Email    string `json:"email" validate:"required|email" label:"Email"`
-	Gender   int64  `json:"gender" validate:"required|int" label:"Gender"`
-	Age      int64  `json:"age" validate:"int" label:"Age"`
-	Status   int64  `json:"status" validate:"int" label:"Status"`
-}
-
-// Validate User Import Validate
-func (s UserImport) Validate(data UserImport, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-	return nil
-}
-
-// ConfigValidation Config Validation
-func (s UserImport) ConfigValidation(v *validate.Validation) {
-	scenes := validate.SValues{
-		"Import": []string{"Data"},
-	}
-	v.WithScenes(scenes)
-}
-
-// Messages Validation Messages
-func (s UserImport) Messages() map[string]string {
-	return validate.MS{
-		"required": "{field} Required",
-		"minLen":   "{field} the length cannot be less than {min} characters",
-		"maxLen":   "{field} the length cannot exceed {max} characters",
-		"int":      "{field} Must be an integer",
-		"regex":    "{field} format error",
-		"email":    "{field} email format error",
-	}
-}
-
-// Translates Translates
-func (s UserImport) Translates() map[string]string {
-	ms := validate.MS{
-		"Data": "Import Data",
-	}
-	for i := range s.Data {
-		prefix := pkg.Sprintf("Data.%d.", i)
-		rowLabel := pkg.Sprintf("Line %d ", i+1)
-		ms[prefix+"Username"] = rowLabel + "Username"
-		ms[prefix+"Password"] = rowLabel + "Password"
-		ms[prefix+"FullName"] = rowLabel + "FullName"
-		ms[prefix+"Nickname"] = rowLabel + "Nickname"
-		ms[prefix+"Email"] = rowLabel + "Email"
-		ms[prefix+"Gender"] = rowLabel + "Gender"
-		ms[prefix+"Age"] = rowLabel + "Age"
-		ms[prefix+"Status"] = rowLabel + "Status"
-	}
-	return ms
+func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	return fields.SliceStruct("UserRoles", s.UserRoles)
 }
 ```
 
-> Method Two
-
-```go
-package request
-
-import (
-	"fmt"
-	"gin/app/errcode"
-
-	"github.com/gookit/validate"
-)
-
-// SystemConfigValueUpdate Batch update of system configuration
-type SystemConfigValueUpdate struct {
-	ID           int64  `json:"id" validate:"required|int|gt:0"`
-	Key          string `json:"key" validate:""`
-	DefaultValue string `json:"defaultValue" validate:""`
-}
-
-// SystemConfigUpdates Batch update verification of system configuration
-type SystemConfigUpdates struct {
-	List []SystemConfigValueUpdate `json:"list" validate:"required" label:"Config List"`
-}
-
-// Validate System configuration batch update request verification
-func (s SystemConfigUpdates) Validate() error {
-	if len(s.List) == 0 {
-		return errcode.ArgsError().WithMsg("The configuration list cannot be empty")
-	}
-
-	for i, item := range s.List {
-		v := validate.Struct(item)
-		if !v.Validate() {
-			return errcode.ArgsError().WithMsg(fmt.Sprintf("list[%d]item %s", i, v.Errors.One()))
-		}
-	}
-
-	return nil
-}
-
-// Translates Field translation
-func (s SystemConfigValueUpdate) Translates() map[string]string {
-	return validate.MS{
-		"ID":               "ID",
-		"Key":              "Identification",
-		"Name":             "Name",
-		"DefaultValue":     "DefaultValue",
-		"OptionValue":      "OptionValue",
-		"Type":             "Type 1=input 2=radio 3=checkbox 4=select 5=textarea 6=file",
-		"ConfigCategoryId": "ConfigCategoryId",
-	}
-}
-
-// Messages Validator error message
-func (s SystemConfigValueUpdate) Messages() map[string]string {
-	return validate.MS{
-		"required": "Field {field} is required",
-		"int":      "Field {field} must be an integer",
-		"gt":       "Field {field} must be greater than 0",
-	}
-}
-```
+The returned paths include the concrete index, for example `UserRoles[2].RoleId`.
 
 ## Custom Validation
 
 ### Global Rules
 
-> Global rules only need to be defined in the entry file `main.go`,applicable to all validators, without the need for
-> repeated definitions.
-
-```go
-package main
-
-import (
-	"github.com/gookit/validate"
-)
-
-// Register during initialization
-func init() {
-	validate.AddValidator("is_even", func(val any, rule string) bool {
-		num, ok := val.(int)
-		if !ok {
-			return false
-		}
-		return num%2 == 0
-	})
-}
-```
+Shared messages and translations can be returned by helper functions and reused by request types.
 
 ### Local Rules
 
-```go
-package request
+Use `Rule` for request-specific predicates:
 
-// ValidateIsEven Define local rule methods (naming convention: Validate<rule name>)
-func (s User) ValidateIsEven(val any) bool {
-	num := val.(int)
-	return num%2 == 0
-}
+```go
+fields.Int("Age", s.Age).Rule(
+	"is_even",
+	"{field} must be even",
+	func(value int64) bool {
+		return value%2 == 0
+	},
+).Errors()
 ```
 
 ### Temporary Rules
 
-```go
-package request
-
-import (
-	"gin/app/errcode"
-)
-
-// Validate Request-Validation
-func (s User) Validate(data User, scene string) error {
-	v := validate.Struct(data, scene)
-	v.AddValidator("is_even", func(val any, rule string) bool {
-		num, ok := val.(int)
-		if !ok {
-			return false
-		}
-		return num%2 == 0
-	})
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-
-	return nil
-}
-```
+The same `Rule` call can implement a rule used by only one scene.
 
 ### Validator Usage
 
 ```go
-package request
-
 type User struct {
-	Age int `json:"gender" validate:"required|is_even" label:"age"`
+	Age int64 `json:"age" form:"age" label:"Age"`
 }
 ```
 
 ### Used In The Controller
 
-> `BindValidate` binds query/body and validates in one step. `Validate` only validates. Both accept the request context and automatically inject it into `Request`, so translation and validation messages can use the request context.
-
 ```go
-package v1
-
-import (
-	"gin/app/errcode"
-	"gin/app/facade"
-	"gin/app/model"
-	"gin/app/request"
-	"gin/app/service"
-	"gin/common/base"
-
-	"github.com/gin-gonic/gin"
-)
-
-type UserController struct {
-	base.Controller
-	service service.UserService
-}
-
-// List User-List
-// @Tags User
-// @Summary List
-// @Description User-List
-// @Param token header string true "Authentication Token"
-// @Param page query string true "Page"
-// @Param pageSize query string true "Page Size"
-// @Success 200 {object} errcode.SuccessResponse{data=request.PageData{list=[]model.User}} "Login Successful"
-// @Failure 400 {object} errcode.ArgsErrorResponse "Argument Error"
-// @Failure 500 {object} errcode.SystemErrorResponse "System Error"
-// @Router /api/v1/user [get]
-func (s *UserController) List(c *gin.Context) {
-	var (
-		ctx = c.Request.Context()
-		req request.User
-	)
-
-	// Method One
-	/*err := c.ShouldBind(&req)
-	  if err != nil {
-	      s.Response.Error(c, err)
-	      return
-	  }
-
-	  // Validator
-	  err = facade.Request().Validate(c, &req, "List")
-	  if err != nil {
-	      s.Response.Error(c, err)
-	      return
-	  }*/
-	// Method Two
-	// Bind And Validate
-	err := facade.Request().BindValidate(c, &req, "List")
-	if err != nil {
-		s.Response.Error(c, err)
-		return
-	}
-
-	res, err := s.service.List(ctx, req)
-	if err != nil {
-		s.Response.Error(c, err)
-		return
-	}
-
-	s.Response.Success(c, errcode.Success().WithData(res))
+err := facade.Request().BindValidate(c, &req, "List")
+if err != nil {
+	s.Response.Error(c, err)
+	return
 }
 ```
+
+`BindValidate` binds the request and invokes `ValidateWithScene`. `Validate` invokes validation for an already-bound request.
+
+## gRPC Requests
+
+gRPC request structs use the same validatex interfaces:
+
+- `Validate(fields validatex.Fields)` for ordinary requests
+- `ValidateWithScene(scene, fields)` for scene requests
+
+Generated gRPC services validate with `validatex.ValidateRequest` and `validatex.ValidateSceneRequest`, then convert `validatex.Errors` to a gRPC `InvalidArgument` status.
+
+## CLI Generation
+
+`make:request` and `grpc-make:request` now generate:
+
+- `form` and `json` tags without `validate` tags
+- `validatex.Fields` validation expressions
+- `validatex.Messages` and `validatex.Translates`
+- pagination validation that skips `Page` and `PageSize` when `NotPage` is true
 
 # Service
 
