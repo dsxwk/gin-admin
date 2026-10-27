@@ -64,6 +64,8 @@ github.com/dsxwk/validatex v1.0.1 h1:cbJyVgmU/ZguSq3JSbLlQd1zH12MCNFCCj2ZuVs92y0
 github.com/dsxwk/validatex v1.0.1/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
 github.com/dsxwk/validatex v1.0.2 h1:fXyVG/KvDB+W4IONOAqC//XL4mJClZ9tT6onbTMvK8U=
 github.com/dsxwk/validatex v1.0.2/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
+github.com/dsxwk/validatex v1.0.3 h1:qOTLw0omxE4udBN64mkQfu2CRrRH/RH0XZm4/sWm4ts=
+github.com/dsxwk/validatex v1.0.3/go.mod h1:72uh4xvgr6cqBXIXhYGKpaH+RYVaOPOWyTAux8BeZqg=
 github.com/dustin/go-humanize v1.1.0 h1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=
 github.com/dustin/go-humanize v1.1.0/go.mod h1:hc1CvRkJMsgxqjmjMQF3QNRAZBwY8AXBAzKYoSX9sFI=
 github.com/ebitengine/purego v0.11.1 h1:2zpWRSQNVKN4eKsKO9eM1ILDgWfYMY9GwqRmK6XeQ/0=
