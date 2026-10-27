@@ -8,9 +8,10 @@ import (
 	"gin/grpc/model"
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
+	"gin/pkg/cryptox"
 	"time"
 
-	"gin/pkg/cryptox"
+	"github.com/dsxwk/validatex"
 	"github.com/go-viper/mapstructure/v2"
 	grpclib "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -50,8 +51,8 @@ func (UserService) AuthMethods() map[string]bool {
 // List 用户列表
 func (s UserService) List(ctx context.Context, req *proto.UserListRequest) (*proto.UserListResponse, error) {
 	dto := toUserListRequest(req)
-	if err := dto.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateRequest(dto); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 	var m []model.User
 	db := s.DB(ctx, &model.User{}).Model(&m)
@@ -95,8 +96,8 @@ func (s UserService) List(ctx context.Context, req *proto.UserListRequest) (*pro
 // Detail 用户详情
 func (s UserService) Detail(ctx context.Context, req *proto.UserRequest) (*proto.User, error) {
 	dto := grpcrequest.UserRequest{Id: req.GetId()}
-	if err := dto.Validate(dto, "Detail"); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateSceneRequest(&dto, "Detail"); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 	var m model.User
 	db := s.DB(ctx, &model.User{}).Model(&m).
@@ -118,8 +119,8 @@ func (s UserService) Detail(ctx context.Context, req *proto.UserRequest) (*proto
 // Create 创建用户
 func (s UserService) Create(ctx context.Context, req *proto.UserCreateRequest) (*proto.User, error) {
 	dto := toUserCreateRequest(req)
-	if err := dto.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateRequest(dto); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 	db := s.DB(ctx, &model.User{})
 
@@ -214,8 +215,8 @@ func (s UserService) Update(ctx context.Context, req *proto.UserUpdateRequest) (
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	dto.Id = req.GetId()
-	if err := dto.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateRequest(&dto); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 
 	db := s.DB(ctx, &model.User{})
@@ -310,8 +311,8 @@ func (s UserService) Update(ctx context.Context, req *proto.UserUpdateRequest) (
 // Delete 删除用户
 func (s UserService) Delete(ctx context.Context, req *proto.UserRequest) (*proto.EmptyResponse, error) {
 	dto := grpcrequest.UserRequest{Id: req.GetId()}
-	if err := dto.Validate(dto, "Delete"); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateSceneRequest(&dto, "Delete"); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 	var m model.User
 	if err := s.DB(ctx, &model.User{}).Model(&m).Delete(&m, dto.Id).Error; err != nil {
@@ -323,8 +324,8 @@ func (s UserService) Delete(ctx context.Context, req *proto.UserRequest) (*proto
 // BatchDelete 批量删除用户
 func (s UserService) BatchDelete(ctx context.Context, req *proto.UserBatchDeleteRequest) (*proto.EmptyResponse, error) {
 	dto := grpcrequest.UserBatchDeleteRequest{Ids: req.GetIds()}
-	if err := dto.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateRequest(&dto); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 	var m model.User
 	if err := s.DB(ctx, &model.User{}).Model(&m).Delete(&m, dto.Ids).Error; err != nil {

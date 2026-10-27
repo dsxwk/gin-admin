@@ -1,88 +1,69 @@
 package {{.Package}}
 
 import (
-    "gin/app/errcode"
-    "gin/common/base"
+	"gin/common/base"
 
-    "github.com/gookit/validate"
+	"github.com/dsxwk/validatex"
 )
 
 // {{.StructName}} {{.Description}}
 type {{.StructName}} struct {
-    base.Request
+	base.Request
 {{- range .Fields}}
 {{.FormattedField}}
 {{- end}}
-    PageListValidate
+	PageListValidate
 }
 
-// Validate 请求验证
-func (s {{.StructName}}) Validate(data {{.StructName}}, scene string) error {
-    v := validate.Struct(data, scene)
-    if !v.Validate(scene) {
-        return errcode.ArgsError().WithMsg(v.Errors.One())
-    }
-    return nil
-}
-
-// {{.StructName}}Create {{.StructName}}创建验证
-type {{.StructName}}Create struct {
+// ValidateWithScene 请求验证
+func (s {{.StructName}}) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	switch scene {
+	case "List":
+		return validatex.When(!s.NotPage, func() validatex.Errors {
+			return validatex.Check(
+				fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
+				fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+			)
+		})
+	case "Create":
+		return validatex.Check(
 {{- range .Fields}}
-{{- if not .IsID}}
-{{.FormattedField}}
+{{- if and .Validation (not .IsID)}}
+			{{.Validation}}
 {{- end}}
 {{- end}}
-}
-
-// {{.StructName}}Update {{.StructName}}更新验证
-type {{.StructName}}Update struct {
+		)
+	case "Update":
+		return validatex.Check(
+			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
 {{- range .Fields}}
-{{- if not .IsID}}
-{{.FormattedField}}
+{{- if and .Validation (not .IsID)}}
+			{{.Validation}}
 {{- end}}
 {{- end}}
-}
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s {{.StructName}}) ConfigValidation(v *validate.Validation) {
-    scenes := validate.SValues{
-        "List": []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-        "Create": []string{
-{{- range .CreateScene }}
-            {{ . }},
-{{- end }}
-        },
-        "Update": []string{
-{{- range .UpdateScene }}
-            {{ . }},
-{{- end }}
-        },
-        "Detail": []string{"ID"},
-        "Delete": []string{"ID"},
-    }
-    v.WithScenes(scenes)
+		)
+	case "Detail", "Delete":
+		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+	default:
+		return nil
+	}
 }
 
 // Messages 验证器错误消息
-func (s {{.StructName}}) Messages() map[string]string {
-    return validate.MS{
-        "required":                     "字段 {field} 必填",
-        "int":                          "字段 {field} 必须为整数",
-        "gt":                           "字段 {field} 必须大于 0",
-        "minLen":                       "{field} 长度不能少于 {min} 个字符",
-        "maxLen":                       "{field} 长度不能超过 {max} 个字符",
-        "PageListValidate.Page.gt":     "页码必须大于 0",
-        "PageListValidate.PageSize.gt": "每页数量必须大于 0",
-    }
+func (s {{.StructName}}) Messages() validatex.Messages {
+	return validatex.Messages{
+		"required": "字段 {field} 必填",
+		"gt":       "字段 {field} 需大于 0",
+		"min":      "{field} 长度不能少于 {min} 个字符",
+		"max":      "{field} 长度不能超过 {max} 个字符",
+	}
 }
 
 // Translates 字段翻译
-func (s {{.StructName}}) Translates() map[string]string {
-    return validate.MS{
+func (s {{.StructName}}) Translates() validatex.Translates {
+	return validatex.Translates{
 {{- range .FormattedTranslates}}
-        {{.}}
+		{{.}}
 {{- end}}
-    }
+	}
 }

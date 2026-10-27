@@ -36,7 +36,7 @@ func (s *RoleController) List(c *gin.Context) {
 	)
 
 	// 绑定参数并验证
-	err := facade.Request().BindValidate(c, &req, "")
+	err := facade.Request().BindValidate(c, &req, "List")
 	if err != nil {
 		s.Response.Error(c, err)
 		return

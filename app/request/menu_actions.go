@@ -1,134 +1,130 @@
 package request
 
 import (
-	"gin/app/errcode"
 	"gin/common/base"
 
-	"github.com/gookit/validate"
+	"github.com/dsxwk/validatex"
 )
 
 // MenuActions Validator
 type MenuActions struct {
 	base.Request
-	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
-	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
-	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
-	BtnStyle  string `json:"btnStyle" form:"btnStyle" validate:"required|string" label:"按钮样式"`
-	BtnSize   string `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
-	IsConfirm int64  `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
-	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
-	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
-	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
-	Sort      int64  `json:"sort" form:"sort" validate:"required|int" label:"排序"`
+	ID        int64  `json:"id" form:"id" label:"ID"`
+	MenuId    int64  `json:"menuId" form:"menuId" label:"菜单id"`
+	Type      int64  `json:"type" form:"type" label:"类型 1=header 2=operation"`
+	BtnType   string `json:"btnType" form:"btnType" label:"按钮类型 text|btn"`
+	BtnStyle  string `json:"btnStyle" form:"btnStyle" label:"按钮样式"`
+	BtnSize   string `json:"btnSize" form:"btnSize" label:"按钮尺寸"`
+	IsConfirm int64  `json:"isConfirm" form:"isConfirm" label:"是否确认 1=是 2=否"`
+	Label     string `json:"label" form:"label" label:"功能名称"`
+	AuthValue string `json:"authValue" form:"authValue" label:"权限标识"`
+	IsLink    int64  `json:"isLink" form:"isLink" label:"是否为链接 1=是 2=否"`
+	Sort      int64  `json:"sort" form:"sort" label:"排序"`
 	PageListValidate
 }
 
 // RoleAction 角色功能
 type RoleAction struct {
-	RoleId   int64  `json:"roleId" form:"roleId" validate:"int" label:"角色id"`
-	ActionId int64  `json:"actionId" form:"actionId" validate:"int" label:"功能id"`
-	Name     string `json:"name" form:"name" validate:"int" label:"角色名称"`
+	RoleId   int64  `json:"roleId" form:"roleId" label:"角色id"`
+	ActionId int64  `json:"actionId" form:"actionId" label:"功能id"`
+	Name     string `json:"name" form:"name" label:"角色名称"`
 }
 
 // ActionList 功能列表
 type ActionList struct {
-	MenuId int64 `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
+	MenuId int64 `json:"menuId" form:"menuId" label:"菜单id"`
 }
 
 // ActionCreate 功能创建
 type ActionCreate struct {
-	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
-	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
-	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
-	BtnStyle  string `json:"btnStyle" form:"btnStyle" validate:"required|string" label:"按钮样式"`
-	BtnSize   string `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
-	IsConfirm int64  `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
-	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
-	TransKey  string `json:"transKey" form:"transKey" validate:"" label:"翻译键"`
-	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
-	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
+	MenuId    int64  `json:"menuId" form:"menuId" label:"菜单id"`
+	Type      int64  `json:"type" form:"type" label:"类型 1=header 2=operation"`
+	BtnType   string `json:"btnType" form:"btnType" label:"按钮类型 text|btn"`
+	BtnStyle  string `json:"btnStyle" form:"btnStyle" label:"按钮样式"`
+	BtnSize   string `json:"btnSize" form:"btnSize" label:"按钮尺寸"`
+	IsConfirm int64  `json:"isConfirm" form:"isConfirm" label:"是否确认 1=是 2=否"`
+	Label     string `json:"label" form:"label" label:"功能名称"`
+	TransKey  string `json:"transKey" form:"transKey" label:"翻译键"`
+	AuthValue string `json:"authValue" form:"authValue" label:"权限标识"`
+	IsLink    int64  `json:"isLink" form:"isLink" label:"是否为链接 1=是 2=否"`
 }
 
 // ActionUpdate 功能更新
 type ActionUpdate struct {
-	MenuId    int64  `json:"menuId" form:"menuId" validate:"int" label:"菜单id"`
-	Type      int64  `json:"type" form:"type" validate:"required|int" label:"类型 1=header 2=operation"`
-	BtnType   string `json:"btnType" form:"btnType" validate:"required|string" label:"按钮类型 text|btn"`
-	BtnStyle  string `json:"btnStyle" form:"btnStyle" validate:"required|string" label:"按钮样式"`
-	BtnSize   string `json:"btnSize" form:"btnSize" validate:"required|string" label:"按钮尺寸"`
-	IsConfirm int64  `json:"isConfirm" form:"isConfirm" validate:"required|int" label:"是否确认 1=是 2=否"`
-	Label     string `json:"label" form:"label" validate:"required|string" label:"功能名称"`
-	TransKey  string `json:"transKey" form:"transKey" validate:"" label:"翻译键"`
-	AuthValue string `json:"authValue" form:"authValue" validate:"required|string" label:"权限标识"`
-	IsLink    int64  `json:"isLink" form:"isLink" validate:"required|int" label:"是否为链接 1=是 2=否"`
+	MenuId    int64  `json:"menuId" form:"menuId" label:"菜单id"`
+	Type      int64  `json:"type" form:"type" label:"类型 1=header 2=operation"`
+	BtnType   string `json:"btnType" form:"btnType" label:"按钮类型 text|btn"`
+	BtnStyle  string `json:"btnStyle" form:"btnStyle" label:"按钮样式"`
+	BtnSize   string `json:"btnSize" form:"btnSize" label:"按钮尺寸"`
+	IsConfirm int64  `json:"isConfirm" form:"isConfirm" label:"是否确认 1=是 2=否"`
+	Label     string `json:"label" form:"label" label:"功能名称"`
+	TransKey  string `json:"transKey" form:"transKey" label:"翻译键"`
+	AuthValue string `json:"authValue" form:"authValue" label:"权限标识"`
+	IsLink    int64  `json:"isLink" form:"isLink" label:"是否为链接 1=是 2=否"`
 }
 
-// Validate 请求验证
-func (s MenuActions) Validate(data MenuActions, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
+// Validate 功能创建验证
+func (s ActionCreate) Validate(fields validatex.Fields) validatex.Errors {
+	return validatex.Check(
+		fields.Int("Type", s.Type).Required().Errors(),
+		fields.Str("BtnType", s.BtnType).Required().Errors(),
+		fields.Str("BtnStyle", s.BtnStyle).Required().Errors(),
+		fields.Str("BtnSize", s.BtnSize).Required().Errors(),
+		fields.Int("IsConfirm", s.IsConfirm).Required().Errors(),
+		fields.Str("Label", s.Label).Required().Errors(),
+		fields.Str("AuthValue", s.AuthValue).Required().Errors(),
+		fields.Int("IsLink", s.IsLink).Required().Errors(),
+	)
+}
+
+// Validate 功能更新验证
+func (s ActionUpdate) Validate(fields validatex.Fields) validatex.Errors {
+	return validatex.Check(
+		fields.Int("Type", s.Type).Required().Errors(),
+		fields.Str("BtnType", s.BtnType).Required().Errors(),
+		fields.Str("BtnStyle", s.BtnStyle).Required().Errors(),
+		fields.Str("BtnSize", s.BtnSize).Required().Errors(),
+		fields.Int("IsConfirm", s.IsConfirm).Required().Errors(),
+		fields.Str("Label", s.Label).Required().Errors(),
+		fields.Str("AuthValue", s.AuthValue).Required().Errors(),
+		fields.Int("IsLink", s.IsLink).Required().Errors(),
+	)
+}
+
+// ValidateWithScene 请求验证
+func (s MenuActions) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	switch scene {
+	case "List":
+		return s.PageListValidate.Validate(fields)
+	case "Create", "Update":
+		return validatex.Check(
+			fields.Int("Type", s.Type).Required().Errors(),
+			fields.Str("BtnType", s.BtnType).Required().Errors(),
+			fields.Str("BtnStyle", s.BtnStyle).Required().Errors(),
+			fields.Str("BtnSize", s.BtnSize).Required().Errors(),
+			fields.Int("IsConfirm", s.IsConfirm).Required().Errors(),
+			fields.Str("Label", s.Label).Required().Errors(),
+			fields.Str("AuthValue", s.AuthValue).Required().Errors(),
+			fields.Int("IsLink", s.IsLink).Required().Errors(),
+		)
+	case "Detail", "Delete":
+		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+	default:
+		return nil
 	}
-
-	return nil
-}
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s MenuActions) ConfigValidation(v *validate.Validation) {
-	v.WithScenes(validate.SValues{
-		"List": []string{
-			"MenuId",
-		},
-		"Create": []string{
-			"MenuId",
-			"Type",
-			"BtnType",
-			"BtnStyle",
-			"BtnSize",
-			"IsConfirm",
-			"Label",
-			"AuthValue",
-			"IsLink",
-		},
-		"Update": []string{
-			"MenuId",
-			"Type",
-			"BtnType",
-			"BtnStyle",
-			"BtnSize",
-			"IsConfirm",
-			"Label",
-			"AuthValue",
-			"IsLink",
-		},
-		"Detail": []string{
-			"ID",
-		},
-		"Delete": []string{
-			"ID",
-		},
-	})
 }
 
 // Messages 验证器错误消息
-func (s MenuActions) Messages() map[string]string {
-	return validate.MS{
-		"required":                     "字段 {field} 必填",
-		"int":                          "字段 {field} 必须为整数",
-		"PageListValidate.Page.gt":     "字段 {field} 需大于 0",
-		"PageListValidate.PageSize.gt": "字段 {field} 需大于 0",
-	}
+func (s MenuActions) Messages() validatex.Messages {
+	return commonMessages()
 }
 
 // Translates 字段翻译
-func (s MenuActions) Translates() map[string]string {
-	return validate.MS{
+func (s MenuActions) Translates() validatex.Translates {
+	return validatex.Translates{
 		"PageListValidate.Page":     "页码",
 		"PageListValidate.PageSize": "每页数量",
 		"ID":                        "ID",
-		"Pid":                       "父级ID",
 		"MenuId":                    "菜单ID",
 		"Type":                      "类型",
 		"BtnType":                   "按钮类型",

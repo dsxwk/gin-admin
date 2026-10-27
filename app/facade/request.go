@@ -4,7 +4,6 @@ import (
 	"gin/pkg/serviceprovider/request"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/validate"
 )
 
 // Request 门面函数,返回门面实例
@@ -97,28 +96,4 @@ func (r RequestFacade) BindValidate(ctx *gin.Context, v any, scene string) error
 		return nil
 	}
 	return r.client.BindValidate(ctx, v, scene)
-}
-
-// ValidateWithMessages 验证并自定义错误消息
-func (r RequestFacade) ValidateWithMessages(data any, scene string, messages map[string]string) error {
-	if r.client == nil {
-		return nil
-	}
-	return r.client.ValidateWithMessages(data, scene, messages)
-}
-
-// ValidateWithTranslates 验证并自定义字段翻译
-func (r RequestFacade) ValidateWithTranslates(data any, scene string, translates map[string]string) error {
-	if r.client == nil {
-		return nil
-	}
-	return r.client.ValidateWithTranslates(data, scene, translates)
-}
-
-// Validator 获取验证器实例
-func (r RequestFacade) Validator(data any, scene string) *validate.Validation {
-	if r.client == nil {
-		return nil
-	}
-	return r.client.Validator(data, scene)
 }

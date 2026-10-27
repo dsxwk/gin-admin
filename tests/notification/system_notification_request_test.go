@@ -4,6 +4,7 @@ import (
 	"gin/app/request"
 	"testing"
 
+	"github.com/dsxwk/validatex"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestSystemNotificationPushValidate(t *testing.T) {
 		IsToAll: 2,
 		UserIds: []int64{1, 2},
 	}
-	require.NoError(t, req.Validate("Push"))
+	require.Empty(t, validatex.ValidateSceneRequest(&req, "Push"))
 	require.Equal(t, "系统通知", req.Title)
 	require.Equal(t, "通知内容", req.Content)
 
@@ -25,7 +26,7 @@ func TestSystemNotificationPushValidate(t *testing.T) {
 		Content: "通知内容",
 		IsToAll: 1,
 	}
-	require.NoError(t, allReq.Validate("Push"))
+	require.Empty(t, validatex.ValidateSceneRequest(&allReq, "Push"))
 
 	invalidUserReq := request.SystemNotificationPush{
 		Title:   "系统通知",
@@ -34,7 +35,7 @@ func TestSystemNotificationPushValidate(t *testing.T) {
 		IsToAll: 2,
 		UserIds: []int64{0},
 	}
-	require.Error(t, invalidUserReq.Validate("Push"))
+	require.NotEmpty(t, validatex.ValidateSceneRequest(&invalidUserReq, "Push"))
 
 	invalidTypeReq := request.SystemNotificationPush{
 		Title:   "系统通知",
@@ -43,13 +44,13 @@ func TestSystemNotificationPushValidate(t *testing.T) {
 		IsToAll: 2,
 		UserIds: []int64{1},
 	}
-	require.Error(t, invalidTypeReq.Validate("Push"))
+	require.NotEmpty(t, validatex.ValidateSceneRequest(&invalidTypeReq, "Push"))
 }
 
 // TestSystemNotificationListValidate 通知列表请求验证测试
 func TestSystemNotificationListValidate(t *testing.T) {
 	req := request.SystemNotificationList{}
-	require.NoError(t, req.Validate("List"))
+	require.Empty(t, validatex.ValidateSceneRequest(&req, "List"))
 	require.Equal(t, 1, req.Page)
 	require.Equal(t, 20, req.PageSize)
 }
@@ -57,17 +58,17 @@ func TestSystemNotificationListValidate(t *testing.T) {
 // TestSystemNotificationReadValidate 通知已读请求验证测试
 func TestSystemNotificationReadValidate(t *testing.T) {
 	req := request.SystemNotificationRead{IDs: []int64{1, 2}}
-	require.NoError(t, req.Validate("Read"))
+	require.Empty(t, validatex.ValidateSceneRequest(&req, "Read"))
 
 	invalidReq := request.SystemNotificationRead{IDs: []int64{1, 0}}
-	require.Error(t, invalidReq.Validate("Read"))
+	require.NotEmpty(t, validatex.ValidateSceneRequest(&invalidReq, "Read"))
 }
 
 // TestSystemNotificationRevokeValidate 通知撤回请求验证测试
 func TestSystemNotificationRevokeValidate(t *testing.T) {
 	req := request.SystemNotificationRevoke{ID: 1}
-	require.NoError(t, req.Validate("Revoke"))
+	require.Empty(t, validatex.ValidateSceneRequest(&req, "Revoke"))
 
 	invalidReq := request.SystemNotificationRevoke{}
-	require.Error(t, invalidReq.Validate("Revoke"))
+	require.NotEmpty(t, validatex.ValidateSceneRequest(&invalidReq, "Revoke"))
 }

@@ -9,7 +9,7 @@ import (
 
     "github.com/gin-gonic/gin"
     "github.com/gin-gonic/gin/binding"
-    "github.com/go-viper/mapstructure/v2"
+	"github.com/go-viper/mapstructure/v2"
 )
 
 type {{.Name}}Controller struct {
@@ -140,7 +140,7 @@ func (s *{{.Name}}Controller) Update(c *gin.Context) {
         s.Response.Error(c, err)
         return
     }
-    err = mapstructure.Decode(data, &req)
+	err = mapstructure.Decode(data, &req)
     if err != nil {
         s.Response.Error(c, err)
         return

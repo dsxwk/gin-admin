@@ -1,201 +1,147 @@
 package {{.Package}}
 
-import (
-    "github.com/gookit/validate"
-    "google.golang.org/grpc/codes"
-    "google.golang.org/grpc/status"
-)
+import "github.com/dsxwk/validatex"
 
 // {{.Name}}Request {{.Description}}请求
 type {{.Name}}Request struct {
-    {{.FormattedId}}
+	{{.FormattedId}}
 }
 
 // {{.Name}}ListRequest {{.Description}}列表请求
 type {{.Name}}ListRequest struct {
-    Page     int            `json:"page" validate:"required|int|gt:0" label:"页码"`
-    PageSize int            `json:"pageSize" validate:"required|int|gt:0" label:"每页数量"`
-    NotPage  bool           `json:"notPage" label:"不分页"`
-    Search   map[string]any `json:"search" label:"搜索条件"`
-    Sort     map[string]any `json:"sort" label:"排序条件"`
+	Page     int            `json:"page" label:"页码"`
+	PageSize int            `json:"pageSize" label:"每页数量"`
+	NotPage  bool           `json:"notPage" label:"不分页"`
+	Search   map[string]any `json:"search" label:"搜索条件"`
+	Sort     map[string]any `json:"sort" label:"排序条件"`
 }
 
 // {{.Name}}CreateRequest {{.Description}}创建请求
 type {{.Name}}CreateRequest struct {
 {{- range .Fields}}
-    {{.FormattedField}}
+	{{.FormattedField}}
 {{- end}}
 }
 
 // {{.Name}}UpdateRequest {{.Description}}更新请求
 type {{.Name}}UpdateRequest struct {
-    {{.FormattedUpdateId}}
+	{{.FormattedUpdateId}}
 {{- range .Fields}}
-    {{.FormattedUpdateField}}
+	{{.FormattedUpdateField}}
 {{- end}}
 }
 
 // {{.Name}}BatchDeleteRequest {{.Description}}批量删除请求
 type {{.Name}}BatchDeleteRequest struct {
-    Ids []int32 `json:"ids" validate:"required|minLen:1" label:"ID列表"`
+	Ids []int32 `json:"ids" label:"ID列表"`
 }
 
-// Validate {{.Description}}请求验证
-func (s {{.Name}}Request) Validate(data {{.Name}}Request, scene string) error {
-    v := validate.Struct(data, scene)
-    if !v.Validate(scene) {
-        return status.Error(codes.InvalidArgument, v.Errors.One())
-    }
-    return nil
-}
-
-// ConfigValidation 配置验证
-func (s {{.Name}}Request) ConfigValidation(v *validate.Validation) {
-    v.WithScenes(validate.SValues{
-        "Detail": []string{"Id"},
-        "Delete": []string{"Id"},
-    })
-}
-
-// Messages 验证器错误消息
-func (s {{.Name}}Request) Messages() map[string]string {
-    return {{.Var}}Messages()
-}
-
-// Translates 字段翻译
-func (s {{.Name}}Request) Translates() map[string]string {
-    return {{.Var}}Translates()
+// ValidateWithScene {{.Description}}请求验证
+func (s {{.Name}}Request) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	switch scene {
+	case "Detail", "Delete":
+		return fields.Int("Id", s.Id).Required().Gt(0).Errors()
+	default:
+		return nil
+	}
 }
 
 // Validate 列表请求验证
-func (s {{.Name}}ListRequest) Validate() error {
-    v := validate.Struct(s, "List")
-    if !v.Validate("List") {
-        return status.Error(codes.InvalidArgument, v.Errors.One())
-    }
-    return nil
-}
-
-// ConfigValidation 配置验证
-func (s {{.Name}}ListRequest) ConfigValidation(v *validate.Validation) {
-    v.WithScenes(validate.SValues{
-        "List": []string{"Page", "PageSize"},
-    })
-}
-
-// Messages 验证器错误消息
-func (s {{.Name}}ListRequest) Messages() map[string]string {
-    return {{.Var}}Messages()
-}
-
-// Translates 字段翻译
-func (s {{.Name}}ListRequest) Translates() map[string]string {
-    return {{.Var}}Translates()
+func (s {{.Name}}ListRequest) Validate(fields validatex.Fields) validatex.Errors {
+	return validatex.When(!s.NotPage, func() validatex.Errors {
+		return validatex.Check(
+			fields.Int("Page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("PageSize", s.PageSize).Required().Gt(0).Errors(),
+		)
+	})
 }
 
 // Validate 创建请求验证
-func (s {{.Name}}CreateRequest) Validate() error {
-    v := validate.Struct(s, "Create")
-    if !v.Validate("Create") {
-        return status.Error(codes.InvalidArgument, v.Errors.One())
-    }
-    return nil
-}
-
-// ConfigValidation 配置验证
-func (s {{.Name}}CreateRequest) ConfigValidation(v *validate.Validation) {
-    v.WithScenes(validate.SValues{
-        "Create": []string{
-{{- range .CreateScene}}
-            "{{.}}",
+func (s {{.Name}}CreateRequest) Validate(fields validatex.Fields) validatex.Errors {
+	return validatex.Check(
+{{- range .Fields}}
+{{- if .Validation}}
+		{{.Validation}}
 {{- end}}
-        },
-    })
-}
-
-// Messages 验证器错误消息
-func (s {{.Name}}CreateRequest) Messages() map[string]string {
-    return {{.Var}}Messages()
-}
-
-// Translates 字段翻译
-func (s {{.Name}}CreateRequest) Translates() map[string]string {
-    return {{.Var}}Translates()
+{{- end}}
+	)
 }
 
 // Validate 更新请求验证
-func (s {{.Name}}UpdateRequest) Validate() error {
-    v := validate.Struct(s, "Update")
-    if !v.Validate("Update") {
-        return status.Error(codes.InvalidArgument, v.Errors.One())
-    }
-    return nil
-}
-
-// ConfigValidation 配置验证
-func (s {{.Name}}UpdateRequest) ConfigValidation(v *validate.Validation) {
-    v.WithScenes(validate.SValues{
-        "Update": []string{
-            "Id",
-{{- range .Fields}}
-            "{{.Name}}",
-{{- end}}
-        },
-    })
-}
-
-// Messages 验证器错误消息
-func (s {{.Name}}UpdateRequest) Messages() map[string]string {
-    return {{.Var}}Messages()
-}
-
-// Translates 字段翻译
-func (s {{.Name}}UpdateRequest) Translates() map[string]string {
-    return {{.Var}}Translates()
+func (s {{.Name}}UpdateRequest) Validate(fields validatex.Fields) validatex.Errors {
+	return fields.Int("Id", s.Id).Required().Gt(0).Errors()
 }
 
 // Validate 批量删除请求验证
-func (s {{.Name}}BatchDeleteRequest) Validate() error {
-    v := validate.Struct(s, "BatchDelete")
-    if !v.Validate("BatchDelete") {
-        return status.Error(codes.InvalidArgument, v.Errors.One())
-    }
-    return nil
+func (s {{.Name}}BatchDeleteRequest) Validate(fields validatex.Fields) validatex.Errors {
+	return fields.Slice("Ids", s.Ids).Required().Each("gt", "", func(id int32) bool {
+		return id > 0
+	}, int32(0)).Errors()
 }
 
-// ConfigValidation 配置验证
-func (s {{.Name}}BatchDeleteRequest) ConfigValidation(v *validate.Validation) {
-    v.WithScenes(validate.SValues{
-        "BatchDelete": []string{"Ids"},
-    })
+// Messages {{.Description}}错误消息
+func (s {{.Name}}Request) Messages() validatex.Messages {
+	return {{.Var}}Messages()
 }
 
-// Messages 验证器错误消息
-func (s {{.Name}}BatchDeleteRequest) Messages() map[string]string {
-    return {{.Var}}Messages()
+// Translates {{.Description}}字段翻译
+func (s {{.Name}}Request) Translates() validatex.Translates {
+	return {{.Var}}Translates()
 }
 
-// Translates 字段翻译
-func (s {{.Name}}BatchDeleteRequest) Translates() map[string]string {
-    return {{.Var}}Translates()
+// Messages {{.Description}}列表错误消息
+func (s {{.Name}}ListRequest) Messages() validatex.Messages {
+	return {{.Var}}Messages()
+}
+
+// Translates {{.Description}}列表字段翻译
+func (s {{.Name}}ListRequest) Translates() validatex.Translates {
+	return {{.Var}}Translates()
+}
+
+// Messages {{.Description}}创建错误消息
+func (s {{.Name}}CreateRequest) Messages() validatex.Messages {
+	return {{.Var}}Messages()
+}
+
+// Translates {{.Description}}创建字段翻译
+func (s {{.Name}}CreateRequest) Translates() validatex.Translates {
+	return {{.Var}}Translates()
+}
+
+// Messages {{.Description}}更新错误消息
+func (s {{.Name}}UpdateRequest) Messages() validatex.Messages {
+	return {{.Var}}Messages()
+}
+
+// Translates {{.Description}}更新字段翻译
+func (s {{.Name}}UpdateRequest) Translates() validatex.Translates {
+	return {{.Var}}Translates()
+}
+
+// Messages {{.Description}}批量删除错误消息
+func (s {{.Name}}BatchDeleteRequest) Messages() validatex.Messages {
+	return {{.Var}}Messages()
+}
+
+// Translates {{.Description}}批量删除字段翻译
+func (s {{.Name}}BatchDeleteRequest) Translates() validatex.Translates {
+	return {{.Var}}Translates()
 }
 
 // {{.Var}}Messages {{.Description}}公共错误消息
-func {{.Var}}Messages() map[string]string {
-    return validate.MS{
-        "required": "字段 {field} 必填",
-        "int":      "字段 {field} 必须为整数",
-        "float":    "字段 {field} 必须为数字",
-        "gt":       "字段 {field} 需大于 0",
-        "minLen":   "字段 {field} 不能为空",
-    }
+func {{.Var}}Messages() validatex.Messages {
+	return validatex.Messages{
+		"required": "字段 {field} 必填",
+		"gt":       "字段 {field} 需大于 0",
+	}
 }
 
 // {{.Var}}Translates {{.Description}}公共字段翻译
-func {{.Var}}Translates() map[string]string {
-    return validate.MS{
+func {{.Var}}Translates() validatex.Translates {
+	return validatex.Translates{
 {{- range .Translates}}
-        {{.}}
+		{{.}}
 {{- end}}
-    }
+	}
 }

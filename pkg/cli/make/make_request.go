@@ -55,6 +55,7 @@ func NewMakeRequest() *MakeRequest {
 	}
 }
 
+// Handle 执行请求生成
 func (m *MakeRequest) Handle(values map[string]string) error {
 
 	file := m.GetMakeFile(values["file"], "request")
@@ -77,7 +78,7 @@ func (m *MakeRequest) Handle(values map[string]string) error {
 				JSON:     "id",
 				Type:     "int64",
 				Label:    "ID",
-				Validate: "required|int|gt:0",
+				Required: true,
 				IsID:     true,
 			},
 		}
@@ -96,7 +97,8 @@ type Field struct {
 	JSON           string
 	Type           string
 	Label          string
-	Validate       string
+	Required       bool
+	Validation     string
 	IsID           bool
 }
 
@@ -114,6 +116,7 @@ type TranslateField struct {
 	Label string
 }
 
+// toJsonName 转换JSON字段名
 func (m *MakeRequest) toJsonName(name string, camel bool) string {
 	if !camel {
 		return name
@@ -142,17 +145,18 @@ func (m *MakeRequest) formatFields(fields []Field) {
 		paddedName := fmt.Sprintf("%-*s", maxNameLen, f.Name)
 		paddedType := fmt.Sprintf("%-*s", maxTypeLen, f.Type)
 		f.FormattedField = fmt.Sprintf(
-			"\t%s %s `json:\"%s\" form:\"%s\" validate:\"%s\" label:\"%s\"`",
+			"\t%s %s `json:\"%s\" form:\"%s\" label:\"%s\"`",
 			paddedName,
 			paddedType,
 			f.JSON,
 			f.JSON,
-			f.Validate,
 			f.Label,
 		)
+		f.Validation = m.buildFieldValidation(*f)
 	}
 }
 
+// generateFile 生成请求文件
 func (m *MakeRequest) generateFile(templateName, file, structName string, fields []Field, desc string) {
 	templateFile := m.GetTemplate(templateName)
 
@@ -220,16 +224,12 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 		StructName          string
 		Description         string
 		Fields              []Field
-		CreateScene         []string
-		UpdateScene         []string
 		FormattedTranslates []string
 	}{
 		Package:             packageName,
 		StructName:          structName,
 		Description:         desc,
 		Fields:              fields,
-		CreateScene:         m.buildScene(fields, false),
-		UpdateScene:         m.buildScene(fields, true),
 		FormattedTranslates: formattedTranslates,
 	}
 
@@ -285,20 +285,16 @@ func (m *MakeRequest) loadTableFields(conn, table string, camel bool) []Field {
 
 		// 构建字段
 		field := Field{
-			Name:  m.toGoName(col.Name, camel),
-			JSON:  m.toJsonName(col.Name, camel),
-			Label: m.parseComment(col.Comment, col.Name),
-			Type:  m.getGoType(col.DataType),
+			Name:     m.toGoName(col.Name, camel),
+			JSON:     m.toJsonName(col.Name, camel),
+			Label:    m.parseComment(col.Comment, col.Name),
+			Type:     m.getGoType(col.DataType),
+			Required: !col.Nullable,
 		}
 
-		// 构建验证规则
 		if col.Name == "id" {
-			field.Validate = "required|int|gt:0"
+			field.Required = true
 			field.IsID = true
-		} else {
-			rules := []string{"required"}
-			rules = append(rules, m.getValidateRules(col.DataType)...)
-			field.Validate = strings.Join(rules, "|")
 		}
 
 		fields = append(fields, field)
@@ -346,42 +342,42 @@ func (m *MakeRequest) getGoType(dbType string) string {
 	return "string"
 }
 
-// getValidateRules 根据数据库类型获取验证规则
-func (m *MakeRequest) getValidateRules(dbType string) []string {
-	t := strings.ToLower(dbType)
-	var rules []string
+// buildFieldValidation 构建字段校验表达式
+func (m *MakeRequest) buildFieldValidation(field Field) string {
+	path := fmt.Sprintf("%q", field.Name)
+	value := "s." + field.Name
 
-	// 整数类型添加int验证
-	if strings.Contains(t, "int") {
-		rules = append(rules, "int")
+	switch field.Type {
+	case "string":
+		validation := fmt.Sprintf("fields.Str(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	case "int64":
+		validation := fmt.Sprintf("fields.Int(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	case "float64":
+		validation := fmt.Sprintf("fields.Float(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	case "[]byte":
+		validation := fmt.Sprintf("fields.Slice(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	default:
+		return ""
 	}
-
-	// 字符串类型添加max验证
-	//if strings.Contains(t, "char") || strings.Contains(t, "text") {
-	//	rules = append(rules, "maxLen:255")
-	//}
-
-	return rules
 }
 
-// buildScene 生成字符串数组
-func (m *MakeRequest) buildScene(fields []Field, update bool) []string {
-	var arr []string
-
-	for _, f := range fields {
-		if update && f.IsID {
-			arr = append(arr, `"ID"`)
-			continue
-		}
-		if !update && f.IsID {
-			continue
-		}
-		arr = append(arr, `"`+f.Name+`"`)
-	}
-
-	return arr
-}
-
+// parseComment 解析字段注释
 func (m *MakeRequest) parseComment(comment, fallback string) string {
 	if comment == "" {
 		return fallback
@@ -389,6 +385,7 @@ func (m *MakeRequest) parseComment(comment, fallback string) string {
 	return comment
 }
 
+// toGoName 转换Go字段名
 func (m *MakeRequest) toGoName(name string, camel bool) string {
 	if !camel {
 		return name

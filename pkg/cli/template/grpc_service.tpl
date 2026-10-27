@@ -10,6 +10,7 @@ import (
     grpcrequest "gin/grpc/request"
     "time"
 
+    "github.com/dsxwk/validatex"
     "github.com/go-viper/mapstructure/v2"
     grpclib "google.golang.org/grpc"
     "google.golang.org/grpc/codes"
@@ -48,8 +49,8 @@ func ({{.Name}}Service) AuthMethods() map[string]bool {
 // List {{.Description}}列表
 func (s {{.Name}}Service) List(ctx context.Context, req *proto.{{.Name}}ListRequest) (*proto.{{.Name}}ListResponse, error) {
     dto := to{{.Name}}ListRequest(req)
-    if err := dto.Validate(); err != nil {
-        return nil, status.Error(codes.InvalidArgument, err.Error())
+    if errs := validatex.ValidateRequest(dto); len(errs) > 0 {
+        return nil, status.Error(codes.InvalidArgument, errs.Error())
     }
     var m []model.{{.Name}}
     db := s.DB(ctx, &model.{{.Name}}{}).Model(&m)
@@ -87,8 +88,8 @@ func (s {{.Name}}Service) List(ctx context.Context, req *proto.{{.Name}}ListRequ
 // Detail {{.Description}}详情
 func (s {{.Name}}Service) Detail(ctx context.Context, req *proto.{{.Name}}Request) (*proto.{{.Name}}, error) {
     dto := grpcrequest.{{.Name}}Request{Id: req.GetId()}
-    if err := dto.Validate(dto, "Detail"); err != nil {
-        return nil, status.Error(codes.InvalidArgument, err.Error())
+    if errs := validatex.ValidateSceneRequest(&dto, "Detail"); len(errs) > 0 {
+        return nil, status.Error(codes.InvalidArgument, errs.Error())
     }
     var m model.{{.Name}}
     db := s.DB(ctx, &model.{{.Name}}{}).Model(&m).First(&m, dto.Id)
@@ -104,8 +105,8 @@ func (s {{.Name}}Service) Detail(ctx context.Context, req *proto.{{.Name}}Reques
 // Create {{.Description}}创建
 func (s {{.Name}}Service) Create(ctx context.Context, req *proto.{{.Name}}CreateRequest) (*proto.{{.Name}}, error) {
     dto := to{{.Name}}CreateRequest(req)
-    if err := dto.Validate(); err != nil {
-        return nil, status.Error(codes.InvalidArgument, err.Error())
+    if errs := validatex.ValidateRequest(dto); len(errs) > 0 {
+        return nil, status.Error(codes.InvalidArgument, errs.Error())
     }
     m := model.{{.Name}}{
 {{.CreateFields}}
@@ -127,8 +128,8 @@ func (s {{.Name}}Service) Update(ctx context.Context, req *proto.{{.Name}}Update
         return nil, status.Error(codes.Internal, err.Error())
     }
     dto.Id = req.GetId()
-    if err := dto.Validate(); err != nil {
-        return nil, status.Error(codes.InvalidArgument, err.Error())
+    if errs := validatex.ValidateRequest(&dto); len(errs) > 0 {
+        return nil, status.Error(codes.InvalidArgument, errs.Error())
     }
 
     db := s.DB(ctx, &model.{{.Name}}{})
@@ -144,8 +145,8 @@ func (s {{.Name}}Service) Update(ctx context.Context, req *proto.{{.Name}}Update
 // Delete {{.Description}}删除
 func (s {{.Name}}Service) Delete(ctx context.Context, req *proto.{{.Name}}Request) (*proto.EmptyResponse, error) {
     dto := grpcrequest.{{.Name}}Request{Id: req.GetId()}
-    if err := dto.Validate(dto, "Delete"); err != nil {
-        return nil, status.Error(codes.InvalidArgument, err.Error())
+    if errs := validatex.ValidateSceneRequest(&dto, "Delete"); len(errs) > 0 {
+        return nil, status.Error(codes.InvalidArgument, errs.Error())
     }
     var m model.{{.Name}}
     if err := s.DB(ctx, &model.{{.Name}}{}).Model(&m).Delete(&m, dto.Id).Error; err != nil {

@@ -15,7 +15,6 @@ import (
 
 	"github.com/dsxwk/validatex"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/validate"
 )
 
 func NewClient() *Client {
@@ -276,31 +275,6 @@ func (c Client) BindValidate(ctx *gin.Context, v any, scene string) error {
 	return c.withContext(ctx.Request.Context(), v, scene)
 }
 
-// ValidateWithMessages 验证并自定义错误消息
-func (c Client) ValidateWithMessages(data any, scene string, messages map[string]string) error {
-	v := validate.Struct(data, scene)
-	v.WithMessages(messages)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-	return nil
-}
-
-// ValidateWithTranslates 验证并自定义字段翻译
-func (c Client) ValidateWithTranslates(data any, scene string, translates map[string]string) error {
-	v := validate.Struct(data, scene)
-	v.WithTranslates(translates)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-	return nil
-}
-
-// Validator 获取验证器实例
-func (c Client) Validator(data any, scene string) *validate.Validation {
-	return validate.Struct(data, scene)
-}
-
 // Validate 通用验证函数,自动注入请求上下文
 func (c Client) Validate(ctx context.Context, data any, scene string) error {
 	return c.withContext(ctx, data, scene)
@@ -331,11 +305,7 @@ func (c Client) withContext(ctx context.Context, data any, scene string) error {
 		return validatexValidationError(validator.Validate(fields))
 	}
 
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
-	}
-	return nil
+	return errcode.ArgsError().WithMsg("请求未实现validatex验证接口")
 }
 
 // validatexTranslator 创建携带请求翻译配置的验证器

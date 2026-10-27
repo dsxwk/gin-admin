@@ -24,8 +24,8 @@ type GrpcRequestField struct {
 	JSON                 string
 	Type                 string
 	Label                string
-	Validate             string
-	UpdateValidate       string
+	Required             bool
+	Validation           string
 }
 
 // MakeGrpcRequest grpc请求生成命令
@@ -104,12 +104,11 @@ func (m *MakeGrpcRequest) generateRequest(db *gorm.DB, table, outDir string) {
 			label = c.Name
 		}
 		fields = append(fields, GrpcRequestField{
-			Name:           fieldName,
-			JSON:           jsonName,
-			Type:           grpcRequestGoType(c.DataType),
-			Label:          label,
-			Validate:       grpcRequestValidate(c),
-			UpdateValidate: grpcRequestUpdateValidate(c),
+			Name:     fieldName,
+			JSON:     jsonName,
+			Type:     grpcRequestGoType(c.DataType),
+			Label:    label,
+			Required: !c.Nullable,
 		})
 	}
 
@@ -131,7 +130,6 @@ func (m *MakeGrpcRequest) generateRequest(db *gorm.DB, table, outDir string) {
 		Fields            []GrpcRequestField
 		FormattedId       string
 		FormattedUpdateId string
-		CreateScene       []string
 		Translates        []string
 	}{
 		Package:           filepath.Base(outDir),
@@ -141,7 +139,6 @@ func (m *MakeGrpcRequest) generateRequest(db *gorm.DB, table, outDir string) {
 		Fields:            fields,
 		FormattedId:       formattedId,
 		FormattedUpdateId: formattedUpdateId,
-		CreateScene:       m.buildGrpcRequestScene(fields),
 		Translates:        translates,
 	}
 
@@ -171,9 +168,9 @@ func (m *MakeGrpcRequest) formatGrpcIdFields(fields []GrpcRequestField) (string,
 		}
 	}
 
-	formattedId := "Id int32 `json:\"id\" validate:\"required|gt:0\" label:\"ID\"`"
+	formattedId := "Id int32 `json:\"id\" label:\"ID\"`"
 	formattedUpdateId := fmt.Sprintf(
-		"%-*s %-*s `json:\"id\" validate:\"required|int|gt:0\" label:\"ID\"`",
+		"%-*s %-*s `json:\"id\" label:\"ID\"`",
 		maxNameLen,
 		"Id",
 		maxTypeLen,
@@ -200,23 +197,22 @@ func (m *MakeGrpcRequest) formatGrpcRequestFields(fields []GrpcRequestField) {
 		paddedName := fmt.Sprintf("%-*s", maxNameLen, f.Name)
 		paddedType := fmt.Sprintf("%-*s", maxTypeLen, f.Type)
 		f.FormattedField = fmt.Sprintf(
-			"%s %s `json:\"%s\" form:\"%s\" validate:\"%s\" label:\"%s\"`",
+			"%s %s `json:\"%s\" form:\"%s\" label:\"%s\"`",
 			paddedName,
 			paddedType,
 			f.JSON,
 			f.JSON,
-			f.Validate,
 			f.Label,
 		)
 		f.FormattedUpdateField = fmt.Sprintf(
-			"%s %s `json:\"%s\" form:\"%s\" validate:\"%s\" label:\"%s\"`",
+			"%s %s `json:\"%s\" form:\"%s\" label:\"%s\"`",
 			paddedName,
 			paddedType,
 			f.JSON,
 			f.JSON,
-			f.UpdateValidate,
 			f.Label,
 		)
+		f.Validation = buildGrpcRequestValidation(*f)
 	}
 }
 
@@ -253,15 +249,6 @@ func (m *MakeGrpcRequest) formatGrpcRequestTranslates(fields []GrpcRequestField)
 		))
 	}
 	return lines
-}
-
-// buildGrpcRequestScene 构建grpc请求验证场景
-func (m *MakeGrpcRequest) buildGrpcRequestScene(fields []GrpcRequestField) []string {
-	arr := make([]string, 0, len(fields))
-	for _, f := range fields {
-		arr = append(arr, f.Name)
-	}
-	return arr
 }
 
 // grpcRequestDescription 获取grpc请求描述
@@ -315,32 +302,37 @@ func grpcRequestGoType(dbType string) string {
 	return "string"
 }
 
-// grpcRequestValidate 构建grpc请求验证规则
-func grpcRequestValidate(c Column) string {
-	t := strings.ToLower(c.DataType)
-	switch {
-	case strings.Contains(t, "int"):
-		return "required|int"
-	case strings.Contains(t, "float"),
-		strings.Contains(t, "double"),
-		strings.Contains(t, "decimal"),
-		strings.Contains(t, "numeric"):
-		return "required|float"
-	}
-	return "required"
-}
+// buildGrpcRequestValidation 构建grpc请求字段校验表达式
+func buildGrpcRequestValidation(field GrpcRequestField) string {
+	path := fmt.Sprintf("%q", field.Name)
+	value := "s." + field.Name
 
-// grpcRequestUpdateValidate 构建grpc更新请求验证规则
-func grpcRequestUpdateValidate(c Column) string {
-	t := strings.ToLower(c.DataType)
-	switch {
-	case strings.Contains(t, "int"):
-		return "int"
-	case strings.Contains(t, "float"),
-		strings.Contains(t, "double"),
-		strings.Contains(t, "decimal"),
-		strings.Contains(t, "numeric"):
-		return "float"
+	switch field.Type {
+	case "string":
+		validation := fmt.Sprintf("fields.Str(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	case "int32":
+		validation := fmt.Sprintf("fields.Int(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	case "float64":
+		validation := fmt.Sprintf("fields.Float(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	case "[]byte":
+		validation := fmt.Sprintf("fields.Slice(%s, %s)", path, value)
+		if field.Required {
+			validation += ".Required()"
+		}
+		return validation + ".Errors(),"
+	default:
+		return ""
 	}
-	return ""
 }

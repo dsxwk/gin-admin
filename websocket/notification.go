@@ -9,6 +9,8 @@ import (
 	"gin/app/service"
 	"gin/pkg/errcode"
 	"gin/pkg/serviceprovider/ws"
+
+	"github.com/dsxwk/validatex"
 )
 
 const (
@@ -70,8 +72,8 @@ func (h *NotificationHandler) push(ctx context.Context, client ws.Connection, us
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return ws.SendError(client, errcode.ArgsError().WithMsg("推送参数错误"))
 	}
-	if err := payload.Validate("Push"); err != nil {
-		return ws.SendError(client, err)
+	if errs := validatex.ValidateSceneRequest(&payload, "Push"); len(errs) > 0 {
+		return ws.SendError(client, errcode.ArgsError().WithMsg(errs.Error()))
 	}
 
 	var notificationService service.SystemNotificationService
@@ -108,8 +110,8 @@ func (h *NotificationHandler) list(ctx context.Context, client ws.Connection, us
 			return ws.SendError(client, errcode.ArgsError().WithMsg("列表参数错误"))
 		}
 	}
-	if err := payload.Validate("List"); err != nil {
-		return ws.SendError(client, err)
+	if errs := validatex.ValidateSceneRequest(&payload, "List"); len(errs) > 0 {
+		return ws.SendError(client, errcode.ArgsError().WithMsg(errs.Error()))
 	}
 
 	var notificationService service.SystemNotificationService
@@ -129,8 +131,8 @@ func (h *NotificationHandler) read(ctx context.Context, client ws.Connection, us
 			return ws.SendError(client, errcode.ArgsError().WithMsg("已读参数错误"))
 		}
 	}
-	if err := payload.Validate("Read"); err != nil {
-		return ws.SendError(client, err)
+	if errs := validatex.ValidateSceneRequest(&payload, "Read"); len(errs) > 0 {
+		return ws.SendError(client, errcode.ArgsError().WithMsg(errs.Error()))
 	}
 
 	var notificationService service.SystemNotificationService
@@ -150,8 +152,8 @@ func (h *NotificationHandler) revoke(ctx context.Context, client ws.Connection, 
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return ws.SendError(client, errcode.ArgsError().WithMsg("撤回参数错误"))
 	}
-	if err := payload.Validate("Revoke"); err != nil {
-		return ws.SendError(client, err)
+	if errs := validatex.ValidateSceneRequest(&payload, "Revoke"); len(errs) > 0 {
+		return ws.SendError(client, errcode.ArgsError().WithMsg(errs.Error()))
 	}
 
 	var notificationService service.SystemNotificationService

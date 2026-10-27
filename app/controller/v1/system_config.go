@@ -79,7 +79,7 @@ func (s *SystemConfigController) UpdateConfig(c *gin.Context) {
 		return
 	}
 
-	err = req.Validate()
+	err = facade.Request().Validate(c, &req, "UpdateConfig")
 	if err != nil {
 		s.Response.Error(c, err)
 		return

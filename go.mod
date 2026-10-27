@@ -15,7 +15,6 @@ require (
 	github.com/goccy/go-json v0.11.2
 	github.com/godoes/gorm-oracle v1.6.20
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/gookit/validate v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jedib0t/go-pretty/v6 v6.8.3
 	github.com/mattn/go-runewidth v0.0.31
@@ -96,8 +95,6 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gookit/filter v1.2.3 // indirect
-	github.com/gookit/goutil v0.8.4 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.11.0 // indirect

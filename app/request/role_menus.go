@@ -1,61 +1,54 @@
 package request
 
 import (
-	"gin/app/errcode"
 	"gin/common/base"
 
-	"github.com/gookit/validate"
+	"github.com/dsxwk/validatex"
 )
 
 // RoleMenus 请求验证
 type RoleMenus struct {
 	base.Request
-	ID     int64  `uri:"id" form:"id" validate:"required|int|gt:0" label:"ID"`
-	RoleId int64  `json:"role_id" form:"role_id" validate:"required|int" label:"角色id"`
-	MenuId int64  `json:"menu_id" form:"menu_id" validate:"required|int" label:"菜单id"`
-	Name   string `json:"name" form:"name" validate:"required|max:255" label:"角色名称"`
+	ID     int64  `uri:"id" form:"id" label:"ID"`
+	RoleId int64  `json:"role_id" form:"role_id" label:"角色id"`
+	MenuId int64  `json:"menu_id" form:"menu_id" label:"菜单id"`
+	Name   string `json:"name" form:"name" label:"角色名称"`
 	PageListValidate
 }
 
-// Validate 请求验证
-func (s RoleMenus) Validate(data RoleMenus, scene string) error {
-	v := validate.Struct(data, scene)
-	if !v.Validate(scene) {
-		return errcode.ArgsError().WithMsg(v.Errors.One())
+// ValidateWithScene 请求验证
+func (s RoleMenus) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
+	switch scene {
+	case "List":
+		return s.PageListValidate.Validate(fields)
+	case "Create":
+		return validatex.Check(
+			fields.Int("RoleId", s.RoleId).Required().Errors(),
+			fields.Int("MenuId", s.MenuId).Required().Errors(),
+			fields.Str("Name", s.Name).Required().Max(255).Errors(),
+		)
+	case "Update":
+		return validatex.Check(
+			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
+			fields.Int("RoleId", s.RoleId).Required().Errors(),
+			fields.Int("MenuId", s.MenuId).Required().Errors(),
+			fields.Str("Name", s.Name).Required().Max(255).Errors(),
+		)
+	case "Detail", "Delete":
+		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+	default:
+		return nil
 	}
-	return nil
-}
-
-// ConfigValidation 配置验证
-// - 定义验证场景
-// - 也可以添加验证设置
-func (s RoleMenus) ConfigValidation(v *validate.Validation) {
-	scenes := validate.SValues{
-		"List":   []string{"PageListValidate.Page", "PageListValidate.PageSize"},
-		"Create": []string{"RoleId", "MenuId", "Name"},
-		"Update": []string{"ID", "RoleId", "MenuId", "Name"},
-		"Detail": []string{"ID"},
-		"Delete": []string{"ID"},
-	}
-	v.WithScenes(scenes)
 }
 
 // Messages 验证器错误消息
-func (s RoleMenus) Messages() map[string]string {
-	return validate.MS{
-		"required":                     "字段 {field} 必填",
-		"int":                          "字段 {field} 必须为整数",
-		"gt":                           "字段 {field} 必须大于 0",
-		"minLen":                       "{field} 长度不能少于 {min} 个字符",
-		"maxLen":                       "{field} 长度不能超过 {max} 个字符",
-		"PageListValidate.Page.gt":     "页码必须大于 0",
-		"PageListValidate.PageSize.gt": "每页数量必须大于 0",
-	}
+func (s RoleMenus) Messages() validatex.Messages {
+	return commonMessages()
 }
 
 // Translates 字段翻译
-func (s RoleMenus) Translates() map[string]string {
-	return validate.MS{
+func (s RoleMenus) Translates() validatex.Translates {
+	return validatex.Translates{
 		"ID":                        "ID",
 		"RoleId":                    "角色id",
 		"MenuId":                    "菜单id",

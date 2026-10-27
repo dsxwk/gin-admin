@@ -3,13 +3,14 @@ package grpc
 import (
 	"context"
 	"gin/app/facade"
-	"gin/pkg/ctxkey"
 	"gin/grpc/proto"
 	grpcrequest "gin/grpc/request"
+	"gin/pkg/ctxkey"
 	client "gin/pkg/serviceprovider/grpcclient"
 	"testing"
 	"time"
 
+	"github.com/dsxwk/validatex"
 	"github.com/golang-jwt/jwt/v5"
 	grpclib "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -304,8 +305,8 @@ func (fakeUserService) List(_ context.Context, req *proto.UserListRequest) (*pro
 // Detail 用户详情
 func (fakeUserService) Detail(_ context.Context, req *proto.UserRequest) (*proto.User, error) {
 	dto := grpcrequest.UserRequest{Id: req.GetId()}
-	if err := dto.Validate(dto, "Detail"); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	if errs := validatex.ValidateSceneRequest(&dto, "Detail"); len(errs) > 0 {
+		return nil, status.Error(codes.InvalidArgument, errs.Error())
 	}
 	if req.GetId() != 1 {
 		return nil, status.Error(codes.NotFound, "用户不存在")
