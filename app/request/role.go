@@ -55,17 +55,17 @@ type RoleUpdate struct {
 // Validate 用户角色验证
 func (s UserRoles) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Int("RoleId", s.RoleId).Required().Gt(0).Errors(),
-		fields.Int("UserId", s.UserId).Required().Gt(0).Errors(),
-		fields.Str("Name", s.Name).Required().Max(20).Errors(),
+		fields.Int("roleId", s.RoleId).Required().Gt(0).Errors(),
+		fields.Int("userId", s.UserId).Required().Gt(0).Errors(),
+		fields.Str("name", s.Name).Required().Max(20).Errors(),
 	)
 }
 
 // Validate 角色权限验证
 func (s RolePermission) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Int("RoleId", s.RoleId).Required().Errors(),
-		fields.Int("PermissionId", s.PermissionId).Required().Errors(),
+		fields.Int("roleId", s.RoleId).Required().Errors(),
+		fields.Int("permissionId", s.PermissionId).Required().Errors(),
 	)
 }
 
@@ -76,19 +76,19 @@ func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validate
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Name", s.Name).Required().Min(1).Max(20).Errors(),
-			fields.Str("Desc", s.Desc).Max(100).Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Str("name", s.Name).Required().Min(1).Max(20).Errors(),
+			fields.Str("desc", s.Desc).Max(100).Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Min(1).Max(20).Errors(),
-			fields.Str("Desc", s.Desc).Max(100).Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Min(1).Max(20).Errors(),
+			fields.Str("desc", s.Desc).Max(100).Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -102,14 +102,14 @@ func (s Roles) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Roles) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Name":                      "角色名称",
-		"Desc":                      "角色描述",
-		"Status":                    "状态 1=启用 2=停用",
-		"RoleId":                    "角色ID",
-		"UserId":                    "用户ID",
-		"PermissionId":              "权限ID",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":           "ID",
+		"name":         "角色名称",
+		"desc":         "角色描述",
+		"status":       "状态 1=启用 2=停用",
+		"roleId":       "角色ID",
+		"userId":       "用户ID",
+		"permissionId": "权限ID",
+		"page":         "页码",
+		"pageSize":     "每页数量",
 	}
 }

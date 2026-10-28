@@ -23,19 +23,19 @@ func (s RoleMenus) ValidateWithScene(scene string, fields validatex.Fields) vali
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Int("RoleId", s.RoleId).Required().Errors(),
-			fields.Int("MenuId", s.MenuId).Required().Errors(),
-			fields.Str("Name", s.Name).Required().Max(255).Errors(),
+			fields.Int("role_id", s.RoleId).Required().Errors(),
+			fields.Int("menu_id", s.MenuId).Required().Errors(),
+			fields.Str("name", s.Name).Required().Max(255).Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Int("RoleId", s.RoleId).Required().Errors(),
-			fields.Int("MenuId", s.MenuId).Required().Errors(),
-			fields.Str("Name", s.Name).Required().Max(255).Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Int("role_id", s.RoleId).Required().Errors(),
+			fields.Int("menu_id", s.MenuId).Required().Errors(),
+			fields.Str("name", s.Name).Required().Max(255).Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -49,11 +49,11 @@ func (s RoleMenus) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s RoleMenus) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"RoleId":                    "角色id",
-		"MenuId":                    "菜单id",
-		"Name":                      "角色名称",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"role_id":  "角色id",
+		"menu_id":  "菜单id",
+		"name":     "角色名称",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }

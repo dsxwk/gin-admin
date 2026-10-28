@@ -22,7 +22,7 @@ func (s ImportRecords) ValidateWithScene(scene string, fields validatex.Fields) 
 	case "List":
 		return s.PageListValidate.Validate(fields)
 	case "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -36,11 +36,11 @@ func (s ImportRecords) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s ImportRecords) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Type":                      "导入类型",
-		"Name":                      "类型名称",
-		"Data":                      "导入数据",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"type":     "导入类型",
+		"name":     "类型名称",
+		"data":     "导入数据",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }

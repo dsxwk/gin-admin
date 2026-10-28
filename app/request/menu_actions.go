@@ -66,28 +66,28 @@ type ActionUpdate struct {
 // Validate 功能创建验证
 func (s ActionCreate) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Int("Type", s.Type).Required().Errors(),
-		fields.Str("BtnType", s.BtnType).Required().Errors(),
-		fields.Str("BtnStyle", s.BtnStyle).Required().Errors(),
-		fields.Str("BtnSize", s.BtnSize).Required().Errors(),
-		fields.Int("IsConfirm", s.IsConfirm).Required().Errors(),
-		fields.Str("Label", s.Label).Required().Errors(),
-		fields.Str("AuthValue", s.AuthValue).Required().Errors(),
-		fields.Int("IsLink", s.IsLink).Required().Errors(),
+		fields.Int("type", s.Type).Required().Errors(),
+		fields.Str("btnType", s.BtnType).Required().Errors(),
+		fields.Str("btnStyle", s.BtnStyle).Required().Errors(),
+		fields.Str("btnSize", s.BtnSize).Required().Errors(),
+		fields.Int("isConfirm", s.IsConfirm).Required().Errors(),
+		fields.Str("label", s.Label).Required().Errors(),
+		fields.Str("authValue", s.AuthValue).Required().Errors(),
+		fields.Int("isLink", s.IsLink).Required().Errors(),
 	)
 }
 
 // Validate 功能更新验证
 func (s ActionUpdate) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Int("Type", s.Type).Required().Errors(),
-		fields.Str("BtnType", s.BtnType).Required().Errors(),
-		fields.Str("BtnStyle", s.BtnStyle).Required().Errors(),
-		fields.Str("BtnSize", s.BtnSize).Required().Errors(),
-		fields.Int("IsConfirm", s.IsConfirm).Required().Errors(),
-		fields.Str("Label", s.Label).Required().Errors(),
-		fields.Str("AuthValue", s.AuthValue).Required().Errors(),
-		fields.Int("IsLink", s.IsLink).Required().Errors(),
+		fields.Int("type", s.Type).Required().Errors(),
+		fields.Str("btnType", s.BtnType).Required().Errors(),
+		fields.Str("btnStyle", s.BtnStyle).Required().Errors(),
+		fields.Str("btnSize", s.BtnSize).Required().Errors(),
+		fields.Int("isConfirm", s.IsConfirm).Required().Errors(),
+		fields.Str("label", s.Label).Required().Errors(),
+		fields.Str("authValue", s.AuthValue).Required().Errors(),
+		fields.Int("isLink", s.IsLink).Required().Errors(),
 	)
 }
 
@@ -98,17 +98,17 @@ func (s MenuActions) ValidateWithScene(scene string, fields validatex.Fields) va
 		return s.PageListValidate.Validate(fields)
 	case "Create", "Update":
 		return validatex.Check(
-			fields.Int("Type", s.Type).Required().Errors(),
-			fields.Str("BtnType", s.BtnType).Required().Errors(),
-			fields.Str("BtnStyle", s.BtnStyle).Required().Errors(),
-			fields.Str("BtnSize", s.BtnSize).Required().Errors(),
-			fields.Int("IsConfirm", s.IsConfirm).Required().Errors(),
-			fields.Str("Label", s.Label).Required().Errors(),
-			fields.Str("AuthValue", s.AuthValue).Required().Errors(),
-			fields.Int("IsLink", s.IsLink).Required().Errors(),
+			fields.Int("type", s.Type).Required().Errors(),
+			fields.Str("btnType", s.BtnType).Required().Errors(),
+			fields.Str("btnStyle", s.BtnStyle).Required().Errors(),
+			fields.Str("btnSize", s.BtnSize).Required().Errors(),
+			fields.Int("isConfirm", s.IsConfirm).Required().Errors(),
+			fields.Str("label", s.Label).Required().Errors(),
+			fields.Str("authValue", s.AuthValue).Required().Errors(),
+			fields.Int("isLink", s.IsLink).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -122,17 +122,17 @@ func (s MenuActions) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s MenuActions) Translates() validatex.Translates {
 	return validatex.Translates{
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
-		"ID":                        "ID",
-		"MenuId":                    "菜单ID",
-		"Type":                      "类型",
-		"BtnType":                   "按钮类型",
-		"BtnStyle":                  "按钮样式",
-		"BtnSize":                   "按钮尺寸",
-		"IsConfirm":                 "是否确认",
-		"Label":                     "功能名称",
-		"AuthValue":                 "权限标识",
-		"IsLink":                    "是否为链接",
+		"page":      "页码",
+		"pageSize":  "每页数量",
+		"id":        "ID",
+		"menuId":    "菜单ID",
+		"type":      "类型",
+		"btnType":   "按钮类型",
+		"btnStyle":  "按钮样式",
+		"btnSize":   "按钮尺寸",
+		"isConfirm": "是否确认",
+		"label":     "功能名称",
+		"authValue": "权限标识",
+		"isLink":    "是否为链接",
 	}
 }

@@ -96,49 +96,49 @@ func (s User) ValidateWithScene(scene string, fields validatex.Fields) validatex
 	case "List":
 		return validatex.When(!s.NotPage, func() validatex.Errors {
 			return validatex.Check(
-				fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
-				fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+				fields.Int("page", s.Page).Required().Gt(0).Errors(),
+				fields.Int("pageSize", s.PageSize).Required().Gt(0).Errors(),
 			)
 		})
 	case "Create":
 		return validatex.Check(
-			fields.Str("Username", s.Username).Required().Errors(),
-			fields.Str("FullName", s.FullName).Required().Errors(),
-			fields.Str("Nickname", s.Nickname).Required().Errors(),
-			fields.Int("Gender", s.Gender).Required().Errors(),
-			fields.Str("Password", s.Password).Required().Errors(),
-			fields.Struct("MainDept", s.MainDept),
-			fields.Slice[struct{}]("UserDepts", make([]struct{}, len(s.UserDepts))).Required().Errors(),
-			fields.SliceStruct("UserDepts", s.UserDepts),
+			fields.Str("username", s.Username).Required().Errors(),
+			fields.Str("fullName", s.FullName).Required().Errors(),
+			fields.Str("nickname", s.Nickname).Required().Errors(),
+			fields.Int("gender", s.Gender).Required().Errors(),
+			fields.Str("password", s.Password).Required().Errors(),
+			fields.Struct("mainDept", s.MainDept),
+			fields.Slice[struct{}]("userDepts", make([]struct{}, len(s.UserDepts))).Required().Errors(),
+			fields.SliceStruct("userDepts", s.UserDepts),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Username", s.Username).Required().Errors(),
-			fields.Str("FullName", s.FullName).Required().Errors(),
-			fields.Str("Nickname", s.Nickname).Required().Errors(),
-			fields.Int("Gender", s.Gender).Required().Errors(),
-			fields.Struct("MainDept", s.MainDept),
-			fields.Slice[struct{}]("UserDepts", make([]struct{}, len(s.UserDepts))).Required().Errors(),
-			fields.SliceStruct("UserDepts", s.UserDepts),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("username", s.Username).Required().Errors(),
+			fields.Str("fullName", s.FullName).Required().Errors(),
+			fields.Str("nickname", s.Nickname).Required().Errors(),
+			fields.Int("gender", s.Gender).Required().Errors(),
+			fields.Struct("mainDept", s.MainDept),
+			fields.Slice[struct{}]("userDepts", make([]struct{}, len(s.UserDepts))).Required().Errors(),
+			fields.SliceStruct("userDepts", s.UserDepts),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	case "BatchDelete":
-		return fields.Slice("IDs", s.IDs).Required().
+		return fields.Slice("ids", s.IDs).Required().
 			Each("gt", "", func(value int64) bool {
 				return value > 0
 			}, int64(0)).
 			Errors()
 	case "Import":
 		return validatex.Check(
-			fields.Slice[struct{}]("Data", make([]struct{}, len(s.Data))).Required().Min(1).Errors(),
-			fields.SliceStruct("Data", s.Data),
+			fields.Slice[struct{}]("data", make([]struct{}, len(s.Data))).Required().Min(1).Errors(),
+			fields.SliceStruct("data", s.Data),
 		)
 	case "Password":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Password", s.Password).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("password", s.Password).Required().Errors(),
 		)
 	default:
 		return nil
@@ -147,18 +147,18 @@ func (s User) ValidateWithScene(scene string, fields validatex.Fields) validatex
 
 // Validate 部门验证
 func (s Dept) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Int("DepartmentId", s.DepartmentId).Required().Gt(0).Errors()
+	return fields.Int("departmentId", s.DepartmentId).Required().Gt(0).Errors()
 }
 
 // Validate 用户导入子项验证
 func (s UserImportItem) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Str("Username", s.Username).Required().Min(3).Max(20).Regexp(usernamePattern).Errors(),
-		fields.Str("Password", s.Password).Required().Errors(),
-		fields.Str("FullName", s.FullName).Required().Errors(),
-		fields.Str("Nickname", s.Nickname).Required().Errors(),
-		fields.Str("Email", s.Email).Required().Email().Errors(),
-		fields.Int("Gender", s.Gender).Required().Errors(),
+		fields.Str("username", s.Username).Required().Min(3).Max(20).Regexp(usernamePattern).Errors(),
+		fields.Str("password", s.Password).Required().Errors(),
+		fields.Str("fullName", s.FullName).Required().Errors(),
+		fields.Str("nickname", s.Nickname).Required().Errors(),
+		fields.Str("email", s.Email).Required().Email().Errors(),
+		fields.Int("gender", s.Gender).Required().Errors(),
 	)
 }
 
@@ -210,14 +210,14 @@ func (s UserImportItem) Messages() validatex.Messages {
 // Translates 用户导入子项字段翻译
 func (s UserImportItem) Translates() validatex.Translates {
 	return validatex.Translates{
-		"Username": "用户名",
-		"Password": "密码",
-		"FullName": "姓名",
-		"Nickname": "昵称",
-		"Email":    "邮箱",
-		"Gender":   "性别",
-		"Age":      "年龄",
-		"Status":   "状态",
+		"username": "用户名",
+		"password": "密码",
+		"fullName": "姓名",
+		"nickname": "昵称",
+		"email":    "邮箱",
+		"gender":   "性别",
+		"age":      "年龄",
+		"status":   "状态",
 	}
 }
 
@@ -229,15 +229,15 @@ func (s UserImport) Messages() validatex.Messages {
 // Translates 用户导入字段翻译
 func (s UserImport) Translates() validatex.Translates {
 	return validatex.Translates{
-		"Data":            "导入数据",
-		"Data.*.Username": "用户名",
-		"Data.*.Password": "密码",
-		"Data.*.FullName": "姓名",
-		"Data.*.Nickname": "昵称",
-		"Data.*.Email":    "邮箱",
-		"Data.*.Gender":   "性别",
-		"Data.*.Age":      "年龄",
-		"Data.*.Status":   "状态",
+		"data":            "导入数据",
+		"data.*.username": "用户名",
+		"data.*.password": "密码",
+		"data.*.fullName": "姓名",
+		"data.*.nickname": "昵称",
+		"data.*.email":    "邮箱",
+		"data.*.gender":   "性别",
+		"data.*.age":      "年龄",
+		"data.*.status":   "状态",
 	}
 }
 
@@ -256,14 +256,14 @@ func userMessages() validatex.Messages {
 	return validatex.Messages{
 		"required":            "字段 {field} 必填",
 		"gt":                  "字段 {field} 需大于 0",
-		"IDs.*.gt":            "字段 {field} 需大于 0",
+		"ids.*.gt":            "字段 {field} 需大于 0",
 		"min":                 "{field} 长度不能少于 {min} 个字符",
 		"max":                 "{field} 长度不能超过 {max} 个字符",
 		"regex":               "{field} 格式错误",
 		"email":               "{field} 邮箱格式错误",
-		"Data.min":            "{field} 数量不能少于 {min}",
-		"Data.*.Username.min": "{field} 长度不能少于 {min} 个字符",
-		"Data.*.Username.max": "{field} 长度不能超过 {max} 个字符",
+		"data.min":            "{field} 数量不能少于 {min}",
+		"data.*.username.min": "{field} 长度不能少于 {min} 个字符",
+		"data.*.username.max": "{field} 长度不能超过 {max} 个字符",
 	}
 }
 
@@ -275,37 +275,37 @@ func userImportMessages() validatex.Messages {
 		"max":                 "{field} 长度不能超过 {max} 个字符",
 		"regex":               "{field} 格式错误",
 		"email":               "{field} 邮箱格式错误",
-		"Data.min":            "{field} 数量不能少于 {min}",
-		"Data.*.Username.min": "{field} 长度不能少于 {min} 个字符",
-		"Data.*.Username.max": "{field} 长度不能超过 {max} 个字符",
+		"data.min":            "{field} 数量不能少于 {min}",
+		"data.*.username.min": "{field} 长度不能少于 {min} 个字符",
+		"data.*.username.max": "{field} 长度不能超过 {max} 个字符",
 	}
 }
 
 // userTranslates 返回用户字段翻译
 func userTranslates() validatex.Translates {
 	return validatex.Translates{
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
-		"ID":                        "ID",
-		"Username":                  "用户名",
-		"FullName":                  "姓名",
-		"Nickname":                  "昵称",
-		"Gender":                    "性别",
-		"Password":                  "密码",
-		"Age":                       "年龄",
-		"MainDept.DepartmentId":     "主部门",
-		"UserDepts":                 "用户部门",
-		"UserDepts.*.DepartmentId":  "用户部门ID",
-		"IDs":                       "ID列表",
-		"IDs.*":                     "ID",
-		"Data":                      "导入数据",
-		"Data.*.Username":           "用户名",
-		"Data.*.Password":           "密码",
-		"Data.*.FullName":           "姓名",
-		"Data.*.Nickname":           "昵称",
-		"Data.*.Email":              "邮箱",
-		"Data.*.Gender":             "性别",
-		"Data.*.Age":                "年龄",
-		"Data.*.Status":             "状态",
+		"page":                     "页码",
+		"pageSize":                 "每页数量",
+		"id":                       "ID",
+		"username":                 "用户名",
+		"fullName":                 "姓名",
+		"nickname":                 "昵称",
+		"gender":                   "性别",
+		"password":                 "密码",
+		"age":                      "年龄",
+		"mainDept.departmentId":    "主部门",
+		"userDepts":                "用户部门",
+		"userDepts.*.departmentId": "用户部门ID",
+		"ids":                      "ID列表",
+		"ids.*":                    "ID",
+		"data":                     "导入数据",
+		"data.*.username":          "用户名",
+		"data.*.password":          "密码",
+		"data.*.fullName":          "姓名",
+		"data.*.nickname":          "昵称",
+		"data.*.email":             "邮箱",
+		"data.*.gender":            "性别",
+		"data.*.age":               "年龄",
+		"data.*.status":            "状态",
 	}
 }

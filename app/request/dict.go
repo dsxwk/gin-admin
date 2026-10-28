@@ -52,21 +52,21 @@ func (s Dict) ValidateWithScene(scene string, fields validatex.Fields) validatex
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Str("Title", s.Title).Required().Errors(),
-			fields.Str("Value", s.Value).Required().Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Str("title", s.Title).Required().Errors(),
+			fields.Str("value", s.Value).Required().Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Str("Title", s.Title).Required().Errors(),
-			fields.Str("Value", s.Value).Required().Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Str("title", s.Title).Required().Errors(),
+			fields.Str("value", s.Value).Required().Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -80,16 +80,16 @@ func (s Dict) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Dict) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Pid":                       "父级id",
-		"Name":                      "标识",
-		"Title":                     "名称",
-		"Value":                     "映射值",
-		"Status":                    "状态 1=启用 2=停用",
-		"Sort":                      "排序",
-		"Extend":                    "扩展字段",
-		"Desc":                      "字段描述",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"pid":      "父级id",
+		"name":     "标识",
+		"title":    "名称",
+		"value":    "映射值",
+		"status":   "状态 1=启用 2=停用",
+		"sort":     "排序",
+		"extend":   "扩展字段",
+		"desc":     "字段描述",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }

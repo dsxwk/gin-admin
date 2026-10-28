@@ -34,11 +34,11 @@ func (s Permission) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Permission) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Key":                       "权限标识",
-		"Method":                    "请求方式",
-		"Uri":                       "路由地址",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"key":      "权限标识",
+		"method":   "请求方式",
+		"uri":      "路由地址",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }

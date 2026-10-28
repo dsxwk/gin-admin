@@ -18,14 +18,14 @@ type AgentAsk struct {
 func (s AgentAsk) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "Ask":
-		return fields.Str("Question", s.Question).Required().Errors()
+		return fields.Str("question", s.Question).Required().Errors()
 	case "Stream":
 		return validatex.Check(
-			fields.Str("Question", s.Question).Required().Errors(),
-			fields.Int("SessionId", s.SessionId).Gte(0).Errors(),
+			fields.Str("question", s.Question).Required().Errors(),
+			fields.Int("sessionId", s.SessionId).Gte(0).Errors(),
 		)
 	case "History":
-		return fields.Int("SessionId", s.SessionId).Gte(0).Errors()
+		return fields.Int("sessionId", s.SessionId).Gte(0).Errors()
 	default:
 		return nil
 	}
@@ -39,9 +39,9 @@ func (s AgentAsk) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s AgentAsk) Translates() validatex.Translates {
 	return validatex.Translates{
-		"Question":  "问题",
-		"Provider":  "模型提供商",
-		"SessionId": "会话ID",
+		"question":  "问题",
+		"provider":  "模型提供商",
+		"sessionId": "会话ID",
 	}
 }
 
@@ -55,7 +55,7 @@ type AgentDelete struct {
 func (s AgentDelete) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -68,5 +68,5 @@ func (s AgentDelete) Messages() validatex.Messages {
 
 // Translates 字段翻译
 func (s AgentDelete) Translates() validatex.Translates {
-	return validatex.Translates{"ID": "会话ID"}
+	return validatex.Translates{"id": "会话ID"}
 }

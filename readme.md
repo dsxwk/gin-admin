@@ -1220,17 +1220,17 @@ func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validate
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Name", s.Name).Required().Max(20).Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Str("name", s.Name).Required().Max(20).Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Max(20).Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Max(20).Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -1262,8 +1262,8 @@ Scenes are handled by one `switch` in `ValidateWithScene`. Pagination is validat
 case "List":
 	return validatex.When(!s.NotPage, func() validatex.Errors {
 		return validatex.Check(
-			fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
-			fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+			fields.Int("page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("pageSize", s.PageSize).Required().Gt(0).Errors(),
 		)
 	})
 ```
@@ -1287,11 +1287,11 @@ func (s Roles) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Roles) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Name":                      "Role Name",
-		"Status":                    "Status",
-		"PageListValidate.Page":     "Page",
-		"PageListValidate.PageSize": "Page Size",
+		"id":       "ID",
+		"name":     "Role Name",
+		"status":   "Status",
+		"page":     "Page",
+		"pageSize": "Page Size",
 	}
 }
 ```
@@ -1323,7 +1323,7 @@ Shared messages and translations can be returned by helper functions and reused 
 Use `Rule` for request-specific predicates:
 
 ```go
-fields.Int("Age", s.Age).Rule(
+fields.Int("age", s.Age).Rule(
 	"is_even",
 	"{field} must be even",
 	func(value int64) bool {

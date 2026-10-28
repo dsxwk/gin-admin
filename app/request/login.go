@@ -1,7 +1,6 @@
 package request
 
 import (
-	"fmt"
 	"gin/common/base"
 
 	"github.com/dsxwk/validatex"
@@ -41,15 +40,15 @@ func (s Login) ValidateWithScene(scene string, fields validatex.Fields) validate
 	switch scene {
 	case "Login":
 		return validatex.Check(
-			fields.Str("UserLogin.Username", s.Username).Required().Errors(),
-			fields.Str("UserLogin.Password", s.Password).Required().Errors(),
+			fields.Str("username", s.Username).Required().Errors(),
+			fields.Str("password", s.Password).Required().Errors(),
 		)
 	case "RefreshToken":
-		return fields.Str("RefreshToken.Token", s.RefreshToken.Token).Required().Errors()
+		return fields.Str("token", s.RefreshToken.Token).Required().Errors()
 	case "CheckCaptcha":
 		return validatex.Check(
-			fields.Str("UserLogin.CaptchaID", s.CaptchaID).Required().Errors(),
-			fields.Str("UserLogin.Code", s.Code).Required().Errors(),
+			fields.Str("captchaId", s.CaptchaID).Required().Errors(),
+			fields.Str("code", s.Code).Required().Errors(),
 		)
 	default:
 		return nil
@@ -59,20 +58,17 @@ func (s Login) ValidateWithScene(scene string, fields validatex.Fields) validate
 // Messages 错误消息
 func (s Login) Messages() validatex.Messages {
 	return validatex.Messages{
-		"required": fmt.Sprintf("%s {field} %s",
-			s.Trans("validator.common.field", nil),
-			s.Trans("validator.common.required", nil),
-		),
+		"required": s.Trans("validator.common.requiredField", nil),
 	}
 }
 
 // Translates 字段翻译
 func (s Login) Translates() validatex.Translates {
 	return validatex.Translates{
-		"UserLogin.Username":  s.Trans("validator.login.username", nil),
-		"UserLogin.Password":  s.Trans("validator.login.password", nil),
-		"RefreshToken.Token":  s.Trans("validator.login.refreshToken", nil),
-		"UserLogin.CaptchaID": s.Trans("login.captchaId", nil),
-		"UserLogin.Code":      s.Trans("login.code", nil),
+		"username":  s.Trans("validator.login.username", nil),
+		"password":  s.Trans("validator.login.password", nil),
+		"token":     s.Trans("validator.login.refreshToken", nil),
+		"captchaId": s.Trans("login.captchaId", nil),
+		"code":      s.Trans("login.code", nil),
 	}
 }

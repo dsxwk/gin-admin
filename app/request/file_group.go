@@ -22,14 +22,14 @@ func (s FileGroup) ValidateWithScene(scene string, fields validatex.Fields) vali
 	case "List":
 		return s.PageListValidate.Validate(fields)
 	case "Create":
-		return fields.Str("Name", s.Name).Required().Max(20).Errors()
+		return fields.Str("name", s.Name).Required().Max(20).Errors()
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Max(20).Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Max(20).Errors(),
 		)
 	case "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -43,11 +43,11 @@ func (s FileGroup) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s FileGroup) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Pid":                       "父级ID",
-		"Name":                      "分组名称",
-		"Sort":                      "排序",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"pid":      "父级ID",
+		"name":     "分组名称",
+		"sort":     "排序",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }

@@ -61,19 +61,19 @@ type DeptItem struct {
 
 // Validate UserRoleItem验证
 func (s UserRoleItem) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Int("RoleId", s.RoleId).Required().Gt(0).Errors()
+	return fields.Int("roleId", s.RoleId).Required().Gt(0).Errors()
 }
 
 // Validate DeptItem验证
 func (s DeptItem) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Int("DepartmentId", s.DepartmentId).Required().Gt(0).Errors()
+	return fields.Int("departmentId", s.DepartmentId).Required().Gt(0).Errors()
 }
 
 // ValidateWithScene 用户请求验证
 func (s UserRequest) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "Detail", "Delete":
-		return fields.Int("Id", s.Id).Required().Gt(0).Errors()
+		return fields.Int("id", s.Id).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -83,8 +83,8 @@ func (s UserRequest) ValidateWithScene(scene string, fields validatex.Fields) va
 func (s UserListRequest) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.When(!s.NotPage, func() validatex.Errors {
 		return validatex.Check(
-			fields.Int("Page", s.Page).Required().Gt(0).Errors(),
-			fields.Int("PageSize", s.PageSize).Required().Gt(0).Errors(),
+			fields.Int("page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("pageSize", s.PageSize).Required().Gt(0).Errors(),
 		)
 	})
 }
@@ -92,28 +92,28 @@ func (s UserListRequest) Validate(fields validatex.Fields) validatex.Errors {
 // Validate 用户创建请求验证
 func (s UserCreateRequest) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Str("Username", s.Username).Required().Errors(),
-		fields.Str("FullName", s.FullName).Required().Errors(),
-		fields.Str("Nickname", s.Nickname).Required().Errors(),
-		fields.Int("Gender", s.Gender).Required().Errors(),
-		fields.Str("Password", s.Password).Required().Errors(),
-		fields.Struct("MainDept", s.MainDept),
-		fields.Slice[struct{}]("UserDepts", make([]struct{}, len(s.UserDepts))).Required().Errors(),
-		fields.SliceStruct("UserDepts", s.UserDepts),
+		fields.Str("username", s.Username).Required().Errors(),
+		fields.Str("fullName", s.FullName).Required().Errors(),
+		fields.Str("nickname", s.Nickname).Required().Errors(),
+		fields.Int("gender", s.Gender).Required().Errors(),
+		fields.Str("password", s.Password).Required().Errors(),
+		fields.Struct("mainDept", s.MainDept),
+		fields.Slice[struct{}]("userDepts", make([]struct{}, len(s.UserDepts))).Required().Errors(),
+		fields.SliceStruct("userDepts", s.UserDepts),
 	)
 }
 
 // Validate 用户更新请求验证
 func (s UserUpdateRequest) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Int("Id", s.Id).Required().Gt(0).Errors(),
-		fields.Str("FullName", s.FullName).Required().Errors(),
+		fields.Int("id", s.Id).Required().Gt(0).Errors(),
+		fields.Str("fullName", s.FullName).Required().Errors(),
 	)
 }
 
 // Validate 用户批量删除请求验证
 func (s UserBatchDeleteRequest) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Slice("Ids", s.Ids).Required().Each("gt", "", func(id int32) bool {
+	return fields.Slice("ids", s.Ids).Required().Each("gt", "", func(id int32) bool {
 		return id > 0
 	}, int32(0)).Errors()
 }
@@ -129,20 +129,22 @@ func userMessages() validatex.Messages {
 // userTranslates 用户请求公共字段翻译
 func userTranslates() validatex.Translates {
 	return validatex.Translates{
-		"Id":                    "ID",
-		"Page":                  "页码",
-		"PageSize":              "每页数量",
-		"Username":              "用户名",
-		"FullName":              "姓名",
-		"Nickname":              "昵称",
-		"Gender":                "性别",
-		"Password":              "密码",
-		"Age":                   "年龄",
-		"MainDept.DepartmentId": "主部门",
-		"UserDepts":             "用户部门",
-		"Ids":                   "ID列表",
-		"RoleId":                "角色ID",
-		"DepartmentId":          "部门ID",
+		"id":                       "ID",
+		"page":                     "页码",
+		"pageSize":                 "每页数量",
+		"username":                 "用户名",
+		"fullName":                 "姓名",
+		"nickname":                 "昵称",
+		"gender":                   "性别",
+		"password":                 "密码",
+		"age":                      "年龄",
+		"mainDept.departmentId":    "主部门",
+		"userDepts":                "用户部门",
+		"userDepts.*.departmentId": "部门ID",
+		"ids":                      "ID列表",
+		"ids.*":                    "ID",
+		"roleId":                   "角色ID",
+		"departmentId":             "部门ID",
 	}
 }
 

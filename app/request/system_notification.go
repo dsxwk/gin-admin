@@ -53,10 +53,10 @@ func (s *SystemNotificationPush) ValidateWithScene(scene string, fields validate
 		}
 
 		errs := validatex.Check(
-			fields.Str("Title", s.Title).Required().Max(50).Errors(),
-			fields.Str("Content", s.Content).Required().Max(500).Errors(),
-			fields.Int("Type", s.Type).In(enum.NotificationTypeUser, enum.NotificationTypeDepartment).Errors(),
-			fields.Int("IsToAll", s.IsToAll).In(enum.NotificationIsToAllYes, enum.NotificationIsToAllNo).Errors(),
+			fields.Str("title", s.Title).Required().Max(50).Errors(),
+			fields.Str("content", s.Content).Required().Max(500).Errors(),
+			fields.Int("type", s.Type).In(enum.NotificationTypeUser, enum.NotificationTypeDepartment).Errors(),
+			fields.Int("isToAll", s.IsToAll).In(enum.NotificationIsToAllYes, enum.NotificationIsToAllNo).Errors(),
 		)
 		if len(errs) > 0 || s.IsToAll == enum.NotificationIsToAllYes {
 			return errs
@@ -64,11 +64,11 @@ func (s *SystemNotificationPush) ValidateWithScene(scene string, fields validate
 
 		switch s.Type {
 		case enum.NotificationTypeUser:
-			return fields.Slice("UserIds", s.UserIds).Required().Each("gt", "", func(id int64) bool {
+			return fields.Slice("userIds", s.UserIds).Required().Each("gt", "", func(id int64) bool {
 				return id > 0
 			}, int64(0)).Errors()
 		case enum.NotificationTypeDepartment:
-			return fields.Slice("DepartmentIds", s.DepartmentIds).Required().Each("gt", "", func(id int64) bool {
+			return fields.Slice("departmentIds", s.DepartmentIds).Required().Each("gt", "", func(id int64) bool {
 				return id > 0
 			}, int64(0)).Errors()
 		default:
@@ -90,8 +90,8 @@ func (s *SystemNotificationList) ValidateWithScene(scene string, fields validate
 			s.PageSize = 20
 		}
 		return validatex.Check(
-			fields.Int("Page", s.Page).Gte(1).Errors(),
-			fields.Int("PageSize", s.PageSize).Gte(1).Errors(),
+			fields.Int("page", s.Page).Gte(1).Errors(),
+			fields.Int("pageSize", s.PageSize).Gte(1).Errors(),
 		)
 	default:
 		return nil
@@ -105,7 +105,7 @@ func (s *SystemNotificationRead) ValidateWithScene(scene string, fields validate
 		if len(s.IDs) == 0 {
 			return nil
 		}
-		return fields.Slice("IDs", s.IDs).Each("gt", "", func(id int64) bool {
+		return fields.Slice("ids", s.IDs).Each("gt", "", func(id int64) bool {
 			return id > 0
 		}, int64(0)).Errors()
 	default:
@@ -117,7 +117,7 @@ func (s *SystemNotificationRead) ValidateWithScene(scene string, fields validate
 func (s *SystemNotificationRevoke) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "Revoke":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -154,30 +154,35 @@ func (s *SystemNotificationRevoke) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s *SystemNotificationPush) Translates() validatex.Translates {
 	return validatex.Translates{
-		"Title":         "通知标题",
-		"Content":       "通知内容",
-		"Type":          "通知类型",
-		"IsToAll":       "是否推送所有",
-		"UserIds":       "接收用户ID",
-		"DepartmentIds": "接收部门ID",
+		"title":           "通知标题",
+		"content":         "通知内容",
+		"type":            "通知类型",
+		"isToAll":         "是否推送所有",
+		"userIds":         "接收用户ID",
+		"userIds.*":       "用户ID",
+		"departmentIds":   "接收部门ID",
+		"departmentIds.*": "部门ID",
 	}
 }
 
 // Translates 字段翻译
 func (s *SystemNotificationList) Translates() validatex.Translates {
 	return validatex.Translates{
-		"Page":     "页码",
-		"PageSize": "每页数量",
-		"Sent":     "已发送列表",
+		"page":     "页码",
+		"pageSize": "每页数量",
+		"sent":     "已发送列表",
 	}
 }
 
 // Translates 字段翻译
 func (s *SystemNotificationRead) Translates() validatex.Translates {
-	return validatex.Translates{"IDs": "通知ID列表"}
+	return validatex.Translates{
+		"ids":   "通知ID列表",
+		"ids.*": "通知ID",
+	}
 }
 
 // Translates 字段翻译
 func (s *SystemNotificationRevoke) Translates() validatex.Translates {
-	return validatex.Translates{"ID": "通知ID"}
+	return validatex.Translates{"id": "通知ID"}
 }

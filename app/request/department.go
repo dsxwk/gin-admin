@@ -43,8 +43,8 @@ type DepartmentUpdate struct {
 // Validate 部门领导验证
 func (s DeptLeader) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Int("DepartmentId", s.DepartmentId).Required().Gt(0).Errors(),
-		fields.Int("LeaderUserId", s.LeaderUserId).Required().Gt(0).Errors(),
+		fields.Int("departmentId", s.DepartmentId).Required().Gt(0).Errors(),
+		fields.Int("leaderUserId", s.LeaderUserId).Required().Gt(0).Errors(),
 	)
 }
 
@@ -55,17 +55,17 @@ func (s Department) ValidateWithScene(scene string, fields validatex.Fields) val
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -79,14 +79,14 @@ func (s Department) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Department) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Pid":                       "父级id",
-		"Name":                      "部门名称",
-		"Status":                    "状态 1=启用 2=停用",
-		"Sort":                      "排序",
-		"DepartmentId":              "部门ID",
-		"LeaderUserId":              "部门领导ID",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":           "ID",
+		"pid":          "父级id",
+		"name":         "部门名称",
+		"status":       "状态 1=启用 2=停用",
+		"sort":         "排序",
+		"departmentId": "部门ID",
+		"leaderUserId": "部门领导ID",
+		"page":         "页码",
+		"pageSize":     "每页数量",
 	}
 }

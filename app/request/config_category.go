@@ -30,14 +30,14 @@ func (s ConfigCategory) ValidateWithScene(scene string, fields validatex.Fields)
 	case "List":
 		return s.PageListValidate.Validate(fields)
 	case "Create":
-		return fields.Str("Name", s.Name).Required().Errors()
+		return fields.Str("name", s.Name).Required().Errors()
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -51,9 +51,9 @@ func (s ConfigCategory) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s ConfigCategory) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Name":                      "分类名称",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"name":     "分类名称",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }

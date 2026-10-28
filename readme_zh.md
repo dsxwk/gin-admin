@@ -1191,17 +1191,17 @@ func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validate
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Name", s.Name).Required().Max(20).Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Str("name", s.Name).Required().Max(20).Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Name", s.Name).Required().Max(20).Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("name", s.Name).Required().Max(20).Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -1233,8 +1233,8 @@ fields.Map("labels", values).AllowedKeys("zh", "en")
 case "List":
 	return validatex.When(!s.NotPage, func() validatex.Errors {
 		return validatex.Check(
-			fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
-			fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+			fields.Int("page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("pageSize", s.PageSize).Required().Gt(0).Errors(),
 		)
 	})
 ```
@@ -1258,11 +1258,11 @@ func (s Roles) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Roles) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Name":                      "角色名称",
-		"Status":                    "状态",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"name":     "角色名称",
+		"status":   "状态",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }
 ```
@@ -1294,7 +1294,7 @@ func (s Roles) ValidateWithScene(scene string, fields validatex.Fields) validate
 使用 `Rule` 编写请求专属规则：
 
 ```go
-fields.Int("Age", s.Age).Rule(
+fields.Int("age", s.Age).Rule(
 	"is_even",
 	"{field}必须为偶数",
 	func(value int64) bool {

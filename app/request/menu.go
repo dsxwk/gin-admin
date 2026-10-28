@@ -74,20 +74,20 @@ type RoleMenu struct {
 // Validate 菜单元数据验证
 func (s Meta) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.Check(
-		fields.Str("Title", s.Title).Required().Errors(),
-		fields.Str("Icon", s.Icon).Required().Errors(),
-		fields.Str("Path", s.Path).Required().Errors(),
-		fields.Str("Component", s.Component).Required().Errors(),
-		fields.Int("IsHide", s.IsHide).Required().Errors(),
-		fields.Int("IsKeepAlive", s.IsKeepAlive).Required().Errors(),
-		fields.Int("IsAffix", s.IsAffix).Required().Errors(),
-		fields.Int("IsIframe", s.IsIframe).Required().Errors(),
+		fields.Str("title", s.Title).Required().Errors(),
+		fields.Str("icon", s.Icon).Required().Errors(),
+		fields.Str("path", s.Path).Required().Errors(),
+		fields.Str("component", s.Component).Required().Errors(),
+		fields.Int("isHide", s.IsHide).Required().Errors(),
+		fields.Int("isKeepAlive", s.IsKeepAlive).Required().Errors(),
+		fields.Int("isAffix", s.IsAffix).Required().Errors(),
+		fields.Int("isIframe", s.IsIframe).Required().Errors(),
 	)
 }
 
 // Validate 角色菜单验证
 func (s RoleMenu) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Str("Name", s.Name).Required().Errors()
+	return fields.Str("name", s.Name).Required().Errors()
 }
 
 // ValidateWithScene 请求验证
@@ -96,24 +96,24 @@ func (s Menu) ValidateWithScene(scene string, fields validatex.Fields) validatex
 	case "List":
 		return s.PageListValidate.Validate(fields)
 	case "RoleMenu":
-		return fields.Str("RoleId", s.RoleId).Required().Errors()
+		return fields.Str("roleId", s.RoleId).Required().Errors()
 	case "Create":
 		return validatex.Check(
-			fields.Int("Type", s.Type).Required().Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
-			fields.Struct("Meta", s.Meta),
+			fields.Int("type", s.Type).Required().Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
+			fields.Struct("meta", s.Meta),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Int("Type", s.Type).Required().Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Int("Status", s.Status).Required().Errors(),
-			fields.Struct("Meta", s.Meta),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Int("type", s.Type).Required().Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Int("status", s.Status).Required().Errors(),
+			fields.Struct("meta", s.Meta),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -127,21 +127,21 @@ func (s Menu) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Menu) Translates() validatex.Translates {
 	return validatex.Translates{
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
-		"ID":                        "ID",
-		"RoleId":                    "角色ID",
-		"MenuId":                    "菜单ID",
-		"Type":                      "类型",
-		"Name":                      "名称",
-		"Status":                    "状态",
-		"Title":                     "菜单名称",
-		"Icon":                      "菜单图标",
-		"Path":                      "路由路径",
-		"Component":                 "组件路径",
-		"IsHide":                    "是否隐藏",
-		"IsKeepAlive":               "是否缓存",
-		"IsAffix":                   "是否固定",
-		"IsIframe":                  "是否内嵌",
+		"page":             "页码",
+		"pageSize":         "每页数量",
+		"id":               "ID",
+		"roleId":           "角色ID",
+		"menuId":           "菜单ID",
+		"type":             "类型",
+		"name":             "名称",
+		"status":           "状态",
+		"meta.title":       "菜单名称",
+		"meta.icon":        "菜单图标",
+		"meta.path":        "路由路径",
+		"meta.component":   "组件路径",
+		"meta.isHide":      "是否隐藏",
+		"meta.isKeepAlive": "是否缓存",
+		"meta.isAffix":     "是否固定",
+		"meta.isIframe":    "是否内嵌",
 	}
 }

@@ -6,5 +6,9 @@
   {
     "id": "validator.common.field",
     "translation": "Field"
+  },
+  {
+    "id": "validator.common.requiredField",
+    "translation": "{field} is required"
   }
 ]

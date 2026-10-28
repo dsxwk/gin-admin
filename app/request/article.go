@@ -46,19 +46,19 @@ func (s Article) ValidateWithScene(scene string, fields validatex.Fields) valida
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Title", s.Title).Required().Errors(),
-			fields.Str("Content", s.Content).Required().Errors(),
-			requiredValue(fields, "Tag", s.Tag),
+			fields.Str("title", s.Title).Required().Errors(),
+			fields.Str("content", s.Content).Required().Errors(),
+			requiredValue(fields, "tag", s.Tag),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Title", s.Title).Required().Errors(),
-			fields.Str("Content", s.Content).Required().Errors(),
-			requiredValue(fields, "Tag", s.Tag),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("title", s.Title).Required().Errors(),
+			fields.Str("content", s.Content).Required().Errors(),
+			requiredValue(fields, "tag", s.Tag),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -72,14 +72,14 @@ func (s Article) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s Article) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"Title":                     "标题",
-		"Content":                   "内容",
-		"CategoryId":                "分类id",
-		"DataSource":                "数据来源",
-		"IsPublish":                 "是否发布",
-		"Tag":                       "标签",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":         "ID",
+		"title":      "标题",
+		"content":    "内容",
+		"categoryId": "分类id",
+		"dataSource": "数据来源",
+		"isPublish":  "是否发布",
+		"tag":        "标签",
+		"page":       "页码",
+		"pageSize":   "每页数量",
 	}
 }

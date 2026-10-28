@@ -55,7 +55,7 @@ type SystemConfigUpdates struct {
 
 // Validate SystemConfigValueUpdate验证
 func (s SystemConfigValueUpdate) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+	return fields.Int("id", s.ID).Required().Gt(0).Errors()
 }
 
 // ValidateWithScene 请求验证
@@ -65,25 +65,25 @@ func (s SystemConfig) ValidateWithScene(scene string, fields validatex.Fields) v
 		return s.PageListValidate.Validate(fields)
 	case "Create":
 		return validatex.Check(
-			fields.Str("Key", s.Key).Required().Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Str("DefaultValue", s.DefaultValue).Required().Errors(),
-			fields.Str("OptionValue", s.OptionValue).Required().Errors(),
-			fields.Int("Type", s.Type).Required().Errors(),
-			fields.Int("ConfigCategoryId", s.ConfigCategoryId).Required().Errors(),
+			fields.Str("key", s.Key).Required().Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Str("defaultValue", s.DefaultValue).Required().Errors(),
+			fields.Str("optionValue", s.OptionValue).Required().Errors(),
+			fields.Int("type", s.Type).Required().Errors(),
+			fields.Int("configCategoryId", s.ConfigCategoryId).Required().Errors(),
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
-			fields.Str("Key", s.Key).Required().Errors(),
-			fields.Str("Name", s.Name).Required().Errors(),
-			fields.Str("DefaultValue", s.DefaultValue).Required().Errors(),
-			fields.Str("OptionValue", s.OptionValue).Required().Errors(),
-			fields.Int("Type", s.Type).Required().Errors(),
-			fields.Int("ConfigCategoryId", s.ConfigCategoryId).Required().Errors(),
+			fields.Int("id", s.ID).Required().Gt(0).Errors(),
+			fields.Str("key", s.Key).Required().Errors(),
+			fields.Str("name", s.Name).Required().Errors(),
+			fields.Str("defaultValue", s.DefaultValue).Required().Errors(),
+			fields.Str("optionValue", s.OptionValue).Required().Errors(),
+			fields.Int("type", s.Type).Required().Errors(),
+			fields.Int("configCategoryId", s.ConfigCategoryId).Required().Errors(),
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -94,8 +94,8 @@ func (s SystemConfigUpdates) ValidateWithScene(scene string, fields validatex.Fi
 	switch scene {
 	case "UpdateConfig":
 		return validatex.Check(
-			fields.Slice[struct{}]("List", make([]struct{}, len(s.List))).Required().Errors(),
-			fields.SliceStruct("List", s.List),
+			fields.Slice[struct{}]("list", make([]struct{}, len(s.List))).Required().Errors(),
+			fields.SliceStruct("list", s.List),
 		)
 	default:
 		return nil
@@ -120,28 +120,28 @@ func (s SystemConfigValueUpdate) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s SystemConfig) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "id",
-		"Key":                       "标识",
-		"Name":                      "名称",
-		"DefaultValue":              "默认值",
-		"OptionValue":               "可选值",
-		"Type":                      "配置类型",
-		"ConfigCategoryId":          "配置分类Id",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":               "id",
+		"key":              "标识",
+		"name":             "名称",
+		"defaultValue":     "默认值",
+		"optionValue":      "可选值",
+		"type":             "配置类型",
+		"configCategoryId": "配置分类Id",
+		"page":             "页码",
+		"pageSize":         "每页数量",
 	}
 }
 
 // Translates 字段翻译
 func (s SystemConfigUpdates) Translates() validatex.Translates {
-	return validatex.Translates{"List": "配置列表"}
+	return validatex.Translates{"list": "配置列表"}
 }
 
 // Translates 字段翻译
 func (s SystemConfigValueUpdate) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":           "id",
-		"Key":          "标识",
-		"DefaultValue": "默认值",
+		"id":           "id",
+		"key":          "标识",
+		"defaultValue": "默认值",
 	}
 }

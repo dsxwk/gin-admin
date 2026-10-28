@@ -27,7 +27,7 @@ func (s File) ValidateWithScene(scene string, fields validatex.Fields) validatex
 	case "List":
 		return s.PageListValidate.Validate(fields)
 	case "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -41,10 +41,10 @@ func (s File) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s File) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":                        "ID",
-		"GroupId":                   "分组ID",
-		"PageListValidate.Page":     "页码",
-		"PageListValidate.PageSize": "每页数量",
+		"id":       "ID",
+		"groupId":  "分组ID",
+		"page":     "页码",
+		"pageSize": "每页数量",
 	}
 }
 
@@ -52,7 +52,7 @@ func (s File) Translates() validatex.Translates {
 func (s FileUpdateGroup) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "UpdateGroup":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("id", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -66,7 +66,7 @@ func (s FileUpdateGroup) Messages() validatex.Messages {
 // Translates 字段翻译
 func (s FileUpdateGroup) Translates() validatex.Translates {
 	return validatex.Translates{
-		"ID":      "ID",
-		"GroupId": "分组ID",
+		"id":      "ID",
+		"groupId": "分组ID",
 	}
 }
