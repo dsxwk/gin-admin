@@ -5,7 +5,7 @@ go 1.27.0
 require (
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/dgraph-io/badger/v4 v4.9.6
-	github.com/dsxwk/validatex v1.1.1
+	github.com/dsxwk/validatex v1.1.2
 	github.com/fatih/color v1.19.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gin-gonic/gin v1.12.0
