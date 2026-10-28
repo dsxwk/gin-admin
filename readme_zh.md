@@ -264,7 +264,7 @@ Gin Admin(`gin-admin`)是一个基于Go、Gin和GORM开发的开源企业级后�
 
 # 版本记录
 
-> - 最新版本 [v3.5.0](version_history_zh.md#v350)
+> - 最新版本 [v3.5.1](version_history_zh.md#v351)
 > - [历史版本记录](version_history_zh.md)
 
 # 安装说明

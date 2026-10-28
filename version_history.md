@@ -1,5 +1,11 @@
 # Version History
 
+## v3.5.1
+> - Upgrade validatex to 1.1.2 and return structured validation errors
+> - Add data.errors to HTTP validation responses and use the first field error as msg
+> - Align HTTP, WebSocket, and gRPC request field paths with API field names while preserving array indexes
+> - Update request generators, templates, documentation, and validation tests
+
 ## v.3.5.0
 > - Update dependency packages
 > - Reconstruction of login verification request

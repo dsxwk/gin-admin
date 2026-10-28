@@ -275,7 +275,7 @@ Gin Admin (`gin-admin`) is an open-source Go + Gin + GORM enterprise backend man
 
 # Version History
 
-> - Latest Version [v3.5.0](version_history.md#v350)
+> - Latest Version [v3.5.1](version_history.md#v351)
 > - [Historical Version Records](version_history.md)
 
 # Installation Instructions
