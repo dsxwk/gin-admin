@@ -325,5 +325,12 @@ func validatexValidationError(errors validatex.Errors) error {
 	if len(errors) == 0 {
 		return nil
 	}
-	return errcode.ArgsError().WithMsg(errors.Error())
+	data := validatex.ValidationErrorData{Errors: errors}
+	message := data.Errors[0].Msg
+	if message == "" {
+		message = data.Errors[0].Rule
+	}
+	return errcode.ArgsError().
+		WithMsg(message).
+		WithData(data)
 }
