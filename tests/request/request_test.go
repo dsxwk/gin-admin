@@ -1,12 +1,13 @@
 package request
 
 import (
+	"gin/app/facade"
+	"gin/pkg/errcode"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"gin/app/facade"
-
+	"github.com/dsxwk/validatex"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
@@ -19,6 +20,12 @@ type requestTestData struct {
 
 // newRequestTestContext 创建请求测试上下文
 func newRequestTestContext(method, target, body, contentType string) *gin.Context {
+	ctx, _ := newRequestTestContextWithRecorder(method, target, body, contentType)
+	return ctx
+}
+
+// newRequestTestContextWithRecorder 创建带响应记录器的请求测试上下文
+func newRequestTestContextWithRecorder(method, target, body, contentType string) (*gin.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
 	recorder := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(recorder)
@@ -26,7 +33,37 @@ func newRequestTestContext(method, target, body, contentType string) *gin.Contex
 	if contentType != "" {
 		ctx.Request.Header.Set("Content-Type", contentType)
 	}
-	return ctx
+	return ctx, recorder
+}
+
+// requireValidationErrors 获取结构化校验错误
+func requireValidationErrors(t *testing.T, err error) validatex.Errors {
+	t.Helper()
+	var errorCode errcode.ErrorCode
+	require.ErrorAs(t, err, &errorCode)
+	data, ok := errorCode.Data.(validatex.ValidationErrorData)
+	require.True(t, ok)
+	require.NotEmpty(t, data.Errors)
+	require.Equal(t, data.Errors[0].Msg, errorCode.Msg)
+	return data.Errors
+}
+
+// validationFieldPaths 提取校验字段路径
+func validationFieldPaths(errors validatex.Errors) []string {
+	paths := make([]string, 0, len(errors))
+	for _, item := range errors {
+		paths = append(paths, item.Path)
+	}
+	return paths
+}
+
+// validationErrorRules 提取校验错误规则
+func validationErrorRules(errors validatex.Errors) []string {
+	rules := make([]string, 0, len(errors))
+	for _, item := range errors {
+		rules = append(rules, item.Rule)
+	}
+	return rules
 }
 
 // TestRequestForm 表单参数获取测试

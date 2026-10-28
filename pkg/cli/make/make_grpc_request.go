@@ -223,13 +223,13 @@ func (m *MakeGrpcRequest) formatGrpcRequestTranslates(fields []GrpcRequestField)
 		label string
 	}
 	items := []translateItem{
-		{name: "Id", label: "ID"},
-		{name: "Page", label: "页码"},
-		{name: "PageSize", label: "每页数量"},
-		{name: "Ids", label: "ID列表"},
+		{name: "id", label: "ID"},
+		{name: "page", label: "页码"},
+		{name: "pageSize", label: "每页数量"},
+		{name: "ids", label: "ID列表"},
 	}
 	for _, f := range fields {
-		items = append(items, translateItem{name: f.Name, label: f.Label})
+		items = append(items, translateItem{name: f.JSON, label: f.Label})
 	}
 
 	maxNameLen := 0
@@ -304,7 +304,7 @@ func grpcRequestGoType(dbType string) string {
 
 // buildGrpcRequestValidation 构建grpc请求字段校验表达式
 func buildGrpcRequestValidation(field GrpcRequestField) string {
-	path := fmt.Sprintf("%q", field.Name)
+	path := fmt.Sprintf("%q", field.JSON)
 	value := "s." + field.Name
 
 	switch field.Type {

@@ -177,15 +177,15 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 	var translateFields []TranslateField
 	for _, field := range fields {
 		translateFields = append(translateFields, TranslateField{
-			Name:  field.Name,
+			Name:  field.JSON,
 			Label: field.Label,
 		})
 	}
 
 	// 添加Page和PageSize到翻译字段列表计算最大宽度
 	allTranslateFields := append([]TranslateField{}, translateFields...)
-	allTranslateFields = append(allTranslateFields, TranslateField{Name: "PageListValidate.Page", Label: "页码"})
-	allTranslateFields = append(allTranslateFields, TranslateField{Name: "PageListValidate.PageSize", Label: "每页数量"})
+	allTranslateFields = append(allTranslateFields, TranslateField{Name: "page", Label: "页码"})
+	allTranslateFields = append(allTranslateFields, TranslateField{Name: "pageSize", Label: "每页数量"})
 
 	// 计算最大字段名长度用于对齐
 	maxNameLen := 0
@@ -208,16 +208,24 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 	}
 
 	// 添加Page
-	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"PageListValidate.Page\":%s%q,",
-		strings.Repeat(" ", maxNameLen-len("PageListValidate.Page")+1),
+	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"page\":%s%q,",
+		strings.Repeat(" ", maxNameLen-len("page")+1),
 		"页码",
 	))
 
 	// 添加PageSize
-	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"PageListValidate.PageSize\":%s%q,",
-		strings.Repeat(" ", maxNameLen-len("PageListValidate.PageSize")+1),
+	formattedTranslates = append(formattedTranslates, fmt.Sprintf("\"pageSize\":%s%q,",
+		strings.Repeat(" ", maxNameLen-len("pageSize")+1),
 		"每页数量",
 	))
+
+	idJSON := "id"
+	for _, field := range fields {
+		if field.IsID && field.JSON != "" {
+			idJSON = field.JSON
+			break
+		}
+	}
 
 	data := struct {
 		Package             string
@@ -225,12 +233,14 @@ func (m *MakeRequest) generateFile(templateName, file, structName string, fields
 		Description         string
 		Fields              []Field
 		FormattedTranslates []string
+		IDJSON              string
 	}{
 		Package:             packageName,
 		StructName:          structName,
 		Description:         desc,
 		Fields:              fields,
 		FormattedTranslates: formattedTranslates,
+		IDJSON:              idJSON,
 	}
 
 	err = tmpl.Execute(f, data)
@@ -344,7 +354,7 @@ func (m *MakeRequest) getGoType(dbType string) string {
 
 // buildFieldValidation 构建字段校验表达式
 func (m *MakeRequest) buildFieldValidation(field Field) string {
-	path := fmt.Sprintf("%q", field.Name)
+	path := fmt.Sprintf("%q", field.JSON)
 	value := "s." + field.Name
 
 	switch field.Type {

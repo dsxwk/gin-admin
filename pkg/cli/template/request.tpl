@@ -21,8 +21,8 @@ func (s {{.StructName}}) ValidateWithScene(scene string, fields validatex.Fields
 	case "List":
 		return validatex.When(!s.NotPage, func() validatex.Errors {
 			return validatex.Check(
-				fields.Int("PageListValidate.Page", s.Page).Required().Gt(0).Errors(),
-				fields.Int("PageListValidate.PageSize", s.PageSize).Required().Gt(0).Errors(),
+				fields.Int("page", s.Page).Required().Gt(0).Errors(),
+				fields.Int("pageSize", s.PageSize).Required().Gt(0).Errors(),
 			)
 		})
 	case "Create":
@@ -35,7 +35,7 @@ func (s {{.StructName}}) ValidateWithScene(scene string, fields validatex.Fields
 		)
 	case "Update":
 		return validatex.Check(
-			fields.Int("ID", s.ID).Required().Gt(0).Errors(),
+			fields.Int("{{.IDJSON}}", s.ID).Required().Gt(0).Errors(),
 {{- range .Fields}}
 {{- if and .Validation (not .IsID)}}
 			{{.Validation}}
@@ -43,7 +43,7 @@ func (s {{.StructName}}) ValidateWithScene(scene string, fields validatex.Fields
 {{- end}}
 		)
 	case "Detail", "Delete":
-		return fields.Int("ID", s.ID).Required().Gt(0).Errors()
+		return fields.Int("{{.IDJSON}}", s.ID).Required().Gt(0).Errors()
 	default:
 		return nil
 	}

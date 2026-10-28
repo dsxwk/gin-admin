@@ -36,15 +36,17 @@ func TestRequestTemplateUsesFields(t *testing.T) {
 		Description         string
 		Fields              []Field
 		FormattedTranslates []string
+		IDJSON              string
 	}{
 		Package:     "request",
 		StructName:  "Demo",
 		Description: "示例请求",
 		Fields:      fields,
+		IDJSON:      "id",
 		FormattedTranslates: []string{
-			`"Name": "名称",`,
-			`"PageListValidate.Page": "页码",`,
-			`"PageListValidate.PageSize": "每页数量",`,
+			`"name": "名称",`,
+			`"page": "页码",`,
+			`"pageSize": "每页数量",`,
 		},
 	}
 
@@ -59,8 +61,9 @@ func TestRequestTemplateUsesFields(t *testing.T) {
 
 	for _, expected := range []string{
 		"func (s Demo) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors",
-		`fields.Str("Name", s.Name).Required().Errors(),`,
-		`fields.Int("Age", s.Age).Errors(),`,
+		`fields.Str("name", s.Name).Required().Errors(),`,
+		`fields.Int("age", s.Age).Errors(),`,
+		`fields.Int("id", s.ID).Required().Gt(0).Errors(),`,
 	} {
 		if !strings.Contains(content, expected) {
 			t.Fatalf("generated request missing %q:\n%s", expected, content)

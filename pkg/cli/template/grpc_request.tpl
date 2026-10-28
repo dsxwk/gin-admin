@@ -40,7 +40,7 @@ type {{.Name}}BatchDeleteRequest struct {
 func (s {{.Name}}Request) ValidateWithScene(scene string, fields validatex.Fields) validatex.Errors {
 	switch scene {
 	case "Detail", "Delete":
-		return fields.Int("Id", s.Id).Required().Gt(0).Errors()
+		return fields.Int("id", s.Id).Required().Gt(0).Errors()
 	default:
 		return nil
 	}
@@ -50,8 +50,8 @@ func (s {{.Name}}Request) ValidateWithScene(scene string, fields validatex.Field
 func (s {{.Name}}ListRequest) Validate(fields validatex.Fields) validatex.Errors {
 	return validatex.When(!s.NotPage, func() validatex.Errors {
 		return validatex.Check(
-			fields.Int("Page", s.Page).Required().Gt(0).Errors(),
-			fields.Int("PageSize", s.PageSize).Required().Gt(0).Errors(),
+			fields.Int("page", s.Page).Required().Gt(0).Errors(),
+			fields.Int("pageSize", s.PageSize).Required().Gt(0).Errors(),
 		)
 	})
 }
@@ -69,12 +69,12 @@ func (s {{.Name}}CreateRequest) Validate(fields validatex.Fields) validatex.Erro
 
 // Validate 更新请求验证
 func (s {{.Name}}UpdateRequest) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Int("Id", s.Id).Required().Gt(0).Errors()
+	return fields.Int("id", s.Id).Required().Gt(0).Errors()
 }
 
 // Validate 批量删除请求验证
 func (s {{.Name}}BatchDeleteRequest) Validate(fields validatex.Fields) validatex.Errors {
-	return fields.Slice("Ids", s.Ids).Required().Each("gt", "", func(id int32) bool {
+	return fields.Slice("ids", s.Ids).Required().Each("gt", "", func(id int32) bool {
 		return id > 0
 	}, int32(0)).Errors()
 }

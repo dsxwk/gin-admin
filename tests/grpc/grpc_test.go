@@ -62,6 +62,33 @@ func TestGrpcMethodAuth(t *testing.T) {
 	}
 }
 
+// TestGrpcRequestFieldPaths 验证gRPC请求使用接口字段路径
+func TestGrpcRequestFieldPaths(t *testing.T) {
+	createRequest := grpcrequest.UserCreateRequest{
+		UserDepts: []grpcrequest.DeptItem{{}},
+	}
+	paths := make(map[string]bool)
+	for _, validationError := range validatex.ValidateRequest(&createRequest) {
+		paths[validationError.Path] = true
+	}
+	for _, path := range []string{
+		"username",
+		"fullName",
+		"mainDept.departmentId",
+		"userDepts[0].departmentId",
+	} {
+		if !paths[path] {
+			t.Fatalf("gRPC校验缺少字段路径%s: %v", path, paths)
+		}
+	}
+
+	batchRequest := grpcrequest.UserBatchDeleteRequest{Ids: []int32{0}}
+	batchErrors := validatex.ValidateRequest(&batchRequest)
+	if len(batchErrors) == 0 || batchErrors[0].Path != "ids[0]" {
+		t.Fatalf("gRPC批量删除字段路径异常: %+v", batchErrors)
+	}
+}
+
 // TestGrpcUserService 测试用户grpc服务
 func TestGrpcUserService(t *testing.T) {
 	srv, err := client.NewServer("127.0.0.1", grpcTestPort, grpcTestJwtKey, fakeUserService{})

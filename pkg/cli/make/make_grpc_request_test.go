@@ -48,8 +48,8 @@ func TestGrpcRequestTemplateUsesFields(t *testing.T) {
 		FormattedId:       formattedId,
 		FormattedUpdateId: formattedUpdateId,
 		Translates: []string{
-			`"Id": "ID",`,
-			`"Name": "名称",`,
+			`"id": "ID",`,
+			`"name": "名称",`,
 		},
 	}
 
@@ -64,7 +64,7 @@ func TestGrpcRequestTemplateUsesFields(t *testing.T) {
 
 	for _, expected := range []string{
 		"func (s DemoCreateRequest) Validate(fields validatex.Fields) validatex.Errors",
-		`fields.Str("Name", s.Name).Required().Errors(),`,
+		`fields.Str("name", s.Name).Required().Errors(),`,
 	} {
 		if !strings.Contains(content, expected) {
 			t.Fatalf("generated gRPC request missing %q:\n%s", expected, content)
